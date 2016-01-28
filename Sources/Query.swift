@@ -45,7 +45,7 @@ class Query {
 		Query.driver.upsert(table: table, items: data)
 	}
 
-		func upsert(data: [String: String]) {
+	func upsert(data: [String: String]) {
 		guard let table = self.table else {
 			return
 		}
@@ -69,17 +69,17 @@ class Query {
 		Query.driver.delete(table: table, filters: self.filters)
 	}
 
-	func exists() {
+	func exists() -> Bool{
 		guard let table = self.table else {
-			return
+			return false
 		}
 
 		return Query.driver.exists(table: table, filters: self.filters)
 	}
 
-	func count() -> [[String: String]] {
+	func count() -> Int {
 		guard let table = self.table else {
-			return []
+			return 0
 		}
 
 		return Query.driver.count(table: table, filters: self.filters)
