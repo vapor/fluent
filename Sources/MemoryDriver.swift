@@ -89,6 +89,48 @@ class MemoryDriver: Driver {
 		//implement me
 	}
 
+	func upsert(table table: String, items: [[String: String]]) {
+		//check if object exists
+		// if does - update
+		// if not - insert
+
+		//implement me
+	}
+ 
+	func exists(table table: String, filters: [Filter]) -> Bool {
+		print("exists \(filters.count) filters on \(table)")
+
+		if let data = self.memory[table] {
+			for (key, entity) in data {
+				//implement filtering
+
+				if key != "metadata" { //hack
+					return true
+				}
+			}
+		}
+
+		return false
+	}
+
+	func count(table table: String, filters: [Filter]) -> Int {
+		print("count \(filters.count) filters on \(table)")
+
+		var count = 0
+
+		if let data = self.memory[table] {
+			for (key, entity) in data {
+				//implement filtering
+
+				if key != "metadata" { //hack
+					count += 1
+				}
+			}
+		}
+
+		return count
+	}
+
 	/*func query(query: Query) -> Any? {
 		print("Query")
 
