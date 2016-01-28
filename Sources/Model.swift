@@ -31,8 +31,6 @@ class Model {
 		let table = self.table()
 		let data = self.serialize()
 
-		print("Saving user with id '\(self.id)' to table '\(table)' with data \(data)")
-
 		let query = Query().table(table)
 		if let id = self.id {
 			query.filter("id", id).update(data)
@@ -49,8 +47,6 @@ class Model {
 
 		let table = self.table()
 
-		print("Delete entity on '\(table)' with ID '\(id)'")
-
 		Query().table(table).filter("id", id).delete()
 	}
 
@@ -63,7 +59,6 @@ class Model {
 
 	class func find(id: String) -> Model? {
 		let table = self.table()
-		print("Finding entity on '\(table)' with ID '\(id)'")
 
 		if let data = Query().table(table).filter("id", id).first() {
 			let model = self.init(serialized: data)
@@ -76,7 +71,6 @@ class Model {
 
 	class func all() -> [Model] {
 		let table = self.table()
-		print("Finding all entities on '\(table)'")
 
 		var all: [Model] = []
 
