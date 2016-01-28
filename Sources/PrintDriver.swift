@@ -44,6 +44,34 @@ class PrintDriver: Driver {
 		}
 	}
 
+	func upsert(table table: String, items: [[String: String]]) {
+		print("Upsert")
+		print("\ttable: \(table)")
+		print("\t\(items.count) items")
+		for (key, item) in items.enumerate() {
+			print("\t\titem \(key)")
+			for (key, val) in item {
+				print("\t\t\t\(key)=\(val)")
+			}
+		}
+
+	}
+	func exists(table table: String, filters: [Filter]) -> Bool {
+		print("Exists")
+		print("\ttable: \(table)")
+		self.printFilters(filters)
+
+		return false
+	}
+
+	func count(table table: String, filters: [Filter]) -> Int {
+		print("Count")
+		print("\ttable: \(table)")
+		self.printFilters(filters)
+
+		return 0
+	}
+
 	func printFilters(filters: [Filter]) {
 		print("\t\(filters.count) filter(s)")
 		for filter in filters {
