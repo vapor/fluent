@@ -33,26 +33,25 @@ class Model {
 
 		print("Saving user with id '\(self.id)' to table '\(table)' with data \(data)")
 
-		let query = Query(table: table, operation: .Save)
-		query.id = self.id
-		query.data = data
-
-		Manager.query(query)
+		let query = Query().table(table)
+		if let id = self.id {
+			query.filter("id", id).update(data)
+		} else {
+			query.insert(data)
+		}
 	}
 
 	///Deletes the entity from the database.
 	func delete() {
 		guard let id = self.id else {
-			print("No id on object")
 			return
 		}
+
 		let table = self.table()
 
 		print("Delete entity on '\(table)' with ID '\(id)'")
 
-		let query = Query(table: table, operation: .Delete)
-		query.id = id
-		Manager.query(query)
+		Query().table(table).filter("id", id).delete()
 	}
 
 	/**
@@ -66,10 +65,7 @@ class Model {
 		let table = self.table()
 		print("Finding entity on '\(table)' with ID '\(id)'")
 
-		let query = Query(table: table, operation: .Get)
-		query.id = id
-
-		if let data = Manager.query(query) as? [String: String] {
+		if let data = Query().table(table).filter("id", id).first() {
 			let model = self.init(serialized: data)
 			model.id = id
 			return model
@@ -82,26 +78,22 @@ class Model {
 		let table = self.table()
 		print("Finding all entities on '\(table)'")
 
-		let query = Query(table: table, operation: .Get)
+		var all: [Model] = []
 
-		if let data = Manager.query(query) as? [String: [String: String]] {
-			var all: [Model] = []
-
-			for (id, entity) in data {
-				let model = self.init(serialized: entity)
-				model.id = id
-				all.append(model)
-			}
-
-			return all
-		} else {
-			return []
+		for entity in Query().table(table).find() {
+			let model = self.init(serialized: entity)
+			all.append(model)
 		}
+
+		return all
+	}
+
+	init() {
+
 	}
 
 	///Called when an entity is selected from the database.
 	required init(serialized: [String: String]) {
 		self.id = serialized["id"]
-
 	}
 }
