@@ -74,7 +74,7 @@ class Model {
 		}
 	}
 
-	class func all() -> [Model] {
+	static var all: [Model] {
 		let table = self.table()
 
 		var all: [Model] = []
