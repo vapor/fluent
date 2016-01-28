@@ -47,8 +47,34 @@ class PrintDriver: Driver {
 	func printFilters(filters: [Filter]) {
 		print("\t\(filters.count) filter(s)")
 		for filter in filters {
-			if let filter = filter as? ValueFilter {
-				print("\t\t\(filter.key)=\(filter.value)")
+			if let filter = filter as? CompareFilter {
+				let symbol: String
+				switch filter.comparison {
+					case .Equal:
+						symbol = "="
+					case .NotEqual:
+						symbol = "!="
+					case .GreaterThan:
+						symbol = ">"
+					case .LessThan:
+						symbol = "<"
+					case .GreaterThanOrEqual:
+						symbol = ">="
+					case .LessThanOrEqual:
+						symbol = "<="
+				}
+
+				print("\t\t\(filter.key) \(symbol) \(filter.value)")
+			} else if let filter = filter as? SubsetFilter {
+				let op: String
+				switch filter.comparison {
+					case .In:
+						op = "in"
+					case .NotIn:
+						op = "not in"
+				}
+
+				print("\t\t\(filter.key) \(op) \(filter.superSet.count) options")
 			}
 		}
 	}

@@ -13,6 +13,11 @@ class Model {
 		return ""
 	}
 
+	class func query() -> Query {
+		let table = self.table()
+		return Query().table(table)
+	}
+
 	/**
 		This method will be called when the entity is saved. 
 		The keys of the dictionary are the column names
