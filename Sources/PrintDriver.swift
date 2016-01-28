@@ -20,8 +20,6 @@ class PrintDriver: Driver {
 		print("Delete")
 		print("\ttable: \(table)")
 		print("\t\(filters.count) filters")
-
-		return []
 	}
 
 	func update(table table: String, filters: [Filter], data: [String: String]) {
@@ -29,16 +27,12 @@ class PrintDriver: Driver {
 		print("\ttable: \(table)")
 		print("\t\(filters.count) filters")
 		print("\t\(data.count) data points")
-
-		return []
 	}
 
 	func insert(table table: String, items: [[String: String]]) {
 		print("Insert")
 		print("\ttable: \(table)")
 		print("\t\(items.count) items")
-
-		return []
 	}
 
 }
