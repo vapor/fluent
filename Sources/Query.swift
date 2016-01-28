@@ -86,8 +86,29 @@ class Query {
 	}
 
 	//continues
-	func filter(key: String,_ value: String) -> Query {
-		let filter = ValueFilter(key: key, value: value)
+	func filter(key: String, _ value: String) -> Query {
+		let filter = CompareFilter(key: key, value: value, comparison: .Equal)
+		self.filters.append(filter)
+
+		return self
+	}
+
+	func filter(key: String, _ comparison: CompareFilter.Comparison, _ value: String) -> Query {
+		let filter = CompareFilter(key: key, value: value, comparison: comparison)
+		self.filters.append(filter)
+
+		return self
+	}
+
+	func filter(key: String, in superSet: [String]) -> Query {
+		let filter = SubsetFilter(key: key, superSet: superSet, comparison: .In)
+		self.filters.append(filter)
+
+		return self
+	}
+
+	func filter(key: String, notIn superSet: [String]) -> Query {
+		let filter = SubsetFilter(key: key, superSet: superSet, comparison: .NotIn)
 		self.filters.append(filter)
 
 		return self
