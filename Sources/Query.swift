@@ -1,6 +1,6 @@
 class Query {
 
-	static var driver: Driver = MemoryDriver()
+	static var driver: Driver = PrintDriver()
 
 	var filters: [Filter] = []
 
