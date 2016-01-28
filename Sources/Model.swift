@@ -13,7 +13,7 @@ class Model {
 		return ""
 	}
 
-	class func query() -> Query {
+	class var query: Query {
 		let table = self.table()
 		return Query().table(table)
 	}
@@ -65,7 +65,7 @@ class Model {
 	class func find(id: String) -> Model? {
 		let table = self.table()
 
-		if let data = Query().table(table).filter("id", id).first() {
+		if let data = Query().table(table).filter("id", id).first {
 			let model = self.init(serialized: data)
 			model.id = id
 			return model
@@ -79,7 +79,7 @@ class Model {
 
 		var all: [Model] = []
 
-		for entity in Query().table(table).find() {
+		for entity in Query().table(table).results {
 			let model = self.init(serialized: entity)
 			all.append(model)
 		}

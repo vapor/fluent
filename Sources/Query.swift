@@ -5,7 +5,7 @@ class Query {
 	var filters: [Filter] = []
 
 	//ends
-	func first() -> [String: String]? {
+	var first: [String: String]? {
 		guard let table = self.table else {
 			return nil
 		}
@@ -13,7 +13,7 @@ class Query {
 		return Query.driver.fetchOne(table: table, filters: self.filters)
 	}
 
-	func find() -> [[String: String]] {
+	var results: [[String: String]] {
 		guard let table = self.table else {
 			return []
 		}
@@ -69,7 +69,7 @@ class Query {
 		Query.driver.delete(table: table, filters: self.filters)
 	}
 
-	func exists() -> Bool{
+	var exists: Bool{
 		guard let table = self.table else {
 			return false
 		}
@@ -77,7 +77,7 @@ class Query {
 		return Query.driver.exists(table: table, filters: self.filters)
 	}
 
-	func count() -> Int {
+	var count: Int {
 		guard let table = self.table else {
 			return 0
 		}
