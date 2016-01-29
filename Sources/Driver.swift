@@ -1,4 +1,4 @@
-protocol Driver {
+public protocol Driver {
 	func fetchOne(table table: String, filters: [Filter]) -> [String: String]?
 	func fetch(table table: String, filters: [Filter]) -> [[String: String]]
 	func delete(table table: String, filters: [Filter])
