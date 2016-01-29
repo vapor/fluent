@@ -1,11 +1,11 @@
-class CompareFilter: Filter {
-	enum Comparison {
+public class CompareFilter: Filter {
+	public enum Comparison {
 		case Equal, NotEqual, GreaterThanOrEqual, LessThanOrEqual, GreaterThan, LessThan
 	}
 
-	let key: String
-	let value: String
-	let comparison: Comparison
+	public let key: String
+	public let value: String
+	public let comparison: Comparison
 
 	init(key: String, value: String, comparison: Comparison) {
 		self.key = key
@@ -14,14 +14,14 @@ class CompareFilter: Filter {
 	}
 }
 
-class SubsetFilter: Filter {
-	enum Comparison {
+public class SubsetFilter: Filter {
+	public enum Comparison {
 		case In, NotIn
 	}
 
-	let key: String
-	let superSet: [String]
-	let comparison: Comparison
+	public let key: String
+	public let superSet: [String]
+	public let comparison: Comparison
 
 	init(key: String, superSet: [String], comparison: Comparison) {
 		self.key = key
@@ -30,6 +30,6 @@ class SubsetFilter: Filter {
 	}
 }
 
-class Filter {
+public class Filter {
 
 }
