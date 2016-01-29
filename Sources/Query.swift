@@ -1,93 +1,87 @@
-public class Query {
-
-	public static var driver: Driver = PrintDriver()
+public class Query<T: Model> {
 
 	public var filters: [Filter] = []
 
-	typealias ModelSerializer = ([String: String]) -> Model
-	var map: ModelSerializer?
-
 	//ends
 	//var first: Model?
-	public var first: [String: String]? {
-		guard let table = self.table else {
+	public var first: T? {
+		if let serialized = Database.driver.fetchOne(table: self.table, filters: self.filters) {
+			return T(serialized: serialized)
+		} else {
 			return nil
 		}
-
-		return Query.driver.fetchOne(table: table, filters: self.filters)
 	}
 
 	//var results: [Model]
-	public var results: [[String: String]] {
-		guard let table = self.table else {
-			return []
+	public var results: [T] {
+		var models: [T] = []
+
+		let serializeds = Database.driver.fetch(table: self.table, filters: self.filters)
+		for serialized in serializeds {
+			let model = T(serialized: serialized)
+			models.append(model)
 		}
 
-		return Query.driver.fetch(table: table, filters: self.filters)
+		return models
 	}
 
 	public func update(data: [String: String]) {
-		guard let table = self.table else {
-			return
-		}
-
-		Query.driver.update(table: table, filters: self.filters, data: data)
+		Database.driver.update(table: self.table, filters: self.filters, data: data)
 	}
 
 	public func insert(data: [String: String]) {
-		guard let table = self.table else {
-			return
-		}
-
-		Query.driver.insert(table: table, items: [data])
+		Database.driver.insert(table: self.table, items: [data])
 	}
 
 	public func upsert(data: [[String: String]]) {
-		guard let table = self.table else {
-			return
-		}
-
-		Query.driver.upsert(table: table, items: data)
+		Database.driver.upsert(table: self.table, items: data)
 	}
 
 	public func upsert(data: [String: String]) {
-		guard let table = self.table else {
-			return
-		}
-
-		Query.driver.upsert(table: table, items: [data])
+		Database.driver.upsert(table: self.table, items: [data])
 	}
 
 	public func insert(data: [[String: String]]) {
-		guard let table = self.table else {
-			return
-		}
-
-		Query.driver.insert(table: table, items: data)
+		Database.driver.insert(table: self.table, items: data)
 	}
 
 	public func delete() {
-		guard let table = self.table else {
-			return
-		}
-
-		Query.driver.delete(table: table, filters: self.filters)
+		Database.driver.delete(table: self.table, filters: self.filters)
 	}
 
 	public var exists: Bool{
-		guard let table = self.table else {
-			return false
-		}
-
-		return Query.driver.exists(table: table, filters: self.filters)
+		return Database.driver.exists(table: self.table, filters: self.filters)
 	}
 
 	public var count: Int {
-		guard let table = self.table else {
-			return 0
+		return Database.driver.count(table: self.table, filters: self.filters)
+	}
+
+	//model
+	public func find(id: Int) -> T? {
+		return self.filter("id", "\(id)").first
+	}
+
+
+	/* Internal Casts */
+	///Inserts or updates the entity in the database.
+	func save(model: T) {
+		let data = model.serialize()
+
+		if let id = model.id {
+			self.filter("id", id).update(data)
+		} else {
+			self.insert(data)
+		}
+	}
+
+	///Deletes the entity from the database.
+	func delete(model: T) {
+		guard let id = model.id else {
+			return
 		}
 
-		return Query.driver.count(table: table, filters: self.filters)
+		self.filter("id", id).delete()
 	}
 
 	//continues
@@ -119,14 +113,9 @@ public class Query {
 		return self
 	}
 
-	public func table(table: String) -> Query {
-		self.table = table
-		return self
-	}
-
 	public init() {
-
+		self.table = T.table
 	}
 
-	public var table: String?
+	public let table: String
 }
