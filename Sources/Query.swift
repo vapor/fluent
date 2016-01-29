@@ -4,7 +4,11 @@ class Query {
 
 	var filters: [Filter] = []
 
+	typealias ModelSerializer = ([String: String]) -> Model
+	var map: ModelSerializer?
+
 	//ends
+	//var first: Model?
 	var first: [String: String]? {
 		guard let table = self.table else {
 			return nil
@@ -13,6 +17,7 @@ class Query {
 		return Query.driver.fetchOne(table: table, filters: self.filters)
 	}
 
+	//var results: [Model]
 	var results: [[String: String]] {
 		guard let table = self.table else {
 			return []

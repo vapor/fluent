@@ -101,7 +101,7 @@ class MemoryDriver: Driver {
 		print("exists \(filters.count) filters on \(table)")
 
 		if let data = self.memory[table] {
-			for (key, entity) in data {
+			for (key, _) in data {
 				//implement filtering
 
 				if key != "metadata" { //hack
@@ -119,7 +119,7 @@ class MemoryDriver: Driver {
 		var count = 0
 
 		if let data = self.memory[table] {
-			for (key, entity) in data {
+			for (key, _) in data {
 				//implement filtering
 
 				if key != "metadata" { //hack

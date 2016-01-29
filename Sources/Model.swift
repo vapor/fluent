@@ -15,7 +15,14 @@ class Model {
 
 	class var query: Query {
 		let table = self.table()
-		return Query().table(table)
+
+		let query = Query().table(table)
+
+		query.map = { serialized in 
+			return self.init(serialized: serialized)
+		}
+
+		return query
 	}
 
 	/**
