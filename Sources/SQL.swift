@@ -58,8 +58,9 @@ public class SQL {
 
 			} else if self.operation == .UPDATE {
 
+				var updates: [String] = []
+
 				for (key, val) in data {
-					var updates: [String] = []
 
 					let value: String
 
@@ -71,9 +72,10 @@ public class SQL {
 
 					updates.append("`\(key)` = \(value)")
 
-					let updatesString = updates.joinWithSeparator(", ")
-					query.append("SET \(updatesString)")
 				}
+				
+				let updatesString = updates.joinWithSeparator(", ")
+				query.append("SET \(updatesString)")
 
 			}
 
