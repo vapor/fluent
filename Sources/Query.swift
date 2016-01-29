@@ -1,15 +1,15 @@
-class Query {
+public class Query {
 
-	static var driver: Driver = PrintDriver()
+	public static var driver: Driver = PrintDriver()
 
-	var filters: [Filter] = []
+	public var filters: [Filter] = []
 
 	typealias ModelSerializer = ([String: String]) -> Model
 	var map: ModelSerializer?
 
 	//ends
 	//var first: Model?
-	var first: [String: String]? {
+	public var first: [String: String]? {
 		guard let table = self.table else {
 			return nil
 		}
@@ -18,7 +18,7 @@ class Query {
 	}
 
 	//var results: [Model]
-	var results: [[String: String]] {
+	public var results: [[String: String]] {
 		guard let table = self.table else {
 			return []
 		}
@@ -26,7 +26,7 @@ class Query {
 		return Query.driver.fetch(table: table, filters: self.filters)
 	}
 
-	func update(data: [String: String]) {
+	public func update(data: [String: String]) {
 		guard let table = self.table else {
 			return
 		}
@@ -34,7 +34,7 @@ class Query {
 		Query.driver.update(table: table, filters: self.filters, data: data)
 	}
 
-	func insert(data: [String: String]) {
+	public func insert(data: [String: String]) {
 		guard let table = self.table else {
 			return
 		}
@@ -42,7 +42,7 @@ class Query {
 		Query.driver.insert(table: table, items: [data])
 	}
 
-	func upsert(data: [[String: String]]) {
+	public func upsert(data: [[String: String]]) {
 		guard let table = self.table else {
 			return
 		}
@@ -50,7 +50,7 @@ class Query {
 		Query.driver.upsert(table: table, items: data)
 	}
 
-	func upsert(data: [String: String]) {
+	public func upsert(data: [String: String]) {
 		guard let table = self.table else {
 			return
 		}
@@ -58,7 +58,7 @@ class Query {
 		Query.driver.upsert(table: table, items: [data])
 	}
 
-	func insert(data: [[String: String]]) {
+	public func insert(data: [[String: String]]) {
 		guard let table = self.table else {
 			return
 		}
@@ -66,7 +66,7 @@ class Query {
 		Query.driver.insert(table: table, items: data)
 	}
 
-	func delete() {
+	public func delete() {
 		guard let table = self.table else {
 			return
 		}
@@ -74,7 +74,7 @@ class Query {
 		Query.driver.delete(table: table, filters: self.filters)
 	}
 
-	var exists: Bool{
+	public var exists: Bool{
 		guard let table = self.table else {
 			return false
 		}
@@ -82,7 +82,7 @@ class Query {
 		return Query.driver.exists(table: table, filters: self.filters)
 	}
 
-	var count: Int {
+	public var count: Int {
 		guard let table = self.table else {
 			return 0
 		}
@@ -91,42 +91,42 @@ class Query {
 	}
 
 	//continues
-	func filter(key: String, _ value: String) -> Query {
+	public func filter(key: String, _ value: String) -> Query {
 		let filter = CompareFilter(key: key, value: value, comparison: .Equal)
 		self.filters.append(filter)
 
 		return self
 	}
 
-	func filter(key: String, _ comparison: CompareFilter.Comparison, _ value: String) -> Query {
+	public func filter(key: String, _ comparison: CompareFilter.Comparison, _ value: String) -> Query {
 		let filter = CompareFilter(key: key, value: value, comparison: comparison)
 		self.filters.append(filter)
 
 		return self
 	}
 
-	func filter(key: String, in superSet: [String]) -> Query {
+	public func filter(key: String, in superSet: [String]) -> Query {
 		let filter = SubsetFilter(key: key, superSet: superSet, comparison: .In)
 		self.filters.append(filter)
 
 		return self
 	}
 
-	func filter(key: String, notIn superSet: [String]) -> Query {
+	public func filter(key: String, notIn superSet: [String]) -> Query {
 		let filter = SubsetFilter(key: key, superSet: superSet, comparison: .NotIn)
 		self.filters.append(filter)
 
 		return self
 	}
 
-	func table(table: String) -> Query {
+	public func table(table: String) -> Query {
 		self.table = table
 		return self
 	}
 
-	init() {
+	public init() {
 
 	}
 
-	var table: String?
+	public var table: String?
 }

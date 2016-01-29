@@ -1,6 +1,6 @@
 public class CompareFilter: Filter {
 	public enum Comparison {
-		case Equal, NotEqual, GreaterThanOrEqual, LessThanOrEqual, GreaterThan, LessThan
+		case Equals, NotEquals, GreaterThanOrEquals, LessThanOrEquals, GreaterThan, LessThan
 	}
 
 	public let key: String
