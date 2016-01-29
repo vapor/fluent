@@ -78,17 +78,17 @@ class PrintDriver: Driver {
 			if let filter = filter as? CompareFilter {
 				let symbol: String
 				switch filter.comparison {
-					case .Equal:
+					case .Equals:
 						symbol = "="
-					case .NotEqual:
+					case .NotEquals:
 						symbol = "!="
 					case .GreaterThan:
 						symbol = ">"
 					case .LessThan:
 						symbol = "<"
-					case .GreaterThanOrEqual:
+					case .GreaterThanOrEquals:
 						symbol = ">="
-					case .LessThanOrEqual:
+					case .LessThanOrEquals:
 						symbol = "<="
 				}
 

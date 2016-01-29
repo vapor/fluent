@@ -92,7 +92,7 @@ public class Query {
 
 	//continues
 	public func filter(key: String, _ value: String) -> Query {
-		let filter = CompareFilter(key: key, value: value, comparison: .Equal)
+		let filter = CompareFilter(key: key, value: value, comparison: .Equals)
 		self.filters.append(filter)
 
 		return self
