@@ -1,3 +1,5 @@
+![Fluent](https://cloud.githubusercontent.com/assets/1342803/12735105/1bdfb1d0-c913-11e5-9b45-f7a6f7cba720.png)
+
 # Fluent
 
 Simple ActiveRecord implementation for working with your database in Swift.
