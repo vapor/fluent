@@ -37,7 +37,7 @@ let user = Query<User>().filter("id", notIn: [1, 2, 3]).filter("age", .GreaterTh
 
 ## Setup
 
-Start by `import`ing Fluent into your application.
+Start by importing Fluent into your application.
 
 ```swift
 import Fluent
@@ -116,7 +116,8 @@ extension Model {
 	public func save()
 	public func delete()
 	public static func find(id: Int) -> Self?
-}```
+}
+```
 
 ## Querying
 
