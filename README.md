@@ -124,7 +124,8 @@ extension Model {
 Create an instance of the query builder by passing one of your application models that conforms to the `Model` protocol.
 
 ```swift
-let query = Query<User>()```
+let query = Query<User>()
+```
 
 ### Filters
 
