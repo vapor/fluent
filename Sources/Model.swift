@@ -23,15 +23,15 @@ public protocol Model {
 
 extension Model {
 
-	func save() {
+	public func save() {
 		Query().save(self)
 	}
 
-	func delete() {
+	public func delete() {
 		Query().delete(self)
 	}
 
-	static func find(id: Int) -> Self? {
+	public static func find(id: Int) -> Self? {
 		return Query().find(id)
 	}
 
