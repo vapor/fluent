@@ -141,7 +141,8 @@ query.filter("age", .GreaterThan, 21)
 ```swift
 public enum Comparison {
 	case Equals, NotEquals, GreaterThanOrEquals, LessThanOrEquals, GreaterThan, LessThan
-}```
+}
+```
 
 #### Subset
 
