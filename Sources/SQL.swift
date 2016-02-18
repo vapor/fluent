@@ -88,7 +88,22 @@ public class SQL {
 
 			for filter in filters {
 				if let filter = filter as? CompareFilter {
-					query.append(" `\(filter.key)` = '\(filter.value)'")
+					var operation: String = ""
+					switch filter.comparison {
+					case .Equals:
+						operation = "="
+					case .NotEquals:
+						operation = "!="
+					case .GreaterThanOrEquals:
+						operation = ">="
+					case .LessThanOrEquals:
+						operation = "<="
+					case .GreaterThan:
+						operation = ">"
+					case .LessThan:
+						operation = "<"
+					}
+					query.append(" `\(filter.key)` \(operation) '\(filter.value)'")
 				}
 			}
 		}
