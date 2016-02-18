@@ -86,9 +86,26 @@ public class SQL {
 				query.append("WHERE")
 			}
 
-			for filter in filters {
+			for (index, filter) in filters.enumerate() {
 				if let filter = filter as? CompareFilter {
-					query.append(" `\(filter.key)` = '\(filter.value)'")
+					var operation: String = ""
+					switch filter.comparison {
+					case .Equals:
+						operation = "="
+					case .NotEquals:
+						operation = "!="
+					case .GreaterThanOrEquals:
+						operation = ">="
+					case .LessThanOrEquals:
+						operation = "<="
+					case .GreaterThan:
+						operation = ">"
+					case .LessThan:
+						operation = "<"
+					}
+
+					query.append((index > 0) ? " AND" : "")
+					query.append(" `\(filter.key)` \(operation) '\(filter.value)'")
 				}
 			}
 		}
