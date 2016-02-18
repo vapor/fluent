@@ -86,7 +86,7 @@ public class SQL {
 				query.append("WHERE")
 			}
 
-			for filter in filters {
+			for (index, filter) in filters.enumerate() {
 				if let filter = filter as? CompareFilter {
 					var operation: String = ""
 					switch filter.comparison {
@@ -103,6 +103,8 @@ public class SQL {
 					case .LessThan:
 						operation = "<"
 					}
+
+					query.append((index > 0) ? " AND" : "")
 					query.append(" `\(filter.key)` \(operation) '\(filter.value)'")
 				}
 			}
