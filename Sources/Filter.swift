@@ -1,6 +1,11 @@
 public class CompareFilter: Filter {
-	public enum Comparison {
-		case Equals, NotEquals, GreaterThanOrEquals, LessThanOrEquals, GreaterThan, LessThan
+	public enum Comparison: String {
+		case Equals = "="
+		case NotEquals = "!="
+		case GreaterThanOrEquals = ">="
+		case LessThanOrEquals = "<="
+		case GreaterThan = ">"
+		case LessThan = "<"
 	}
 
 	public let key: String
@@ -15,8 +20,9 @@ public class CompareFilter: Filter {
 }
 
 public class SubsetFilter: Filter {
-	public enum Comparison {
-		case In, NotIn
+	public enum Comparison: String {
+		case In = "IN"
+		case NotIn = "NOT IN"
 	}
 
 	public let key: String
@@ -27,6 +33,11 @@ public class SubsetFilter: Filter {
 		self.key = key
 		self.superSet = superSet
 		self.comparison = comparison
+	}
+
+	var superSetString: String {
+		let elements = superSet.map({ "'\($0)'" })
+		return "(" + elements.joinWithSeparator(",") + ")"
 	}
 }
 
