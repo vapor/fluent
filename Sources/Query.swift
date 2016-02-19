@@ -85,29 +85,45 @@ public class Query<T: Model> {
 	}
 
 	//continues
-	public func filter(key: String, _ value: String) -> Query {
-		let filter = CompareFilter(key: key, value: value, comparison: .Equals)
+	public func filter(key: String, _ value: String) -> Query  {
+		return filter(key, value, .None)
+	}
+
+	public func filter(key: String, _ value: String, _ joinOperator: Filter.Operator) -> Query {
+		let filter = CompareFilter(key: key, value: value, comparison: .Equals, joinOperator: joinOperator)
 		self.filters.append(filter)
 
 		return self
 	}
 
 	public func filter(key: String, _ comparison: CompareFilter.Comparison, _ value: String) -> Query {
-		let filter = CompareFilter(key: key, value: value, comparison: comparison)
+		return filter(key, comparison, .None)
+	}
+
+	public func filter(key: String, _ comparison: CompareFilter.Comparison, _ value: String, _ joinOperator: Filter.Operator) -> Query {
+		let filter = CompareFilter(key: key, value: value, comparison: comparison, joinOperator: joinOperator)
 		self.filters.append(filter)
 
 		return self
 	}
 
 	public func filter(key: String, in superSet: [String]) -> Query {
-		let filter = SubsetFilter(key: key, superSet: superSet, comparison: .In)
+		return filter(key, in: superSet, .None)
+	}
+
+	public func filter(key: String, in superSet: [String], joinOperator: Filter.Operator) -> Query {
+		let filter = SubsetFilter(key: key, superSet: superSet, comparison: .In, joinOperator: joinOperator)
 		self.filters.append(filter)
 
 		return self
 	}
 
 	public func filter(key: String, notIn superSet: [String]) -> Query {
-		let filter = SubsetFilter(key: key, superSet: superSet, comparison: .NotIn)
+		return filter(key, notIn: superSet, .None)
+	}
+
+	public func filter(key: String, notIn superSet: [String], joinOperator: Filter.Operator) -> Query {
+		let filter = SubsetFilter(key: key, superSet: superSet, comparison: .NotIn, joinOperator: joinOperator)
 		self.filters.append(filter)
 
 		return self

@@ -73,7 +73,7 @@ public class SQL {
 					updates.append("`\(key)` = \(value)")
 
 				}
-				
+
 				let updatesString = updates.joinWithSeparator(", ")
 				query.append("SET \(updatesString)")
 
@@ -87,25 +87,11 @@ public class SQL {
 			}
 
 			for (index, filter) in filters.enumerate() {
+				query.append((index > 0) ? " \(filter.joinOperation().rawValue)" : "")
 				if let filter = filter as? CompareFilter {
-					var operation: String = ""
-					switch filter.comparison {
-					case .Equals:
-						operation = "="
-					case .NotEquals:
-						operation = "!="
-					case .GreaterThanOrEquals:
-						operation = ">="
-					case .LessThanOrEquals:
-						operation = "<="
-					case .GreaterThan:
-						operation = ">"
-					case .LessThan:
-						operation = "<"
-					}
-
-					query.append((index > 0) ? " AND" : "")
-					query.append(" `\(filter.key)` \(operation) '\(filter.value)'")
+					query.append(" `\(filter.key)` \(filter.comparison.rawValue) '\(filter.value)'")
+				} else if let filter = filter as? SubsetFilter {
+					query.append(" `\(filter.key)` \(filter.comparison.rawValue) \(filter.superSetString)")
 				}
 			}
 		}
