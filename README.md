@@ -10,7 +10,7 @@ Simple ActiveRecord implementation for working with your database in Swift.
 
 ## Getting Started
 
-Clone the [Example](https://github.com/tannernelson/fluent-example) project to start making your application. If you are also looking for a web server, check out [Vapor](https://github.com/tannernelson/vapor). It was built to work well with Fluent.
+Clone the [Example](https://github.com/qutheory/fluent-example) project to start making your application. If you are also looking for a web server, check out [Vapor](https://github.com/qutheory/vapor). It was built to work well with Fluent.
 
 You must have Swift 2.2 or later installed. You can learn more about Swift 2.2 at [Swift.org](http://swift.org)
 
