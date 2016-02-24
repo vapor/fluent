@@ -27,10 +27,8 @@ class MemoryDriver: Driver {
 		var id: String?
 
 		for filter in filters {
-			if let filter = filter as? CompareFilter {
-				if filter.key == "id" { //only working for id
-					id = filter.value
-				}
+			if filter.key == "id" { //only working for id
+				id = filter.operand.value
 			}
 		}
 

@@ -29,9 +29,9 @@ public class SQL {
 		case .UPDATE:
 			query.append("UPDATE")
 		}
-		//UPDATE table_name
-// SET column1 = value1, column2 = value2...., columnN = valueN
-// WHERE [condition];
+		// UPDATE table_name
+		// SET column1 = value1, column2 = value2...., columnN = valueN
+		// WHERE [condition];
 
 		query.append("`\(self.table)`")
 
@@ -73,7 +73,7 @@ public class SQL {
 					updates.append("`\(key)` = \(value)")
 
 				}
-				
+
 				let updatesString = updates.joinWithSeparator(", ")
 				query.append("SET \(updatesString)")
 
@@ -81,33 +81,45 @@ public class SQL {
 
 		}
 
-		if let filters = self.filters {
-			if filters.count > 0 {
-				query.append("WHERE")
-			}
+		if let filters = self.filters where filters.count > 0 {
+			var filterStrings = [String]()
 
-			for (index, filter) in filters.enumerate() {
-				if let filter = filter as? CompareFilter {
-					var operation: String = ""
-					switch filter.comparison {
-					case .Equals:
-						operation = "="
-					case .NotEquals:
-						operation = "!="
-					case .GreaterThanOrEquals:
-						operation = ">="
-					case .LessThanOrEquals:
-						operation = "<="
-					case .GreaterThan:
-						operation = ">"
-					case .LessThan:
-						operation = "<"
-					}
+			for filter in filters {
+				let op: String
 
-					query.append((index > 0) ? " AND" : "")
-					query.append(" `\(filter.key)` \(operation) '\(filter.value)'")
+				switch filter.comparison {
+					case Filter.Equality.Equals:
+						op = "="
+					case Filter.Equality.NotEquals:
+						op = "!="
+				 	case Filter.Equality.GreaterThan:
+						op = ">"
+				 	case Filter.Equality.LessThan:
+						op = "<"
+				 	case Filter.Equality.GreaterThanOrEquals:
+						op = ">="
+				 	case Filter.Equality.LessThanOrEquals:
+						op = "<="
+					case Filter.Subset.In:
+						op = "IN"
+					case Filter.Subset.NotIn:
+						op = "NOT IN"
+					default:
+						op = ""
 				}
+
+				var value: String = ""
+
+				if let _ = filter.comparison as? Filter.Equality {
+					value = filter.operand.value
+				} else if let _ = filter.comparison as? Filter.Subset {
+					value = "\(filter.operand.valueSet)"
+				}
+
+				filterStrings.append("`\(filter.key)` \(op) ''\(value)'")
 			}
+
+			query.append("WHERE \(filterStrings.joinWithSeparator(" AND "))")
 		}
 
 		if let limit = self.limit {
