@@ -75,35 +75,29 @@ class PrintDriver: Driver {
 	func printFilters(filters: [Filter]) {
 		print("\t\(filters.count) filter(s)")
 		for filter in filters {
-			if let filter = filter as? CompareFilter {
-				let symbol: String
-				switch filter.comparison {
-					case .Equals:
-						symbol = "="
-					case .NotEquals:
-						symbol = "!="
-					case .GreaterThan:
-						symbol = ">"
-					case .LessThan:
-						symbol = "<"
-					case .GreaterThanOrEquals:
-						symbol = ">="
-					case .LessThanOrEquals:
-						symbol = "<="
-				}
-
-				print("\t\t\(filter.key) \(symbol) \(filter.value)")
-			} else if let filter = filter as? SubsetFilter {
-				let op: String
-				switch filter.comparison {
-					case .In:
-						op = "in"
-					case .NotIn:
-						op = "not in"
-				}
-
-				print("\t\t\(filter.key) \(op) \(filter.superSet.count) options")
+			let op: String
+			switch filter.comparison {
+				case EqualityFilter.EqualityComparison.Equals:
+					op = "="
+				case EqualityFilter.EqualityComparison.NotEquals:
+					op = "!="
+				case EqualityFilter.EqualityComparison.GreaterThan:
+					op = ">"
+				case EqualityFilter.EqualityComparison.LessThan:
+					op = "<"
+				case EqualityFilter.EqualityComparison.GreaterThanOrEquals:
+					op = ">="
+				case EqualityFilter.EqualityComparison.LessThanOrEquals:
+					op = "<="
+				case SubsetFilter.SubsetComparison.In:
+					op = "IN"
+				case SubsetFilter.SubsetComparison.NotIn:
+					op = "NOT IN"
+				default:
+					op = ""
 			}
+
+			print("\t\t\(filter.key) \(op) \(filter.value)")
 		}
 	}
 
