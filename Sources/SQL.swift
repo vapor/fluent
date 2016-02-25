@@ -88,35 +88,27 @@ public class SQL {
 				let op: String
 
 				switch filter.comparison {
-					case Filter.Equality.Equals:
+					case EqualityFilter.EqualityComparison.Equals:
 						op = "="
-					case Filter.Equality.NotEquals:
+					case EqualityFilter.EqualityComparison.NotEquals:
 						op = "!="
-				 	case Filter.Equality.GreaterThan:
+				 	case EqualityFilter.EqualityComparison.GreaterThan:
 						op = ">"
-				 	case Filter.Equality.LessThan:
+				 	case EqualityFilter.EqualityComparison.LessThan:
 						op = "<"
-				 	case Filter.Equality.GreaterThanOrEquals:
+				 	case EqualityFilter.EqualityComparison.GreaterThanOrEquals:
 						op = ">="
-				 	case Filter.Equality.LessThanOrEquals:
+				 	case EqualityFilter.EqualityComparison.LessThanOrEquals:
 						op = "<="
-					case Filter.Subset.In:
+					case SubsetFilter.SubsetComparison.In:
 						op = "IN"
-					case Filter.Subset.NotIn:
+					case SubsetFilter.SubsetComparison.NotIn:
 						op = "NOT IN"
 					default:
 						op = ""
 				}
 
-				var value: String = ""
-
-				if let _ = filter.comparison as? Filter.Equality {
-					value = filter.operand.value
-				} else if let _ = filter.comparison as? Filter.Subset {
-					value = "\(filter.operand.valueSet)"
-				}
-
-				filterStrings.append("`\(filter.key)` \(op) ''\(value)'")
+				filterStrings.append("`\(filter.key)` \(op) ''\(filter.value)'")
 			}
 
 			query.append("WHERE \(filterStrings.joinWithSeparator(" AND "))")

@@ -1,55 +1,47 @@
-public protocol FilterComparison {
+public protocol Filterable {}
 
+extension String: Filterable {}
+
+// We can't specify it to be an array of Strings as of now. Let's just hope that
+// the init method of SubsetFilter will take care of this.
+extension Array: Filterable {}
+
+public protocol FilterComparison {}
+
+public protocol Filter {
+  var key: String { get }
+  var value: Filterable { get }
+  var comparison: FilterComparison { get }
 }
 
-public class Filter {
-	public enum Equality: FilterComparison {
-		case Equals, NotEquals, GreaterThanOrEquals, LessThanOrEquals, GreaterThan, LessThan
-	}
+public class EqualityFilter: Filter {
+  public enum EqualityComparison: FilterComparison {
+    case Equals, NotEquals, GreaterThanOrEquals, LessThanOrEquals, GreaterThan, LessThan
+  }
+  
+  public let key: String
+  public let value: Filterable
+  public let comparison: FilterComparison
 
-	public enum Subset: FilterComparison {
+  init(key: String, comparison: EqualityComparison, value: String) {
+    self.key = key
+    self.value = value
+    self.comparison = comparison
+  }
+}
+
+public class SubsetFilter: Filter {
+	public enum SubsetComparison: FilterComparison {
 		case In, NotIn
 	}
 
-	public enum Operand {
-		case Value(String)
-		case ValueSet([String])
+	public let key: String
+	public let value: Filterable
+	public let comparison: FilterComparison
 
-		public var value: String {
-			switch self {
-				case .Value(let value):
-					return value
-				default:
-					return ""
-			}
-		}
-
-		public var valueSet: [String] {
-			switch self {
-				case .ValueSet(let valueSet):
-					return valueSet
-				default:
-					return [String]()
-			}
-		}
-
-		public var eitherValue: Any {
-			switch self {
-				case .Value(let value):
-					return value
-				case .ValueSet(let valueSet):
-					return valueSet
-			}
-		}
-	}
-
-	let key: String
-	let comparison: FilterComparison
-	let operand: Operand
-
-	init(key: String, comparison: FilterComparison, operand: Operand) {
+	init(key: String, comparison: SubsetComparison, value: [String]) {
 		self.key = key
+		self.value = value
 		self.comparison = comparison
-		self.operand = operand
 	}
 }

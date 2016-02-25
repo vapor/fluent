@@ -27,8 +27,8 @@ class MemoryDriver: Driver {
 		var id: String?
 
 		for filter in filters {
-			if filter.key == "id" { //only working for id
-				id = filter.operand.value
+			if let value = filter.value as? String where filter.key == "id" {
+				id = value
 			}
 		}
 
@@ -94,7 +94,7 @@ class MemoryDriver: Driver {
 
 		//implement me
 	}
- 
+
 	func exists(table table: String, filters: [Filter]) -> Bool {
 		print("exists \(filters.count) filters on \(table)")
 
@@ -153,7 +153,7 @@ class MemoryDriver: Driver {
 					print("id = \(id)")
 					self.memory[query.table]?[id] = data
 				} else {
-					if 
+					if
 						let incString = self.memory[query.table]?["metadata"]?["increment"],
 						let inc = Int(incString)
 					{

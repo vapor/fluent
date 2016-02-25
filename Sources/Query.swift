@@ -86,25 +86,25 @@ public class Query<T: Model> {
 
 	//continues
 	public func filter(key: String, _ value: String) -> Query {
-		return filter(key, Filter.Equality.Equals, value)
+		return filter(key, .Equals, value)
 	}
 
-	public func filter(key: String, _ comparison: Filter.Equality, _ value: String) -> Query {
-		let filter = Filter(key: key, comparison: comparison, operand: .Value(value))
+	public func filter(key: String, _ comparison: EqualityFilter.EqualityComparison, _ value: String) -> Query {
+		let filter = EqualityFilter(key: key, comparison: comparison, value: value)
 		self.filters.append(filter)
 
 		return self
 	}
 
 	public func filter(key: String, in superSet: [String]) -> Query {
-		let filter = Filter(key: key, comparison: Filter.Subset.In, operand: .ValueSet(superSet))
+		let filter = SubsetFilter(key: key, comparison: SubsetFilter.SubsetComparison.In, value: superSet)
 		self.filters.append(filter)
 
 		return self
 	}
 
 	public func filter(key: String, notIn superSet: [String]) -> Query {
-		let filter = Filter(key: key, comparison: Filter.Subset.NotIn, operand: .ValueSet(superSet))
+		let filter = SubsetFilter(key: key, comparison: SubsetFilter.SubsetComparison.NotIn, value: superSet)
 		self.filters.append(filter)
 
 		return self

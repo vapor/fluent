@@ -77,27 +77,27 @@ class PrintDriver: Driver {
 		for filter in filters {
 			let op: String
 			switch filter.comparison {
-				case Filter.Equality.Equals:
+				case EqualityFilter.EqualityComparison.Equals:
 					op = "="
-				case Filter.Equality.NotEquals:
+				case EqualityFilter.EqualityComparison.NotEquals:
 					op = "!="
-				case Filter.Equality.GreaterThan:
+				case EqualityFilter.EqualityComparison.GreaterThan:
 					op = ">"
-				case Filter.Equality.LessThan:
+				case EqualityFilter.EqualityComparison.LessThan:
 					op = "<"
-				case Filter.Equality.GreaterThanOrEquals:
+				case EqualityFilter.EqualityComparison.GreaterThanOrEquals:
 					op = ">="
-				case Filter.Equality.LessThanOrEquals:
+				case EqualityFilter.EqualityComparison.LessThanOrEquals:
 					op = "<="
-				case Filter.Subset.In:
+				case SubsetFilter.SubsetComparison.In:
 					op = "IN"
-				case Filter.Subset.NotIn:
+				case SubsetFilter.SubsetComparison.NotIn:
 					op = "NOT IN"
 				default:
 					op = ""
 			}
 
-			print("\t\t\(filter.key) \(op) \(filter.operand.eitherValue)")
+			print("\t\t\(filter.key) \(op) \(filter.value)")
 		}
 	}
 
