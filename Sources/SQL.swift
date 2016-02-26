@@ -1,3 +1,5 @@
+import LoggerAPI
+
 public class SQL {
 
 	public var table: String
@@ -7,6 +9,8 @@ public class SQL {
 	public var limit: Int?
 	public var data: [String: String]?
 
+	public static var quote: String = "`"
+
 	public enum Operation {
 		case SELECT, DELETE, INSERT, UPDATE
 	}
@@ -14,6 +18,10 @@ public class SQL {
 	public init(operation: Operation, table: String) {
 		self.operation = operation
 		self.table = table
+	}
+
+	private func quoteWord(word: String) -> String {
+		return SQL.quote+word+SQL.quote
 	}
 
 	public var query: String {
@@ -33,7 +41,7 @@ public class SQL {
 // SET column1 = value1, column2 = value2...., columnN = valueN
 // WHERE [condition];
 
-		query.append("`\(self.table)`")
+		query.append(self.quoteWord(self.table))
 
 		if let data = self.data {
 
@@ -43,7 +51,7 @@ public class SQL {
 				var values: [String] = []
 
 				for (key, val) in data {
-					columns.append("`\(key)`")
+					columns.append(self.quoteWord(key))
 
 					if val == "NULL" {
 						values.append("\(val)")
@@ -70,10 +78,11 @@ public class SQL {
 						value = "'\(val)'"
 					}
 
-					updates.append("`\(key)` = \(value)")
+					let quotedKey = self.quoteWord(key)
+					updates.append("\(quotedKey) = \(value)")
 
 				}
-				
+
 				let updatesString = updates.joinWithSeparator(", ")
 				query.append("SET \(updatesString)")
 
@@ -104,8 +113,10 @@ public class SQL {
 						operation = "<"
 					}
 
+					let quotedKey = self.quoteWord(filter.key)
+
 					query.append((index > 0) ? " AND" : "")
-					query.append(" `\(filter.key)` \(operation) '\(filter.value)'")
+					query.append(" \(quotedKey) \(operation) '\(filter.value)'")
 				}
 			}
 		}
@@ -122,6 +133,6 @@ public class SQL {
 	}
 
 	func log(message: Any) {
-		print("[SQL] \(message)")
+		Log.debug("[SQL] \(message)")
 	}
 }
