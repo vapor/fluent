@@ -26,7 +26,7 @@ public class Query<T: Model> {
 	}
 
 	public func update(data: [String: String]) {
-		Database.driver.update(table: self.table, filters: self.filters, data: data)
+		Database.driver.update(table: self.table, filters: self.filters, items: data)
 	}
 
 	public func insert(data: [String: String]) {

@@ -22,12 +22,12 @@ class PrintDriver: Driver {
 		self.printFilters(filters)
 	}
 
-	func update(table table: String, filters: [Filter], data: [String: String]) {
+	func update(table table: String, filters: [Filter], items: [String: String]) {
 		print("Update")
 		print("\ttable: \(table)")
 		self.printFilters(filters)
-		print("\t\(data.count) data points")
-		for (key, value) in data {
+		print("\t\(items.count) data points")
+		for (key, value) in items {
 			print("\t\t\(key)=\(value)")
 		}
 	}
