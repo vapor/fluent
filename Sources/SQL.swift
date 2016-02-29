@@ -136,24 +136,24 @@ public class SQL {
     private func tokenize(query: String) {
         self.tokens = []
         self.indices = []
-        let tuples = SQLTokenizer(statement: query).tuples
-        var previousType = ""
-        outerLoop: for tuple in tuples {
-            guard let typeRaw = tuple["type"], let token = tuple["token"] else {
+        let items = SQLTokenizer(statement: query).items
+        var previousToken = ""
+        outerLoop: for item in items {
+            guard let token = item["token"], let value = item["value"] else {
                 break
             }
             
-            if let type = SQLTokenizer.Token(rawValue: typeRaw) {
+            if let type = SQLTokenizer.Token(rawValue: token) {
                 switch type {
                 case SQLTokenizer.Token.Keyword:
-                    tokens.append(token.uppercaseString)
+                    tokens.append(value.uppercaseString)
                 case SQLTokenizer.Token.Identifier:
-                    tokens.append(escapeString ? prepareIdentifier(token) : token)
+                    tokens.append(escapeString ? prepareIdentifier(value) : value)
                 case SQLTokenizer.Token.Parameter:
                     indices.append(tokens.count)
-                    tokens.append(token)
+                    tokens.append(value)
                 case SQLTokenizer.Token.Whitespace:
-                    if previousType != SQLTokenizer.Token.Whitespace.rawValue {
+                    if previousToken != SQLTokenizer.Token.Whitespace.rawValue {
                         tokens.append(" ")
                     }
                     break
@@ -161,14 +161,14 @@ public class SQL {
                     tokens.append(";")
                     break outerLoop
                 default:
-                    tokens.append(token)
+                    tokens.append(value)
                     break
                 }
             } else {
-                tokens.append(token)
+                tokens.append(value)
             }
             
-            previousType = typeRaw
+            previousToken = token
         }
     }
     

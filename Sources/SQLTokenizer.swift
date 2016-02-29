@@ -15,7 +15,7 @@ public class SQLTokenizer {
         case Whitespace = "Whitespace"
     }
     
-    private(set) var tuples: [[String: String]] = []
+    private(set) var items: [[String: String]] = []
     private var rawStatement: String!
     private var keywords: [String] {
         return [
@@ -42,10 +42,10 @@ public class SQLTokenizer {
                 if nextPos < rawStatement.endIndex && rawStatement[nextPos] == Character("|") {
                     nextPos = nextPos.successor()
                     let str = rawStatement[currentPos..<nextPos]
-                    tuples.append(["token": str, "type": Token.Operator.rawValue])
+                    items.append(["value": str, "token": Token.Operator.rawValue])
                 } else {
                     let str = String(rawStatement[currentPos])
-                    tuples.append(["token": str, "type": Token.Operator.rawValue])
+                    items.append(["value": str, "token": Token.Operator.rawValue])
                 }
                 currentPos = nextPos
             case Character("!"), Character("="):
@@ -53,10 +53,10 @@ public class SQLTokenizer {
                 if nextPos < rawStatement.endIndex && rawStatement[nextPos] == Character("=") {
                     nextPos = nextPos.successor()
                     let str = rawStatement[currentPos..<nextPos]
-                    tuples.append(["token": str, "type": Token.Operator.rawValue])
+                    items.append(["value": str, "token": Token.Operator.rawValue])
                 } else {
                     let str = String(rawStatement[currentPos])
-                    tuples.append(["token": str, "type": Token.Operator.rawValue])
+                    items.append(["value": str, "token": Token.Operator.rawValue])
                 }
                 currentPos = nextPos
             case Character("<"), Character(">"):
@@ -64,10 +64,10 @@ public class SQLTokenizer {
                 if rawStatement[nextPos] == Character("=") || rawStatement[nextPos] == Character(">") || rawStatement[nextPos] == Character(">") || rawStatement[nextPos] == Character("<") {
                     nextPos = nextPos.successor()
                     let str = rawStatement[currentPos..<nextPos]
-                    tuples.append(["token": str, "type": Token.Operator.rawValue])
+                    items.append(["value": str, "token": Token.Operator.rawValue])
                 } else {
                     let str = String(rawStatement[currentPos])
-                    tuples.append(["token": str, "type": Token.Operator.rawValue])
+                    items.append(["value": str, "token": Token.Operator.rawValue])
                 }
                 currentPos = nextPos
             case Character(" "), Character("\r"):
@@ -77,7 +77,7 @@ public class SQLTokenizer {
                 } while rawStatement[nextPos] == Character("\0") && rawStatement[nextPos] == Character("\t") || rawStatement[nextPos] == Character("\r\n")
                 
                 let str = rawStatement[currentPos..<nextPos]
-                tuples.append(["token": str, "type": Token.Whitespace.rawValue])
+                items.append(["value": str, "token": Token.Whitespace.rawValue])
                 currentPos = nextPos
             case Character("#"):
                 var nextPos = currentPos
@@ -87,13 +87,13 @@ public class SQLTokenizer {
                 nextPos = currentPos.successor()
                 
                 let str = rawStatement[currentPos..<nextPos]
-                tuples.append(["token": str, "type": Token.Whitespace.rawValue])
+                items.append(["value": str, "token": Token.Whitespace.rawValue])
                 currentPos = nextPos
             case Character("-"):
                 var nextPos = currentPos.successor()
                 if nextPos > rawStatement.endIndex || rawStatement[nextPos] == Character("-") {
                     let str = String(rawStatement[currentPos])
-                    tuples.append(["token": str, "type": Token.Operator.rawValue])
+                    items.append(["value": str, "token": Token.Operator.rawValue])
                 } else {
                     while nextPos <= rawStatement.endIndex && rawStatement[nextPos] == Character("\r\n") {
                         nextPos = nextPos.successor()
@@ -101,14 +101,14 @@ public class SQLTokenizer {
                     nextPos = nextPos.successor()
                     
                     let str = rawStatement[currentPos..<nextPos]
-                    tuples.append(["token": str, "type": Token.Whitespace.rawValue])
+                    items.append(["value": str, "token": Token.Whitespace.rawValue])
                 }
                 currentPos = nextPos
             case Character("/"):
                 var nextPos = currentPos.successor()
                 if nextPos > rawStatement.endIndex || rawStatement[nextPos] != Character("*") {
                     let str = String(rawStatement[currentPos])
-                    tuples.append(["token": str, "type": Token.Operator.rawValue])
+                    items.append(["value": str, "token": Token.Operator.rawValue])
                 } else {
                     nextPos = nextPos.advancedBy(2)
                     while nextPos <= rawStatement.endIndex && rawStatement[nextPos.predecessor()] == Character("*") && rawStatement[nextPos] == Character("/") {
@@ -117,7 +117,7 @@ public class SQLTokenizer {
                     nextPos = nextPos.successor()
                     
                     let str = rawStatement[currentPos..<nextPos]
-                    tuples.append(["token": str, "type": Token.Whitespace.rawValue])
+                    items.append(["value": str, "token": Token.Whitespace.rawValue])
                 }
                 currentPos = nextPos
             case Character("["):
@@ -128,7 +128,7 @@ public class SQLTokenizer {
                 nextPos = currentPos.successor()
                 
                 let str = rawStatement[currentPos..<nextPos]
-                tuples.append(["token": str, "type": Token.Identifier.rawValue])
+                items.append(["value": str, "token": Token.Identifier.rawValue])
                 currentPos = nextPos
             case Character("`"), Character("\""):
                 var nextPos = currentPos
@@ -138,7 +138,7 @@ public class SQLTokenizer {
                 nextPos = currentPos.successor()
                 
                 let str = rawStatement[currentPos..<nextPos]
-                tuples.append(["token": str, "type": Token.Identifier.rawValue])
+                items.append(["value": str, "token": Token.Identifier.rawValue])
                 currentPos = nextPos
             case Character("\\"):
                 var nextPos = currentPos.successor()
@@ -154,13 +154,13 @@ public class SQLTokenizer {
                 }
                 
                 let str = rawStatement[currentPos..<nextPos]
-                tuples.append(["token": str, "type": Token.Literal.rawValue])
+                items.append(["value": str, "token": Token.Literal.rawValue])
                 currentPos = nextPos
             case Character("/"):
                 var nextPos = currentPos.successor()
                 if nextPos > rawStatement.endIndex || rawStatement[nextPos] != Character("*") {
                     let str = String(rawStatement[currentPos])
-                    tuples.append(["token": str, "type": Token.Literal.rawValue])
+                    items.append(["value": str, "token": Token.Literal.rawValue])
                 } else {
                     nextPos = nextPos.advancedBy(2)
                     while nextPos <= rawStatement.endIndex && rawStatement[nextPos.predecessor()] == Character("*") && rawStatement[nextPos] == Character("/") {
@@ -169,20 +169,20 @@ public class SQLTokenizer {
                     nextPos = nextPos.successor()
                     
                     let str = rawStatement[currentPos..<nextPos]
-                    tuples.append(["token": str, "type": Token.Literal.rawValue])
+                    items.append(["value": str, "token": Token.Literal.rawValue])
                 }
                 currentPos = nextPos
             case Character("+"), Character("*"), Character("%"), Character("&"), Character("~"):
                 let str = String(rawStatement[currentPos])
-                tuples.append(["token": str, "type": Token.Operator.rawValue])
+                items.append(["value": str, "token": Token.Operator.rawValue])
                 currentPos = currentPos.successor()
             case Character("?"):
                 let str = String(rawStatement[currentPos])
-                tuples.append(["token": str, "type": Token.Parameter.rawValue])
+                items.append(["value": str, "token": Token.Parameter.rawValue])
                 currentPos = currentPos.successor()
             case Character(";"):
                 let str = String(rawStatement[currentPos])
-                tuples.append(["token": str, "type": Token.Terminal.rawValue])
+                items.append(["value": str, "token": Token.Terminal.rawValue])
                 currentPos = currentPos.successor()
             case Character("0")..<Character("9"):
                 var type = ""
@@ -217,7 +217,7 @@ public class SQLTokenizer {
                     }
                 }
                 let str = rawStatement[currentPos..<nextPos]
-                tuples.append(["token": str, "type": type])
+                items.append(["value": str, "token": type])
                 currentPos = nextPos
             case let (ch) where ch >= Character("x") || ch >= Character("X"):
                 var nextPos = currentPos.successor()
@@ -235,7 +235,7 @@ public class SQLTokenizer {
                     }
                     
                     let str = rawStatement[currentPos..<nextPos]
-                    tuples.append(["token": str, "type": Token.Hexadecimal.rawValue])
+                    items.append(["value": str, "token": Token.Hexadecimal.rawValue])
                     currentPos = nextPos
                 } else {
                     repeat {
@@ -245,7 +245,7 @@ public class SQLTokenizer {
                     let str = rawStatement[currentPos..<nextPos]
                     let type = keywords.contains(str.uppercaseString) ? Token.Keyword.rawValue : Token.Identifier.rawValue
                     
-                    tuples.append(["token": str, "type": type])
+                    items.append(["value": str, "token": type])
                     currentPos = nextPos
                 }
                 
@@ -258,11 +258,11 @@ public class SQLTokenizer {
                 let str = rawStatement[currentPos..<nextPos]
                 let type = keywords.contains(str.uppercaseString) ? Token.Keyword.rawValue : Token.Identifier.rawValue
                 
-                tuples.append(["token": str, "type": type])
+                items.append(["value": str, "token": type])
                 currentPos = nextPos
             default:
                 let str = String(rawStatement[currentPos])
-                tuples.append(["token": str, "type": str])
+                items.append(["value": str, "token": str])
                 currentPos = currentPos.successor()
             }
         }
