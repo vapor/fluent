@@ -77,8 +77,8 @@ class MemoryDriver: Driver {
 		}
 	}
 
-	func update(table table: String, filters: [Filter], data: [String: String]) {
-		print("update \(filters.count) filters \(data.count) data points on \(table)")
+	func update(table table: String, filters: [Filter], items: [String: String]) {
+		print("update \(filters.count) filters \(items.count) data points on \(table)")
 
 		//implement me
 	}
