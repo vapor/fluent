@@ -33,9 +33,8 @@ public extension String {
         return matches
     }
     
-    public func stringByEscapingSQLStatement() -> String {
+    public func escapeSQL() -> String {
         var str = self
-        str = str.stringByReplacingOccurrencesOfString("\'", withString: "\\'")
         str = str.stringByReplacingOccurrencesOfString("'", withString: "''")
         str = str.stringByReplacingOccurrencesOfString("\"", withString: "\\\"")
         str = str.stringByReplacingOccurrencesOfString("/", withString: "\\/")
@@ -46,9 +45,8 @@ public extension String {
         return str
     }
     
-    public func stringByUnescapintSQLStatement() -> String {
+    public func unescapeSQL() -> String {
         var str = self
-        str = str.stringByReplacingOccurrencesOfString("\\'", withString: "\'")
         str = str.stringByReplacingOccurrencesOfString("''", withString: "'")
         str = str.stringByReplacingOccurrencesOfString("\\\"", withString: "\"")
         str = str.stringByReplacingOccurrencesOfString("\\/", withString: "/")

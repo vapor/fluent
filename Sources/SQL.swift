@@ -15,16 +15,16 @@ public class SQL {
         case SELECT, DELETE, INSERT, UPDATE
     }
     
-    lazy public var parameterizedQuery: String = { [unowned self] in
+    lazy public var parameterizedQuery: String = {
         return self.buildQuery()
     }()
     
-    lazy public var queryValues: [String] = { [unowned self] in
+    lazy public var queryValues: [String] = {
         self.buildQuery()
         return self.values
     }()
 
-    lazy public var query: String = { [unowned self] in
+    lazy public var query: String = {
         let q = self.buildQuery()
         self.tokenize(q)
         
@@ -32,7 +32,7 @@ public class SQL {
         if self.indices.count > 0 {
             for item in self.values {
                 let index = self.indices[count]
-                self.tokens[index] = self.escapeString ? item.stringByEscapingSQLStatement() : item
+                self.tokens[index] = self.escapeString ? item.escapeSQL() : item
                 count += 1
             }
             
@@ -137,38 +137,28 @@ public class SQL {
         self.tokens = []
         self.indices = []
         let items = SQLTokenizer(statement: query).items
-        var previousToken = ""
+        var previousToken: SQLTokenizer.Token?
         outerLoop: for item in items {
-            guard let token = item["token"], let value = item["value"] else {
+            switch item.token {
+            case SQLTokenizer.Token.Keyword:
+                tokens.append(item.value.uppercaseString)
+            case SQLTokenizer.Token.Identifier:
+                tokens.append(escapeString ? prepareIdentifier(item.value) : item.value)
+            case SQLTokenizer.Token.Parameter:
+                indices.append(tokens.count)
+                tokens.append(item.value)
+            case SQLTokenizer.Token.Whitespace:
+                if let previousToken = previousToken where previousToken.rawValue != SQLTokenizer.Token.Whitespace.rawValue {
+                    tokens.append(" ")
+                }
+            case SQLTokenizer.Token.Terminal:
+                tokens.append(";")
+                break outerLoop
+            default:
+                tokens.append(item.value)
                 break
             }
-            
-            if let type = SQLTokenizer.Token(rawValue: token) {
-                switch type {
-                case SQLTokenizer.Token.Keyword:
-                    tokens.append(value.uppercaseString)
-                case SQLTokenizer.Token.Identifier:
-                    tokens.append(escapeString ? prepareIdentifier(value) : value)
-                case SQLTokenizer.Token.Parameter:
-                    indices.append(tokens.count)
-                    tokens.append(value)
-                case SQLTokenizer.Token.Whitespace:
-                    if previousToken != SQLTokenizer.Token.Whitespace.rawValue {
-                        tokens.append(" ")
-                    }
-                    break
-                case SQLTokenizer.Token.Terminal:
-                    tokens.append(";")
-                    break outerLoop
-                default:
-                    tokens.append(value)
-                    break
-                }
-            } else {
-                tokens.append(value)
-            }
-            
-            previousToken = token
+            previousToken = item.token
         }
     }
     
