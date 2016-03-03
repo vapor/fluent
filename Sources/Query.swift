@@ -12,6 +12,14 @@ public class Query<T: Model> {
 		}
 	}
 
+	public var fetchOne: [String:String]? {
+		if let serialized = Database.driver.fetchOne(table: self.table, filters: self.filters) {
+			return serialized
+		} else {
+			return nil
+		}
+	}
+
 	//var results: [Model]
 	public var results: [T] {
 		var models: [T] = []
@@ -23,6 +31,10 @@ public class Query<T: Model> {
 		}
 
 		return models
+	}
+
+	public var fetch: [[String:String]] {
+		return Database.driver.fetch(table: self.table, filters: self.filters)
 	}
 
 	public func update(data: [String: String]) {
@@ -85,32 +97,84 @@ public class Query<T: Model> {
 	}
 
 	//continues
-	public func filter(key: String, _ value: String) -> Query {
-		let filter = CompareFilter(key: key, value: value, comparison: .Equals)
+	public func filter(type: Filter.GroupType,_ key: String, _ comparison: CompareFilter.Comparison, _ value: String) -> Query {
+		let filter = CompareFilter(key: key, value: value, comparison: comparison)
+		filter.groupType = type
 		self.filters.append(filter)
 
 		return self
+	}
+
+	public func filter(type: Filter.GroupType,_ key: String, in superSet: [String]) -> Query {
+		let filter = SubsetFilter(key: key, superSet: superSet, comparison: .In)
+		filter.groupType = type
+		self.filters.append(filter)
+
+		return self
+	}
+
+	public func filter(type: Filter.GroupType,_ key: String, notIn superSet: [String]) -> Query {
+		let filter = SubsetFilter(key: key, superSet: superSet, comparison: .NotIn)
+		filter.groupType = type
+		self.filters.append(filter)
+
+		return self
+	}
+
+	public func filter(key: String, _ value: String) -> Query {
+		return self.filter(.And, key,.Equals, value)
 	}
 
 	public func filter(key: String, _ comparison: CompareFilter.Comparison, _ value: String) -> Query {
-		let filter = CompareFilter(key: key, value: value, comparison: comparison)
-		self.filters.append(filter)
-
-		return self
+		return self.filter(.And, key,comparison,value)
 	}
 
 	public func filter(key: String, in superSet: [String]) -> Query {
-		let filter = SubsetFilter(key: key, superSet: superSet, comparison: .In)
-		self.filters.append(filter)
-
-		return self
+		return self.filter(.And, key, in:superSet)
 	}
 
 	public func filter(key: String, notIn superSet: [String]) -> Query {
-		let filter = SubsetFilter(key: key, superSet: superSet, comparison: .NotIn)
-		self.filters.append(filter)
+		return self.filter(.And, key, notIn: superSet)
+	}
 
+	//continues
+	public func and(key: String, _ value: String) -> Query {
+		return self.filter(key,value)
+	}
+
+	public func or(key: String, _ value: String) -> Query {
+		return self.filter(.Or, key, .Equals, value)
+	}
+
+	public func and(key: String, _ comparison: CompareFilter.Comparison, _ value: String) -> Query {
+		return self.filter(key,comparison,value)
+	}
+	public func or(key: String, _ comparison: CompareFilter.Comparison, _ value: String) -> Query {
+		return self.filter(.Or, key,comparison, value)
+	}
+
+	public func and(key: String, in superSet: [String]) -> Query {
+		return self.filter(key, in:superSet)
+	}
+	public func or(key: String, in superSet: [String]) -> Query {
+		return self.filter(.Or, key, in: superSet)
+	}
+
+	public func and(key: String, notIn superSet: [String]) -> Query {
+		return self.filter(key, notIn: superSet)
+	}
+	public func or(key: String, notIn superSet: [String]) -> Query {
+		return self.filter(.Or, key, notIn: superSet)
+	}
+
+	public func group (type: FilterGroup.GroupType,_ filters: (group: FilterGroup)->FilterGroup) -> Query {
+		let filterGroup = FilterGroup(type:type)
+		self.filters.append(filters(group: filterGroup))
 		return self
+	}
+
+	public func group (filters: (group: FilterGroup)->FilterGroup) -> Query {
+		return self.group(.And,filters)
 	}
 
 	public init() {

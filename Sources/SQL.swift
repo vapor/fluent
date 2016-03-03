@@ -24,6 +24,19 @@ public class SQL {
 		return SQL.quote+word+SQL.quote
 	}
 
+	public func getData(key: String) -> String {
+		if let data = self.data {
+			if let val = data[key] {
+				if val == "NULL" {
+					return val
+				} else {
+					return "'\(val)'"
+				}
+			}
+		}
+		return ""
+	}
+
 	public var query: String {
 		var query: [String] = []
 
@@ -50,14 +63,9 @@ public class SQL {
 				var columns: [String] = []
 				var values: [String] = []
 
-				for (key, val) in data {
+				for key in data.keys {
 					columns.append(self.quoteWord(key))
-
-					if val == "NULL" {
-						values.append("\(val)")
-					} else {
-						values.append("'\(val)'")
-					}
+					values.append(self.getData(key))
 				}
 
 				let columnsString = columns.joinWithSeparator(", ")
@@ -68,19 +76,10 @@ public class SQL {
 
 				var updates: [String] = []
 
-				for (key, val) in data {
-
-					let value: String
-
-					if val == "NULL" {
-						value = "\(val)"
-					} else {
-						value = "'\(val)'"
-					}
-
+				for key in data.keys {
 					let quotedKey = self.quoteWord(key)
-					updates.append("\(quotedKey) = \(value)")
-
+					updates.append("\(quotedKey) = ")
+					updates.append(self.getData(key))
 				}
 
 				let updatesString = updates.joinWithSeparator(", ")
@@ -93,31 +92,8 @@ public class SQL {
 		if let filters = self.filters {
 			if filters.count > 0 {
 				query.append("WHERE")
-			}
 
-			for (index, filter) in filters.enumerate() {
-				if let filter = filter as? CompareFilter {
-					var operation: String = ""
-					switch filter.comparison {
-					case .Equals:
-						operation = "="
-					case .NotEquals:
-						operation = "!="
-					case .GreaterThanOrEquals:
-						operation = ">="
-					case .LessThanOrEquals:
-						operation = "<="
-					case .GreaterThan:
-						operation = ">"
-					case .LessThan:
-						operation = "<"
-					}
-
-					let quotedKey = self.quoteWord(filter.key)
-
-					query.append((index > 0) ? " AND" : "")
-					query.append(" \(quotedKey) \(operation) '\(filter.value)'")
-				}
+				query = generateFilterQuery(0, query, filters)
 			}
 		}
 
@@ -130,6 +106,100 @@ public class SQL {
 		self.log(queryString)
 
 		return queryString + ";"
+	}
+
+	public func getFilterValue(filter: CompareFilter) -> String {
+		return "'\(filter.value)'"
+	}
+
+	public func getFilterValue(filter: SubsetFilter) -> String {
+		return "'" + filter.superSet.joinWithSeparator("','") + "'"
+	}
+
+	func generateFilterQuery(index: Int,_ query: [String] ,_ filters: [Filter]) -> [String] {
+		var i = index
+		var q = query
+		for (_, filter) in filters.enumerate() {
+			if let filter = filter as? CompareFilter {
+				var operation: String = ""
+				switch filter.comparison {
+				case .Equals:
+					operation = "="
+				case .NotEquals:
+					operation = "!="
+				case .GreaterThanOrEquals:
+					operation = ">="
+				case .LessThanOrEquals:
+					operation = "<="
+				case .GreaterThan:
+					operation = ">"
+				case .LessThan:
+					operation = "<"
+				}
+
+				let quotedKey = self.quoteWord(filter.key)
+
+				var type: String = "AND"
+				switch filter.groupType {
+				case .And:
+					type = "AND"
+				case .Or:
+					type = "OR"
+				}
+				q.append((i > 0) ? " \(type)" : "")
+				q.append(" \(quotedKey) \(operation) ")
+				q.append(self.getFilterValue(filter))
+			}
+			else if let filter = filter as? SubsetFilter {
+				if(filter.superSet.count == 0) {
+					continue
+				}
+
+				var operation: String = ""
+				switch filter.comparison {
+				case .In:
+					operation = "IN"
+				case .NotIn:
+					operation = "NOT IN"
+				}
+
+				let quotedKey = self.quoteWord(filter.key)
+
+				let holdersStr = self.getFilterValue(filter)
+
+				var type: String = "AND"
+				switch filter.groupType {
+				case .And:
+					type = "AND"
+				case .Or:
+					type = "OR"
+				}
+
+				q.append((i > 0) ? " \(type)" : "")
+				q.append(" \(quotedKey) \(operation) (\(holdersStr))")
+
+			}
+			else if let filter = filter as? FilterGroup {
+				if(filter.filters.count == 0) {
+					continue
+				}
+
+				var type: String = "AND"
+				switch filter.groupType {
+					case .And:
+						type = "AND"
+					case .Or:
+						type = "OR"
+				}
+
+				q.append((i > 0) ? " \(type)" : "")
+				q.append("(")
+				q = generateFilterQuery(0,q,filter.filters)
+				q.append(")")
+			}
+			i = i+1
+		}
+		return q
 	}
 
 	func log(message: Any) {
