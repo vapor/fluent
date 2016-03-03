@@ -24,6 +24,19 @@ public class SQL {
 		return SQL.quote+word+SQL.quote
 	}
 
+	public func getData(key: String) -> String {
+		if let data = self.data {
+			if let val = data[key] {
+				if val == "NULL" {
+					return val
+				} else {
+					return "'\(val)'"
+				}
+			}
+		}
+		return ""
+	}
+
 	public var query: String {
 		var query: [String] = []
 
@@ -52,7 +65,7 @@ public class SQL {
 
 				for key in data.keys {
 					columns.append(self.quoteWord(key))
-					values.append("?")
+					values.append(self.getData(key))
 				}
 
 				let columnsString = columns.joinWithSeparator(", ")
@@ -65,7 +78,8 @@ public class SQL {
 
 				for key in data.keys {
 					let quotedKey = self.quoteWord(key)
-					updates.append("\(quotedKey) = ?")
+					updates.append("\(quotedKey) = ")
+					updates.append(self.getData(key))
 				}
 
 				let updatesString = updates.joinWithSeparator(", ")
@@ -92,6 +106,14 @@ public class SQL {
 		self.log(queryString)
 
 		return queryString + ";"
+	}
+
+	public func getFilterValue(filter: CompareFilter) -> String {
+		return "'\(filter.value)'"
+	}
+
+	public func getFilterValue(filter: SubsetFilter) -> String {
+		return "'" + filter.superSet.joinWithSeparator("','") + "'"
 	}
 
 	func generateFilterQuery(index: Int,_ query: [String] ,_ filters: [Filter]) -> [String] {
@@ -125,7 +147,8 @@ public class SQL {
 					type = "OR"
 				}
 				q.append((i > 0) ? " \(type)" : "")
-				q.append(" \(quotedKey) \(operation) ?")
+				q.append(" \(quotedKey) \(operation) ")
+				q.append(self.getFilterValue(filter))
 			}
 			else if let filter = filter as? SubsetFilter {
 				if(filter.superSet.count == 0) {
@@ -142,8 +165,7 @@ public class SQL {
 
 				let quotedKey = self.quoteWord(filter.key)
 
-				let holders = [String](count: filter.superSet.count, repeatedValue: "?")
-				let holdersStr = holders.joinWithSeparator(",")
+				let holdersStr = self.getFilterValue(filter)
 
 				var type: String = "AND"
 				switch filter.groupType {
@@ -154,7 +176,7 @@ public class SQL {
 				}
 
 				q.append((i > 0) ? " \(type)" : "")
-				q.append(" \(quotedKey) \(operation) (\(holdersStr)")
+				q.append(" \(quotedKey) \(operation) (\(holdersStr))")
 
 			}
 			else if let filter = filter as? FilterGroup {
