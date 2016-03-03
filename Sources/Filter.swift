@@ -107,12 +107,15 @@ public class FilterGroup : Filter {
 		return self.filter(.Or, key, notIn: superSet)
 	}
 
-	public func group (type: FilterGroup.GroupType, filters: (group: FilterGroup)->FilterGroup) -> FilterGroup {
+	public func group (type: FilterGroup.GroupType,_ filters: (group: FilterGroup)->FilterGroup) -> FilterGroup {
 		let filterGroup = FilterGroup(type:type)
 		self.filters.append(filters(group: filterGroup))
 		return self
 	}
 
+	public func group (filters: (group: FilterGroup)->FilterGroup) -> FilterGroup {
+		return self.group(.And, filters)
+	}
 }
 
 public class Filter {

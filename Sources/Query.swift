@@ -12,6 +12,14 @@ public class Query<T: Model> {
 		}
 	}
 
+	public var fetchOne: [String:String]? {
+		if let serialized = Database.driver.fetchOne(table: self.table, filters: self.filters) {
+			return serialized
+		} else {
+			return nil
+		}
+	}
+
 	//var results: [Model]
 	public var results: [T] {
 		var models: [T] = []
@@ -23,6 +31,10 @@ public class Query<T: Model> {
 		}
 
 		return models
+	}
+
+	public var fetch: [[String:String]] {
+		return Database.driver.fetch(table: self.table, filters: self.filters)
 	}
 
 	public func update(data: [String: String]) {
@@ -155,10 +167,14 @@ public class Query<T: Model> {
 		return self.filter(.Or, key, notIn: superSet)
 	}
 
-	public func group (type: FilterGroup.GroupType, filters: (group: FilterGroup)->FilterGroup) -> Query {
+	public func group (type: FilterGroup.GroupType,_ filters: (group: FilterGroup)->FilterGroup) -> Query {
 		let filterGroup = FilterGroup(type:type)
 		self.filters.append(filters(group: filterGroup))
 		return self
+	}
+
+	public func group (filters: (group: FilterGroup)->FilterGroup) -> Query {
+		return self.group(.And,filters)
 	}
 
 	public init() {
