@@ -78,8 +78,7 @@ public class SQL {
 
 				for key in data.keys {
 					let quotedKey = self.quoteWord(key)
-					updates.append("\(quotedKey) = ")
-					updates.append(self.getData(key))
+					updates.append("\(quotedKey) = " + self.getData(key))
 				}
 
 				let updatesString = updates.joinWithSeparator(", ")
