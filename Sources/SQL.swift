@@ -20,7 +20,7 @@ public class SQL {
 		self.table = table
 	}
 
-	private func quoteWord(word: String) -> String {
+	public func quoteWord(word: String) -> String {
 		return SQL.quote+word+SQL.quote
 	}
 
