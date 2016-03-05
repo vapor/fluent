@@ -7,4 +7,7 @@ public protocol Driver {
 	func upsert(table table: String, items: [[String: String]])
 	func exists(table table: String, filters: [Filter]) -> Bool
 	func count(table table: String, filters: [Filter]) -> Int
+
+	func escapeIdentifier(identifier: String) -> String
+	func escapeLiteral(literal: String) -> String
 }

@@ -131,6 +131,14 @@ class MemoryDriver: Driver {
 		return count
 	}
 
+	func escapeIdentifier(identifier: String) -> String {
+		return identifier
+	}
+
+	func escapeLiteral(literal: String) -> String {
+		return literal
+	}
+
 	/*func query(query: Query) -> Any? {
 		print("Query")
 

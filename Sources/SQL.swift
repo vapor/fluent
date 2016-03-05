@@ -9,8 +9,6 @@ public class SQL {
 	public var limit: Int?
 	public var data: [String: String]?
 
-	public static var quote: String = "`"
-
 	public enum Operation {
 		case SELECT, DELETE, INSERT, UPDATE
 	}
@@ -21,7 +19,7 @@ public class SQL {
 	}
 
 	public func quoteWord(word: String) -> String {
-		return SQL.quote+word+SQL.quote
+		return Database.driver.escapeIdentifier(word)
 	}
 
 	public func getData(key: String) -> String {
@@ -30,7 +28,7 @@ public class SQL {
 				if val == "NULL" {
 					return val
 				} else {
-					return "'\(val)'"
+					return Database.driver.escapeLiteral(val)
 				}
 			}
 		}
@@ -108,11 +106,12 @@ public class SQL {
 	}
 
 	public func getFilterValue(filter: CompareFilter) -> String {
-		return "'\(filter.value)'"
+		return Database.driver.escapeLiteral(filter.value)
 	}
 
 	public func getFilterValue(filter: SubsetFilter) -> String {
-		return "'" + filter.superSet.joinWithSeparator("','") + "'"
+		let superSet = filter.superSet.map { Database.driver.escapeLiteral($0) }
+		return superSet.joinWithSeparator(",")
 	}
 
 	func generateFilterQuery(index: Int,_ query: [String] ,_ filters: [Filter]) -> [String] {
