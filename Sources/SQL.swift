@@ -1,5 +1,3 @@
-import LoggerAPI
-
 public class SQL {
 
 	public var table: String
@@ -201,6 +199,6 @@ public class SQL {
 	}
 
 	func log(message: Any) {
-		Log.debug("[SQL] \(message)")
+		print("[SQL] \(message)")
 	}
 }
