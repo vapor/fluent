@@ -107,4 +107,12 @@ class PrintDriver: Driver {
 		}
 	}
 
+	func escapeIdentifier(identifier: String) -> String {
+		return identifier
+	}
+
+	func escapeLiteral(literal: String) -> String {
+		return literal
+	}
+
 }
