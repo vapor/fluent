@@ -72,6 +72,22 @@ class PrintDriver: Driver {
 		return 0
 	}
 
+	func create(table table: String, ifNotExists: Bool, builder: SchemaTableBuilder) {
+		print("TODO: \(#function)")
+	}
+
+	func alter(table table: String, builder: SchemaTableBuilder) {
+		print("TODO: \(#function)")
+	}
+
+	func rename(table table: String, to: String) {
+		print("TODO: \(#function)")
+	}
+
+	func drop(table table: String, ifExists: Bool) {
+		print("TODO: \(#function)")
+	}
+
 	func printFilters(filters: [Filter]) {
 		print("\t\(filters.count) filter(s)")
 		for filter in filters {

@@ -7,4 +7,9 @@ public protocol Driver {
 	func upsert(table table: String, items: [[String: String]])
 	func exists(table table: String, filters: [Filter]) -> Bool
 	func count(table table: String, filters: [Filter]) -> Int
+
+	func create(table table: String, ifNotExists: Bool, builder: SchemaTableBuilder)
+	func alter(table table: String, builder: SchemaTableBuilder)
+	func rename(table table: String, to: String)
+	func drop(table table: String, ifExists: Bool)
 }
