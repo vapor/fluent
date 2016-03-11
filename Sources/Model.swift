@@ -1,38 +1,101 @@
-/**
-	Base model for all Fluent entities. 
 
-	Override the `table()`, `serialize()`, and `init(serialized:)`
-	methods on your subclass. 
-*/
 public protocol Model {
-	///The entities database identifier. `nil` when not saved yet.
-	var id: String? { get }
-
-	///The database table in which entities are stored.
-	static var table: String { get }
-
-	/**
-		This method will be called when the entity is saved. 
-		The keys of the dictionary are the column names
-		in the database.
-	*/
-	func serialize() -> [String: String]
-
-	init(serialized: [String: String])
+    static var entity: String { get }
+    var id: String? { get }
+    
+    func serialize() -> [String: StatementValueType]
+    init(deserialize: [String: String])
 }
 
-extension Model {
+extension Model {    
+    public func save() {
+        Query().save(self)
+    }
+    
+    public static func saveMany<T: Model>(models: [T]) {
+        for model in models {
+            model.save()
+        }
+    }
+    
+    public func delete() {
+        Query().delete(self)
+    }
+    
+    // TODO: Finish This
+    
+    public func hasOne<T: Model>(table: T.Type, foreignKey: String? = nil) -> T? {
+        let q = Query<T>()
+        let fkey = foreignKey ?? "\(Self.entity)_id"
+        return q.with(fkey, .Equals, id!).first()
+    }
+    
+    public func hasMany<T: Model>(table: T.Type, foreignKey: String? = nil) -> [T]? {
+        let q = Query<T>()
+        let fkey = foreignKey ?? "\(Self.entity)_id"
+        return q.with(fkey, .Equals, id!).all()
+    }
+    
+    public func belongsTo<T: Model>(table: T.Type, foreignKey: String? = nil, otherKey: String? = nil) -> T? {
+        let q = Query<T>()
+        let fkey = foreignKey ?? "\(table.entity)_id"
+        let other = otherKey ?? "id"
+        return q.with(other, .Equals, fkey).first()
+    }
+    
+//    public func belongsToMany<T: Model>(table: T.Type, intermediateTableName: String? = nil, foreignKey1: String? = nil, foreignKey2: String? = nil) -> [T]? {
+//        return Query().joins([table])
+//    }
 
-	public func save() {
-		Query().save(self)
-	}
-
-	public func delete() {
-		Query().delete(self)
-	}
-
-	public static func find(id: Int) -> Self? {
-		return Query().find(id)
-	}
-
+//    public func hasManyThrough<T: Model, U: Model>(table1: T.Type, table2: U.Type, foreignKey1: String? = nil, foreignKey2: String? = nil) -> [T]? {
+//        return nil
+//    }
+    
+    public static func find(ids: StatementValueType...) -> [Self]? {
+        return Query()._with("id", .In, ids).all()
+    }
+    
+    public static func findBy(key: String, _ op: Operator = .Equals, _ values: StatementValueType...) -> [Self]? {
+        return Query()._with(key, .Equals, values).all()
+    }
+    
+    public static func take(count: Int = 1) -> [Self]? {
+        return Query().limit(1).all()
+    }
+    
+    public static func first(count: Int = 1) -> [Self]? {
+        return Query().orderBy("id", .Ascending).limit(count).all()
+    }
+    
+    public static func last(count: Int = 1) -> [Self]? {
+        return Query().orderBy("id", .Descending).limit(count).all()
+    }
+    
+//    public static func list(key: String) -> [String]? {
+//        return Query().list(key)
+//    }
+//
+//    public static func exist() -> Bool {
+//        return self.count > 0
+//    }
+//
+//    public static var count: Int {
+//        return Query().count()
+//    }
+//    
+//    public static func average(key: String = "*") -> Double {
+//        return Query().avg(key)
+//    }
+//    
+//    public static func maximum(key: String = "*") -> Double {
+//        return Query().max(key)
+//    }
+//    
+//    public static func minimum(key: String = "*") -> Double {
+//        return Query().min(key)
+//    }
+//    
+//    public static func sum(key: String = "*") -> Double {
+//        return Query().sum(key)
+//    }
 }

@@ -1,5 +1,4 @@
+
 public class Database {
-
-	public static var driver: Driver = PrintDriver()
-
+    public static var driver: Driver = PrintDriver()
 }
