@@ -96,7 +96,7 @@ class MemoryDriver: Driver {
 
 		//implement me
 	}
- 
+
 	func exists(table table: String, filters: [Filter]) -> Bool {
 		print("exists \(filters.count) filters on \(table)")
 
@@ -129,6 +129,22 @@ class MemoryDriver: Driver {
 		}
 
 		return count
+	}
+
+	func create(table table: String, ifNotExists: Bool, builder: SchemaTableBuilder) {
+		print("TODO: \(#function)")
+	}
+
+	func alter(table table: String, builder: SchemaTableBuilder) {
+		print("TODO: \(#function)")
+	}
+
+	func rename(table table: String, to: String) {
+		print("TODO: \(#function)")
+	}
+
+	func drop(table table: String, ifExists: Bool) {
+		print("TODO: \(#function)")
 	}
 
 	/*func query(query: Query) -> Any? {
