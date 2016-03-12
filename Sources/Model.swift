@@ -60,7 +60,7 @@ extension Model {
     }
     
     public static func take(count: Int = 1) -> [Self]? {
-        return Query().limit(1).all()
+        return Query().limit(count).all()
     }
     
     public static func first(count: Int = 1) -> [Self]? {

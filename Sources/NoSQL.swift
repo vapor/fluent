@@ -26,7 +26,7 @@ public class NoSQL: StatementGenerator {
        return []
     }()
     
-    public required init(entity: String) {
-        self.entity = entity
+    public required init() {
+        
     }
 }

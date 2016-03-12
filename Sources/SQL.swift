@@ -50,8 +50,8 @@ public class SQL: StatementGenerator {
         return q
     }()
     
-    public required init(entity: String) {
-        self.entity = entity
+    public required init() {
+        
     }
     
     private func tokenize(query: String) {

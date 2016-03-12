@@ -1,5 +1,5 @@
 
 public protocol Driver {
-    var statementClass: StatementGenerator.Type { get }
+    var statementGenerator: StatementGenerator.Type { get }
     func execute(statement: StatementGenerator) -> [[String: StatementValueType]]?
 }

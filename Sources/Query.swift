@@ -5,11 +5,7 @@ public class Query<T: Model> {
     
     public init(entity: String? = nil) {
         self.entity = entity ?? T.entity
-        statement = Database.driver.statementClass.init(entity: self.entity)
-    }
-    
-    public var toSQL: String {
-        return statement.query
+        statement = Database.driver.statementGenerator.init()
     }
     
     public func first(fields: String...) -> T? {

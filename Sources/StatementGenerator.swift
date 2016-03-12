@@ -17,7 +17,7 @@ public protocol StatementGenerator {
     var parameterizedQuery: String { get }
     var queryValues: [StatementValueType] { get }
     
-    init(entity: String)
+    init()
 }
 
 // MARK: - Condition
