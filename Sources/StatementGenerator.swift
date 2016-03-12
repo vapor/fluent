@@ -2,16 +2,16 @@
 public protocol StatementGenerator {
     var entity: String { get set }
     var clause: Clause { get set }
-    var operation: [(String, Operator, [StatementValueType])]? { get set }
-    var andIndexes: [Int]? { get set }
-    var orIndexes: [Int]? { get set }
-    var fields: [String]? { get set }
-    var limit: Int? { get set }
-    var offset: Int? { get set }
-    var orderBy: [(String, OrderBy)]? { get set }
-    var groupBy: String? { get set }
-    var joins: [(String, Join)]? { get set }
-    var data: [String: StatementValueType]? { get set }
+    var operation: [(String, Operator, [StatementValueType])] { get set }
+    var andIndexes: [Int] { get set }
+    var orIndexes: [Int] { get set }
+    var fields: [String] { get set }
+    var limit: Int { get set }
+    var offset: Int { get set }
+    var orderBy: [(String, OrderBy)] { get set }
+    var groupBy: String { get set }
+    var joins: [(String, Join)] { get set }
+    var data: [String: StatementValueType] { get set }
     var query: String { get }
     var distinct: Bool { get set }
     var parameterizedQuery: String { get }

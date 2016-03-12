@@ -4,7 +4,7 @@ public protocol Model {
     var id: String? { get }
     
     func serialize() -> [String: StatementValueType]
-    init(deserialize: [String: String])
+    init(deserialize: [String: StatementValueType])
 }
 
 extension Model {    

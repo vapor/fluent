@@ -4,7 +4,7 @@ class PrintDriver: Driver {
         return SQL.self
     }
     
-    func execute(statement: StatementGenerator) -> [[String : String]]? {
+    func execute(statement: StatementGenerator) -> [[String : StatementValueType]]? {
         print("FULL QUERY: \(statement.query)")
         print("PARAMETERIZED QUERY: \(statement.parameterizedQuery)")
         print("QUERY VALUES: \(statement.queryValues)")

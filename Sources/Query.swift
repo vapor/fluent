@@ -21,7 +21,7 @@ public class Query<T: Model> {
     }
     
     public func run(fields: [String]? = nil) -> [T]? {
-        statement.fields = fields
+        statement.fields = fields ?? []
         var models: [T] = []
         
         guard let results = Database.driver.execute(statement) else {
@@ -51,7 +51,7 @@ public class Query<T: Model> {
         
         if let id = model?.id {
             statement.entity = T.entity
-            statement.operation?.append( ("id", .Equals, [id]))
+            statement.operation.append( ("id", .Equals, [id]))
         }
         
         run()
@@ -70,29 +70,29 @@ public class Query<T: Model> {
     }
     
     public func with(key: String, _ op: Operator, _ values: StatementValueType...) -> Self {
-        statement.operation?.append((key, op, values))
+        statement.operation.append((key, op, values))
         return self
     }
     
     public func _with(key: String, _ op: Operator, _ values: [StatementValueType]) -> Self {
-        statement.operation?.append((key, op, values))
+        statement.operation.append((key, op, values))
         return self
     }
     
     public func andWith(key: String, _ op: Operator, _ values: StatementValueType...) -> Self {
-        statement.operation?.append((key, op, values))
-        statement.andIndexes?.append(statement.operation!.count - 1)
+        statement.operation.append((key, op, values))
+        statement.andIndexes.append(statement.operation.count - 1)
         return self
     }
     
     public func orWith(key: String, _ op: Operator, _ values: StatementValueType...) -> Self {
-        statement.operation?.append((key, op, values))
-        statement.orIndexes?.append(statement.operation!.count - 1)
+        statement.operation.append((key, op, values))
+        statement.orIndexes.append(statement.operation.count - 1)
         return self
     }
     
     public func orderBy(key: String, _ order: OrderBy) -> Self {
-        statement.orderBy?.append((key, order))
+        statement.orderBy.append((key, order))
         return self
     }
     
@@ -111,12 +111,12 @@ public class Query<T: Model> {
         return self
     }
     
-    public func list(key: String) -> [String]? {
+    public func list(key: String) -> [StatementValueType]? {
         guard let results = Database.driver.execute(statement) else {
             return nil
         }
         
-        var items = [String]()
+        var items = [StatementValueType]()
         
         for result in results {
             for (k, v) in result {
@@ -141,7 +141,7 @@ public class Query<T: Model> {
     public func join(table: Model.Type, _ type: Join = .Inner) -> Self? {
         switch statement.clause {
         case .SELECT:
-            statement.joins?.append((table.entity, type))
+            statement.joins.append((table.entity, type))
             return self
         default:
             return nil
@@ -155,42 +155,42 @@ public class Query<T: Model> {
 
     // MARK: - Aggregate
 
-    public func count(key: String = "*") -> Int {
+    public func count(key: String = "*") -> Int? {
         guard let result = aggregate(.COUNT(key)) else {
-            return -1
+            return nil
         }
-        return Int(result["COUNT(\(key))"]!) ?? -1
+        return Int(result["COUNT(\(key))"]!.asString)
     }
 
-    public func avg(key: String = "*") -> Double {
+    public func avg(key: String = "*") -> Double? {
         guard let result = aggregate(.AVG(key)) else {
-            return -1
+            return nil
         }
-        return Double(result["AVG(\(key))"]!) ?? -1
+        return Double(result["AVG(\(key))"]!.asString)
     }
 
-    public func max(key: String = "*") -> Double {
+    public func max(key: String = "*") -> Double? {
         guard let result = aggregate(.MAX(key)) else {
-            return -1
+            return nil
         }
-        return Double(result["MAX(\(key))"]!) ?? -1
+        return Double(result["MAX(\(key))"]!.asString)
     }
 
-    public func min(key: String = "*") -> Double {
+    public func min(key: String = "*") -> Double? {
         guard let result = aggregate(.MIN(key)) else {
-            return -1
+            return nil
         }
-        return Double(result["MIN(\(key))"]!) ?? -1
+        return Double(result["MIN(\(key))"]!.asString)
     }
 
-    public func sum(key: String = "*") -> Double {
+    public func sum(key: String = "*") -> Double? {
         guard let result = aggregate(.SUM(key)) else {
-            return -1
+            return nil
         }
-        return Double(result["SUM(\(key))"]!) ?? -1
+        return Double(result["SUM(\(key))"]!.asString)
     }
     
-    private func aggregate(clause: Clause) -> [String: String]? {
+    private func aggregate(clause: Clause) -> [String: StatementValueType]? {
         statement.clause = clause
         guard let results = Database.driver.execute(statement) else {
             return nil

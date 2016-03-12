@@ -4,19 +4,19 @@ public class SQL: StatementGenerator {
     private var indexes: [Int] = []
     private var values: [StatementValueType] = []
     
-    public var fields: [String]?
-    public var entity: String
+    public var fields: [String] = []
+    public var entity: String = ""
     public var clause: Clause = .SELECT
-    public var operation: [(String, Operator, [StatementValueType])]? = []
-    public var andIndexes: [Int]? = []
-    public var orIndexes: [Int]? = []
-    public var limit: Int?
-    public var offset: Int?
-    public var orderBy: [(String, OrderBy)]? = []
-    public var groupBy: String?
-    public var joins: [(String, Join)]? = []
+    public var operation: [(String, Operator, [StatementValueType])] = []
+    public var andIndexes: [Int] = []
+    public var orIndexes: [Int] = []
+    public var limit: Int = 0
+    public var offset: Int = 0
+    public var orderBy: [(String, OrderBy)] = []
+    public var groupBy: String = ""
+    public var joins: [(String, Join)] = []
     public var distinct: Bool = false 
-    public var data: [String: StatementValueType]?
+    public var data: [String: StatementValueType] = [:]
     
     lazy public var parameterizedQuery: String = {
         return self.buildQuery()
@@ -90,30 +90,30 @@ public class SQL: StatementGenerator {
         query.append(buildClauseComponent())
         query.append("\(self.entity)")
         
-        if let joins = self.joins where joins.count > 0 {
+        if self.joins.count > 0 {
             query.append(buildJoinsComponent(joins))
         }
         
-        if let operation = self.operation where operation.count > 0 {
+        if self.operation.count > 0 {
             query.append("WHERE")
             query.append(buildOperationComponent(operation))
         }
         
-        if let orderBy = self.orderBy where orderBy.count > 0 {
+        if self.orderBy.count > 0 {
             query.append("ORDER BY")
             query.append(buildOrderByComponent(orderBy))
         }
         
-        if let groupBy = self.groupBy where !groupBy.isEmpty {
+        if !self.groupBy.isEmpty {
             query.append("GROUP BY")
             query.append(groupBy)
         }
         
-        if let limit = self.limit where limit > 0 {
+        if self.limit > 0 {
             query.append("LIMIT \(limit)")
         }
         
-        if let offset = self.offset where offset > 0 {
+        if self.offset > 0 {
             query.append("OFFSET \(offset)")
         }
         
@@ -148,7 +148,7 @@ public class SQL: StatementGenerator {
     private func buildClauseComponent() -> String {
         switch clause {
         case .SELECT:
-            if let fields = fields where fields.count > 0 {
+            if self.fields.count > 0 {
                 if distinct {
                     return "SELECT DISTINCT \(fields.joinWithSeparator(", ")) FROM"
                 }
@@ -178,7 +178,7 @@ public class SQL: StatementGenerator {
     }
     
     private func buildDataComponent() -> String {
-        if let data = self.data {
+        if !self.data.isEmpty {
             if case .INSERT = self.clause {
                 var columns: [String] = []
                 var values: [String] = []
@@ -213,9 +213,9 @@ public class SQL: StatementGenerator {
         var index = 0
         for (key, op, values) in ops {
             
-            if let andIndexes = andIndexes where andIndexes.contains(index) {
+            if self.andIndexes.contains(index) {
                 components.append("AND")
-            } else if let orIndexes = orIndexes where orIndexes.contains(index) {
+            } else if self.orIndexes.contains(index) {
                 components.append("OR")
             }
             
