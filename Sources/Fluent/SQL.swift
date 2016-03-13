@@ -1,5 +1,5 @@
 
-public class SQL: StatementGenerator {
+public class SQL: DSGenerator {
     private var tokens: [String] = []
     private var indexes: [Int] = []
     private var values: [StatementValue] = []

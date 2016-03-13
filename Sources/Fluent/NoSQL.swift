@@ -1,5 +1,5 @@
 
-public class NoSQL: StatementGenerator {
+public class NoSQL: DSGenerator {
     public var entity: String = ""
     public var clause: Clause = .SELECT
     public var operation: [(String, Operator, [StatementValue])] = []

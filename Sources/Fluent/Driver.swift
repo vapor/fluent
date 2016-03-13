@@ -1,4 +1,4 @@
 
 public protocol Driver {
-    func execute(statement: StatementGenerator) -> [[String: StatementValue]]?
+    func execute(dslContext: DSGenerator) -> [[String: StatementValue]]?
 }

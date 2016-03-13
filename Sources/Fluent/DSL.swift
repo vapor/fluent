@@ -1,5 +1,5 @@
 
-public protocol StatementGenerator {
+public protocol DSGenerator {
     var entity: String { get set }
     var clause: Clause { get set }
     var operation: [(String, Operator, [StatementValue])] { get set }

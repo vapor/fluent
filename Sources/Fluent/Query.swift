@@ -1,10 +1,9 @@
 
 public class Query<T: Model> {
-    private(set) var entity: String
-    private var statement: StatementGenerator = SQL() // default
+    private var context: DSGenerator = SQL() // default
     
     public init(entity: String? = nil) {
-        self.entity = entity ?? T.entity
+        context.entity = entity ?? T.entity
     }
     
     public func first(fields: String...) -> T? {
@@ -16,10 +15,10 @@ public class Query<T: Model> {
     }
     
     func run(fields: [String]? = nil) -> [T]? {
-        statement.fields = fields ?? []
+        context.fields = fields ?? []
         var models: [T] = []
         
-        guard let results = Database.driver.execute(statement) else {
+        guard let results = Database.driver.execute(context) else {
             return nil
         }
         
@@ -31,8 +30,8 @@ public class Query<T: Model> {
         return models
     }
     
-    public func using(statementGenerator: StatementGenerator) -> Self {
-        statement = statementGenerator
+    public func using(context: DSGenerator) -> Self {
+        self.context = context
         return self
     }
     
@@ -47,72 +46,72 @@ public class Query<T: Model> {
     }
     
     public func delete(model: T? = nil) {
-        statement.clause = .DELETE
+        context.clause = .DELETE
         
         if let id = model?.id {
-            statement.entity = T.entity
-            statement.operation.append( ("id", .Equals, [id]))
+            context.entity = T.entity
+            context.operation.append( ("id", .Equals, [id]))
         }
         
         run()
     }
     
     public func update(items: [String: StatementValue]) {
-        statement.clause = .UPDATE
-        statement.data = items
+        context.clause = .UPDATE
+        context.data = items
         run()
     }
 
     public func insert(items: [String: StatementValue]) {
-        statement.clause = .INSERT
-        statement.data = items
+        context.clause = .INSERT
+        context.data = items
         run()
     }
     
     public func with(key: String, _ op: Operator, _ values: StatementValue...) -> Self {
-        statement.operation.append((key, op, values))
+        context.operation.append((key, op, values))
         return self
     }
     
     public func _with(key: String, _ op: Operator, _ values: [StatementValue]) -> Self {
-        statement.operation.append((key, op, values))
+        context.operation.append((key, op, values))
         return self
     }
     
     public func andWith(key: String, _ op: Operator, _ values: StatementValue...) -> Self {
-        statement.operation.append((key, op, values))
-        statement.andIndexes.append(statement.operation.count - 1)
+        context.operation.append((key, op, values))
+        context.andIndexes.append(context.operation.count - 1)
         return self
     }
     
     public func orWith(key: String, _ op: Operator, _ values: StatementValue...) -> Self {
-        statement.operation.append((key, op, values))
-        statement.orIndexes.append(statement.operation.count - 1)
+        context.operation.append((key, op, values))
+        context.orIndexes.append(context.operation.count - 1)
         return self
     }
     
     public func orderBy(key: String, _ order: OrderBy) -> Self {
-        statement.orderBy.append((key, order))
+        context.orderBy.append((key, order))
         return self
     }
     
     public func groupBy(field: String) -> Self {
-        statement.groupBy = field
+        context.groupBy = field
         return self
     }
     
     public func limit(count: Int = 1) -> Self {
-        statement.limit = count
+        context.limit = count
         return self
     }
     
     public func offset(count: Int = 1) -> Self {
-        statement.offset = count
+        context.offset = count
         return self
     }
     
     public func list(key: String) -> [StatementValue]? {
-        guard let results = Database.driver.execute(statement) else {
+        guard let results = Database.driver.execute(context) else {
             return nil
         }
         
@@ -139,9 +138,9 @@ public class Query<T: Model> {
      INNER JOIN role on user_role.user_id = user.id
 */
     public func join(table: Model.Type, _ type: Join = .Inner) -> Self? {
-        switch statement.clause {
+        switch context.clause {
         case .SELECT:
-            statement.joins.append((table.entity, type))
+            context.joins.append((table.entity, type))
             return self
         default:
             return nil
@@ -149,7 +148,7 @@ public class Query<T: Model> {
     }
     
     public func distinct() -> Self {
-        statement.distinct = true
+        context.distinct = true
         return self
     }
 
@@ -191,8 +190,8 @@ public class Query<T: Model> {
     }
     
     private func aggregate(clause: Clause) -> [String: StatementValue]? {
-        statement.clause = clause
-        guard let results = Database.driver.execute(statement) else {
+        context.clause = clause
+        guard let results = Database.driver.execute(context) else {
             return nil
         }
         return results.first
