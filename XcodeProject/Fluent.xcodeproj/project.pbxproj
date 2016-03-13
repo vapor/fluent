@@ -21,6 +21,8 @@
 		1E04845B1C949B96001F8B1E /* Fluent.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E0484411C949B35001F8B1E /* Fluent.framework */; };
 		1E0484761C949EF2001F8B1E /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0484751C949EF2001F8B1E /* main.swift */; };
 		1E0484851C94CA7B001F8B1E /* libFluent.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E0484841C94CA7B001F8B1E /* libFluent.dylib */; };
+		1E04848A1C952363001F8B1E /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0484891C952363001F8B1E /* User.swift */; };
+		1E2CC5AC1C95452000AD9252 /* Address.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CC5AB1C95452000AD9252 /* Address.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,7 +66,9 @@
 		1E0484731C949EF2001F8B1E /* FluentDev */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = FluentDev; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E0484751C949EF2001F8B1E /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = main.swift; path = ../Sources/FluentDev/main.swift; sourceTree = SOURCE_ROOT; };
 		1E0484841C94CA7B001F8B1E /* libFluent.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libFluent.dylib; path = ../.build/debug/libFluent.dylib; sourceTree = "<group>"; };
+		1E0484891C952363001F8B1E /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = User.swift; path = ../Sources/FluentDev/User.swift; sourceTree = SOURCE_ROOT; };
 		1E04E1AB1C94971100A57ED0 /* Package.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Package.swift; path = ../Package.swift; sourceTree = SOURCE_ROOT; };
+		1E2CC5AB1C95452000AD9252 /* Address.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Address.swift; path = ../Sources/FluentDev/Address.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -133,6 +137,8 @@
 		1E04847D1C94A393001F8B1E /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				1E0484891C952363001F8B1E /* User.swift */,
+				1E2CC5AB1C95452000AD9252 /* Address.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -185,6 +191,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1E0484461C949B35001F8B1E /* Build configuration list for PBXNativeTarget "Fluent" */;
 			buildPhases = (
+				1E2CC5AA1C9543E100AD9252 /* Swift Build Dependencies */,
 				1E04843C1C949B35001F8B1E /* Sources */,
 				1E04843D1C949B35001F8B1E /* Frameworks */,
 				1E04843E1C949B35001F8B1E /* Headers */,
@@ -307,6 +314,20 @@
 			shellPath = /bin/sh;
 			shellScript = "/Library/Developer/Toolchains/swift-latest.xctoolchain/usr/bin/swift build --chdir \"$SRCROOT\"";
 		};
+		1E2CC5AA1C9543E100AD9252 /* Swift Build Dependencies */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Swift Build Dependencies";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/Library/Developer/Toolchains/swift-latest.xctoolchain/usr/bin/swift build --chdir \"$SRCROOT\"";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -338,6 +359,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E2CC5AC1C95452000AD9252 /* Address.swift in Sources */,
+				1E04848A1C952363001F8B1E /* User.swift in Sources */,
 				1E0484761C949EF2001F8B1E /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -426,6 +449,7 @@
 		1E0484781C949EF2001F8B1E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = "";
 				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../.build/debug";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/../.build/debug";
@@ -435,6 +459,7 @@
 		1E0484791C949EF2001F8B1E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = "";
 				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../.build/debug";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/../.build/debug";
@@ -533,6 +558,7 @@
 				1E0484481C949B35001F8B1E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		1E04845E1C949B96001F8B1E /* Build configuration list for PBXNativeTarget "Tests" */ = {
 			isa = XCConfigurationList;
@@ -541,6 +567,7 @@
 				1E0484601C949B96001F8B1E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		1E0484771C949EF2001F8B1E /* Build configuration list for PBXNativeTarget "FluentDev" */ = {
 			isa = XCConfigurationList;
@@ -549,6 +576,7 @@
 				1E0484791C949EF2001F8B1E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		1E8984A41C92694A00C82EA0 /* Build configuration list for PBXProject "Fluent" */ = {
 			isa = XCConfigurationList;

@@ -186,7 +186,7 @@ public class SQL: StatementGenerator {
                 for (key, val) in data {
                     columns.append("\(key)")
                     values.append("?")
-                    self.values.append(val ?? "NULL")
+                    self.values.append(val.asString)
                 }
                 
                 let columnsString = columns.joinWithSeparator(", ")
@@ -196,9 +196,8 @@ public class SQL: StatementGenerator {
                 var updates: [String] = []
                 
                 for (key, val) in data {
-                    let value: String = "?"
-                    self.values.append(val ?? "NULL")
-                    updates.append("\(key)='\(value)'")
+                    self.values.append(val.asString)
+                    updates.append("\(key)='?'")
                 }
                 
                 let updatesString = updates.joinWithSeparator(", ")
@@ -221,28 +220,28 @@ public class SQL: StatementGenerator {
             
             switch op {
             case .Equals:
-                self.values.append(values.first! ?? "NULL")
+                self.values.append(values.first?.asString ?? "NULL")
                 components.append("\(key)='?'")
             case .NotEquals:
-                self.values.append(values.first! ?? "NULL")
+                self.values.append(values.first?.asString ?? "NULL")
                 components.append("\(key)!='?'")
             case .GreaterThanOrEquals:
-                self.values.append(values.first! ?? "NULL")
+                self.values.append(values.first?.asString ?? "NULL")
                 components.append("\(key)>='?'")
             case .LessThanOrEquals:
-                self.values.append(values.first! ?? "NULL")
+                self.values.append(values.first?.asString ?? "NULL")
                 components.append("\(key)<='?'")
             case .GreaterThan:
-                self.values.append(values.first! ?? "NULL")
+                self.values.append(values.first?.asString ?? "NULL")
                 components.append("\(key)>'?'")
             case .LessThan:
-                self.values.append(values.first! ?? "NULL")
+                self.values.append(values.first?.asString ?? "NULL")
                 components.append("\(key)<'?'")
             case .In:
                 var str = "\(key) IN ("
                 var _values = [String]()
                 for value in values {
-                    self.values.append(value)
+                    self.values.append(value.asString)
                     _values.append("'?'")
                 }
                 str += _values.joinWithSeparator(", ")
@@ -251,7 +250,7 @@ public class SQL: StatementGenerator {
             case .NotIn:
                 var str = "\(key) NOT IN ("
                 for (idx, value) in values.enumerate() {
-                    self.values.append(value ?? "NULL")
+                    self.values.append(value.asString)
                     if idx == 0 {
                         str += "'?'"
                     } else {
@@ -261,8 +260,8 @@ public class SQL: StatementGenerator {
                 str += ")"
                 components.append(str)
             case .Between:
-                self.values.append(values.first ?? "NULL")
-                self.values.append(values.last ?? "NULL")
+                self.values.append(values.first?.asString ?? "NULL")
+                self.values.append(values.last?.asString ?? "NULL")
                 components.append("\(key) BETWEEN '?' AND '?'")
             }
             

@@ -14,7 +14,7 @@ let package = Package(
         ]
         ),
      Target(
-        name: "VaporDev",
+        name: "FluentDev",
         dependencies: [
           .Target(name: "Fluent")
         ]
