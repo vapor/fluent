@@ -3,8 +3,8 @@ public protocol Model {
     static var entity: String { get }
     var id: String? { get }
     
-    func serialize() -> [String: StatementValueType]
-    init(deserialize: [String: StatementValueType])
+    func serialize() -> [String: StatementValue]
+    init(deserialize: [String: StatementValue])
 }
 
 extension Model {    
@@ -51,11 +51,11 @@ extension Model {
 //        return nil
 //    }
     
-    public static func find(ids: StatementValueType...) -> [Self]? {
+    public static func find(ids: StatementValue...) -> [Self]? {
         return Query()._with("id", .In, ids).all()
     }
     
-    public static func findBy(key: String, _ op: Operator = .Equals, _ values: StatementValueType...) -> [Self]? {
+    public static func findBy(key: String, _ op: Operator = .Equals, _ values: StatementValue...) -> [Self]? {
         return Query()._with(key, .Equals, values).all()
     }
     

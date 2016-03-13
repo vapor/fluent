@@ -20,11 +20,11 @@ u.delete()
 
 // Insert
 
-Query<User>().insert(u.serialize()).run()
+Query<User>().insert(u.serialize())
 
 // Update
 
-Query<User>().update(u.serialize()).run()
+Query<User>().update(u.serialize())
 
 // Retrieve All Rows
 
@@ -58,7 +58,7 @@ Query<User>().join(Address.self, .Left)?.all("\(Address.entity).*")
 
 // Where
 
-Query<User>().with("date", .Between, "10/10/2000", "10/10/2005").andWith("name", .Equals, "John").orWith("phone", .NotEquals, "2234567890").groupBy("name").all()
+Query<User>().with("age", .Between, "10", "20").andWith("name", .Equals, "John").orWith("phone", .NotEquals, "2234567890").groupBy("name").all()
 
 // Group By
 

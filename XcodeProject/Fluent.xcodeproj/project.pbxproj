@@ -17,12 +17,15 @@
 		1E04844F1C949B61001F8B1E /* SQL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E046D3B1C949669009F925A /* SQL.swift */; };
 		1E0484501C949B61001F8B1E /* SQLTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E046D3C1C949669009F925A /* SQLTokenizer.swift */; };
 		1E0484511C949B61001F8B1E /* StatementGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E046D3D1C949669009F925A /* StatementGenerator.swift */; };
-		1E0484591C949B96001F8B1E /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0484581C949B96001F8B1E /* Tests.swift */; };
 		1E04845B1C949B96001F8B1E /* Fluent.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E0484411C949B35001F8B1E /* Fluent.framework */; };
 		1E0484761C949EF2001F8B1E /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0484751C949EF2001F8B1E /* main.swift */; };
 		1E0484851C94CA7B001F8B1E /* libFluent.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E0484841C94CA7B001F8B1E /* libFluent.dylib */; };
 		1E04848A1C952363001F8B1E /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0484891C952363001F8B1E /* User.swift */; };
 		1E2CC5AC1C95452000AD9252 /* Address.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CC5AB1C95452000AD9252 /* Address.swift */; };
+		1E2CC5AE1C95DE4C00AD9252 /* ModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CC5AD1C95DE4C00AD9252 /* ModelTests.swift */; };
+		1E2CC5B41C95DE8E00AD9252 /* QueryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CC5B31C95DE8E00AD9252 /* QueryTests.swift */; };
+		1E2CC5B61C95DE9E00AD9252 /* DriverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CC5B51C95DE9E00AD9252 /* DriverTests.swift */; };
+		1E2CC5B81C95E33300AD9252 /* MockSQLDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CC5B71C95E33300AD9252 /* MockSQLDriver.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,7 +64,6 @@
 		1E0484431C949B35001F8B1E /* Fluent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Fluent.h; sourceTree = "<group>"; };
 		1E0484451C949B35001F8B1E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1E0484561C949B96001F8B1E /* Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		1E0484581C949B96001F8B1E /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Tests.swift; path = ../../Sources/Tests/Tests.swift; sourceTree = "<group>"; };
 		1E04845A1C949B96001F8B1E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1E0484731C949EF2001F8B1E /* FluentDev */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = FluentDev; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E0484751C949EF2001F8B1E /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = main.swift; path = ../Sources/FluentDev/main.swift; sourceTree = SOURCE_ROOT; };
@@ -69,6 +71,10 @@
 		1E0484891C952363001F8B1E /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = User.swift; path = ../Sources/FluentDev/User.swift; sourceTree = SOURCE_ROOT; };
 		1E04E1AB1C94971100A57ED0 /* Package.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Package.swift; path = ../Package.swift; sourceTree = SOURCE_ROOT; };
 		1E2CC5AB1C95452000AD9252 /* Address.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Address.swift; path = ../Sources/FluentDev/Address.swift; sourceTree = SOURCE_ROOT; };
+		1E2CC5AD1C95DE4C00AD9252 /* ModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ModelTests.swift; path = ../../Sources/Tests/ModelTests.swift; sourceTree = "<group>"; };
+		1E2CC5B31C95DE8E00AD9252 /* QueryTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QueryTests.swift; path = ../../Sources/Tests/QueryTests.swift; sourceTree = "<group>"; };
+		1E2CC5B51C95DE9E00AD9252 /* DriverTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DriverTests.swift; path = ../../Sources/Tests/DriverTests.swift; sourceTree = "<group>"; };
+		1E2CC5B71C95E33300AD9252 /* MockSQLDriver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MockSQLDriver.swift; path = ../../Sources/Fluent/MockSQLDriver.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +118,7 @@
 				1E046D3D1C949669009F925A /* StatementGenerator.swift */,
 				1E0484431C949B35001F8B1E /* Fluent.h */,
 				1E0484451C949B35001F8B1E /* Info.plist */,
+				1E2CC5B71C95E33300AD9252 /* MockSQLDriver.swift */,
 			);
 			path = Fluent;
 			sourceTree = "<group>";
@@ -119,8 +126,10 @@
 		1E0484571C949B96001F8B1E /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				1E0484581C949B96001F8B1E /* Tests.swift */,
 				1E04845A1C949B96001F8B1E /* Info.plist */,
+				1E2CC5AD1C95DE4C00AD9252 /* ModelTests.swift */,
+				1E2CC5B31C95DE8E00AD9252 /* QueryTests.swift */,
+				1E2CC5B51C95DE9E00AD9252 /* DriverTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -340,6 +349,7 @@
 				1E0484491C949B61001F8B1E /* Database.swift in Sources */,
 				1E04844A1C949B61001F8B1E /* Driver.swift in Sources */,
 				1E04844D1C949B61001F8B1E /* PrintDriver.swift in Sources */,
+				1E2CC5B81C95E33300AD9252 /* MockSQLDriver.swift in Sources */,
 				1E04844E1C949B61001F8B1E /* Query.swift in Sources */,
 				1E04844F1C949B61001F8B1E /* SQL.swift in Sources */,
 				1E04844C1C949B61001F8B1E /* NoSQL.swift in Sources */,
@@ -351,7 +361,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E0484591C949B96001F8B1E /* Tests.swift in Sources */,
+				1E2CC5AE1C95DE4C00AD9252 /* ModelTests.swift in Sources */,
+				1E2CC5B41C95DE8E00AD9252 /* QueryTests.swift in Sources */,
+				1E2CC5B61C95DE9E00AD9252 /* DriverTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

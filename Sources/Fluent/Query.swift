@@ -1,11 +1,10 @@
 
 public class Query<T: Model> {
     private(set) var entity: String
-    private var statement: StatementGenerator
+    private var statement: StatementGenerator = SQL() // default
     
     public init(entity: String? = nil) {
         self.entity = entity ?? T.entity
-        statement = Database.driver.statementGenerator.init()
     }
     
     public func first(fields: String...) -> T? {
@@ -16,7 +15,7 @@ public class Query<T: Model> {
         return run(fields)
     }
     
-    public func run(fields: [String]? = nil) -> [T]? {
+    func run(fields: [String]? = nil) -> [T]? {
         statement.fields = fields ?? []
         var models: [T] = []
         
@@ -32,13 +31,18 @@ public class Query<T: Model> {
         return models
     }
     
+    public func using(statementGenerator: StatementGenerator) -> Self {
+        statement = statementGenerator
+        return self
+    }
+    
     public func save(model: T) {
         let data = model.serialize()
 
         if let id = model.id {
-            update(data).with("id", .Equals, id).run()
+            with("id", .Equals, id).update(data)
         } else {
-            insert(data).run()
+            insert(data)
         }
     }
     
@@ -53,35 +57,35 @@ public class Query<T: Model> {
         run()
     }
     
-    public func update(items: [String: StatementValueType]) -> Self {
+    public func update(items: [String: StatementValue]) {
         statement.clause = .UPDATE
         statement.data = items
-        return self
+        run()
     }
 
-    public func insert(items: [String: StatementValueType]) -> Self {
+    public func insert(items: [String: StatementValue]) {
         statement.clause = .INSERT
         statement.data = items
-        return self
+        run()
     }
     
-    public func with(key: String, _ op: Operator, _ values: StatementValueType...) -> Self {
+    public func with(key: String, _ op: Operator, _ values: StatementValue...) -> Self {
         statement.operation.append((key, op, values))
         return self
     }
     
-    public func _with(key: String, _ op: Operator, _ values: [StatementValueType]) -> Self {
+    public func _with(key: String, _ op: Operator, _ values: [StatementValue]) -> Self {
         statement.operation.append((key, op, values))
         return self
     }
     
-    public func andWith(key: String, _ op: Operator, _ values: StatementValueType...) -> Self {
+    public func andWith(key: String, _ op: Operator, _ values: StatementValue...) -> Self {
         statement.operation.append((key, op, values))
         statement.andIndexes.append(statement.operation.count - 1)
         return self
     }
     
-    public func orWith(key: String, _ op: Operator, _ values: StatementValueType...) -> Self {
+    public func orWith(key: String, _ op: Operator, _ values: StatementValue...) -> Self {
         statement.operation.append((key, op, values))
         statement.orIndexes.append(statement.operation.count - 1)
         return self
@@ -107,12 +111,12 @@ public class Query<T: Model> {
         return self
     }
     
-    public func list(key: String) -> [StatementValueType]? {
+    public func list(key: String) -> [StatementValue]? {
         guard let results = Database.driver.execute(statement) else {
             return nil
         }
         
-        var items = [StatementValueType]()
+        var items = [StatementValue]()
         
         for result in results {
             for (k, v) in result {
@@ -186,7 +190,7 @@ public class Query<T: Model> {
         return Double(result["SUM(\(key))"]!.asString)
     }
     
-    private func aggregate(clause: Clause) -> [String: StatementValueType]? {
+    private func aggregate(clause: Clause) -> [String: StatementValue]? {
         statement.clause = clause
         guard let results = Database.driver.execute(statement) else {
             return nil
