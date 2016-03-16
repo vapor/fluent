@@ -3,6 +3,7 @@ public class SQL: DSGenerator {
     private var tokens: [String] = []
     private var indexes: [Int] = []
     private var values: [StatementValue] = []
+    private var placeholderCount = 0
     
     public var fields: [String] = []
     public var entity: String = ""
@@ -17,6 +18,7 @@ public class SQL: DSGenerator {
     public var joins: [(String, Join)] = []
     public var distinct: Bool = false 
     public var data: [String: StatementValue] = [:]
+    public var placeholderFormat: String = "?" // append %c for counting
     
     lazy public var parameterizedQuery: String = {
         return self.buildQuery()
@@ -47,6 +49,17 @@ public class SQL: DSGenerator {
     
     public required init() {
         
+    }
+    
+    func addPlaceholder() -> String {
+        var m = ""
+        if placeholderFormat.hasSuffix("%c") {
+            m = "$\(placeholderCount)"
+            placeholderCount += 1
+        } else {
+            m = placeholderFormat
+        }
+        return m
     }
     
     private func tokenize(query: String) {
@@ -81,12 +94,14 @@ public class SQL: DSGenerator {
     private func buildQuery() -> String {
         var query: [String] = []
         self.values = []
-        
+        self.placeholderCount = 1
         query.append(buildClauseComponent())
         query.append("\(self.entity)")
         
         if self.joins.count > 0 {
             query.append(buildJoinsComponent(joins))
+        } else if !self.data.isEmpty {
+            query.append(buildDataComponent())
         }
         
         if self.operation.count > 0 {
@@ -173,31 +188,29 @@ public class SQL: DSGenerator {
     }
     
     private func buildDataComponent() -> String {
-        if !self.data.isEmpty {
-            if case .INSERT = self.clause {
-                var columns: [String] = []
-                var values: [String] = []
-                
-                for (key, val) in data {
-                    columns.append("\(key)")
-                    values.append("?")
-                    self.values.append(val.asString)
-                }
-                
-                let columnsString = columns.joinWithSeparator(", ")
-                let valuesString = values.joinWithSeparator(", ")
-                return "(\(columnsString)) VALUES (\(valuesString))"
-            } else if case .UPDATE = self.clause {
-                var updates: [String] = []
-                
-                for (key, val) in data {
-                    self.values.append(val.asString)
-                    updates.append("\(key)='?'")
-                }
-                
-                let updatesString = updates.joinWithSeparator(", ")
-                return "SET \(updatesString)"
+        if case .INSERT = self.clause {
+            var columns: [String] = []
+            var values: [String] = []
+            
+            for (key, val) in data {
+                columns.append("\(key)")
+                values.append("\(addPlaceholder())")
+                self.values.append(val.asString)
             }
+            
+            let columnsString = columns.joinWithSeparator(", ")
+            let valuesString = values.joinWithSeparator(", ")
+            return "(\(columnsString)) VALUES (\(valuesString))"
+        } else if case .UPDATE = self.clause {
+            var updates: [String] = []
+            
+            for (key, val) in data {
+                self.values.append(val.asString)
+                updates.append("\(key) = \(addPlaceholder())")
+            }
+            
+            let updatesString = updates.joinWithSeparator(", ")
+            return "SET \(updatesString)"
         }
         return ""
     }
@@ -216,28 +229,28 @@ public class SQL: DSGenerator {
             switch op {
             case .Equals:
                 self.values.append(values.first?.asString ?? "NULL")
-                components.append("\(key)='?'")
+                components.append("\(key) = \(addPlaceholder())")
             case .NotEquals:
                 self.values.append(values.first?.asString ?? "NULL")
-                components.append("\(key)!='?'")
+                components.append("\(key) != \(addPlaceholder())")
             case .GreaterThanOrEquals:
                 self.values.append(values.first?.asString ?? "NULL")
-                components.append("\(key)>='?'")
+                components.append("\(key) >= \(addPlaceholder())")
             case .LessThanOrEquals:
                 self.values.append(values.first?.asString ?? "NULL")
-                components.append("\(key)<='?'")
+                components.append("\(key) <= \(addPlaceholder())")
             case .GreaterThan:
                 self.values.append(values.first?.asString ?? "NULL")
-                components.append("\(key)>'?'")
+                components.append("\(key) > \(addPlaceholder())")
             case .LessThan:
                 self.values.append(values.first?.asString ?? "NULL")
-                components.append("\(key)<'?'")
+                components.append("\(key) < \(addPlaceholder())")
             case .In:
                 var str = "\(key) IN ("
                 var _values = [String]()
                 for value in values {
                     self.values.append(value.asString)
-                    _values.append("'?'")
+                    _values.append(addPlaceholder())
                 }
                 str += _values.joinWithSeparator(", ")
                 str += ")"
@@ -247,9 +260,9 @@ public class SQL: DSGenerator {
                 for (idx, value) in values.enumerate() {
                     self.values.append(value.asString)
                     if idx == 0 {
-                        str += "'?'"
+                        str += addPlaceholder()
                     } else {
-                        str += ", '?'"
+                        str += ", \(addPlaceholder())"
                     }
                 }
                 str += ")"
@@ -257,7 +270,7 @@ public class SQL: DSGenerator {
             case .Between:
                 self.values.append(values.first?.asString ?? "NULL")
                 self.values.append(values.last?.asString ?? "NULL")
-                components.append("\(key) BETWEEN '?' AND '?'")
+                components.append("\(key) BETWEEN \(addPlaceholder()) AND \(addPlaceholder())")
             }
             
             index += 1

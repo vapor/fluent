@@ -16,6 +16,7 @@ public protocol DSGenerator {
     var distinct: Bool { get set }
     var parameterizedQuery: String { get }
     var queryValues: [StatementValue] { get }
+    var placeholderFormat: String { get set }
     
     init()
 }
@@ -140,6 +141,12 @@ extension Double: StatementValue {
 extension String: StatementValue {
     public var asString: String {
         return self
+    }
+}
+
+extension Bool: StatementValue {
+    public var asString: String {
+        return self ? "true" : "false"
     }
 }
 

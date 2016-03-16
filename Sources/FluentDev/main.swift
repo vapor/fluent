@@ -1,5 +1,7 @@
 import Fluent
 
+//Database.driver = PostgreSQLDriver(connectionInfo: "host='localhost' port='5432' dbname='demodb0' user='princeugwuh' password=''")
+
 print("Hello, Fluent!")
 
 //: Model (Active Record)
@@ -8,9 +10,9 @@ User.first()
 User.last()
 
 User.take(50)
-User.find(1)
+User.findOne(1)
 User.find(1, 2, 4)
-User.findBy("name", .Equals, "Jane Doe")
+User.findWith("name", .Equals, "Jane Doe")
 
 let u = User(deserialize: [:])
 u.save()

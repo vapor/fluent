@@ -55,20 +55,24 @@ extension Model {
         return Query()._with("id", .In, ids).all()
     }
     
-    public static func findBy(key: String, _ op: Operator = .Equals, _ values: StatementValue...) -> [Self]? {
-        return Query()._with(key, .Equals, values).all()
+    public static func findOne(id: StatementValue) -> Self? {
+        return Query().with("id", .Equals, id).first()
+    }
+    
+    public static func findWith(key: String, _ op: Operator, _ values: StatementValue...) -> [Self]? {
+        return Query()._with(key, op, values).all()
     }
     
     public static func take(count: Int = 1) -> [Self]? {
         return Query().limit(count).all()
     }
     
-    public static func first(count: Int = 1) -> [Self]? {
-        return Query().orderBy("id", .Ascending).limit(count).all()
+    public static func first(count: Int = 1) -> Self? {
+        return Query().orderBy("id", .Ascending).limit(count).first()
     }
     
-    public static func last(count: Int = 1) -> [Self]? {
-        return Query().orderBy("id", .Descending).limit(count).all()
+    public static func last(count: Int = 1) -> Self? {
+        return Query().orderBy("id", .Descending).limit(count).first()
     }
     
 //    public static func list(key: String) -> [String]? {

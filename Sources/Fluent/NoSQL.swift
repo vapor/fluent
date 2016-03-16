@@ -13,7 +13,8 @@ public class NoSQL: DSGenerator {
     public var distinct: Bool = false
     public var joins: [(String, Join)] = []
     public var data: [String: StatementValue] = [:]
-    
+    public var placeholderFormat: String = ""
+
     lazy public var query: String = {
         return ""
     }()

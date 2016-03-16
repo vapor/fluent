@@ -214,6 +214,17 @@ public class SQLTokenizer {
                 let str = String(rawStatement[currentPos])
                 items.append(TokenValue(token: Token.Parameter, value: str))
                 currentPos = currentPos.successor()
+            case Character("$"):
+                let nextPos = currentPos.successor()
+                if rawStatement[nextPos] >= Character("0") && rawStatement[nextPos] <= Character("9") {
+                    let str = rawStatement[currentPos...nextPos]
+                    items.append(TokenValue(token: Token.Parameter, value: str))
+                } else {
+                    let str = String(rawStatement[currentPos])
+                    items.append(TokenValue(token: Token.Identifier, value: str))
+                }
+                
+                currentPos = nextPos.successor()
             case Character(";"):
                 let str = String(rawStatement[currentPos])
                 items.append(TokenValue(token: Token.Terminal, value: str))
