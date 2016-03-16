@@ -1,4 +1,7 @@
 Packages
 .build
-Sources/main.swift
+
 Database
+
+.DS_Store
+xcuserdata
