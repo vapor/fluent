@@ -1,13 +1,9 @@
 
 public class PrintDriver: Driver {
-    public var statementGenerator: StatementGenerator.Type {
-        return SQL.self
-    }
-    
-    public func execute(statement: StatementGenerator) -> [[String : StatementValueType]]? {
-        print("FULL QUERY: \(statement.query)")
-        print("PARAMETERIZED QUERY: \(statement.parameterizedQuery)")
-        print("QUERY VALUES: \(statement.queryValues)")
+    public func execute(dslContext: DSGenerator) -> [[String : StatementValue]]? {
+        print("FULL QUERY: \(dslContext.query)")
+        print("PARAMETERIZED QUERY: \(dslContext.parameterizedQuery)")
+        print("QUERY VALUES: \(dslContext.queryValues)")
         print()
         return nil
     }

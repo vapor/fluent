@@ -1,8 +1,8 @@
 
-public protocol StatementGenerator {
+public protocol DSGenerator {
     var entity: String { get set }
     var clause: Clause { get set }
-    var operation: [(String, Operator, [StatementValueType])] { get set }
+    var operation: [(String, Operator, [StatementValue])] { get set }
     var andIndexes: [Int] { get set }
     var orIndexes: [Int] { get set }
     var fields: [String] { get set }
@@ -11,11 +11,12 @@ public protocol StatementGenerator {
     var orderBy: [(String, OrderBy)] { get set }
     var groupBy: String { get set }
     var joins: [(String, Join)] { get set }
-    var data: [String: StatementValueType] { get set }
+    var data: [String: StatementValue] { get set }
     var query: String { get }
     var distinct: Bool { get set }
     var parameterizedQuery: String { get }
-    var queryValues: [StatementValueType] { get }
+    var queryValues: [StatementValue] { get }
+    var placeholderFormat: String { get set }
     
     init()
 }
@@ -59,97 +60,103 @@ public enum OrderBy {
 
 // MARK: - ValueType
 
-public protocol StatementValueType {
+public protocol StatementValue {
     var asString: String { get }
 }
 
 
-extension Int: StatementValueType {
+extension Int: StatementValue {
     public var asString: String {
         return "\(self)"
     }
 }
 
-extension Int64: StatementValueType {
+extension Int64: StatementValue {
     public var asString: String {
         return "\(self)"
     }
 }
 
-extension Int32: StatementValueType {
+extension Int32: StatementValue {
     public var asString: String {
         return "\(self)"
     }
 }
 
-extension Int16: StatementValueType {
+extension Int16: StatementValue {
     public var asString: String {
         return "\(self)"
     }
 }
 
-extension Int8: StatementValueType {
+extension Int8: StatementValue {
     public var asString: String {
         return "\(self)"
     }
 }
 
-extension UInt: StatementValueType {
+extension UInt: StatementValue {
     public var asString: String {
         return "\(self)"
     }
 }
 
-extension UInt64: StatementValueType {
+extension UInt64: StatementValue {
     public var asString: String {
         return "\(self)"
     }
 }
 
-extension UInt32: StatementValueType {
+extension UInt32: StatementValue {
     public var asString: String {
         return "\(self)"
     }
 }
 
-extension UInt16: StatementValueType {
+extension UInt16: StatementValue {
     public var asString: String {
         return "\(self)"
     }
 }
 
-extension UInt8: StatementValueType {
+extension UInt8: StatementValue {
     public var asString: String {
         return "\(self)"
     }
 }
 
 
-extension Float: StatementValueType {
+extension Float: StatementValue {
     public var asString: String {
         return "\(self)"
     }
 }
 
-extension Double: StatementValueType {
+extension Double: StatementValue {
     public var asString: String {
         return "\(self)"
     }
 }
 
-extension String: StatementValueType {
+extension String: StatementValue {
     public var asString: String {
         return self
     }
 }
 
-extension Dictionary: StatementValueType {
+extension Bool: StatementValue {
+    public var asString: String {
+        return self ? "true" : "false"
+    }
+}
+
+extension Dictionary: StatementValue {
     public var asString: String {
         return ""
     }
 }
 
-extension Array: StatementValueType {
+extension Array: StatementValue {
     public var asString: String {
         return ""
     }

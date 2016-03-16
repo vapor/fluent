@@ -2,23 +2,19 @@ import PackageDescription
 
 let package = Package(
     name: "Fluent",
-    dependencies: [
-                   
-    ],
-    exclude: [],
+    dependencies: [],
+    exclude: ["Sources/FluentDev", "Sources/Tests"],
     targets: [
      Target(
         name: "Fluent",
         dependencies: [
           .Target(name: "libc")
-        ]
-        ),
+        ]),
      Target(
         name: "FluentDev",
         dependencies: [
           .Target(name: "Fluent")
-        ]
-        )
+        ])
     ]
 )
 

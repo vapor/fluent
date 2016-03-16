@@ -3,8 +3,8 @@ public protocol Model {
     static var entity: String { get }
     var id: String? { get }
     
-    func serialize() -> [String: StatementValueType]
-    init(deserialize: [String: StatementValueType])
+    func serialize() -> [String: StatementValue]
+    init(deserialize: [String: StatementValue])
 }
 
 extension Model {    
@@ -51,24 +51,28 @@ extension Model {
 //        return nil
 //    }
     
-    public static func find(ids: StatementValueType...) -> [Self]? {
+    public static func find(ids: StatementValue...) -> [Self]? {
         return Query()._with("id", .In, ids).all()
     }
     
-    public static func findBy(key: String, _ op: Operator = .Equals, _ values: StatementValueType...) -> [Self]? {
-        return Query()._with(key, .Equals, values).all()
+    public static func findOne(id: StatementValue) -> Self? {
+        return Query().with("id", .Equals, id).first()
+    }
+    
+    public static func findWith(key: String, _ op: Operator, _ values: StatementValue...) -> [Self]? {
+        return Query()._with(key, op, values).all()
     }
     
     public static func take(count: Int = 1) -> [Self]? {
         return Query().limit(count).all()
     }
     
-    public static func first(count: Int = 1) -> [Self]? {
-        return Query().orderBy("id", .Ascending).limit(count).all()
+    public static func first(count: Int = 1) -> Self? {
+        return Query().orderBy("id", .Ascending).limit(count).first()
     }
     
-    public static func last(count: Int = 1) -> [Self]? {
-        return Query().orderBy("id", .Descending).limit(count).all()
+    public static func last(count: Int = 1) -> Self? {
+        return Query().orderBy("id", .Descending).limit(count).first()
     }
     
 //    public static func list(key: String) -> [String]? {
