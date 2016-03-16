@@ -22,6 +22,7 @@
 		1E04848A1C952363001F8B1E /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0484891C952363001F8B1E /* User.swift */; };
 		1E2CC5AC1C95452000AD9252 /* Address.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CC5AB1C95452000AD9252 /* Address.swift */; };
 		1E2CC5AE1C95DE4C00AD9252 /* FluentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CC5AD1C95DE4C00AD9252 /* FluentTests.swift */; };
+		1EC2BB711C99EBF600E0EFAB /* libFluent.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EC2BB701C99EBF600E0EFAB /* libFluent.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,6 +68,7 @@
 		1E04E1AB1C94971100A57ED0 /* Package.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Package.swift; path = ../Package.swift; sourceTree = SOURCE_ROOT; };
 		1E2CC5AB1C95452000AD9252 /* Address.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Address.swift; path = ../Sources/FluentDev/Address.swift; sourceTree = SOURCE_ROOT; };
 		1E2CC5AD1C95DE4C00AD9252 /* FluentTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FluentTests.swift; path = ../../Sources/Tests/FluentTests.swift; sourceTree = "<group>"; };
+		1EC2BB701C99EBF600E0EFAB /* libFluent.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libFluent.dylib; path = ../.build/debug/libFluent.dylib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,6 +91,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1EC2BB711C99EBF600E0EFAB /* libFluent.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -143,6 +146,7 @@
 		1E0484861C94CA80001F8B1E /* Dependencies */ = {
 			isa = PBXGroup;
 			children = (
+				1EC2BB701C99EBF600E0EFAB /* libFluent.dylib */,
 			);
 			name = Dependencies;
 			sourceTree = "<group>";
@@ -503,6 +507,7 @@
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				SWIFT_INCLUDE_PATHS = "$(PROJECT_DIR)/.build/debug";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -541,6 +546,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
+				SWIFT_INCLUDE_PATHS = "$(PROJECT_DIR)/.build/debug";
 			};
 			name = Release;
 		};
