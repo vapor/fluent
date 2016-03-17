@@ -6,8 +6,6 @@
 //  Copyright © 2016 Qutheory. All rights reserved.
 //
 
-import Foundation
-
 public protocol Value {
     var string: String { get }
 }

@@ -1,4 +1,4 @@
 
 public protocol Driver {
-    func execute(dslContext: DSGenerator) -> [[String: Value]]?
+    func execute<T: Model>(query: Query<T>) throws -> [[String: Value]]
 }

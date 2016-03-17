@@ -18,7 +18,7 @@ public class Query<T: Model> {
         context.fields = fields ?? []
         var models: [T] = []
         
-        guard let results = Database.driver.execute(context) else {
+        guard let results = try? Database.driver.execute(self) else {
             return nil
         }
         
@@ -111,7 +111,7 @@ public class Query<T: Model> {
     }
     
     public func list(key: String) -> [Value]? {
-        guard let results = Database.driver.execute(context) else {
+        guard let results = try? Database.driver.execute(self) else {
             return nil
         }
         
@@ -191,7 +191,7 @@ public class Query<T: Model> {
     
     private func aggregate(clause: Clause) -> [String: Value]? {
         context.clause = clause
-        guard let results = Database.driver.execute(context) else {
+        guard let results = try? Database.driver.execute(self) else {
             return nil
         }
         return results.first
