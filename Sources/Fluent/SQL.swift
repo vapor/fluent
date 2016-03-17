@@ -9,6 +9,17 @@ extension Filter.Scope {
     }
 }
 
+extension Filter.Operation {
+    var sql: String {
+        switch self {
+        case .And:
+            return "AND"
+        case .Or:
+            return "OR"
+        }
+    }
+}
+
 extension Filter.Comparison {
     var sql: String {
         switch self {
@@ -39,25 +50,14 @@ public class SQL<T: Model>: Helper<T> {
         var clause: [String] = []
         
         for filter in query.filters {
-            switch filter {
-            case .Compare(let field, let comparison, let value):
-                self.values.append(value.string)
-                clause.append("\(field) \(comparison.sql) \(nextPlaceholder)")
-            case .Subset(let field, let scope, let values):
-                let valueStrings = values.map { value in
-                    self.values.append(value.string)
-                    return nextPlaceholder
-                }.joinWithSeparator(", ")
-                
-                clause.append("\(field) \(scope.sql) (\(valueStrings))")
-            }
+            clause.append(filterOutput(filter))
         }
         
         if clause.count == 0 {
             return nil
-        } else {
-            return clause.joinWithSeparator(", ")
         }
+        
+        return clause.joinWithSeparator(" ")
     }
 
     public var statement: String {
@@ -73,6 +73,24 @@ public class SQL<T: Model>: Helper<T> {
     public override init(query: Query<T>) {
         values = []
         super.init(query: query)
+    }
+    
+    func filterOutput(filter: Filter) -> String {
+        switch filter {
+        case .Compare(let field, let comparison, let value):
+            self.values.append(value.string)
+            return "\(field) \(comparison.sql) \(nextPlaceholder)"
+        case .Subset(let field, let scope, let values):
+            let valueStrings = values.map { value in
+                self.values.append(value.string)
+                return nextPlaceholder
+                }.joinWithSeparator(", ")
+            
+            return "\(field) \(scope.sql) (\(valueStrings))"
+        case .Group(let op, let filters):
+            let filterString = filters.map { return "\(op.sql) \(filterOutput($0))" }
+            return filterString.joinWithSeparator(" ")
+        }
     }
 }
 

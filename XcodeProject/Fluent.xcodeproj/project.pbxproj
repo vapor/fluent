@@ -22,6 +22,7 @@
 		1E2CC5AE1C95DE4C00AD9252 /* FluentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CC5AD1C95DE4C00AD9252 /* FluentTests.swift */; };
 		1EC2BB711C99EBF600E0EFAB /* libFluent.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EC2BB701C99EBF600E0EFAB /* libFluent.dylib */; };
 		1ED11F981C9A5A22001F7FB6 /* Offset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ED11F971C9A5A22001F7FB6 /* Offset.swift */; };
+		1ED11F9A1C9B2E55001F7FB6 /* Operation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ED11F991C9B2E55001F7FB6 /* Operation.swift */; };
 		C392755D1C9A1FF400AE780B /* Value.swift in Sources */ = {isa = PBXBuildFile; fileRef = C392755C1C9A1FF400AE780B /* Value.swift */; };
 		C3AAA1121C9A406A006C40C3 /* Comparison.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3AAA1111C9A406A006C40C3 /* Comparison.swift */; };
 		C3AAA1141C9A4076006C40C3 /* Scope.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3AAA1131C9A4076006C40C3 /* Scope.swift */; };
@@ -75,6 +76,7 @@
 		1E2CC5AD1C95DE4C00AD9252 /* FluentTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FluentTests.swift; path = ../../Sources/Tests/FluentTests.swift; sourceTree = "<group>"; };
 		1EC2BB701C99EBF600E0EFAB /* libFluent.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libFluent.dylib; path = ../.build/debug/libFluent.dylib; sourceTree = "<group>"; };
 		1ED11F971C9A5A22001F7FB6 /* Offset.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Offset.swift; path = ../../Sources/Fluent/Offset.swift; sourceTree = "<group>"; };
+		1ED11F991C9B2E55001F7FB6 /* Operation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Operation.swift; path = ../../Sources/Fluent/Operation.swift; sourceTree = "<group>"; };
 		C39275591C9A1B0D00AE780B /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		C392755C1C9A1FF400AE780B /* Value.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Value.swift; path = ../../Sources/Fluent/Value.swift; sourceTree = "<group>"; };
 		C3AAA1111C9A406A006C40C3 /* Comparison.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Comparison.swift; path = ../../Sources/Fluent/Comparison.swift; sourceTree = "<group>"; };
@@ -194,6 +196,7 @@
 				C3AAA1131C9A4076006C40C3 /* Scope.swift */,
 				C3AAA11F1C9A4186006C40C3 /* Join.swift */,
 				1ED11F971C9A5A22001F7FB6 /* Offset.swift */,
+				1ED11F991C9B2E55001F7FB6 /* Operation.swift */,
 			);
 			name = Descriptors;
 			sourceTree = "<group>";
@@ -391,6 +394,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C3AAA1141C9A4076006C40C3 /* Scope.swift in Sources */,
+				1ED11F9A1C9B2E55001F7FB6 /* Operation.swift in Sources */,
 				C3AAA1181C9A40C7006C40C3 /* Limit.swift in Sources */,
 				C3AAA1221C9A4428006C40C3 /* Helper.swift in Sources */,
 				1E04844B1C949B61001F8B1E /* Model.swift in Sources */,

@@ -12,7 +12,7 @@ public enum Action {
 
 public class Query<T: Model> {
 
-    typealias FilterHandler = (query: Query) -> Query
+    public typealias FilterHandler = (query: Query) -> Query
     
     var entity: String {
         return T.entity
@@ -154,12 +154,18 @@ public class Query<T: Model> {
         return self
     }
     
-    func or(handler: FilterHandler) {
-        handler(query: self)
+    public func or(handler: FilterHandler) -> Self {
+        let q = handler(query: Query())
+        let filter = Filter.Group(.Or, q.filters)
+        filters.append(filter)
+        return self
     }
 
-    func and(handler: FilterHandler) {
-        handler(query: self)
+    public func and(handler: FilterHandler) -> Self {
+        let q = handler(query: Query())
+        let filter = Filter.Group(.And, q.filters)
+        filters.append(filter)
+        return self
     }
     
     public func join<T: Model>(type: T.Type, _ operation: Union.Operation = .Default) -> Self? {
