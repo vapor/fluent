@@ -29,16 +29,20 @@ public class SQL<T: Model>: Helper<T> {
         return query.entity
     }
     
+    public var values: [String]
+    
     var whereClause: String? {
         var clause: [String] = []
         
         for filter in query.filters {
             switch filter {
             case .Compare(let field, let comparison, let value):
-                clause.append("\(field) \(comparison.sql) \(value.string)")
+                self.values.append(value.string)
+                clause.append("\(field) \(comparison.sql) ?")
             case .Subset(let field, let scope, let values):
                 let valueStrings = values.map { value in
-                    return value.string
+                    self.values.append(value.string)
+                    return "?"
                 }.joinWithSeparator(", ")
                 
                 clause.append("\(field) \(scope.sql) (\(valueStrings))")
@@ -63,6 +67,7 @@ public class SQL<T: Model>: Helper<T> {
     }
     
     public override init(query: Query<T>) {
+        values = []
         super.init(query: query)
     }
 }
