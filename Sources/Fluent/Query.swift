@@ -1,5 +1,5 @@
 public enum Action {
-    case Select
+    case Select(Bool) // distinct
     case Delete
     case Insert
     case Update
@@ -12,6 +12,7 @@ public enum Action {
 
 public class Query<T: Model> {
 
+    typealias FilterHandler = (query: Self) -> Self
     
     var entity: String {
         return T.entity
@@ -20,7 +21,9 @@ public class Query<T: Model> {
     var fields: [String]
     
     var limit: Limit?
+    //var offset: Offset?
     var action: Action
+    var items: [String: Value]?
     
     public var filters: [Filter]
     var sorts: [Sort]
@@ -31,11 +34,11 @@ public class Query<T: Model> {
         filters = []
         sorts = []
         unions = []
-        action = .Select
+        action = .Select(false)
     }
     
     public func first(fields: String...) -> T? {
-        action = .Select
+        action = .Select(false)
         limit = Limit(count: 1)
         
         return run(fields)?.first
@@ -88,13 +91,13 @@ public class Query<T: Model> {
     
     public func update(items: [String: Value]) {
         action = .Update
-        //context.data = items
+        items = items
         run()
     }
 
     public func insert(items: [String: Value]) {
         action = .Insert
-        //context.data = items
+        items = items
         run()
     }
     
@@ -129,7 +132,7 @@ public class Query<T: Model> {
     }
     
     public func offset(count: Int = 1) -> Self {
-        //context.offset = count
+        //offset = Offset(count: count)
         return self
     }
     
@@ -155,6 +158,14 @@ public class Query<T: Model> {
         return self
     }
     
+    func or(handler: FilterHandler) {
+        handler(self)
+    }
+
+    func and(handler: FilterHandler) {
+        handler(self)
+    }
+    
     public func join<T: Model>(type: T.Type, _ operation: Union.Operation = .Default) -> Self? {
         let union = Union(entity: type.entity, operation: operation)
         unions.append(union)
@@ -163,7 +174,7 @@ public class Query<T: Model> {
     }
     
     public func distinct() -> Self {
-        //context.distinct = true
+        action = .Select(true)
         return self
     }
 

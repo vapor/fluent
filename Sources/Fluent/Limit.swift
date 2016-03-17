@@ -1,9 +1,9 @@
-struct Limit {
+public struct Limit {
     var count: Int
 }
 
 extension Limit: CustomStringConvertible {
-    var description: String {
+    public var description: String {
         return "Limit \(count)"   
     }
 }

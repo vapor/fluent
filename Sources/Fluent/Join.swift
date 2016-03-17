@@ -1,6 +1,6 @@
 public struct Union {
     public enum Operation {
-        case Default, Inner, Left
+        case Default, Right, Left
     }
     
     var entity: String
