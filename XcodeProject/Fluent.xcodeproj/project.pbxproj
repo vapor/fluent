@@ -74,7 +74,7 @@
 		1E2CC5AB1C95452000AD9252 /* Address.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Address.swift; path = ../Sources/FluentDev/Address.swift; sourceTree = SOURCE_ROOT; };
 		1E2CC5AD1C95DE4C00AD9252 /* FluentTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FluentTests.swift; path = ../../Sources/Tests/FluentTests.swift; sourceTree = "<group>"; };
 		1EC2BB701C99EBF600E0EFAB /* libFluent.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libFluent.dylib; path = ../.build/debug/libFluent.dylib; sourceTree = "<group>"; };
-		1ED11F971C9A5A22001F7FB6 /* Offset.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Offset.swift; sourceTree = "<group>"; };
+		1ED11F971C9A5A22001F7FB6 /* Offset.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Offset.swift; path = ../../Sources/Fluent/Offset.swift; sourceTree = "<group>"; };
 		C39275591C9A1B0D00AE780B /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		C392755C1C9A1FF400AE780B /* Value.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Value.swift; path = ../../Sources/Fluent/Value.swift; sourceTree = "<group>"; };
 		C3AAA1111C9A406A006C40C3 /* Comparison.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Comparison.swift; path = ../../Sources/Fluent/Comparison.swift; sourceTree = "<group>"; };

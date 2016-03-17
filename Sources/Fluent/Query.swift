@@ -12,7 +12,7 @@ public enum Action {
 
 public class Query<T: Model> {
 
-    typealias FilterHandler = (query: Self) -> Self
+    typealias FilterHandler = (query: Query) -> Query
     
     var entity: String {
         return T.entity
@@ -21,7 +21,7 @@ public class Query<T: Model> {
     var fields: [String]
     
     var limit: Limit?
-    //var offset: Offset?
+    var offset: Offset?
     var action: Action
     var items: [String: Value]?
     
@@ -68,7 +68,7 @@ public class Query<T: Model> {
     }
     
     
-    public func save(model: T) {
+    public func save(model: T) -> T {
         let data = model.serialize()
 
         if let id = model.id {
@@ -76,6 +76,7 @@ public class Query<T: Model> {
         } else {
             insert(data)
         }
+        return model
     }
     
     public func delete(model: T? = nil) {
@@ -91,13 +92,13 @@ public class Query<T: Model> {
     
     public func update(items: [String: Value]) {
         action = .Update
-        items = items
+        self.items = items
         run()
     }
 
     public func insert(items: [String: Value]) {
         action = .Insert
-        items = items
+        self.items = items
         run()
     }
     
@@ -121,18 +122,13 @@ public class Query<T: Model> {
         return self
     }
     
-    public func groupBy(field: String) -> Self {
-        //context.groupBy = field
-        return self
-    }
-    
     public func limit(count: Int = 1) -> Self {
         limit = Limit(count: count)
         return self
     }
     
     public func offset(count: Int = 1) -> Self {
-        //offset = Offset(count: count)
+        offset = Offset(count: count)
         return self
     }
     
@@ -159,11 +155,11 @@ public class Query<T: Model> {
     }
     
     func or(handler: FilterHandler) {
-        handler(self)
+        handler(query: self)
     }
 
     func and(handler: FilterHandler) {
-        handler(self)
+        handler(query: self)
     }
     
     public func join<T: Model>(type: T.Type, _ operation: Union.Operation = .Default) -> Self? {
