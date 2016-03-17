@@ -13,7 +13,7 @@ class User: Model {
         return [:]
     }
     
-    required init(deserialize: [String: Value]) {
+    required init(serialized: [String: Value]) {
         
     }
 }

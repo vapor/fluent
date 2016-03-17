@@ -10,11 +10,12 @@ User.first()
 User.last()
 
 User.take(50)
-User.findOne(1)
+User.find(1)
 User.find(1, 2, 4)
-User.findWith("name", .Equals, "Jane Doe")
+User.find("name", .Equals, "Jane Doe")
+User.find("name", in: ["Tanner", "Jane"])
 
-let u = User(deserialize: [:])
+let u = User(serialized: [:])
 u.save()
 u.delete()
 
@@ -68,7 +69,7 @@ Query<User>().with("name", .Equals, "John").groupBy("name").all()
 
 // Order By
 
-Query<User>().with("name", .Equals, "John").orderBy("name", .Ascending).all()
+Query<User>().with("name", .Equals, "John").sort("name", .Ascending).all()
 
 // Limit And Offset
 

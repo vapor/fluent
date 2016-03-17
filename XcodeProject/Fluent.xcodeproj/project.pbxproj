@@ -15,8 +15,6 @@
 		1E04844D1C949B61001F8B1E /* PrintDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E046D391C949669009F925A /* PrintDriver.swift */; };
 		1E04844E1C949B61001F8B1E /* Query.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E046D3A1C949669009F925A /* Query.swift */; };
 		1E04844F1C949B61001F8B1E /* SQL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E046D3B1C949669009F925A /* SQL.swift */; };
-		1E0484501C949B61001F8B1E /* SQLTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E046D3C1C949669009F925A /* SQLTokenizer.swift */; };
-		1E0484511C949B61001F8B1E /* DSGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E046D3D1C949669009F925A /* DSGenerator.swift */; };
 		1E04845B1C949B96001F8B1E /* Fluent.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E0484411C949B35001F8B1E /* Fluent.framework */; };
 		1E0484761C949EF2001F8B1E /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0484751C949EF2001F8B1E /* main.swift */; };
 		1E04848A1C952363001F8B1E /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0484891C952363001F8B1E /* User.swift */; };
@@ -24,6 +22,11 @@
 		1E2CC5AE1C95DE4C00AD9252 /* FluentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CC5AD1C95DE4C00AD9252 /* FluentTests.swift */; };
 		1EC2BB711C99EBF600E0EFAB /* libFluent.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EC2BB701C99EBF600E0EFAB /* libFluent.dylib */; };
 		C392755D1C9A1FF400AE780B /* Value.swift in Sources */ = {isa = PBXBuildFile; fileRef = C392755C1C9A1FF400AE780B /* Value.swift */; };
+		C3AAA1121C9A406A006C40C3 /* ComparisonFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3AAA1111C9A406A006C40C3 /* ComparisonFilter.swift */; };
+		C3AAA1141C9A4076006C40C3 /* SubsetFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3AAA1131C9A4076006C40C3 /* SubsetFilter.swift */; };
+		C3AAA1181C9A40C7006C40C3 /* Limit.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3AAA1171C9A40C7006C40C3 /* Limit.swift */; };
+		C3AAA11A1C9A40FB006C40C3 /* Sort.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3AAA1191C9A40FB006C40C3 /* Sort.swift */; };
+		C3C7EFB31C9A36D800C5D7D3 /* Filter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3C7EFB21C9A36D800C5D7D3 /* Filter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,8 +59,6 @@
 		1E046D391C949669009F925A /* PrintDriver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PrintDriver.swift; path = ../../Sources/Fluent/PrintDriver.swift; sourceTree = "<group>"; };
 		1E046D3A1C949669009F925A /* Query.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Query.swift; path = ../../Sources/Fluent/Query.swift; sourceTree = "<group>"; };
 		1E046D3B1C949669009F925A /* SQL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SQL.swift; path = ../../Sources/Fluent/SQL.swift; sourceTree = "<group>"; };
-		1E046D3C1C949669009F925A /* SQLTokenizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SQLTokenizer.swift; path = ../../Sources/Fluent/SQLTokenizer.swift; sourceTree = "<group>"; };
-		1E046D3D1C949669009F925A /* DSGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DSGenerator.swift; path = ../../Sources/Fluent/DSGenerator.swift; sourceTree = "<group>"; };
 		1E0484411C949B35001F8B1E /* Fluent.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Fluent.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E0484431C949B35001F8B1E /* Fluent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Fluent.h; sourceTree = "<group>"; };
 		1E0484451C949B35001F8B1E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -72,6 +73,11 @@
 		1EC2BB701C99EBF600E0EFAB /* libFluent.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libFluent.dylib; path = ../.build/debug/libFluent.dylib; sourceTree = "<group>"; };
 		C39275591C9A1B0D00AE780B /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		C392755C1C9A1FF400AE780B /* Value.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Value.swift; path = ../../Sources/Fluent/Value.swift; sourceTree = "<group>"; };
+		C3AAA1111C9A406A006C40C3 /* ComparisonFilter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ComparisonFilter.swift; path = ../../Sources/Fluent/ComparisonFilter.swift; sourceTree = "<group>"; };
+		C3AAA1131C9A4076006C40C3 /* SubsetFilter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SubsetFilter.swift; path = ../../Sources/Fluent/SubsetFilter.swift; sourceTree = "<group>"; };
+		C3AAA1171C9A40C7006C40C3 /* Limit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Limit.swift; path = ../../Sources/Fluent/Limit.swift; sourceTree = "<group>"; };
+		C3AAA1191C9A40FB006C40C3 /* Sort.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Sort.swift; path = ../../Sources/Fluent/Sort.swift; sourceTree = "<group>"; };
+		C3C7EFB21C9A36D800C5D7D3 /* Filter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Filter.swift; path = ../../Sources/Fluent/Filter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,16 +110,10 @@
 		1E0484421C949B35001F8B1E /* Fluent */ = {
 			isa = PBXGroup;
 			children = (
-				1E046D351C949669009F925A /* Database.swift */,
-				1E046D361C949669009F925A /* Driver.swift */,
-				1E046D371C949669009F925A /* Model.swift */,
-				1E046D381C949669009F925A /* NoSQL.swift */,
-				1E046D391C949669009F925A /* PrintDriver.swift */,
-				1E046D3A1C949669009F925A /* Query.swift */,
-				1E046D3B1C949669009F925A /* SQL.swift */,
-				1E046D3C1C949669009F925A /* SQLTokenizer.swift */,
-				1E046D3D1C949669009F925A /* DSGenerator.swift */,
-				C392755C1C9A1FF400AE780B /* Value.swift */,
+				C3AAA11C1C9A412E006C40C3 /* Core */,
+				C3AAA11E1C9A4143006C40C3 /* Example */,
+				C3AAA11B1C9A411F006C40C3 /* Filters */,
+				C3AAA11D1C9A4134006C40C3 /* Helpers */,
 				1E0484431C949B35001F8B1E /* Fluent.h */,
 				1E0484451C949B35001F8B1E /* Info.plist */,
 			);
@@ -176,6 +176,47 @@
 				1E0484731C949EF2001F8B1E /* FluentDev */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		C3AAA11B1C9A411F006C40C3 /* Filters */ = {
+			isa = PBXGroup;
+			children = (
+				C3C7EFB21C9A36D800C5D7D3 /* Filter.swift */,
+				C3AAA1171C9A40C7006C40C3 /* Limit.swift */,
+				C3AAA1191C9A40FB006C40C3 /* Sort.swift */,
+				C3AAA1111C9A406A006C40C3 /* ComparisonFilter.swift */,
+				C3AAA1131C9A4076006C40C3 /* SubsetFilter.swift */,
+			);
+			name = Filters;
+			sourceTree = "<group>";
+		};
+		C3AAA11C1C9A412E006C40C3 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				1E046D351C949669009F925A /* Database.swift */,
+				1E046D361C949669009F925A /* Driver.swift */,
+				1E046D371C949669009F925A /* Model.swift */,
+				1E046D3A1C949669009F925A /* Query.swift */,
+				C392755C1C9A1FF400AE780B /* Value.swift */,
+			);
+			name = Core;
+			sourceTree = "<group>";
+		};
+		C3AAA11D1C9A4134006C40C3 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				1E046D381C949669009F925A /* NoSQL.swift */,
+				1E046D3B1C949669009F925A /* SQL.swift */,
+			);
+			name = Helpers;
+			sourceTree = "<group>";
+		};
+		C3AAA11E1C9A4143006C40C3 /* Example */ = {
+			isa = PBXGroup;
+			children = (
+				1E046D391C949669009F925A /* PrintDriver.swift */,
+			);
+			name = Example;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -340,16 +381,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E0484501C949B61001F8B1E /* SQLTokenizer.swift in Sources */,
+				C3AAA1141C9A4076006C40C3 /* SubsetFilter.swift in Sources */,
+				C3AAA1181C9A40C7006C40C3 /* Limit.swift in Sources */,
 				1E04844B1C949B61001F8B1E /* Model.swift in Sources */,
+				C3C7EFB31C9A36D800C5D7D3 /* Filter.swift in Sources */,
 				C392755D1C9A1FF400AE780B /* Value.swift in Sources */,
 				1E0484491C949B61001F8B1E /* Database.swift in Sources */,
 				1E04844A1C949B61001F8B1E /* Driver.swift in Sources */,
 				1E04844D1C949B61001F8B1E /* PrintDriver.swift in Sources */,
+				C3AAA1121C9A406A006C40C3 /* ComparisonFilter.swift in Sources */,
 				1E04844E1C949B61001F8B1E /* Query.swift in Sources */,
 				1E04844F1C949B61001F8B1E /* SQL.swift in Sources */,
 				1E04844C1C949B61001F8B1E /* NoSQL.swift in Sources */,
-				1E0484511C949B61001F8B1E /* DSGenerator.swift in Sources */,
+				C3AAA11A1C9A40FB006C40C3 /* Sort.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

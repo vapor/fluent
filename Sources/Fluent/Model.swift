@@ -4,7 +4,7 @@ public protocol Model {
     var id: String? { get }
     
     func serialize() -> [String: Value]
-    init(deserialize: [String: Value])
+    init(serialized: [String: Value])
 }
 
 extension Model {    
@@ -52,15 +52,19 @@ extension Model {
 //    }
     
     public static func find(ids: Value...) -> [Self]? {
-        return Query()._with("id", .In, ids).all()
+        return Query().filter("id", in: ids).all()
     }
     
-    public static func findOne(id: Value) -> Self? {
-        return Query().with("id", .Equals, id).first()
+    public static func find(id: Value) -> Self? {
+        return Query().filter("id", .Equals, id).first()
     }
     
-    public static func findWith(key: String, _ op: Operator, _ values: Value...) -> [Self]? {
-        return Query()._with(key, op, values).all()
+    public static func find(field: String, _ comparison: ComparisonFilter.Comparison, _ value: Value) -> [Self]? {
+        return Query().filter(field, comparison, value).all()
+    }
+    
+    public static func find(field: String, in value: [Value]) -> [Self]? {
+        return Query().filter(field, in: value).all()
     }
     
     public static func take(count: Int = 1) -> [Self]? {
@@ -68,11 +72,11 @@ extension Model {
     }
     
     public static func first(count: Int = 1) -> Self? {
-        return Query().orderBy("id", .Ascending).limit(count).first()
+        return Query().sort("id", .Ascending).limit(count).first()
     }
     
     public static func last(count: Int = 1) -> Self? {
-        return Query().orderBy("id", .Descending).limit(count).first()
+        return Query().sort("id", .Descending).limit(count).first()
     }
     
 //    public static func list(key: String) -> [String]? {

@@ -6,7 +6,7 @@
 //  Copyright © 2016 Qutheory. All rights reserved.
 //
 
-public protocol Value {
+public protocol Value: CustomStringConvertible {
     var string: String { get }
 }
 
@@ -21,6 +21,12 @@ extension Value {
     
     var double: Double? {
         return Double(self.string)
+    }
+}
+
+extension Value {
+    public var description: String {
+        return self.string
     }
 }
 

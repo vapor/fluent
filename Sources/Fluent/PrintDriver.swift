@@ -1,9 +1,11 @@
 
 public class PrintDriver: Driver {
     public func execute<T: Model>(query: Query<T>) throws -> [[String : Value]] {
-        print("FULL QUERY: \(query)")
-//        print("PARAMETERIZED QUERY: \(dslContext.parameterizedQuery)")
-//        print("QUERY VALUES: \(dslContext.queryValues)")
+        print("Table \(query.entity)")
+        print("Action \(query.action)")
+        print("Limits \(query.limit)")
+        print("Filters \(query.filters)")
+        print("Sorts \(query.sorts)")
         print()
         
         return []
