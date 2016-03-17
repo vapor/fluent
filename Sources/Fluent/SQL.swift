@@ -2,13 +2,13 @@
 public class SQL: DSGenerator {
     private var tokens: [String] = []
     private var indexes: [Int] = []
-    private var values: [StatementValue] = []
+    private var values: [Value] = []
     private var placeholderCount = 0
     
     public var fields: [String] = []
     public var entity: String = ""
     public var clause: Clause = .SELECT
-    public var operation: [(String, Operator, [StatementValue])] = []
+    public var operation: [(String, Operator, [Value])] = []
     public var andIndexes: [Int] = []
     public var orIndexes: [Int] = []
     public var limit: Int = 0
@@ -17,14 +17,14 @@ public class SQL: DSGenerator {
     public var groupBy: String = ""
     public var joins: [(String, Join)] = []
     public var distinct: Bool = false 
-    public var data: [String: StatementValue] = [:]
+    public var data: [String: Value] = [:]
     public var placeholderFormat: String = "?" // append %c for counting
     
     lazy public var parameterizedQuery: String = {
         return self.buildQuery()
     }()
     
-    lazy public var queryValues: [StatementValue] = {
+    lazy public var queryValues: [Value] = {
         self.buildQuery()
         return self.values
     }()
@@ -36,7 +36,7 @@ public class SQL: DSGenerator {
         for item in self.values {
             let index = self.indexes[count]
             
-            self.tokens[index] = item.asString
+            self.tokens[index] = item.string
             count += 1
         }
         
@@ -195,7 +195,7 @@ public class SQL: DSGenerator {
             for (key, val) in data {
                 columns.append("\(key)")
                 values.append("\(addPlaceholder())")
-                self.values.append(val.asString)
+                self.values.append(val.string)
             }
             
             let columnsString = columns.joinWithSeparator(", ")
@@ -205,7 +205,7 @@ public class SQL: DSGenerator {
             var updates: [String] = []
             
             for (key, val) in data {
-                self.values.append(val.asString)
+                self.values.append(val.string)
                 updates.append("\(key) = \(addPlaceholder())")
             }
             
@@ -215,7 +215,7 @@ public class SQL: DSGenerator {
         return ""
     }
     
-    private func buildOperationComponent(ops: [(String, Operator, [StatementValue])]) -> String {
+    private func buildOperationComponent(ops: [(String, Operator, [Value])]) -> String {
         var components = [String]()
         var index = 0
         for (key, op, values) in ops {
@@ -228,28 +228,28 @@ public class SQL: DSGenerator {
             
             switch op {
             case .Equals:
-                self.values.append(values.first?.asString ?? "NULL")
+                self.values.append(values.first?.string ?? "NULL")
                 components.append("\(key) = \(addPlaceholder())")
             case .NotEquals:
-                self.values.append(values.first?.asString ?? "NULL")
+                self.values.append(values.first?.string ?? "NULL")
                 components.append("\(key) != \(addPlaceholder())")
             case .GreaterThanOrEquals:
-                self.values.append(values.first?.asString ?? "NULL")
+                self.values.append(values.first?.string ?? "NULL")
                 components.append("\(key) >= \(addPlaceholder())")
             case .LessThanOrEquals:
-                self.values.append(values.first?.asString ?? "NULL")
+                self.values.append(values.first?.string ?? "NULL")
                 components.append("\(key) <= \(addPlaceholder())")
             case .GreaterThan:
-                self.values.append(values.first?.asString ?? "NULL")
+                self.values.append(values.first?.string ?? "NULL")
                 components.append("\(key) > \(addPlaceholder())")
             case .LessThan:
-                self.values.append(values.first?.asString ?? "NULL")
+                self.values.append(values.first?.string ?? "NULL")
                 components.append("\(key) < \(addPlaceholder())")
             case .In:
                 var str = "\(key) IN ("
                 var _values = [String]()
                 for value in values {
-                    self.values.append(value.asString)
+                    self.values.append(value.string)
                     _values.append(addPlaceholder())
                 }
                 str += _values.joinWithSeparator(", ")
@@ -258,7 +258,7 @@ public class SQL: DSGenerator {
             case .NotIn:
                 var str = "\(key) NOT IN ("
                 for (idx, value) in values.enumerate() {
-                    self.values.append(value.asString)
+                    self.values.append(value.string)
                     if idx == 0 {
                         str += addPlaceholder()
                     } else {
@@ -268,8 +268,8 @@ public class SQL: DSGenerator {
                 str += ")"
                 components.append(str)
             case .Between:
-                self.values.append(values.first?.asString ?? "NULL")
-                self.values.append(values.last?.asString ?? "NULL")
+                self.values.append(values.first?.string ?? "NULL")
+                self.values.append(values.last?.string ?? "NULL")
                 components.append("\(key) BETWEEN \(addPlaceholder()) AND \(addPlaceholder())")
             }
             

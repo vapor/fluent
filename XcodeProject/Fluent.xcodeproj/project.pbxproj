@@ -23,6 +23,7 @@
 		1E2CC5AC1C95452000AD9252 /* Address.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CC5AB1C95452000AD9252 /* Address.swift */; };
 		1E2CC5AE1C95DE4C00AD9252 /* FluentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CC5AD1C95DE4C00AD9252 /* FluentTests.swift */; };
 		1EC2BB711C99EBF600E0EFAB /* libFluent.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EC2BB701C99EBF600E0EFAB /* libFluent.dylib */; };
+		C392755D1C9A1FF400AE780B /* Value.swift in Sources */ = {isa = PBXBuildFile; fileRef = C392755C1C9A1FF400AE780B /* Value.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,6 +70,8 @@
 		1E2CC5AB1C95452000AD9252 /* Address.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Address.swift; path = ../Sources/FluentDev/Address.swift; sourceTree = SOURCE_ROOT; };
 		1E2CC5AD1C95DE4C00AD9252 /* FluentTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FluentTests.swift; path = ../../Sources/Tests/FluentTests.swift; sourceTree = "<group>"; };
 		1EC2BB701C99EBF600E0EFAB /* libFluent.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libFluent.dylib; path = ../.build/debug/libFluent.dylib; sourceTree = "<group>"; };
+		C39275591C9A1B0D00AE780B /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		C392755C1C9A1FF400AE780B /* Value.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Value.swift; path = ../../Sources/Fluent/Value.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +113,7 @@
 				1E046D3B1C949669009F925A /* SQL.swift */,
 				1E046D3C1C949669009F925A /* SQLTokenizer.swift */,
 				1E046D3D1C949669009F925A /* DSGenerator.swift */,
+				C392755C1C9A1FF400AE780B /* Value.swift */,
 				1E0484431C949B35001F8B1E /* Fluent.h */,
 				1E0484451C949B35001F8B1E /* Info.plist */,
 			);
@@ -155,9 +159,10 @@
 			isa = PBXGroup;
 			children = (
 				1E04E1AB1C94971100A57ED0 /* Package.swift */,
-				1E0484571C949B96001F8B1E /* Tests */,
+				C39275591C9A1B0D00AE780B /* README.md */,
 				1E0484421C949B35001F8B1E /* Fluent */,
 				1E0484741C949EF2001F8B1E /* FluentDev */,
+				1E0484571C949B96001F8B1E /* Tests */,
 				1E0484861C94CA80001F8B1E /* Dependencies */,
 				1E8984AA1C92694A00C82EA0 /* Products */,
 			);
@@ -337,6 +342,7 @@
 			files = (
 				1E0484501C949B61001F8B1E /* SQLTokenizer.swift in Sources */,
 				1E04844B1C949B61001F8B1E /* Model.swift in Sources */,
+				C392755D1C9A1FF400AE780B /* Value.swift in Sources */,
 				1E0484491C949B61001F8B1E /* Database.swift in Sources */,
 				1E04844A1C949B61001F8B1E /* Driver.swift in Sources */,
 				1E04844D1C949B61001F8B1E /* PrintDriver.swift in Sources */,

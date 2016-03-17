@@ -2,7 +2,7 @@
 public class NoSQL: DSGenerator {
     public var entity: String = ""
     public var clause: Clause = .SELECT
-    public var operation: [(String, Operator, [StatementValue])] = []
+    public var operation: [(String, Operator, [Value])] = []
     public var andIndexes: [Int] = []
     public var orIndexes: [Int] = []
     public var fields: [String] = []
@@ -12,7 +12,7 @@ public class NoSQL: DSGenerator {
     public var groupBy: String = ""
     public var distinct: Bool = false
     public var joins: [(String, Join)] = []
-    public var data: [String: StatementValue] = [:]
+    public var data: [String: Value] = [:]
     public var placeholderFormat: String = ""
 
     lazy public var query: String = {
@@ -23,7 +23,7 @@ public class NoSQL: DSGenerator {
         return ""
     }()
     
-    lazy public var queryValues: [StatementValue] = {
+    lazy public var queryValues: [Value] = {
        return []
     }()
     

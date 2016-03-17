@@ -10,11 +10,11 @@ class Address: Model {
         return "0"
     }
     
-    func serialize() -> [String: StatementValue] {
+    func serialize() -> [String: Value] {
         return [:]
     }
     
-    required init(deserialize: [String: StatementValue]) {
+    required init(deserialize: [String: Value]) {
         
     }
 }

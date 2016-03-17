@@ -56,35 +56,35 @@ public class Query<T: Model> {
         run()
     }
     
-    public func update(items: [String: StatementValue]) {
+    public func update(items: [String: Value]) {
         context.clause = .UPDATE
         context.data = items
         run()
     }
 
-    public func insert(items: [String: StatementValue]) {
+    public func insert(items: [String: Value]) {
         context.clause = .INSERT
         context.data = items
         run()
     }
     
-    public func with(key: String, _ op: Operator, _ values: StatementValue...) -> Self {
+    public func with(key: String, _ op: Operator, _ values: Value...) -> Self {
         context.operation.append((key, op, values))
         return self
     }
     
-    public func _with(key: String, _ op: Operator, _ values: [StatementValue]) -> Self {
+    public func _with(key: String, _ op: Operator, _ values: [Value]) -> Self {
         context.operation.append((key, op, values))
         return self
     }
     
-    public func andWith(key: String, _ op: Operator, _ values: StatementValue...) -> Self {
+    public func andWith(key: String, _ op: Operator, _ values: Value...) -> Self {
         context.operation.append((key, op, values))
         context.andIndexes.append(context.operation.count - 1)
         return self
     }
     
-    public func orWith(key: String, _ op: Operator, _ values: StatementValue...) -> Self {
+    public func orWith(key: String, _ op: Operator, _ values: Value...) -> Self {
         context.operation.append((key, op, values))
         context.orIndexes.append(context.operation.count - 1)
         return self
@@ -110,12 +110,12 @@ public class Query<T: Model> {
         return self
     }
     
-    public func list(key: String) -> [StatementValue]? {
+    public func list(key: String) -> [Value]? {
         guard let results = Database.driver.execute(context) else {
             return nil
         }
         
-        var items = [StatementValue]()
+        var items = [Value]()
         
         for result in results {
             for (k, v) in result {
@@ -158,38 +158,38 @@ public class Query<T: Model> {
         guard let result = aggregate(.COUNT(key)) else {
             return nil
         }
-        return Int(result["COUNT(\(key))"]!.asString)
+        return Int(result["COUNT(\(key))"]!.string)
     }
 
     public func avg(key: String = "*") -> Double? {
         guard let result = aggregate(.AVG(key)) else {
             return nil
         }
-        return Double(result["AVG(\(key))"]!.asString)
+        return Double(result["AVG(\(key))"]!.string)
     }
 
     public func max(key: String = "*") -> Double? {
         guard let result = aggregate(.MAX(key)) else {
             return nil
         }
-        return Double(result["MAX(\(key))"]!.asString)
+        return Double(result["MAX(\(key))"]!.string)
     }
 
     public func min(key: String = "*") -> Double? {
         guard let result = aggregate(.MIN(key)) else {
             return nil
         }
-        return Double(result["MIN(\(key))"]!.asString)
+        return Double(result["MIN(\(key))"]!.string)
     }
 
     public func sum(key: String = "*") -> Double? {
         guard let result = aggregate(.SUM(key)) else {
             return nil
         }
-        return Double(result["SUM(\(key))"]!.asString)
+        return Double(result["SUM(\(key))"]!.string)
     }
     
-    private func aggregate(clause: Clause) -> [String: StatementValue]? {
+    private func aggregate(clause: Clause) -> [String: Value]? {
         context.clause = clause
         guard let results = Database.driver.execute(context) else {
             return nil
