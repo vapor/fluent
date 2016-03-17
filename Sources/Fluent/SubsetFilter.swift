@@ -7,7 +7,7 @@
 //
 
 public struct SubsetFilter: Filter {
-    var field: String
+    public var field: String
     var superSet: [Value]
 }
 

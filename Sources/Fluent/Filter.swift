@@ -6,7 +6,7 @@
 //  Copyright © 2016 Qutheory. All rights reserved.
 //
 
-protocol Filter: CustomStringConvertible {
+public protocol Filter: CustomStringConvertible {
     var field: String { get }
 }
 

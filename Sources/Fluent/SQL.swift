@@ -1,5 +1,50 @@
+public class SQL<T: Model>: Helper<T> {
+    var table: String {
+        return query.entity
+    }
+    
+    var whereClause: String? {
+        var clause: [String] = []
+        
+        for filter in query.filters {
+            
+            if let filter = filter as? ComparisonFilter {
+                clause.append("\(filter.field) = \(filter.value.string)")
+            }
+            
+            if let filter = filter as? SubsetFilter {
+                let superSetString = filter.superSet.map { value in
+                    return value.string
+                }.joinWithSeparator(", ")
+                
+                clause.append("\(filter.field) IN (\(superSetString))")
+            }
+            
+        }
+        
+        if clause.count == 0 {
+            return nil
+        } else {
+            return clause.joinWithSeparator(", ")
+        }
+    }
 
-public class SQL {
+    public var statement: String {
+        var statement = ["SELECT * FROM \(table)"]
+        
+        if let whereClause = self.whereClause {
+            statement.append("WHERE \(whereClause)")
+        }
+        
+        return statement.joinWithSeparator(" ")
+    }
+    
+    public override init(query: Query<T>) {
+        super.init(query: query)
+    }
+}
+
+///public class SQL {
 //    private var tokens: [String] = []
 //    private var indexes: [Int] = []
 //    private var values: [Value] = []
@@ -291,4 +336,4 @@ public class SQL {
 //        }
 //        return component
 //    }
-}
+//}

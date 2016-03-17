@@ -23,7 +23,7 @@ public struct ComparisonFilter: Filter {
             }
         }
     }
-    var field: String
+    public var field: String
     var comparison: Comparison
     var value: Value
     

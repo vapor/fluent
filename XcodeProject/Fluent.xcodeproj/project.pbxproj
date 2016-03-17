@@ -27,6 +27,7 @@
 		C3AAA1181C9A40C7006C40C3 /* Limit.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3AAA1171C9A40C7006C40C3 /* Limit.swift */; };
 		C3AAA11A1C9A40FB006C40C3 /* Sort.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3AAA1191C9A40FB006C40C3 /* Sort.swift */; };
 		C3AAA1201C9A4186006C40C3 /* Join.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3AAA11F1C9A4186006C40C3 /* Join.swift */; };
+		C3AAA1221C9A4428006C40C3 /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3AAA1211C9A4428006C40C3 /* Helper.swift */; };
 		C3C7EFB31C9A36D800C5D7D3 /* Filter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3C7EFB21C9A36D800C5D7D3 /* Filter.swift */; };
 /* End PBXBuildFile section */
 
@@ -79,6 +80,7 @@
 		C3AAA1171C9A40C7006C40C3 /* Limit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Limit.swift; path = ../../Sources/Fluent/Limit.swift; sourceTree = "<group>"; };
 		C3AAA1191C9A40FB006C40C3 /* Sort.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Sort.swift; path = ../../Sources/Fluent/Sort.swift; sourceTree = "<group>"; };
 		C3AAA11F1C9A4186006C40C3 /* Join.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Join.swift; path = ../../Sources/Fluent/Join.swift; sourceTree = "<group>"; };
+		C3AAA1211C9A4428006C40C3 /* Helper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Helper.swift; path = ../../Sources/Fluent/Helper.swift; sourceTree = "<group>"; };
 		C3C7EFB21C9A36D800C5D7D3 /* Filter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Filter.swift; path = ../../Sources/Fluent/Filter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -210,6 +212,7 @@
 			children = (
 				1E046D381C949669009F925A /* NoSQL.swift */,
 				1E046D3B1C949669009F925A /* SQL.swift */,
+				C3AAA1211C9A4428006C40C3 /* Helper.swift */,
 			);
 			name = Helpers;
 			sourceTree = "<group>";
@@ -386,6 +389,7 @@
 			files = (
 				C3AAA1141C9A4076006C40C3 /* SubsetFilter.swift in Sources */,
 				C3AAA1181C9A40C7006C40C3 /* Limit.swift in Sources */,
+				C3AAA1221C9A4428006C40C3 /* Helper.swift in Sources */,
 				1E04844B1C949B61001F8B1E /* Model.swift in Sources */,
 				C3C7EFB31C9A36D800C5D7D3 /* Filter.swift in Sources */,
 				C392755D1C9A1FF400AE780B /* Value.swift in Sources */,

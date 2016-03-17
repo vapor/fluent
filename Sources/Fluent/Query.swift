@@ -22,7 +22,7 @@ public class Query<T: Model> {
     var limit: Limit?
     var action: Action
     
-    var filters: [Filter]
+    public var filters: [Filter]
     var sorts: [Sort]
     var unions: [Union]
     
