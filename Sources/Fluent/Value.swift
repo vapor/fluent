@@ -1,11 +1,3 @@
-//
-//  Value.swift
-//  Fluent
-//
-//  Created by Tanner Nelson on 3/16/16.
-//  Copyright © 2016 Qutheory. All rights reserved.
-//
-
 public protocol Value: CustomStringConvertible {
     var string: String { get }
 }

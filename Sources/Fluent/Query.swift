@@ -18,15 +18,19 @@ public class Query<T: Model> {
     }
     
     var fields: [String]
+    
     var limit: Limit?
     var action: Action
+    
     var filters: [Filter]
     var sorts: [Sort]
+    var unions: [Union]
     
     public init() {
         fields = []
         filters = []
         sorts = []
+        unions = []
         action = .Select
     }
     
@@ -65,7 +69,7 @@ public class Query<T: Model> {
         let data = model.serialize()
 
         if let id = model.id {
-            with("id", .Equals, id).update(data)
+            filter("id", .Equals, id).update(data)
         } else {
             insert(data)
         }
@@ -105,28 +109,6 @@ public class Query<T: Model> {
         let filter = ComparisonFilter(field, comparison, value)
         filters.append(filter)
         
-        return self
-    }
-    
-    public func with(key: String, _ op: Operator, _ values: Value...) -> Self {
-        //context.operation.append((key, op, values))
-        return self
-    }
-    
-    public func _with(key: String, _ op: Operator, _ values: [Value]) -> Self {
-        //context.operation.append((key, op, values))
-        return self
-    }
-    
-    public func andWith(key: String, _ op: Operator, _ values: Value...) -> Self {
-        //context.operation.append((key, op, values))
-        //context.andIndexes.append(context.operation.count - 1)
-        return self
-    }
-    
-    public func orWith(key: String, _ op: Operator, _ values: Value...) -> Self {
-        //context.operation.append((key, op, values))
-        //context.orIndexes.append(context.operation.count - 1)
         return self
     }
     
@@ -173,19 +155,10 @@ public class Query<T: Model> {
         return self
     }
     
-/*
-     SELECT role.* FROM user
-     INNER JOIN user_role on user_role.role_id = role.id
-     INNER JOIN role on user_role.user_id = user.id
-*/
-    public func join(table: Model.Type, _ type: Join = .Inner) -> Self? {
-        //switch context.clause {
-        //case .SELECT:
-        //    context.joins.append((table.entity, type))
-        //    return self
-        //default:
-        //    return nil
-        //}
+    public func join<T: Model>(type: T.Type, _ operation: Union.Operation = .Default) -> Self? {
+        let union = Union(entity: type.entity, operation: operation)
+        unions.append(union)
+        
         return self
     }
     
@@ -196,6 +169,7 @@ public class Query<T: Model> {
 
     // MARK: - Aggregate
 
+    /*
     public func count(key: String = "*") -> Int? {
         guard let result = aggregate(.COUNT(key)) else {
             return nil
@@ -237,5 +211,5 @@ public class Query<T: Model> {
             return nil
         }
         return results.first
-    }
+    }*/
 }

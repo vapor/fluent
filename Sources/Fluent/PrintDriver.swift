@@ -6,6 +6,7 @@ public class PrintDriver: Driver {
         print("Limits \(query.limit)")
         print("Filters \(query.filters)")
         print("Sorts \(query.sorts)")
+        print("Unions \(query.unions)")
         print()
         
         return []

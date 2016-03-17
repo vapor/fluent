@@ -35,8 +35,8 @@ Query<User>().all()
 
 // Retrieve A Single Row
 
-Query<User>().with("name", .Equals, "John").first()
-Query<User>().with("name", .Equals, "John").distinct().first() // with distinct
+Query<User>().filter("name", .Equals, "John").first()
+Query<User>().filter("name", .Equals, "John").distinct().first() // with distinct
 
 // Chucking
 
@@ -49,11 +49,11 @@ Query<User>().list("title")
 
 // Aggregates
 
-Query<User>().count()
-Query<User>().count("name")
-Query<User>().max()
-Query<User>().min()
-Query<User>().avg()
+//Query<User>().count()
+//Query<User>().count("name")
+//Query<User>().max()
+//Query<User>().min()
+//Query<User>().avg()
 
 // Joins
 
@@ -61,18 +61,18 @@ Query<User>().join(Address.self, .Left)?.all("\(Address.entity).*")
 
 // Where
 
-Query<User>().with("age", .Between, "10", "20").andWith("name", .Equals, "John").orWith("phone", .NotEquals, "2234567890").groupBy("name").all()
+Query<User>().filter("name", .Equals, "John").filter("phone", .NotEquals, "2234567890").groupBy("name").all()
 
 // Group By
 
-Query<User>().with("name", .Equals, "John").groupBy("name").all()
+Query<User>().filter("name", .Equals, "John").groupBy("name").all()
 
 // Order By
 
-Query<User>().with("name", .Equals, "John").sort("name", .Ascending).all()
+Query<User>().filter("name", .Equals, "John").sort("name", .Ascending).all()
 
 // Limit And Offset
 
-Query<User>().with("name", .Equals, "John").limit().all()
+Query<User>().filter("name", .Equals, "John").limit().all()
 
-Query<User>().with("name", .Equals, "Jane").limit(10).offset(5).all()
+Query<User>().filter("name", .Equals, "Jane").limit(10).offset(5).all()

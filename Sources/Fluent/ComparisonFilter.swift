@@ -8,7 +8,7 @@
 
 public struct ComparisonFilter: Filter {
     public enum Comparison: CustomStringConvertible {
-        case Equals, GreaterThan, LessThan
+        case Equals, GreaterThan, LessThan, NotEquals
         
         public var description: String {
             switch self {
@@ -18,6 +18,8 @@ public struct ComparisonFilter: Filter {
                 return ">"
             case .LessThan:
                 return "<"
+            case .NotEquals:
+                return "!="
             }
         }
     }
