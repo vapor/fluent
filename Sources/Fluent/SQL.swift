@@ -1,3 +1,29 @@
+extension Filter.Scope {
+    var sql: String {
+        switch self {
+        case .In:
+            return "IN"
+        case .NotIn:
+            return "NOT IN"
+        }
+    }
+}
+
+extension Filter.Comparison {
+    var sql: String {
+        switch self {
+        case .Equals:
+            return "="
+        case .NotEquals:
+            return "!="
+        case .GreaterThan:
+            return ">"
+        case .LessThan:
+            return "<"
+        }
+    }
+}
+
 public class SQL<T: Model>: Helper<T> {
     var table: String {
         return query.entity
@@ -7,19 +33,16 @@ public class SQL<T: Model>: Helper<T> {
         var clause: [String] = []
         
         for filter in query.filters {
-            
-            if let filter = filter as? ComparisonFilter {
-                clause.append("\(filter.field) = \(filter.value.string)")
-            }
-            
-            if let filter = filter as? SubsetFilter {
-                let superSetString = filter.superSet.map { value in
+            switch filter {
+            case .Compare(let field, let comparison, let value):
+                clause.append("\(field) \(comparison.sql) \(value.string)")
+            case .Subset(let field, let scope, let values):
+                let valueStrings = values.map { value in
                     return value.string
                 }.joinWithSeparator(", ")
                 
-                clause.append("\(filter.field) IN (\(superSetString))")
+                clause.append("\(field) \(scope.sql) (\(valueStrings))")
             }
-            
         }
         
         if clause.count == 0 {

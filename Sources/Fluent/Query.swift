@@ -79,7 +79,7 @@ public class Query<T: Model> {
         action = .Delete
         
         if let id = model?.id {
-            let filter = ComparisonFilter("id", .Equals, id)
+            let filter = Filter.Compare("id", .Equals, id)
             filters.append(filter)
         }
         
@@ -99,14 +99,14 @@ public class Query<T: Model> {
     }
     
     public func filter(field: String, in superSet: [Value]) -> Self {
-        let filter = SubsetFilter(field: field, superSet: superSet)
+        let filter = Filter.Subset(field, .In, superSet)
         filters.append(filter)
         
         return self
     }
     
-    public func filter(field: String, _ comparison: ComparisonFilter.Comparison, _ value: Value) -> Self {
-        let filter = ComparisonFilter(field, comparison, value)
+    public func filter(field: String, _ comparison: Filter.Comparison, _ value: Value) -> Self {
+        let filter = Filter.Compare(field, comparison, value)
         filters.append(filter)
         
         return self

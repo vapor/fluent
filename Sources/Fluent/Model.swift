@@ -59,7 +59,7 @@ extension Model {
         return Query().filter("id", .Equals, id).first()
     }
     
-    public static func find(field: String, _ comparison: ComparisonFilter.Comparison, _ value: Value) -> [Self]? {
+    public static func find(field: String, _ comparison: Filter.Comparison, _ value: Value) -> [Self]? {
         return Query().filter(field, comparison, value).all()
     }
     
