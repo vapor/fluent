@@ -88,8 +88,13 @@ public class SQL<T: Model>: Helper<T> {
             
             return "\(field) \(scope.sql) (\(valueStrings))"
         case .Group(let op, let filters):
-            let filterString = filters.map { return "\(op.sql) \(filterOutput($0))" }
-            return filterString.joinWithSeparator(" ")
+            let f: [String] = filters.map {
+                if case .Group = $0 {
+                    return self.filterOutput($0)
+                }
+                return "\(op.sql) \(self.filterOutput($0))"
+            }
+            return f.joinWithSeparator(" ")
         }
     }
 }
