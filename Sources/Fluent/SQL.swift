@@ -31,6 +31,10 @@ public class SQL<T: Model>: Helper<T> {
     
     public var values: [String]
     
+    var nextPlaceholder: String {
+        return "?"
+    }
+    
     var whereClause: String? {
         var clause: [String] = []
         
@@ -38,11 +42,11 @@ public class SQL<T: Model>: Helper<T> {
             switch filter {
             case .Compare(let field, let comparison, let value):
                 self.values.append(value.string)
-                clause.append("\(field) \(comparison.sql) ?")
+                clause.append("\(field) \(comparison.sql) \(nextPlaceholder)")
             case .Subset(let field, let scope, let values):
                 let valueStrings = values.map { value in
                     self.values.append(value.string)
-                    return "?"
+                    return nextPlaceholder
                 }.joinWithSeparator(", ")
                 
                 clause.append("\(field) \(scope.sql) (\(valueStrings))")
