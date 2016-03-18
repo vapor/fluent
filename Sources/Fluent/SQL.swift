@@ -30,12 +30,12 @@ public class SQL<T: Model>: Helper<T> {
         return "\(statement.joinWithSeparator(" "));"
     }
     
-    var table: String {
-        return query.entity
+    public var nextPlaceholder: String {
+        return "?"
     }
     
-    var nextPlaceholder: String {
-        return "?"
+    var table: String {
+        return query.entity
     }
     
     var dataClause: String? {
@@ -227,43 +227,3 @@ extension Filter.Comparison {
         }
     }
 }
-
-///public class SQL {
-//    public var placeholderFormat: String = "?" // append %c for counting
-//    func addPlaceholder() -> String {
-//        var m = ""
-//        if placeholderFormat.hasSuffix("%c") {
-//            m = "$\(placeholderCount)"
-//            placeholderCount += 1
-//        } else {
-//            m = placeholderFormat
-//        }
-//        return m
-//    }
-//
-//
-//    // MARK: - Builder Methods
-//
-//    private func buildJoinsComponent(joins: [(String, Join)]) -> String {
-//        var component = [String]()
-//        for (joinEntity, join) in joins {
-//            var joinComponent = [String]()
-//            switch join {
-//            case .Inner:
-//                joinComponent.append("INNER JOIN")
-//            case .Left:
-//                joinComponent.append("LEFT JOIN")
-//            case .Right:
-//                joinComponent.append("RIGHT JOIN")
-//            }
-//            joinComponent.append(joinEntity)
-//            joinComponent.append("ON")
-//            joinComponent.append("\(joinEntity).\(self.entity)_id=\(self.entity).id")
-//
-//            component.append(joinComponent.joinWithSeparator(" "))
-//        }
-//
-//        return component.joinWithSeparator(", ")
-//    }
-//
-//}
