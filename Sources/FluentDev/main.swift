@@ -36,7 +36,7 @@ Query<User>().all()
 // Retrieve A Single Row
 
 Query<User>().filter("name", .Equals, "John").first()
-Query<User>().filter("name", .Equals, "John").distinct().first() // with distinct
+Query<User>().filter("name", .Equals, "Parker Collins").distinct().first() // with distinct
 
 // Chucking
 
@@ -49,15 +49,15 @@ Query<User>().list("title")
 
 // Aggregates
 
-//Query<User>().count()
-//Query<User>().count("name")
-//Query<User>().max()
-//Query<User>().min()
-//Query<User>().avg()
+Query<User>().count()
+Query<User>().count("name")
+Query<User>().max()
+Query<User>().min()
+Query<User>().avg()
 
 // Joins
 
-Query<User>().join(Address.self, .Left)?.all("\(Address.entity).*")
+Query<User>().join(Address.self)?.all("\(Address.entity).*")
 
 // Where
 

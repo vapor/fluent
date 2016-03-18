@@ -1,33 +1,17 @@
-public enum Action {
-    case Select(Bool) // distinct
-    case Delete
-    case Insert
-    case Update
-    case Count
-    case Maximum
-    case Minimum
-    case Average
-    case Sum
-}
-
 public class Query<T: Model> {
-
     public typealias FilterHandler = (query: Query) -> Query
-    
-    var entity: String {
-        return T.entity
-    }
+    public var filters: [Filter]
     
     var fields: [String]
-    
     var limit: Limit?
     var offset: Offset?
     var action: Action
     var items: [String: Value]?
-    
-    public var filters: [Filter]
     var sorts: [Sort]
     var unions: [Union]
+    var entity: String {
+        return T.entity
+    }
     
     public init() {
         fields = []
@@ -38,9 +22,7 @@ public class Query<T: Model> {
     }
     
     public func first(fields: String...) -> T? {
-        action = .Select(false)
         limit = Limit(count: 1)
-        
         return run(fields)?.first
     }
     
@@ -105,14 +87,12 @@ public class Query<T: Model> {
     public func filter(field: String, in superSet: [Value]) -> Self {
         let filter = Filter.Subset(field, .In, superSet)
         filters.append(filter)
-        
         return self
     }
     
     public func filter(field: String, _ comparison: Filter.Comparison, _ value: Value) -> Self {
         let filter = Filter.Compare(field, comparison, value)
         filters.append(filter)
-        
         return self
     }
     
@@ -130,24 +110,6 @@ public class Query<T: Model> {
     public func offset(count: Int = 1) -> Self {
         offset = Offset(count: count)
         return self
-    }
-    
-    public func list(key: String) -> [Value]? {
-        guard let results = try? Database.driver.execute(self) else {
-            return nil
-        }
-        
-        var items = [Value]()
-        
-        for result in results {
-            for (k, v) in result {
-                if k == key {
-                    items.append(v)
-                }
-            }
-        }
-        
-        return items
     }
     
     public func performQuery(string: String) -> Self {
@@ -171,7 +133,6 @@ public class Query<T: Model> {
     public func join<T: Model>(type: T.Type, _ operation: Union.Operation = .Default) -> Self? {
         let union = Union(entity: type.entity, operation: operation)
         unions.append(union)
-        
         return self
     }
     
@@ -180,49 +141,65 @@ public class Query<T: Model> {
         return self
     }
 
-    // MARK: - Aggregate
-
-    /*
-    public func count(key: String = "*") -> Int? {
-        guard let result = aggregate(.COUNT(key)) else {
+    public func list(key: String) -> [Value]? {
+        guard let results = try? Database.driver.execute(self) else {
             return nil
         }
-        return Int(result["COUNT(\(key))"]!.string)
-    }
-
-    public func avg(key: String = "*") -> Double? {
-        guard let result = aggregate(.AVG(key)) else {
-            return nil
+        
+        var items = [Value]()
+        for result in results {
+            for (k, v) in result {
+                if k == key {
+                    items.append(v)
+                }
+            }
         }
-        return Double(result["AVG(\(key))"]!.string)
-    }
-
-    public func max(key: String = "*") -> Double? {
-        guard let result = aggregate(.MAX(key)) else {
-            return nil
-        }
-        return Double(result["MAX(\(key))"]!.string)
-    }
-
-    public func min(key: String = "*") -> Double? {
-        guard let result = aggregate(.MIN(key)) else {
-            return nil
-        }
-        return Double(result["MIN(\(key))"]!.string)
-    }
-
-    public func sum(key: String = "*") -> Double? {
-        guard let result = aggregate(.SUM(key)) else {
-            return nil
-        }
-        return Double(result["SUM(\(key))"]!.string)
+        return items
     }
     
-    private func aggregate(clause: Clause) -> [String: Value]? {
-        //context.clause = clause
+    // MARK: - Aggregate
+    
+    public func count(field: String = "*") -> Int? {
+        guard let result = aggregate(.Count, field: field) else {
+            return nil
+        }
+        return Int(result["COUNT(\(field))"]!.string)
+    }
+    
+    public func avg(field: String = "*") -> Double? {
+        guard let result = aggregate(.Average, field: field) else {
+            return nil
+        }
+        return Double(result["AVG(\(field))"]!.string)
+    }
+    
+    public func max(field: String = "*") -> Double? {
+        guard let result = aggregate(.Maximum, field: field) else {
+            return nil
+        }
+        return Double(result["MAX(\(field))"]!.string)
+    }
+    
+    public func min(field: String = "*") -> Double? {
+        guard let result = aggregate(.Minimum, field: field) else {
+            return nil
+        }
+        return Double(result["MIN(\(field))"]!.string)
+    }
+    
+    public func sum(field: String = "*") -> Double? {
+        guard let result = aggregate(.Sum, field: field) else {
+            return nil
+        }
+        return Double(result["SUM(\(field))"]!.string)
+    }
+    
+    private func aggregate(action: Action, field: String) -> [String: Value]? {
+        self.action = action
+        self.fields = [field]
         guard let results = try? Database.driver.execute(self) else {
             return nil
         }
         return results.first
-    }*/
+    }
 }
