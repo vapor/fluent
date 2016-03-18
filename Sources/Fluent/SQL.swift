@@ -22,6 +22,11 @@ public class SQL<T: Model>: Helper<T> {
             statement.append(offset.sql)
         }
         
+        if query.sorts.count > 0 {
+            let sortStrings = query.sorts.map { return $0.sql }
+           statement.append(sortStrings.joinWithSeparator(" "))
+        }
+        
         return "\(statement.joinWithSeparator(" "));"
     }
     
@@ -56,7 +61,10 @@ public class SQL<T: Model>: Helper<T> {
     }
     
     var unionClause: String? {
-        return nil
+        if query.unions.count == 0 {
+            return nil
+        }
+        return query.unions.map { return $0.sql }.joinWithSeparator(" ")
     }
     
     var whereClause: String? {
@@ -165,6 +173,17 @@ extension Filter.Scope {
     }
 }
 
+extension Sort {
+    var sql: String {
+        if case .Ascending = direction {
+            return "\(field) ASC"
+        } else if case .Descending = direction {
+            return "\(field) DESC"
+        }
+        return ""
+    }
+}
+
 extension Filter.Operation {
     var sql: String {
         switch self {
@@ -173,6 +192,24 @@ extension Filter.Operation {
         case .Or:
             return "OR"
         }
+    }
+}
+
+extension Union {
+    var sql: String {
+        var components = [String]()
+        switch operation {
+        case .Default:
+            components.append("INNER JOIN")
+        case .Left:
+            components.append("LEFT JOIN")
+        case .Right:
+            components.append("RIGHT JOIN")
+        }
+        components.append(entity)
+        components.append("ON")
+        components.append("\(foreignKey)=\(otherKey)")
+        return components.joinWithSeparator(" ")
     }
 }
 
@@ -204,45 +241,6 @@ extension Filter.Comparison {
 //        return m
 //    }
 //
-//    private func buildQuery() -> String {
-//        var query: [String] = []
-//        self.values = []
-//        self.placeholderCount = 1
-//        query.append(buildClauseComponent())
-//        query.append("\(self.entity)")
-//
-//        if self.joins.count > 0 {
-//            query.append(buildJoinsComponent(joins))
-//        } else if !self.data.isEmpty {
-//            query.append(buildDataComponent())
-//        }
-//
-//        if self.operation.count > 0 {
-//            query.append("WHERE")
-//            query.append(buildOperationComponent(operation))
-//        }
-//
-//        if self.orderBy.count > 0 {
-//            query.append("ORDER BY")
-//            query.append(buildOrderByComponent(orderBy))
-//        }
-//
-//        if !self.groupBy.isEmpty {
-//            query.append("GROUP BY")
-//            query.append(groupBy)
-//        }
-//
-//        if self.limit > 0 {
-//            query.append("LIMIT \(limit)")
-//        }
-//
-//        if self.offset > 0 {
-//            query.append("OFFSET \(offset)")
-//        }
-//
-//        let queryString = query.joinWithSeparator(" ")
-//        return queryString + ";"
-//    }
 //
 //    // MARK: - Builder Methods
 //
@@ -268,16 +266,4 @@ extension Filter.Comparison {
 //        return component.joinWithSeparator(", ")
 //    }
 //
-//    private func buildOrderByComponent(orderBy: [(String, OrderBy)]) -> String {
-//        var component = ""
-//        for (key, oBy) in orderBy {
-//            switch oBy {
-//            case .Ascending:
-//                component = "\(key) ASC"
-//            case .Descending:
-//                component = "\(key) DESC"
-//            }
-//        }
-//        return component
-//    }
 //}

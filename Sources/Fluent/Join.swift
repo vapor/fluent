@@ -4,11 +4,13 @@ public struct Union {
     }
     
     var entity: String
+    var foreignKey: String
+    var otherKey: String
     var operation: Operation
 }
 
 extension Union: CustomStringConvertible {
     public var description: String {
-        return "\(operation) \(entity)"
+        return "\(operation) \(entity) by \(foreignKey) = \(otherKey)"
     }
 }

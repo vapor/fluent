@@ -130,8 +130,10 @@ public class Query<T: Model> {
         return self
     }
     
-    public func join<T: Model>(type: T.Type, _ operation: Union.Operation = .Default) -> Self? {
-        let union = Union(entity: type.entity, operation: operation)
+    public func join<T: Model>(type: T.Type, _ operation: Union.Operation = .Default, foreignKey: String? = nil, otherKey: String? = nil) -> Self? {
+        let fk = foreignKey ?? "\(type.entity).\(entity)_id"
+        let ok = otherKey ?? "\(entity).id"
+        let union = Union(entity: type.entity, foreignKey: fk, otherKey: ok, operation: operation)
         unions.append(union)
         return self
     }
