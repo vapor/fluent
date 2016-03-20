@@ -373,7 +373,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/Library/Developer/Toolchains/swift-latest.xctoolchain/usr/bin/swift build --chdir \"$SRCROOT\"";
+			shellScript = "\n/Library/Developer/Toolchains/swift-DEVELOPMENT-SNAPSHOT-2016-03-01-a.xctoolchain/usr/bin/swift build --chdir \"$SRCROOT\"";
 		};
 		1E2CC5AA1C9543E100AD9252 /* Swift Build Dependencies */ = {
 			isa = PBXShellScriptBuildPhase;
