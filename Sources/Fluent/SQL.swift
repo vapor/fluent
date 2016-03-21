@@ -82,19 +82,16 @@ public class SQL<T: Model>: Helper<T> {
     }
     
     var whereClause: String? {
-        var clause: [String] = []
+        if query.filters.count == 0 {
+            return nil
+        }
         
         var filterClause: [String] = []
         for filter in query.filters {
             filterClause.append(filterOutput(filter))
         }
-        clause.append(filterClause.joinWithSeparator(" AND "))
         
-        if clause.count == 0 {
-            return nil
-        }
-        
-        return clause.joinWithSeparator(" ")
+        return filterClause.joinWithSeparator(" AND ")
     }
 
     public override init(query: Query<T>) {
