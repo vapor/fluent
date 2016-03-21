@@ -1,5 +1,6 @@
 public class SQL<T: Model>: Helper<T> {
-    public var values: [String]
+    public var values: [String?]
+    
     public var statement: String {
         var statement = [query.action.sql(query.fields)]
         statement.append(table)
@@ -43,21 +44,27 @@ public class SQL<T: Model>: Helper<T> {
             return nil
         }
         
-        if case .Insert = query.action {
+        switch query.action {
+        case .Insert:
             let fieldsString = items.keys.joinWithSeparator(", ")
-            let valuesString = items.values.map {
-                self.values.append($0.string)
+            
+            let valuesString = items.map { (key, value) in
+                self.values.append(value?.string)
+                
                 return self.nextPlaceholder
             }.joinWithSeparator(", ")
+            
             return "(\(fieldsString)) VALUES (\(valuesString))"
-        } else if case .Update = query.action {
-            let updatesString = items.map {
-                self.values.append($0.1.string)
-                return "\($0.0) = \(self.nextPlaceholder)"
+        case .Update:
+            let updatesString = items.map { (key, value) in
+                self.values.append(value?.string)
+                return "\(key) = \(self.nextPlaceholder)"
             }.joinWithSeparator(", ")
+            
             return "SET \(updatesString)"
+        default:
+            return nil
         }
-        return nil
     }
     
     var unionClause: String? {
@@ -69,9 +76,12 @@ public class SQL<T: Model>: Helper<T> {
     
     var whereClause: String? {
         var clause: [String] = []
+        
+        var filterClause: [String] = []
         for filter in query.filters {
-            clause.append(filterOutput(filter))
+            filterClause.append(filterOutput(filter))
         }
+        clause.append(filterClause.joinWithSeparator(" AND "))
         
         if clause.count == 0 {
             return nil
@@ -89,12 +99,13 @@ public class SQL<T: Model>: Helper<T> {
         switch filter {
         case .Compare(let field, let comparison, let value):
             self.values.append(value.string)
+            
             return "\(field) \(comparison.sql) \(nextPlaceholder)"
         case .Subset(let field, let scope, let values):
             let valueStrings = values.map { value in
                 self.values.append(value.string)
                 return nextPlaceholder
-                }.joinWithSeparator(", ")
+            }.joinWithSeparator(", ")
             
             return "\(field) \(scope.sql) (\(valueStrings))"
         case .Group(let op, let filters):
@@ -102,9 +113,9 @@ public class SQL<T: Model>: Helper<T> {
                 if case .Group = $0 {
                     return self.filterOutput($0)
                 }
-                return "\(op.sql) \(self.filterOutput($0))"
+                return "\(self.filterOutput($0))"
             }
-            return f.joinWithSeparator(" ")
+            return "(" + f.joinWithSeparator(" \(op.sql) ") + ")"
         }
     }
 }

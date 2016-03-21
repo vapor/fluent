@@ -3,15 +3,15 @@ public protocol Value: CustomStringConvertible {
 }
 
 extension Value {
-    var int: Int? {
+    public var int: Int? {
         return Int(self.string)
     }
     
-    var float: Float? {
+    public var float: Float? {
         return Float(self.string)
     }
     
-    var double: Double? {
+    public var double: Double? {
         return Double(self.string)
     }
 }

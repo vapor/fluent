@@ -3,7 +3,7 @@ public protocol Model {
     static var entity: String { get }
     var id: String? { get }
     
-    func serialize() -> [String: Value]
+    func serialize() -> [String: Value?]
     init(serialized: [String: Value])
 }
 

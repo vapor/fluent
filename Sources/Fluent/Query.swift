@@ -6,7 +6,7 @@ public class Query<T: Model> {
     var limit: Limit?
     var offset: Offset?
     var action: Action
-    var items: [String: Value]?
+    var items: [String: Value?]?
     var sorts: [Sort]
     var unions: [Union]
     var entity: String {
@@ -61,27 +61,41 @@ public class Query<T: Model> {
         return model
     }
     
-    public func delete(model: T? = nil) {
+    public func delete() {
+        action = .Delete
+        run()
+    }
+    
+    public func delete(model: T) {
+        guard let id = model.id else {
+            //user wasn't saved yet
+            return
+        }
         action = .Delete
         
-        if let id = model?.id {
-            let filter = Filter.Compare("id", .Equals, id)
-            filters.append(filter)
-        }
+        let filter = Filter.Compare("id", .Equals, id)
+        filters.append(filter)
         
         run()
     }
     
-    public func update(items: [String: Value]) {
+    public func update(items: [String: Value?]) {
         action = .Update
         self.items = items
         run()
     }
 
-    public func insert(items: [String: Value]) {
+    public func insert(items: [String: Value?]) {
         action = .Insert
         self.items = items
         run()
+    }
+    
+    
+    public func filter(field: String, _ value: Value) -> Self {
+        let filter = Filter.Compare(field, .Equals, value)
+        filters.append(filter)
+        return self
     }
     
     public func filter(field: String, in superSet: [Value]) -> Self {
@@ -89,6 +103,7 @@ public class Query<T: Model> {
         filters.append(filter)
         return self
     }
+    
     
     public func filter(field: String, _ comparison: Filter.Comparison, _ value: Value) -> Self {
         let filter = Filter.Compare(field, comparison, value)
@@ -168,21 +183,21 @@ public class Query<T: Model> {
         return Int(result["COUNT(\(field))"]!.string)
     }
     
-    public func avg(field: String = "*") -> Double? {
+    public func average(field: String = "*") -> Double? {
         guard let result = aggregate(.Average, field: field) else {
             return nil
         }
         return Double(result["AVG(\(field))"]!.string)
     }
     
-    public func max(field: String = "*") -> Double? {
+    public func maximum(field: String = "*") -> Double? {
         guard let result = aggregate(.Maximum, field: field) else {
             return nil
         }
         return Double(result["MAX(\(field))"]!.string)
     }
     
-    public func min(field: String = "*") -> Double? {
+    public func minimum(field: String = "*") -> Double? {
         guard let result = aggregate(.Minimum, field: field) else {
             return nil
         }

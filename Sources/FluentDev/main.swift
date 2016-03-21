@@ -15,8 +15,9 @@ User.find(1, 2, 4)
 User.find("name", .Equals, "Jane Doe")
 User.find("name", in: ["Tanner", "Jane"])
 
-let u = User(serialized: [:])
+let u = User(name: "Vapor")
 u.save()
+u.id = "5" //simulate save
 u.delete()
 
 //: Query Builder - Different looks of using Query Builder Class
@@ -35,7 +36,7 @@ Query<User>().all()
 
 // Retrieve A Single Row
 
-Query<User>().filter("name", .Equals, "John").first()
+Query<User>().filter("name", "John").first()
 Query<User>().filter("name", .Equals, "Parker Collins").distinct().first() // with distinct
 
 // Chucking
@@ -51,9 +52,9 @@ Query<User>().list("title")
 
 Query<User>().count()
 Query<User>().count("name")
-Query<User>().max()
-Query<User>().min()
-Query<User>().avg()
+Query<User>().maximum()
+Query<User>().minimum()
+Query<User>().average()
 
 // Joins
 
@@ -61,9 +62,9 @@ Query<User>().join(Address.self)?.all("\(Address.entity).*")
 
 // Where
 
-Query<User>().filter("name", .Equals, "John").or {
-   $0.filter("phone", .NotEquals, "2234567890").and {
-        $0.filter("address", .Equals, "100 Apt Ln")
+Query<User>().filter("name", .Equals, "John").or { query in
+    query.filter("phone", .NotEquals, "2234567890").and { query in
+        query.filter("address", .Equals, "100 Apt Ln").filter("other", 1)
    }
 }.all()
 
