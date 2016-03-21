@@ -15,17 +15,17 @@ public class SQL<T: Model>: Helper<T> {
             statement.append("WHERE \(whereClause)")
         }
         
+        if query.sorts.count > 0 {
+            let sortStrings = query.sorts.map { return $0.sql }
+            statement.append(sortStrings.joinWithSeparator(" "))
+        }
+        
         if let limit = query.limit where limit.count > 0 {
             statement.append(limit.sql)
         }
         
         if let offset = query.offset where offset.count > 0 {
             statement.append(offset.sql)
-        }
-        
-        if query.sorts.count > 0 {
-            let sortStrings = query.sorts.map { return $0.sql }
-           statement.append(sortStrings.joinWithSeparator(" "))
         }
         
         return "\(statement.joinWithSeparator(" "));"
@@ -191,9 +191,9 @@ extension Filter.Scope {
 extension Sort {
     var sql: String {
         if case .Ascending = direction {
-            return "\(field) ASC"
+            return "ORDER BY \(field) ASC"
         } else if case .Descending = direction {
-            return "\(field) DESC"
+            return "ORDER BY \(field) DESC"
         }
         return ""
     }
