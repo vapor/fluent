@@ -26,8 +26,8 @@ public class Query<T: Model> {
         return run(fields)?.first
     }
     
-    public func all(fields: String...) -> [T]? {
-        return run(fields)
+    public func all(fields: String...) -> [T] {
+        return run(fields) ?? []
     }
     
     func run(fields: [String]? = nil) -> [T]? {

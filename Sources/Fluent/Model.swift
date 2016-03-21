@@ -21,6 +21,10 @@ extension Model {
     public func delete() {
         Query().delete(self)
     }
+
+    public static func all() -> [Self] {
+        return Query().all()
+    }
     
     public static func find(ids: Value...) -> [Self]? {
         return Query().filter("id", in: ids).all()
