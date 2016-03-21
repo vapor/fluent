@@ -1,5 +1,5 @@
 public class SQL<T: Model>: Helper<T> {
-    public var values: [String?]
+    public var values: [String]
     
     public var statement: String {
         var statement = [query.action.sql(query.fields)]
@@ -49,16 +49,23 @@ public class SQL<T: Model>: Helper<T> {
             let fieldsString = items.keys.joinWithSeparator(", ")
             
             let valuesString = items.map { (key, value) in
-                self.values.append(value?.string)
-                
-                return self.nextPlaceholder
+                if let value = value {
+                    self.values.append(value.string)
+                    return self.nextPlaceholder
+                } else {
+                    return "NULL"
+                }
             }.joinWithSeparator(", ")
             
             return "(\(fieldsString)) VALUES (\(valuesString))"
         case .Update:
             let updatesString = items.map { (key, value) in
-                self.values.append(value?.string)
-                return "\(key) = \(self.nextPlaceholder)"
+                if let value = value {
+                    self.values.append(value.string)
+                    return "\(key) = \(self.nextPlaceholder)"
+                } else {
+                    return "\(key) = NULL"
+                }
             }.joinWithSeparator(", ")
             
             return "SET \(updatesString)"
