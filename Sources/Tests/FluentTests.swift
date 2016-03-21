@@ -13,8 +13,12 @@ import XCTest
 
 class FluentTests: XCTestCase {
     class TestDriver: Driver {
-        func execute(dslContext: DSGenerator) -> [[String : StatementValue]]? {
-            return [["id": 0, "success": true]]
+        func execute<T: Model>(query: Query<T>) throws -> [[String: Value]] {
+            let sql = SQL(query: query)
+            if sql.statement == "SELECT * FROM test LIMIT 1;" {
+                return [["id": 0, "success": true]]
+            }
+            return []
         }
     }
     
@@ -27,13 +31,13 @@ class FluentTests: XCTestCase {
         
         var success: Bool = false
         
-        func serialize() -> [String: StatementValue] {
-            return ["id": self.id!]
+        func serialize() -> [String: Value?] {
+            return ["id": nil, "success": false]
         }
         
-        required init(deserialize: [String: StatementValue]) {
-            self.id = deserialize["id"] as? String ?? ""
-            self.success = deserialize["success"] as? Bool ?? false
+        required init(serialized: [String: Value]) {
+            self.id = serialized["id"] as? String ?? ""
+            self.success = serialized["success"] as? Bool ?? false
         }
     }
     
