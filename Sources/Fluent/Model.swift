@@ -22,35 +22,6 @@ extension Model {
         Query().delete(self)
     }
     
-    // TODO: Finish This
-    
-    public func hasOne<T: Model>(table: T.Type, foreignKey: String? = nil) -> T? {
-        let q = Query<T>()
-        let fkey = foreignKey ?? "\(Self.entity)_id"
-        return q.filter(fkey, .Equals, id!).first()
-    }
-    
-    public func hasMany<T: Model>(table: T.Type, foreignKey: String? = nil) -> [T]? {
-        let q = Query<T>()
-        let fkey = foreignKey ?? "\(Self.entity)_id"
-        return q.filter(fkey, .Equals, id!).all()
-    }
-    
-    public func belongsTo<T: Model>(table: T.Type, foreignKey: String? = nil, otherKey: String? = nil) -> T? {
-        let q = Query<T>()
-        let fkey = foreignKey ?? "\(table.entity)_id"
-        let other = otherKey ?? "id"
-        return q.filter(other, .Equals, fkey).first()
-    }
-    
-//    public func belongsToMany<T: Model>(table: T.Type, intermediateTableName: String? = nil, foreignKey1: String? = nil, foreignKey2: String? = nil) -> [T]? {
-//        return Query().joins([table])
-//    }
-
-//    public func hasManyThrough<T: Model, U: Model>(table1: T.Type, table2: U.Type, foreignKey1: String? = nil, foreignKey2: String? = nil) -> [T]? {
-//        return nil
-//    }
-    
     public static func find(ids: Value...) -> [Self]? {
         return Query().filter("id", in: ids).all()
     }
@@ -78,32 +49,4 @@ extension Model {
     public static func last(count: Int = 1) -> Self? {
         return Query().sort("id", .Descending).limit(count).first()
     }
-    
-//    public static func list(key: String) -> [String]? {
-//        return Query().list(key)
-//    }
-//
-//    public static func exist() -> Bool {
-//        return self.count > 0
-//    }
-//
-//    public static var count: Int {
-//        return Query().count()
-//    }
-//    
-//    public static func average(key: String = "*") -> Double {
-//        return Query().avg(key)
-//    }
-//    
-//    public static func maximum(key: String = "*") -> Double {
-//        return Query().max(key)
-//    }
-//    
-//    public static func minimum(key: String = "*") -> Double {
-//        return Query().min(key)
-//    }
-//    
-//    public static func sum(key: String = "*") -> Double {
-//        return Query().sum(key)
-//    }
 }
