@@ -1,5 +1,6 @@
 public enum Fluent: ErrorType {
-    case NoValue(message: String)
+    case InvalidValue(message: String)
+    case NoResult(message: String)
     case Unauthorized(message: String)
 }
 
@@ -13,6 +14,7 @@ extension Fluent {
 
 extension Fluent {
     public enum Model: ErrorType {
+        case NoID(message: String)
         case NotFound(message: String)
     }
 }
