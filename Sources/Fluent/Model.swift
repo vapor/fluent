@@ -22,8 +22,8 @@ extension Model {
         try Query().delete(self)
     }
 
-    public static func all() -> [Self] {
-        return Query().all()
+    public static func all() throws -> [Self] {
+        return try Query().all()
     }
     
     public static func find(ids: Value...) throws -> [Self] {
