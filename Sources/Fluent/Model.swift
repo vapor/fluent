@@ -8,49 +8,75 @@ public protocol Model {
 }
 
 extension Model {    
-    public func save() {
-        Query().save(self)
+    public func save() throws {
+        try Query().save(self)
     }
     
-    public static func saveMany<T: Model>(models: [T]) {
+    public static func saveMany<T: Model>(models: [T]) throws {
         for model in models {
-            model.save()
+            try model.save()
         }
     }
     
-    public func delete() {
-        Query().delete(self)
+    public func delete() throws {
+        try Query().delete(self)
     }
 
     public static func all() -> [Self] {
         return Query().all()
     }
     
-    public static func find(ids: Value...) -> [Self]? {
-        return Query().filter("id", in: ids).all()
+    public static func find(ids: Value...) throws -> [Self] {
+        let result: [Self] = try Query().filter("id", in: ids).all()
+        guard result.count > 0 else {
+            throw Fluent.Model.NotFound(message: "Model '\(self.dynamicType)' not found")
+        }
+        return result
+        
     }
     
-    public static func find(id: Value) -> Self? {
-        return Query().filter("id", .Equals, id).first()
+    public static func find(id: Value) throws -> Self {
+        guard let result: Self = try Query().filter("id", .Equals, id).first() else {
+            throw Fluent.Model.NotFound(message: "Model '\(self.dynamicType)' not found")
+        }
+        return result
     }
     
-    public static func find(field: String, _ comparison: Filter.Comparison, _ value: Value) -> [Self]? {
-        return Query().filter(field, comparison, value).all()
+    public static func find(field: String, _ comparison: Filter.Comparison, _ value: Value) throws -> [Self] {
+        let result: [Self] = try Query().filter(field, comparison, value).all()
+        guard result.count > 0 else {
+            throw Fluent.Model.NotFound(message: "Model '\(self.dynamicType)' not found")
+        }
+        return result
     }
     
-    public static func find(field: String, in value: [Value]) -> [Self]? {
-        return Query().filter(field, in: value).all()
+    public static func find(field: String, in value: [Value]) throws -> [Self] {
+        let result: [Self] = try Query().filter(field, in: value).all()
+        guard result.count > 0 else {
+            throw Fluent.Model.NotFound(message: "Model '\(self.dynamicType)' not found")
+        }
+        return result
     }
     
-    public static func take(count: Int = 1) -> [Self]? {
-        return Query().limit(count).all()
+    public static func take(count: Int = 1) throws -> [Self] {
+        let result: [Self] = try Query().limit(count).all()
+        guard result.count > 0 else {
+            throw Fluent.Model.NotFound(message: "Model '\(self.dynamicType)' not found")
+        }
+        return result
     }
     
-    public static func first(count: Int = 1) -> Self? {
-        return Query().sort("id", .Ascending).limit(count).first()
+    public static func first(count: Int = 1) throws -> Self {
+        guard let result: Self = try Query().sort("id", .Ascending).limit(count).first() else {
+            throw Fluent.Model.NotFound(message: "Model '\(self.dynamicType)' not found")
+        }
+        return result
     }
     
-    public static func last(count: Int = 1) -> Self? {
-        return Query().sort("id", .Descending).limit(count).first()
+    public static func last(count: Int = 1) throws -> Self {
+        guard let result: Self = try Query().sort("id", .Descending).limit(count).first() else {
+            throw Fluent.Model.NotFound(message: "Model '\(self.dynamicType)' not found")
+        }
+        return result
     }
 }

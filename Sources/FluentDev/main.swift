@@ -6,38 +6,42 @@ print("Hello, Fluent!")
 
 //: Model (Active Record)
 
-User.first()
-User.last()
+do {
+let result = try User.first()
+} catch Fluent.Model.NotFound(let message) {
+    print(message)
+}
+let _ = try? User.last()
 
-User.take(50)
-User.find(1)
-User.find(1, 2, 4)
-User.find("name", .Equals, "Jane Doe")
-User.find("name", in: ["Tanner", "Jane"])
+let _ = try? User.take(50)
+let _ = try? User.find(1)
+let _ = try? User.find(1, 2, 4)
+let _ = try? User.find("name", .Equals, "Jane Doe")
+let _ = try? User.find("name", in: ["Tanner", "Jane"])
 
 let u = User(name: "Vapor")
-u.save()
+let _ = try? u.save()
 u.id = "5" //simulate save
-u.delete()
+let _ = try? u.delete()
 
 //: Query Builder - Different looks of using Query Builder Class
 
 // Insert
 
-Query<User>().insert(u.serialize())
+let _ = try? Query<User>().insert(u.serialize())
 
 // Update
 
-Query<User>().update(u.serialize())
+let _ = try? Query<User>().update(u.serialize())
 
 // Retrieve All Rows
 
-Query<User>().all()
+let _ = try? Query<User>().all()
 
 // Retrieve A Single Row
 
-Query<User>().filter("name", "John").first()
-Query<User>().filter("name", .Equals, "Parker Collins").distinct().first() // with distinct
+let _ = try? Query<User>().filter("name", "John").first()
+let _ = try? Query<User>().filter("name", .Equals, "Parker Collins").distinct().first() // with distinct
 
 // Chucking
 
@@ -45,24 +49,24 @@ Query<User>().filter("name", .Equals, "Parker Collins").distinct().first() // wi
 
 // List / Pluck
 
-Query<User>().list("title")
+let _ = try? Query<User>().list("title")
 
 
 // Aggregates
 
-Query<User>().count()
-Query<User>().count("name")
-Query<User>().maximum()
-Query<User>().minimum()
-Query<User>().average()
+let _ = try? Query<User>().count()
+let _ = try? Query<User>().count("name")
+let _ = try? Query<User>().maximum()
+let _ = try? Query<User>().minimum()
+let _ = try? Query<User>().average()
 
 // Joins
 
-Query<User>().join(Address.self)?.all("\(Address.entity).*")
+let _ = try? Query<User>().join(Address.self)?.all("\(Address.entity).*")
 
 // Where
 
-Query<User>().filter("name", .Equals, "John").or { query in
+let _ = try? Query<User>().filter("name", .Equals, "John").or { query in
     query.filter("phone", .NotEquals, "2234567890").and { query in
         query.filter("address", .Equals, "100 Apt Ln").filter("other", 1)
    }
@@ -70,10 +74,9 @@ Query<User>().filter("name", .Equals, "John").or { query in
 
 // Order By
 
-Query<User>().filter("name", .Equals, "John").sort("name", .Ascending).all()
+let _ = try? Query<User>().filter("name", .Equals, "John").sort("name", .Ascending).all()
 
 // Limit And Offset
 
-Query<User>().filter("name", .Equals, "John").limit().all()
-
-Query<User>().filter("name", .Equals, "Jane").limit(10).offset(5).all()
+let _ = try? Query<User>().filter("name", .Equals, "John").limit().all()
+let _ = try? Query<User>().filter("name", .Equals, "Jane").limit(10).offset(5).all()
