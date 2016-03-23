@@ -49,11 +49,15 @@ class FluentTests: XCTestCase {
     
     func testFluent() {
         prepare()
-        if let test = Query<TestModel>().first() {
-            if !test.success {
+        do {
+            if let test = try Query<TestModel>().first() {
+                if !test.success {
+                    XCTFail()
+                }
+            } else {
                 XCTFail()
             }
-        } else {
+        } catch {
             XCTFail()
         }
     }
