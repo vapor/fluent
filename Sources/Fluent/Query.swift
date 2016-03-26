@@ -208,6 +208,6 @@ public class Query<T: Model> {
         guard results.count > 0 else {
             throw Fluent.NoResult(message: "No results found")
         }
-        return results.first
+        return results.first!
     }
 }

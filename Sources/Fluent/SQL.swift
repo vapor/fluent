@@ -17,11 +17,7 @@ public class SQL<T: Model>: Helper<T> {
 
         if query.sorts.count > 0 {
             let sortStrings = query.sorts.map { return $0.sql }
-#if swift(>=3.0)
             statement.append(sortStrings.joined(separator: " "))
-#else
-            statement.append(sortStrings.joinWithSeparator(" "))
-#endif
         }
 
         if let limit = query.limit where limit.count > 0 {
@@ -32,11 +28,7 @@ public class SQL<T: Model>: Helper<T> {
             statement.append(offset.sql)
         }
 
-#if swift(>=3.0)
         return "\(statement.joined(separator: " "));"
-#else
-        return "\(statement.joinWithSeparator(" "));"
-#endif
     }
 
     public var nextPlaceholder: String {
@@ -54,12 +46,7 @@ public class SQL<T: Model>: Helper<T> {
 
         switch query.action {
         case .Insert:
-#if swift(>=3.0)
             let fieldsString = items.keys.joined(separator: ", ")
-#else
-            let fieldsString = items.keys.joinWithSeparator(", ")
-#endif
-
             let rawValuesString = items.map { (key, value) -> String in
                 if let value = value {
                     self.values.append(value.string)
@@ -69,12 +56,7 @@ public class SQL<T: Model>: Helper<T> {
                 }
             }
 
-#if swift(>=3.0)
             let valuesString = rawValuesString.joined(separator: ", ")
-#else
-            let valuesString = rawValuesString.joinWithSeparator(", ")
-#endif
-
             return "(\(fieldsString)) VALUES (\(valuesString))"
         case .Update:
             let rawUpdatesString = items.map { (key, value) -> String in
@@ -86,12 +68,7 @@ public class SQL<T: Model>: Helper<T> {
                 }
             }
 
-#if swift(>=3.0)
-            let updatesString = rawUpdatesString.joined(separator: ", ")
-#else
-            let updatesString = rawUpdatesString.joinWithSeparator(", ")
-#endif
-
+            let updatesString = rawUpdatesString.joined(separator: ", "
             return "SET \(updatesString)"
         default:
             return nil
@@ -104,12 +81,7 @@ public class SQL<T: Model>: Helper<T> {
         }
 
         let queryUnionsSQL = query.unions.map { return $0.sql }
-
-#if swift(>=3.0)
         return queryUnionsSQL.joined(separator: " ")
-#else
-        return queryUnionsSQL.joinWithSeparator(" ")
-#endif
     }
 
     var whereClause: String? {
@@ -122,11 +94,7 @@ public class SQL<T: Model>: Helper<T> {
             filterClause.append(filterOutput(filter))
         }
 
-#if swift(>=3.0)
         return filterClause.joined(separator: " AND ")
-#else
-        return filterClause.joinWithSeparator(" AND ")
-#endif
     }
 
     public override init(query: Query<T>) {
@@ -146,12 +114,7 @@ public class SQL<T: Model>: Helper<T> {
                 return nextPlaceholder
             }
 
-#if swift(>=3.0)
             let valueStrings = rawValueStrings.joined(separator: ", ")
-#else
-            let valueStrings = rawValueStrings.joinWithSeparator(", ")
-#endif
-
             return "\(field) \(scope.sql) (\(valueStrings))"
         case .Group(let op, let filters):
             let f: [String] = filters.map {
@@ -161,11 +124,7 @@ public class SQL<T: Model>: Helper<T> {
                 return "\(self.filterOutput($0))"
             }
 
-#if swift(>=3.0)
             return "(" + f.joined(separator: " \(op.sql) ") + ")"
-#else
-            return "(" + f.joinWithSeparator(" \(op.sql) ") + ")"
-#endif
         }
     }
 }
@@ -183,22 +142,14 @@ extension Action {
             }
 
             if fields.count > 0 {
-#if swift(>=3.0)
                 select.append(fields.joined(separator: ", "))
-#else
-                select.append(fields.joinWithSeparator(", "))
-#endif
             } else {
                 select.append("*")
             }
 
             select.append("FROM")
 
-#if swift(>=3.0)
             return select.joined(separator: " ")
-#else
-            return select.joinWithSeparator(" ")
-#endif
         case .Delete:
             return "DELETE FROM"
         case .Insert:
@@ -280,11 +231,7 @@ extension Union {
         components.append("ON")
         components.append("\(foreignKey)=\(otherKey)")
 
-#if swift(>=3.0)
         return components.joined(separator: " ")
-#else
-        return components.joinWithSeparator(" ")
-#endif
     }
 }
 
