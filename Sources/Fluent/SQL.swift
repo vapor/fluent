@@ -1,157 +1,116 @@
 public class SQL<T: Model>: Helper<T> {
     public var values: [String]
-
+    
     public var statement: String {
         var statement = [query.action.sql(query.fields)]
         statement.append(table)
-
+        
         if let dataClause = self.dataClause {
             statement.append(dataClause)
         } else if let unionClause = self.unionClause {
             statement.append(unionClause)
         }
-
+        
         if let whereClause = self.whereClause {
             statement.append("WHERE \(whereClause)")
         }
-
+        
         if query.sorts.count > 0 {
             let sortStrings = query.sorts.map { return $0.sql }
-#if swift(>=3.0)
-            statement.append(sortStrings.joined(separator: " "))
-#else
             statement.append(sortStrings.joinWithSeparator(" "))
-#endif
         }
-
+        
         if let limit = query.limit where limit.count > 0 {
             statement.append(limit.sql)
         }
-
+        
         if let offset = query.offset where offset.count > 0 {
             statement.append(offset.sql)
         }
-
-#if swift(>=3.0)
-        return "\(statement.joined(separator: " "));"
-#else
+        
         return "\(statement.joinWithSeparator(" "));"
-#endif
     }
-
+    
     public var nextPlaceholder: String {
         return "?"
     }
-
+    
     var table: String {
         return query.entity
     }
-
+    
     var dataClause: String? {
         guard let items = query.items else {
             return nil
         }
-
+        
         switch query.action {
         case .Insert:
-#if swift(>=3.0)
-            let fieldsString = items.keys.joined(separator: ", ")
-#else
             let fieldsString = items.keys.joinWithSeparator(", ")
-#endif
-
-            let rawValuesString = items.map { (key, value) -> String in
+            
+            let valuesString = items.map { (key, value) in
                 if let value = value {
                     self.values.append(value.string)
                     return self.nextPlaceholder
                 } else {
                     return "NULL"
                 }
-            }
-
-#if swift(>=3.0)
-            let valuesString = rawValuesString.joined(separator: ", ")
-#else
-            let valuesString = rawValuesString.joinWithSeparator(", ")
-#endif
-
+            }.joinWithSeparator(", ")
+            
             return "(\(fieldsString)) VALUES (\(valuesString))"
         case .Update:
-            let rawUpdatesString = items.map { (key, value) -> String in
+            let updatesString = items.map { (key, value) in
                 if let value = value {
                     self.values.append(value.string)
                     return "\(key) = \(self.nextPlaceholder)"
                 } else {
                     return "\(key) = NULL"
                 }
-            }
-
-#if swift(>=3.0)
-            let updatesString = rawUpdatesString.joined(separator: ", ")
-#else
-            let updatesString = rawUpdatesString.joinWithSeparator(", ")
-#endif
-
+            }.joinWithSeparator(", ")
+            
             return "SET \(updatesString)"
         default:
             return nil
         }
     }
-
+    
     var unionClause: String? {
         if query.unions.count == 0 {
             return nil
         }
-
-        let queryUnionsSQL = query.unions.map { return $0.sql }
-
-#if swift(>=3.0)
-        return queryUnionsSQL.joined(separator: " ")
-#else
-        return queryUnionsSQL.joinWithSeparator(" ")
-#endif
+        return query.unions.map { return $0.sql }.joinWithSeparator(" ")
     }
-
+    
     var whereClause: String? {
         if query.filters.count == 0 {
             return nil
         }
-
+        
         var filterClause: [String] = []
         for filter in query.filters {
             filterClause.append(filterOutput(filter))
         }
-
-#if swift(>=3.0)
-        return filterClause.joined(separator: " AND ")
-#else
+        
         return filterClause.joinWithSeparator(" AND ")
-#endif
     }
 
     public override init(query: Query<T>) {
         values = []
         super.init(query: query)
     }
-
+    
     func filterOutput(filter: Filter) -> String {
         switch filter {
         case .Compare(let field, let comparison, let value):
             self.values.append(value.string)
-
+            
             return "\(field) \(comparison.sql) \(nextPlaceholder)"
         case .Subset(let field, let scope, let values):
-            let rawValueStrings = values.map { value -> String in
+            let valueStrings = values.map { value in
                 self.values.append(value.string)
                 return nextPlaceholder
-            }
-
-#if swift(>=3.0)
-            let valueStrings = rawValueStrings.joined(separator: ", ")
-#else
-            let valueStrings = rawValueStrings.joinWithSeparator(", ")
-#endif
-
+            }.joinWithSeparator(", ")
+            
             return "\(field) \(scope.sql) (\(valueStrings))"
         case .Group(let op, let filters):
             let f: [String] = filters.map {
@@ -160,12 +119,7 @@ public class SQL<T: Model>: Helper<T> {
                 }
                 return "\(self.filterOutput($0))"
             }
-
-#if swift(>=3.0)
-            return "(" + f.joined(separator: " \(op.sql) ") + ")"
-#else
             return "(" + f.joinWithSeparator(" \(op.sql) ") + ")"
-#endif
         }
     }
 }
@@ -177,28 +131,19 @@ extension Action {
         switch self {
         case .Select(let distinct):
             var select = ["SELECT"]
-
+            
             if distinct {
                 select.append("DISTINCT")
             }
-
+            
             if fields.count > 0 {
-#if swift(>=3.0)
-                select.append(fields.joined(separator: ", "))
-#else
                 select.append(fields.joinWithSeparator(", "))
-#endif
             } else {
                 select.append("*")
             }
-
+            
             select.append("FROM")
-
-#if swift(>=3.0)
-            return select.joined(separator: " ")
-#else
             return select.joinWithSeparator(" ")
-#endif
         case .Delete:
             return "DELETE FROM"
         case .Insert:
@@ -279,12 +224,7 @@ extension Union {
         components.append(entity)
         components.append("ON")
         components.append("\(foreignKey)=\(otherKey)")
-
-#if swift(>=3.0)
-        return components.joined(separator: " ")
-#else
         return components.joinWithSeparator(" ")
-#endif
     }
 }
 
