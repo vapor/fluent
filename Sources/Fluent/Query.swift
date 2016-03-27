@@ -65,7 +65,7 @@ public class Query<T: Model> {
     
     public func delete(model: T) throws {
         guard let id = model.id else {
-            throw Fluent.Model.NoID(message: "Model has no id")
+            throw ModelError.NoID(message: "Model has no id")
         }
         action = .Delete
         
@@ -163,7 +163,7 @@ public class Query<T: Model> {
     public func count(field: String = "*") throws -> Int {
         let result = try aggregate(.Count, field: field)
         guard let value = Int(result["COUNT(\(field))"]!.string) else {
-            throw Fluent.InvalidValue(message: "Result value was invalid")
+            throw QueryError.InvalidValue(message: "Result value was invalid")
         }
         return value
     }
@@ -171,7 +171,7 @@ public class Query<T: Model> {
     public func average(field: String = "*") throws -> Double {
         let result = try aggregate(.Average, field: field)
         guard let value = Double(result["AVG(\(field))"]!.string) else {
-            throw Fluent.InvalidValue(message: "Result value was invalid")
+            throw QueryError.InvalidValue(message: "Result value was invalid")
         }
         return value
     }
@@ -179,7 +179,7 @@ public class Query<T: Model> {
     public func maximum(field: String = "*") throws -> Double {
         let result = try aggregate(.Maximum, field: field)
         guard let value = Double(result["MAX(\(field))"]!.string) else {
-            throw Fluent.InvalidValue(message: "Result value was invalid")
+            throw QueryError.InvalidValue(message: "Result value was invalid")
         }
         return value
     }
@@ -187,7 +187,7 @@ public class Query<T: Model> {
     public func minimum(field: String = "*") throws -> Double {
         let result = try aggregate(.Minimum, field: field)
         guard let value = Double(result["MIN(\(field))"]!.string) else {
-            throw Fluent.InvalidValue(message: "Result value was invalid")
+            throw QueryError.InvalidValue(message: "Result value was invalid")
         }
         return value
     }
@@ -196,7 +196,7 @@ public class Query<T: Model> {
         let result = try aggregate(.Sum, field: field)
         
         guard let value = Double(result["SUM(\(field))"]!.string) else {
-            throw Fluent.InvalidValue(message: "Result value was invalid")
+            throw QueryError.InvalidValue(message: "Result value was invalid")
         }
         return value
     }
@@ -206,8 +206,9 @@ public class Query<T: Model> {
         self.fields = [field]
         let results = try Database.driver.execute(self)
         guard results.count > 0 else {
-            throw Fluent.NoResult(message: "No results found")
+            throw QueryError.NoResult(message: "No results found")
         }
         return results.first!
     }
 }
+

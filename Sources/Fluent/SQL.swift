@@ -68,7 +68,7 @@ public class SQL<T: Model>: Helper<T> {
                 }
             }
 
-            let updatesString = rawUpdatesString.joined(separator: ", "
+            let updatesString = rawUpdatesString.joined(separator: ", ")
             return "SET \(updatesString)"
         default:
             return nil
