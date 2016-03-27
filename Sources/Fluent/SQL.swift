@@ -17,7 +17,7 @@ public class SQL<T: Model>: Helper<T> {
         
         if query.sorts.count > 0 {
             let sortStrings = query.sorts.map { return $0.sql }
-            statement.append(sortStrings.joinWithSeparator(" "))
+            statement.append(sortStrings.joined(separator: " "))
         }
         
         if let limit = query.limit where limit.count > 0 {
@@ -28,7 +28,7 @@ public class SQL<T: Model>: Helper<T> {
             statement.append(offset.sql)
         }
         
-        return "\(statement.joinWithSeparator(" "));"
+        return "\(statement.joined(separator: " "));"
     }
     
     public var nextPlaceholder: String {
@@ -46,7 +46,7 @@ public class SQL<T: Model>: Helper<T> {
         
         switch query.action {
         case .Insert:
-            let fieldsString = items.keys.joinWithSeparator(", ")
+            let fieldsString = items.keys.joined(separator: ", ")
             
             let valuesString = items.map { (key, value) in
                 if let value = value {
@@ -55,7 +55,7 @@ public class SQL<T: Model>: Helper<T> {
                 } else {
                     return "NULL"
                 }
-            }.joinWithSeparator(", ")
+            }.joined(separator: ", ")
             
             return "(\(fieldsString)) VALUES (\(valuesString))"
         case .Update:
@@ -66,7 +66,7 @@ public class SQL<T: Model>: Helper<T> {
                 } else {
                     return "\(key) = NULL"
                 }
-            }.joinWithSeparator(", ")
+            }.joined(separator: ", ")
             
             return "SET \(updatesString)"
         default:
@@ -78,7 +78,7 @@ public class SQL<T: Model>: Helper<T> {
         if query.unions.count == 0 {
             return nil
         }
-        return query.unions.map { return $0.sql }.joinWithSeparator(" ")
+        return query.unions.map { return $0.sql }.joined(separator: " ")
     }
     
     var whereClause: String? {
@@ -91,7 +91,7 @@ public class SQL<T: Model>: Helper<T> {
             filterClause.append(filterOutput(filter))
         }
         
-        return filterClause.joinWithSeparator(" AND ")
+        return filterClause.joined(separator: " AND ")
     }
 
     public override init(query: Query<T>) {
@@ -109,7 +109,7 @@ public class SQL<T: Model>: Helper<T> {
             let valueStrings = values.map { value in
                 self.values.append(value.string)
                 return nextPlaceholder
-            }.joinWithSeparator(", ")
+            }.joined(separator: ", ")
             
             return "\(field) \(scope.sql) (\(valueStrings))"
         case .Group(let op, let filters):
@@ -119,7 +119,7 @@ public class SQL<T: Model>: Helper<T> {
                 }
                 return "\(self.filterOutput($0))"
             }
-            return "(" + f.joinWithSeparator(" \(op.sql) ") + ")"
+            return "(" + f.joined(separator: " \(op.sql) ") + ")"
         }
     }
 }
@@ -137,13 +137,13 @@ extension Action {
             }
             
             if fields.count > 0 {
-                select.append(fields.joinWithSeparator(", "))
+                select.append(fields.joined(separator: ", "))
             } else {
                 select.append("*")
             }
             
             select.append("FROM")
-            return select.joinWithSeparator(" ")
+            return select.joined(separator: " ")
         case .Delete:
             return "DELETE FROM"
         case .Insert:
@@ -224,7 +224,7 @@ extension Union {
         components.append(entity)
         components.append("ON")
         components.append("\(foreignKey)=\(otherKey)")
-        return components.joinWithSeparator(" ")
+        return components.joined(separator: " ")
     }
 }
 
