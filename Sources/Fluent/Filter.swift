@@ -1,11 +1,3 @@
-//
-//  Filter.swift
-//  Fluent
-//
-//  Created by Tanner Nelson on 3/16/16.
-//  Copyright © 2016 Qutheory. All rights reserved.
-//
-
 public enum Filter {
     case Compare(String, Comparison, Value)
     case Subset(String, Scope, [Value])

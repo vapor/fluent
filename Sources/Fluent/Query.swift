@@ -2,13 +2,13 @@ public class Query<T: Model> {
     public typealias FilterHandler = (query: Query) -> Query
     public var filters: [Filter]
     
+    var sorts: [Sort]
+    var unions: [Union]
     var fields: [String]
+    var items: [String: Value?]?
     var limit: Limit?
     var offset: Offset?
     var action: Action
-    var items: [String: Value?]?
-    var sorts: [Sort]
-    var unions: [Union]
     var entity: String {
         return T.entity
     }
@@ -21,25 +21,23 @@ public class Query<T: Model> {
         action = .Select(false)
     }
     
-    public func first(fields: String...) -> T? {
+    public func first(fields: String...) throws -> T? {
         limit = Limit(count: 1)
-        return run(fields)?.first
+        return try run(fields).first
     }
     
-    public func all(fields: String...) -> [T] {
-        return run(fields) ?? []
+    public func all(fields: String...) throws -> [T] {
+        return try run(fields)
     }
     
-    func run(fields: [String]? = nil) -> [T]? {
+    func run(fields: [String]? = nil) throws -> [T] {
         if let fields = fields {
             self.fields += fields
         }
         
         var models: [T] = []
         
-        guard let results = try? Database.driver.execute(self) else {
-            return nil
-        }
+        let results = try Database.driver.execute(self)
         
         for result in results {
             let model = T(serialized: result)
@@ -49,48 +47,45 @@ public class Query<T: Model> {
         return models
     }
     
-    
-    public func save(model: T) -> T {
+    public func save(model: T) throws -> T {
         let data = model.serialize()
 
         if let id = model.id {
-            filter("id", .Equals, id).update(data)
+            try filter("id", .Equals, id).update(data)
         } else {
-            insert(data)
+            try insert(data)
         }
         return model
     }
     
-    public func delete() {
+    public func delete() throws {
         action = .Delete
-        run()
+        try run()
     }
     
-    public func delete(model: T) {
+    public func delete(model: T) throws {
         guard let id = model.id else {
-            //user wasn't saved yet
-            return
+            throw ModelError.NoID(message: "Model has no id")
         }
         action = .Delete
         
         let filter = Filter.Compare("id", .Equals, id)
         filters.append(filter)
         
-        run()
+        try run()
     }
     
-    public func update(items: [String: Value?]) {
+    public func update(items: [String: Value?]) throws {
         action = .Update
         self.items = items
-        run()
+        try run()
     }
 
-    public func insert(items: [String: Value?]) {
+    public func insert(items: [String: Value?]) throws {
         action = .Insert
         self.items = items
-        run()
+        try run()
     }
-    
     
     public func filter(field: String, _ value: Value) -> Self {
         let filter = Filter.Compare(field, .Equals, value)
@@ -127,10 +122,6 @@ public class Query<T: Model> {
         return self
     }
     
-    public func performQuery(string: String) -> Self {
-        return self
-    }
-    
     public func or(handler: FilterHandler) -> Self {
         let q = handler(query: Query())
         let filter = Filter.Group(.Or, q.filters)
@@ -158,65 +149,66 @@ public class Query<T: Model> {
         return self
     }
 
-    public func list(key: String) -> [Value]? {
-        guard let results = try? Database.driver.execute(self) else {
-            return nil
-        }
-        
-        var items = [Value]()
-        for result in results {
-            for (k, v) in result {
-                if k == key {
-                    items.append(v)
-                }
+    public func list(key: String) throws -> [Value] {
+        let results = try Database.driver.execute(self)
+        return results.reduce([]) {
+            var newArr = $0
+            if let value = $1[key] {
+                newArr.append(value)
             }
+            return newArr
         }
-        return items
     }
     
-    // MARK: - Aggregate
-    
-    public func count(field: String = "*") -> Int? {
-        guard let result = aggregate(.Count, field: field) else {
-            return nil
+    public func count(field: String = "*") throws -> Int {
+        let result = try aggregate(.Count, field: field)
+        guard let value = Int(result["COUNT(\(field))"]!.string) else {
+            throw QueryError.InvalidValue(message: "Result value was invalid")
         }
-        return Int(result["COUNT(\(field))"]!.string)
+        return value
     }
     
-    public func average(field: String = "*") -> Double? {
-        guard let result = aggregate(.Average, field: field) else {
-            return nil
+    public func average(field: String = "*") throws -> Double {
+        let result = try aggregate(.Average, field: field)
+        guard let value = Double(result["AVG(\(field))"]!.string) else {
+            throw QueryError.InvalidValue(message: "Result value was invalid")
         }
-        return Double(result["AVG(\(field))"]!.string)
+        return value
     }
     
-    public func maximum(field: String = "*") -> Double? {
-        guard let result = aggregate(.Maximum, field: field) else {
-            return nil
+    public func maximum(field: String = "*") throws -> Double {
+        let result = try aggregate(.Maximum, field: field)
+        guard let value = Double(result["MAX(\(field))"]!.string) else {
+            throw QueryError.InvalidValue(message: "Result value was invalid")
         }
-        return Double(result["MAX(\(field))"]!.string)
+        return value
     }
     
-    public func minimum(field: String = "*") -> Double? {
-        guard let result = aggregate(.Minimum, field: field) else {
-            return nil
+    public func minimum(field: String = "*") throws -> Double {
+        let result = try aggregate(.Minimum, field: field)
+        guard let value = Double(result["MIN(\(field))"]!.string) else {
+            throw QueryError.InvalidValue(message: "Result value was invalid")
         }
-        return Double(result["MIN(\(field))"]!.string)
+        return value
     }
     
-    public func sum(field: String = "*") -> Double? {
-        guard let result = aggregate(.Sum, field: field) else {
-            return nil
+    public func sum(field: String = "*") throws -> Double {
+        let result = try aggregate(.Sum, field: field)
+        
+        guard let value = Double(result["SUM(\(field))"]!.string) else {
+            throw QueryError.InvalidValue(message: "Result value was invalid")
         }
-        return Double(result["SUM(\(field))"]!.string)
+        return value
     }
     
-    private func aggregate(action: Action, field: String) -> [String: Value]? {
+    private func aggregate(action: Action, field: String) throws -> [String: Value] {
         self.action = action
         self.fields = [field]
-        guard let results = try? Database.driver.execute(self) else {
-            return nil
+        let results = try Database.driver.execute(self)
+        guard results.count > 0 else {
+            throw QueryError.NoResult(message: "No results found")
         }
-        return results.first
+        return results.first!
     }
 }
+
