@@ -8,7 +8,7 @@ print("Hello, Fluent!")
 
 do {
 let result = try User.first()
-} catch Fluent.Model.NotFound(let message) {
+} catch ModelError.NotFound(let message) {
     print(message)
 }
 let _ = try? User.last()
