@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0730"
+   LastUpgradeVersion = "9999"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -11,13 +11,40 @@
             buildForRunning = "YES"
             buildForProfiling = "YES"
             buildForArchiving = "YES"
-            buildForAnalyzing = "YES"
-            hideIssues = "NO">
+            buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "1E0484401C949B35001F8B1E"
-               BuildableName = "Fluent.framework"
+               BlueprintIdentifier = "______Target_Fluent"
+               BuildableName = "libFluent.dylib"
                BlueprintName = "Fluent"
+               ReferencedContainer = "container:Fluent.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "______Target_FluentDev"
+               BuildableName = "FluentDev"
+               BlueprintName = "FluentDev"
+               ReferencedContainer = "container:Fluent.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "______Target_libc"
+               BuildableName = "liblibc.dylib"
+               BlueprintName = "libc"
                ReferencedContainer = "container:Fluent.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -29,6 +56,16 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "______Target_FluentTestSuite"
+               BuildableName = "Fluent.testsuite.xctest"
+               BlueprintName = "Fluent.testsuite"
+               ReferencedContainer = "container:Fluent.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <AdditionalOptions>
       </AdditionalOptions>
@@ -46,8 +83,8 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "1E0484401C949B35001F8B1E"
-            BuildableName = "Fluent.framework"
+            BlueprintIdentifier = "______Target_Fluent"
+            BuildableName = "libFluent.dylib"
             BlueprintName = "Fluent"
             ReferencedContainer = "container:Fluent.xcodeproj">
          </BuildableReference>
@@ -61,15 +98,6 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "1E0484401C949B35001F8B1E"
-            BuildableName = "Fluent.framework"
-            BlueprintName = "Fluent"
-            ReferencedContainer = "container:Fluent.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">
