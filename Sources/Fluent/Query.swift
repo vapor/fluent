@@ -2,14 +2,14 @@ public class Query<T: Model> {
     public typealias FilterHandler = (query: Query) -> Query
     public var filters: [Filter]
     
-    var sorts: [Sort]
-    var unions: [Union]
-    var fields: [String]
-    var items: [String: Value?]?
-    var limit: Limit?
-    var offset: Offset?
-    var action: Action
-    var entity: String {
+    public var sorts: [Sort]
+    public var unions: [Union]
+    public var fields: [String]
+    public var items: [String: Value?]?
+    public var limit: Limit?
+    public var offset: Offset?
+    public var action: Action
+    public var entity: String {
         return T.entity
     }
     

@@ -83,7 +83,7 @@
 		__PBXFileRef_Tests/Fluent/QueryTests.swift /* QueryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueryTests.swift; sourceTree = "<group>"; };
 		"_____Product_Fluent" /* libFluent.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libFluent.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		"_____Product_FluentDev" /* FluentDev */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = FluentDev; sourceTree = BUILT_PRODUCTS_DIR; };
-		"_____Product_FluentTestSuite" /* FluentTestSuite.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; name = FluentTestSuite.xctest; path = Fluent.testsuite.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		"_____Product_FluentTestSuite" /* Fluent.testsuite.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = Fluent.testsuite.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		"_____Product_libc" /* liblibc.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = liblibc.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -127,7 +127,7 @@
 		TestProducts_ /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				"_____Product_FluentTestSuite" /* FluentTestSuite.xctest */,
+				"_____Product_FluentTestSuite" /* Fluent.testsuite.xctest */,
 			);
 			name = Tests;
 			sourceTree = "<group>";
@@ -278,7 +278,7 @@
 			);
 			name = Fluent.testsuite;
 			productName = FluentTestSuite;
-			productReference = "_____Product_FluentTestSuite" /* FluentTestSuite.xctest */;
+			productReference = "_____Product_FluentTestSuite" /* Fluent.testsuite.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		"______Target_libc" /* libc */ = {
