@@ -13,11 +13,11 @@ let result = try User.first()
 }
 let _ = try? User.last()
 
-let _ = try? User.take(count: 50)
-let _ = try? User.find(id: 1)
-let _ = try? User.find(ids: 1, 2, 4)
-let _ = try? User.find(field: "name", .Equals, "Jane Doe")
-let _ = try? User.find(field: "name", in: ["Tanner", "Jane"])
+let _ = try? User.take(50)
+let _ = try? User.find(1)
+let _ = try? User.find(1, 2, 4)
+let _ = try? User.find("name", .Equals, "Jane Doe")
+let _ = try? User.find("name", in: ["Tanner", "Jane"])
 
 let u = User(name: "Vapor")
 let _ = try? u.save()
@@ -28,11 +28,11 @@ let _ = try? u.delete()
 
 // Insert
 
-let _ = try? Query<User>().insert(items: u.serialize())
+let _ = try? Query<User>().insert(u.serialize())
 
 // Update
 
-let _ = try? Query<User>().update(items: u.serialize())
+let _ = try? Query<User>().update(u.serialize())
 
 // Retrieve All Rows
 
@@ -40,8 +40,8 @@ let _ = try? Query<User>().all()
 
 // Retrieve A Single Row
 
-let _ = try? Query<User>().filter(field: "name", "John").first()
-let _ = try? Query<User>().filter(field: "name", .Equals, "Parker Collins").distinct().first() // with distinct
+let _ = try? Query<User>().filter("name", "John").first()
+let _ = try? Query<User>().filter("name", .Equals, "Parker Collins").distinct().first() // with distinct
 
 // Chucking
 
@@ -49,34 +49,34 @@ let _ = try? Query<User>().filter(field: "name", .Equals, "Parker Collins").dist
 
 // List / Pluck
 
-let _ = try? Query<User>().list(key: "title")
+let _ = try? Query<User>().list("title")
 
 
 // Aggregates
 
 let _ = try? Query<User>().count()
-let _ = try? Query<User>().count(field: "name")
+let _ = try? Query<User>().count("name")
 let _ = try? Query<User>().maximum()
 let _ = try? Query<User>().minimum()
 let _ = try? Query<User>().average()
 
 // Joins
 
-let _ = try? Query<User>().join(type: Address.self)?.all(fields: "\(Address.entity).*")
+let _ = try? Query<User>().join(Address.self)?.all("\(Address.entity).*")
 
 // Where
 
-let _ = try? Query<User>().filter(field: "name", .Equals, "John").or { query in
-    query.filter(field: "phone", .NotEquals, "2234567890").and { query in
-		query.filter(field: "address", .Equals, "100 Apt Ln").filter(field: "other", 1)
+let _ = try? Query<User>().filter("name", .Equals, "John").or { query in
+    query.filter("phone", .NotEquals, "2234567890").and { query in
+        query.filter("address", .Equals, "100 Apt Ln").filter("other", 1)
    }
 }.all()
 
 // Order By
 
-let _ = try? Query<User>().filter(field: "name", .Equals, "John").sort(field: "name", .Ascending).all()
+let _ = try? Query<User>().filter("name", .Equals, "John").sort("name", .Ascending).all()
 
 // Limit And Offset
 
-let _ = try? Query<User>().filter(field: "name", .Equals, "John").limit().all()
-let _ = try? Query<User>().filter(field: "name", .Equals, "Jane").limit(count: 10).offset(count: 5).all()
+let _ = try? Query<User>().filter("name", .Equals, "John").limit().all()
+let _ = try? Query<User>().filter("name", .Equals, "Jane").limit(10).offset(5).all()
