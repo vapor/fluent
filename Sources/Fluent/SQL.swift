@@ -2,7 +2,7 @@ public class SQL<T: Model>: Helper<T> {
     public var values: [String]
 
     public var statement: String {
-        var statement = [query.action.sql(query.fields)]
+        var statement = [query.action.sql(fields: query.fields)]
         statement.append(table)
 
         if let dataClause = self.dataClause {
@@ -91,7 +91,7 @@ public class SQL<T: Model>: Helper<T> {
 
         var filterClause: [String] = []
         for filter in query.filters {
-            filterClause.append(filterOutput(filter))
+            filterClause.append(filterOutput(filter: filter))
         }
 
         return filterClause.joined(separator: " AND ")
@@ -119,9 +119,9 @@ public class SQL<T: Model>: Helper<T> {
         case .Group(let op, let filters):
             let f: [String] = filters.map {
                 if case .Group = $0 {
-                    return self.filterOutput($0)
+                    return self.filterOutput(filter: $0)
                 }
-                return "\(self.filterOutput($0))"
+                return "\(self.filterOutput(filter: $0))"
             }
 
             return "(" + f.joined(separator: " \(op.sql) ") + ")"
