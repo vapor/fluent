@@ -150,6 +150,7 @@ public class Query<T: Model> {
     }
 
     public func list(_ key: String) throws -> [Value] {
+		self.fields.append(key)
         let results = try Database.driver.execute(self)
         return results.reduce([]) {
             var newArr = $0
