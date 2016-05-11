@@ -102,7 +102,7 @@ public class SQL<T: Model>: Helper<T> {
         super.init(query: query)
     }
 
-    func filterOutput(filter: Filter) -> String {
+    func filterOutput(_ filter: Filter) -> String {
         switch filter {
         case .Compare(let field, let comparison, let value):
             self.values.append(value.string)
@@ -132,7 +132,7 @@ public class SQL<T: Model>: Helper<T> {
 //:
 
 extension Action {
-    func sql(fields: [String]) -> String {
+    func sql(_ fields: [String]) -> String {
         switch self {
         case .Select(let distinct):
             var select = ["SELECT"]
