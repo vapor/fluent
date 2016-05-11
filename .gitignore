@@ -4,4 +4,4 @@ Packages
 Database
 
 .DS_Store
-xcuserdata
+*.xcodeproj
