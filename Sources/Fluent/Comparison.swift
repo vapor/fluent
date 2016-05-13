@@ -21,14 +21,14 @@ public func >(lhs: String, rhs: Filterable) -> Filter {
     return .compare(lhs, .isGreaterThan, rhs)
 }
 
+public func !=(lhs: String, rhs: Filterable) -> Filter {
+    return .compare(lhs, .isNotEqualTo, rhs)
+}
+
 public func <=(lhs: String, rhs: Filterable) -> Filter {
     return .compare(lhs, .isLessThanOrEqualTo, rhs)
 }
 
 public func >=(lhs: String, rhs: Filterable) -> Filter {
     return .compare(lhs, .isGreaterThanOrEqualTo, rhs)
-}
-
-public func !=(lhs: String, rhs: Filterable) -> Filter {
-    return .compare(lhs, .isNotEqualTo, rhs)
 }
