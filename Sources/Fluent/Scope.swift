@@ -1,11 +1,23 @@
 extension Filter {
-    public enum Scope {
-        case In, NotIn
+    public enum Scope: String {
+        case `in`, notIn
     }
 }
 
-extension Filter.Scope: CustomStringConvertible {
-    public var description: String {
-        return self == .In ? "in" : "not in"
-    }
+infix operator !~= { precedence 130 }
+
+public func ~=(lhs: String, rhs: [Filterable]) -> Filter {
+    return .subset(lhs, .`in`, rhs)
+}
+
+public func !~=(lhs: String, rhs: [Filterable]) -> Filter {
+    return .subset(lhs, .notIn, rhs)
+}
+
+public func ~=<T: protocol<ForwardIndexType,Filterable>>(lhs: String, rhs: Range<T>) -> Filter {
+    return .subset(lhs, .`in`, rhs.map { $0 as Filterable })
+}
+
+public func !~=<T: protocol<ForwardIndexType,Filterable>>(lhs: String, rhs: Range<T>) -> Filter {
+    return .subset(lhs, .notIn, rhs.map { $0 as Filterable })
 }

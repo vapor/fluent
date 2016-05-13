@@ -1,19 +1,18 @@
 public enum Filter {
-    case Compare(String, Comparison, Value)
-    case Subset(String, Scope, [Value])
-    case Group(Operation, [Filter])
+    case compare(String, Comparison, Filterable)
+    case subset(String, Scope, [Filterable])
+    indirect case group(Filter, Operation, Filter)
 }
 
 extension Filter: CustomStringConvertible {
     public var description: String {
         switch self {
-        case .Compare(let field, let comparison, let value):
-            return "\(field) \(comparison) \(value.string)"
-        case .Subset(let field, let scope, let values):
-            let valueDescriptions = values.map { return $0.description }
-            return "\(field) \(scope) \(valueDescriptions)"
-        case .Group(let op, let filters):
-            return "\(op.description) \(filters)"
+        case .compare(let field, let comparison, let value):
+            return "\(field) \(comparison.rawValue) \(value.stringValue)"
+        case .subset(let field, let scope, let values):
+            return "\(field) \(scope.rawValue) \(values)"
+        case let .group(left, operation, right):
+            return "(\(left) \(operation.rawValue) \(right))"
         }
     }
 }

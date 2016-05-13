@@ -1,20 +1,34 @@
 extension Filter {
-    public enum Comparison {
-        case Equals, GreaterThan, LessThan, NotEquals
+    public enum Comparison: String {
+        case isEqualTo              = "="
+        case isLessThan             = "<"
+        case isGreaterThan          = ">"
+        case isNotEqualTo           = "!="
+        case isLessThanOrEqualTo    = "<="
+        case isGreaterThanOrEqualTo = ">="
     }
 }
 
-extension Filter.Comparison: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case .Equals:
-            return "="
-        case .GreaterThan:
-            return ">"
-        case .LessThan:
-            return "<"
-        case .NotEquals:
-            return "!="
-        }
-    }
+public func ==(lhs: String, rhs: Filterable) -> Filter {
+    return .compare(lhs, .isEqualTo, rhs)
+}
+
+public func <(lhs: String, rhs: Filterable) -> Filter {
+    return .compare(lhs, .isLessThan, rhs)
+}
+
+public func >(lhs: String, rhs: Filterable) -> Filter {
+    return .compare(lhs, .isGreaterThan, rhs)
+}
+
+public func <=(lhs: String, rhs: Filterable) -> Filter {
+    return .compare(lhs, .isLessThanOrEqualTo, rhs)
+}
+
+public func >=(lhs: String, rhs: Filterable) -> Filter {
+    return .compare(lhs, .isGreaterThanOrEqualTo, rhs)
+}
+
+public func !=(lhs: String, rhs: Filterable) -> Filter {
+    return .compare(lhs, .isNotEqualTo, rhs)
 }
