@@ -1,8 +1,9 @@
 public enum Filter {
     indirect case not(Filter)
-    case subset(String, Scope, [Filterable])
     case compare(String, Comparison, Filterable)
+    case subset(String, SubsetScope, [Filterable])
     indirect case group(Filter, Operation, Filter)
+    case range(String, RangeScope, Filterable, Filterable)
 }
 
 extension Filter: CustomStringConvertible {
@@ -14,6 +15,8 @@ extension Filter: CustomStringConvertible {
             return "\(field) \(scope.rawValue) \(values)"
         case let .group(left, operation, right):
             return "(\(left) \(operation.rawValue) \(right))"
+        case let .range(field, range, value1, value2):
+            return "\(field) \(range) \(value1) and \(value2)"
         case let .compare(field, comparison, value):
             return "\(field) \(comparison.rawValue) \(value.stringValue)"
         }
@@ -23,3 +26,5 @@ extension Filter: CustomStringConvertible {
 public prefix func !(filter: Filter) -> Filter {
     return .not(filter)
 }
+
+infix operator !~= { precedence 130 }
