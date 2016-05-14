@@ -1,12 +1,4 @@
 
-public protocol Entity {
-    static var entity: String { get }
-    var id: String? { get }
-    
-    func serialize() -> [String: Value?]
-    init(serialized: [String: Value])
-}
-
 public protocol Model: Entity {}
 
 extension Model {    
