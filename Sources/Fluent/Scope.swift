@@ -1,34 +1,48 @@
 extension Filter {
     public enum Scope {
-        case `in`([Filterable])
-        case between(Filterable, and: Filterable)
+        case `in`([Value])
+        case between(Value, and: Value)
     }
 }
 
 infix operator =~ { precedence 130 }
 
-public func =~<T: Filterable>(lhs: String, rhs: [T]) -> Filter {
-    return .find(lhs, .`in`(rhs.map { $0 as Filterable }))
+public func =~<T: Value>(lhs: String, rhs: [T]) -> Filter {
+    return .find(lhs, .`in`(rhs.map { $0 as Value }))
 }
 
-public func =~<T: protocol<ForwardIndexType,Filterable>>(lhs: String, rhs: Range<T>) -> Filter {
-    return .find(lhs, .between(rhs.startIndex, and: rhs.endIndex.advancedBy(-1)))
+public func =~<Bound : protocol<Value, Comparable, _Strideable> where Bound.Stride : SignedInteger>
+    (lhs: String, rhs: CountableRange<Bound>) -> Filter {
+    return .find(lhs, .between(rhs.startIndex, and: rhs.endIndex.advanced(by: -1)))
 }
 
-public func =~<T: protocol<Comparable,Filterable>>(lhs: String, rhs: ClosedInterval<T>) -> Filter {
-    return .find(lhs, .between(rhs.start, and: rhs.end))
+public func =~<Bound : protocol<Value, Comparable, _Strideable> where Bound.Stride : SignedInteger>
+    (lhs: String, rhs: CountableClosedRange<Bound>) -> Filter {
+    return .find(lhs, .between(rhs.lowerBound, and: rhs.upperBound))
+}
+
+public func =~<Bound : protocol<Value, Comparable>>
+    (lhs: String, rhs: ClosedRange<Bound>) -> Filter {
+    return .find(lhs, .between(rhs.lowerBound, and: rhs.upperBound))
 }
 
 infix operator !~ { precedence 130 }
 
-public func !~<T: Filterable>(lhs: String, rhs: [T]) -> Filter {
+public func !~<T: Value>(lhs: String, rhs: [T]) -> Filter {
     return .not(lhs =~ rhs)
 }
 
-public func !~<T: protocol<ForwardIndexType,Filterable>>(lhs: String, rhs: Range<T>) -> Filter {
+public func !~<Bound : protocol<Value, Comparable, _Strideable> where Bound.Stride : SignedInteger>
+    (lhs: String, rhs: CountableRange<Bound>) -> Filter {
     return .not(lhs =~ rhs)
 }
 
-public func !~<T: protocol<Comparable,Filterable>>(lhs: String, rhs: ClosedInterval<T>) -> Filter {
+public func !~<Bound : protocol<Value, Comparable, _Strideable> where Bound.Stride : SignedInteger>
+    (lhs: String, rhs: CountableClosedRange<Bound>) -> Filter {
+    return .not(lhs =~ rhs)
+}
+
+public func !~<Bound : protocol<Value, Comparable>>
+    (lhs: String, rhs: ClosedRange<Bound>) -> Filter {
     return .not(lhs =~ rhs)
 }

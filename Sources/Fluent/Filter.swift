@@ -3,7 +3,7 @@ public indirect enum Filter {
     case both(Filter, and: Filter)
     case either(Filter, or: Filter)
     case find(String, Scope)
-    case compare(String, Comparison, Filterable)
+    case compare(String, Comparison, Value)
 }
 
 extension Filter: CustomStringConvertible {
@@ -23,7 +23,7 @@ extension Filter: CustomStringConvertible {
                 return "(`\(field)` BETWEEN \(low) AND \(high))"
             }
         case let .compare(field, comparison, value):
-            return "`\(field)` \(comparison.rawValue) \(value.stringValue)"
+            return "`\(field)` \(comparison.rawValue) \(value.string)"
         }
     }
 }

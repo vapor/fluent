@@ -1,8 +1,14 @@
-public protocol Value: CustomStringConvertible {
+import Foundation
+
+public protocol Value {
     var string: String { get }
 }
 
-extension Value {
+public extension Value {
+    var string: String {
+        return String(self)
+    }
+    
     public var int: Int? {
         return Int(self.string)
     }
@@ -14,95 +20,55 @@ extension Value {
     public var double: Double? {
         return Double(self.string)
     }
-}
-
-extension Value {
-    public var description: String {
-        return self.string
+    
+    public var bool: Bool? {
+        let str = self.string.lowercased()
+        
+        if str == "true" || str == "1" {
+            return true
+        }
+        
+        if str == "false" || str == "0" {
+            return false
+        }
+        
+        return nil
+    }
+    
+    public var date: NSDate? {
+        let formatter = NSDateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.date(from: self.string)
     }
 }
 
-extension Int: Value {
-    public var string: String {
-        return "\(self)"
-    }
-}
+extension Int:    Value {}
+extension UInt:   Value {}
 
-extension Int64: Value {
-    public var string: String {
-        return "\(self)"
-    }
-}
+extension Bool:   Value {}
 
-extension Int32: Value {
-    public var string: String {
-        return "\(self)"
-    }
-}
+extension Int8:   Value {}
+extension Int16:  Value {}
+extension Int32:  Value {}
+extension Int64:  Value {}
 
-extension Int16: Value {
-    public var string: String {
-        return "\(self)"
-    }
-}
+extension UInt8:  Value {}
+extension UInt16: Value {}
+extension UInt32: Value {}
+extension UInt64: Value {}
 
-extension Int8: Value {
-    public var string: String {
-        return "\(self)"
-    }
-}
+extension Float:  Value {}
+extension Double: Value {}
 
-extension UInt: Value {
-    public var string: String {
-        return "\(self)"
-    }
-}
+extension String: Value {}
 
-extension UInt64: Value {
-    public var string: String {
-        return "\(self)"
-    }
-}
+extension NSNumber: Value {}
+extension NSString: Value {}
 
-extension UInt32: Value {
+extension NSDate: Value {
     public var string: String {
-        return "\(self)"
-    }
-}
-
-extension UInt16: Value {
-    public var string: String {
-        return "\(self)"
-    }
-}
-
-extension UInt8: Value {
-    public var string: String {
-        return "\(self)"
-    }
-}
-
-
-extension Float: Value {
-    public var string: String {
-        return "\(self)"
-    }
-}
-
-extension Double: Value {
-    public var string: String {
-        return "\(self)"
-    }
-}
-
-extension String: Value {
-    public var string: String {
-        return self
-    }
-}
-
-extension Bool: Value {
-    public var string: String {
-        return self ? "true" : "false"
+        let formatter = NSDateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: self)
     }
 }
