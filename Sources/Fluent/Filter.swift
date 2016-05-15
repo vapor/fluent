@@ -28,9 +28,6 @@ extension Filter: CustomStringConvertible {
     }
 }
 
-public typealias Find = Filter
-public typealias Where = Filter
-
 public prefix func !(filter: Filter) -> Filter {
     return .not(filter)
 }
