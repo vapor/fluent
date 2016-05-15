@@ -1,6 +1,6 @@
 
 public class PrintDriver: Driver {
-    public func execute<T: Model>(_ query: Query<T>) throws -> [[String : Value]] {
+    public func execute<T: Entity>(_ query: QueryParameters<T>) throws -> [[String : Value]] {
         let sql = SQL(query: query)
         
         print("Statement: \(sql.statement) Values: \(sql.values)")
@@ -8,7 +8,7 @@ public class PrintDriver: Driver {
         print("Table \(query.entity)")
         print("Action \(query.action)")
         print("Limits \(query.limit)")
-        print("Filters \(query.filters)")
+        print("Filter \(query.filter)")
         print("Sorts \(query.sorts)")
         print("Unions \(query.unions)")
         print()
