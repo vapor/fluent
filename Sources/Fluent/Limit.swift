@@ -1,9 +1,9 @@
 public struct Limit {
-    var count: Int
+    var amount: Int
 }
 
 extension Limit: CustomStringConvertible {
     public var description: String {
-        return "Limit \(count)"   
+        return "Limit \(amount)"
     }
 }

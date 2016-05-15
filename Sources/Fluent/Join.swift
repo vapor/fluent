@@ -1,6 +1,6 @@
-public struct Union {
-    public enum Operation {
-        case Default, Right, Left
+public struct Join {
+    public enum Operation: String {
+        case inner, right, left
     }
     
     var entity: String
@@ -9,7 +9,7 @@ public struct Union {
     var operation: Operation
 }
 
-extension Union: CustomStringConvertible {
+extension Join: CustomStringConvertible {
     public var description: String {
         return "\(operation) \(entity) by \(foreignKey) = \(otherKey)"
     }

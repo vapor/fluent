@@ -1,6 +1,6 @@
 public struct Sort {
     public enum Direction {
-        case Ascending, Descending, Random
+        case ascending, descending, random
     }
     
     var field: String
