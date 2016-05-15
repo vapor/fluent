@@ -1,31 +1,36 @@
-public enum Filter {
-    indirect case not(Filter)
+public indirect enum Filter {
+    case not(Filter)
+    case both(Filter, and: Filter)
+    case either(Filter, or: Filter)
+    case find(String, Scope)
     case compare(String, Comparison, Filterable)
-    case subset(String, SubsetScope, [Filterable])
-    indirect case group(Filter, Operation, Filter)
-    case range(String, RangeScope, Filterable, Filterable)
 }
 
 extension Filter: CustomStringConvertible {
     public var description: String {
         switch self {
         case let .not(filter):
-            return "!\(filter)"
-        case let .subset(field, scope, values):
-            return "\(field) \(scope.rawValue) \(values)"
-        case let .group(left, operation, right):
-            return "(\(left) \(operation.rawValue) \(right))"
-        case let .range(field, range, value1, value2):
-            return "\(field) \(range.rawValue) \(value1) and \(value2)"
+            return "NOT(\(filter))"
+        case let .both(left, and: right):
+            return "(\(left)) AND (\(right))"
+        case let .either(left, or: right):
+            return "(\(left)) OR (\(right))"
+        case let .find(field, scope):
+            switch scope {
+            case let .`in`(values):
+                return "(`\(field)` IN \(values))"
+            case let .between(low, and: high):
+                return "(`\(field)` BETWEEN \(low) AND \(high))"
+            }
         case let .compare(field, comparison, value):
-            return "\(field) \(comparison.rawValue) \(value.stringValue)"
+            return "`\(field)` \(comparison.rawValue) \(value.stringValue)"
         }
     }
 }
 
+public typealias Find = Filter
+public typealias Where = Filter
+
 public prefix func !(filter: Filter) -> Filter {
     return .not(filter)
 }
-
-infix operator =~ { precedence 130 }
-infix operator !~ { precedence 130 }

@@ -5,9 +5,9 @@ extension Filter {
 }
 
 public func &&(lhs: Filter, rhs: Filter) -> Filter {
-    return .group(lhs, .and, rhs)
+    return .both(lhs, and: rhs)
 }
 
 public func ||(lhs: Filter, rhs: Filter) -> Filter {
-    return .group(lhs, .or, rhs)
+    return .either(lhs, or: rhs)
 }
