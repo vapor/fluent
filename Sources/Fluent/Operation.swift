@@ -1,18 +1,13 @@
 extension Filter {
-    public enum Operation {
-        case And, Or
-        
-        
+    public enum Operation: String {
+        case and, or
     }
 }
 
-extension Filter.Operation: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case .And:
-            return "and"
-        case .Or:
-            return "or"
-        }
-    }
+public func &&(lhs: Filter, rhs: Filter) -> Filter {
+    return .both(lhs, and: rhs)
+}
+
+public func ||(lhs: Filter, rhs: Filter) -> Filter {
+    return .either(lhs, or: rhs)
 }

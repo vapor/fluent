@@ -1,19 +1,33 @@
-public enum Filter {
-    case Compare(String, Comparison, Value)
-    case Subset(String, Scope, [Value])
-    case Group(Operation, [Filter])
+public indirect enum Filter {
+    case not(Filter)
+    case both(Filter, and: Filter)
+    case either(Filter, or: Filter)
+    case find(String, Scope)
+    case compare(String, Comparison, Filterable)
 }
 
 extension Filter: CustomStringConvertible {
     public var description: String {
         switch self {
-        case .Compare(let field, let comparison, let value):
-            return "\(field) \(comparison) \(value.string)"
-        case .Subset(let field, let scope, let values):
-            let valueDescriptions = values.map { return $0.description }
-            return "\(field) \(scope) \(valueDescriptions)"
-        case .Group(let op, let filters):
-            return "\(op.description) \(filters)"
+        case let .not(filter):
+            return "NOT(\(filter))"
+        case let .both(left, and: right):
+            return "(\(left)) AND (\(right))"
+        case let .either(left, or: right):
+            return "(\(left)) OR (\(right))"
+        case let .find(field, scope):
+            switch scope {
+            case let .`in`(values):
+                return "(`\(field)` IN \(values))"
+            case let .between(low, and: high):
+                return "(`\(field)` BETWEEN \(low) AND \(high))"
+            }
+        case let .compare(field, comparison, value):
+            return "`\(field)` \(comparison.rawValue) \(value.stringValue)"
         }
     }
+}
+
+public prefix func !(filter: Filter) -> Filter {
+    return .not(filter)
 }
