@@ -16,7 +16,7 @@ extension Filter: CustomStringConvertible {
         case let .group(left, operation, right):
             return "(\(left) \(operation.rawValue) \(right))"
         case let .range(field, range, value1, value2):
-            return "\(field) \(range) \(value1) and \(value2)"
+            return "\(field) \(range.rawValue) \(value1) and \(value2)"
         case let .compare(field, comparison, value):
             return "\(field) \(comparison.rawValue) \(value.stringValue)"
         }
@@ -27,4 +27,5 @@ public prefix func !(filter: Filter) -> Filter {
     return .not(filter)
 }
 
-infix operator !~= { precedence 130 }
+infix operator =~ { precedence 130 }
+infix operator !~ { precedence 130 }
