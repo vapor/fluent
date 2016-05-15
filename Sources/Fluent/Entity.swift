@@ -1,10 +1,7 @@
 
-public protocol Entity {
+public protocol Entity: Unboxable {
     static var entity: String { get }
     var id: String? { get }
-    
-    func serialize() -> [String: Value?]
-    init(serialized: [String: Value])
 }
 
 extension Entity {
