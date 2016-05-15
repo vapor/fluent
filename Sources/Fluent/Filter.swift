@@ -1,12 +1,14 @@
-public enum Filter {
-    indirect case not(Filter)
-    case compare(String, Comparison, Filterable)
-    case subset(String, SubsetScope, [Filterable])
-    indirect case group(Filter, Operation, Filter)
-    case range(String, RangeScope, Filterable, Filterable)
+public protocol FilterProtocol: CustomStringConvertible {}
+
+public indirect enum Filter<Value: Filterable> {
+    case not(Filter)
+    case compare(String, Comparison, Value)
+    case subset(String, SubsetScope, [Value])
+    case range(String, RangeScope, Value, Value)
+    case group(FilterProtocol, Operation, FilterProtocol)
 }
 
-extension Filter: CustomStringConvertible {
+extension Filter: FilterProtocol {
     public var description: String {
         switch self {
         case let .not(filter):
@@ -23,7 +25,7 @@ extension Filter: CustomStringConvertible {
     }
 }
 
-public prefix func !(filter: Filter) -> Filter {
+public prefix func !<T: Filterable>(filter: Filter<T>) -> Filter<T> {
     return .not(filter)
 }
 
