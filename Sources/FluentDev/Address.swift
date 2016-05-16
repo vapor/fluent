@@ -1,4 +1,3 @@
-
 import Fluent
 
 class Address: Model {

@@ -12,13 +12,16 @@ public class Query<T: Model> {
     public var entity: String {
         return T.entity
     }
+
+    var database: Database
     
-    public init() {
+    public init(database: Database) {
         fields = []
         filters = []
         sorts = []
         unions = []
         action = .Select(false)
+        self.database = database
     }
     
     public func first(_ fields: String...) throws -> T? {
@@ -37,7 +40,7 @@ public class Query<T: Model> {
         
         var models: [T] = []
         
-        let results = try Database.driver.execute(self)
+        let results = try database.execute(self)
         
         for result in results {
             let model = T(serialized: result)
@@ -123,14 +126,14 @@ public class Query<T: Model> {
     }
     
     public func or(_ handler: FilterHandler) -> Self {
-        let q = handler(query: Query())
+        let q = handler(query: Query(database: database))
         let filter = Filter.Group(.Or, q.filters)
         filters.append(filter)
         return self
     }
 
     public func and(_ handler: FilterHandler) -> Self {
-        let q = handler(query: Query())
+        let q = handler(query: Query(database: database))
         let filter = Filter.Group(.And, q.filters)
         filters.append(filter)
         return self
@@ -150,7 +153,7 @@ public class Query<T: Model> {
     }
 
     public func list(_ key: String) throws -> [Value] {
-        let results = try Database.driver.execute(self)
+        let results = try database.execute(self)
         return results.reduce([]) {
             var newArr = $0
             if let value = $1[key] {
@@ -162,7 +165,7 @@ public class Query<T: Model> {
     
     public func count(_ field: String = "*") throws -> Int {
         let result = try aggregate(.Count, field: field)
-        guard let value = Int(result["COUNT(\(field))"]!.string) else {
+        guard let value = Int(result["COUNT(\(field))"]?.string ?? "0") else {
             throw QueryError.InvalidValue(message: "Result value was invalid")
         }
         return value
@@ -170,7 +173,7 @@ public class Query<T: Model> {
     
     public func average(_ field: String = "*") throws -> Double {
         let result = try aggregate(.Average, field: field)
-        guard let value = Double(result["AVG(\(field))"]!.string) else {
+        guard let value = Double(result["AVG(\(field))"]?.string ?? "0") else {
             throw QueryError.InvalidValue(message: "Result value was invalid")
         }
         return value
@@ -178,7 +181,7 @@ public class Query<T: Model> {
     
     public func maximum(_ field: String = "*") throws -> Double {
         let result = try aggregate(.Maximum, field: field)
-        guard let value = Double(result["MAX(\(field))"]!.string) else {
+        guard let value = Double(result["MAX(\(field))"]?.string ?? "0") else {
             throw QueryError.InvalidValue(message: "Result value was invalid")
         }
         return value
@@ -204,7 +207,7 @@ public class Query<T: Model> {
     private func aggregate(_ action: Action, field: String) throws -> [String: Value] {
         self.action = action
         self.fields = [field]
-        let results = try Database.driver.execute(self)
+        let results = try database.execute(self)
         guard results.count > 0 else {
             throw QueryError.NoResult(message: "No results found")
         }

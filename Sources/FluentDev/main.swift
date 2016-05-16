@@ -1,13 +1,48 @@
 import Fluent
 
+import FluentSQLite
+import FluentMongo
+
 //Database.driver = PostgreSQLDriver(connectionInfo: "host='localhost' port='5432' dbname='demodb0' user='princeugwuh' password=''")
 
+let sqlite: Database
+let mongo: Database
+let fake: Database
+
+do {
+    let sqliteDriver = try FluentSQLite.SQLiteDriver()
+    sqlite = Database(driver: sqliteDriver)
+
+    let mongoDriver = try FluentMongo.MongoDriver(name: "test")
+    mongo = Database(driver: mongoDriver)
+
+    fake = Database()
+} catch {
+    fatalError("Could not open database \(error)")
+}
+
 print("Hello, Fluent!")
+
+do {
+    let sqliteUser = try Query<User>(database: sqlite).all()
+    let mongoUser = try Query<User>(database: mongo).all()
+    let printUser = try Query<User>(database: fake).all()
+
+    print([
+        "sqlite": sqliteUser,
+        "mongo": mongoUser,
+        "print": printUser
+    ])
+} catch {
+    print("Could not fetch \(error)")
+}
+
+/*
 
 //: Model (Active Record)
 
 do {
-let result = try User.first()
+    let result = try User.first()
 } catch ModelError.NotFound(let message) {
     print(message)
 }
@@ -28,20 +63,20 @@ let _ = try? u.delete()
 
 // Insert
 
-let _ = try? Query<User>().insert(u.serialize())
+let _ = try? Query<User>(database: sqlite).insert(u.serialize())
 
 // Update
 
-let _ = try? Query<User>().update(u.serialize())
+let _ = try? Query<User>(database: sqlite).update(u.serialize())
 
 // Retrieve All Rows
 
-let _ = try? Query<User>().all()
+let _ = try? Query<User>(database: sqlite).all()
 
 // Retrieve A Single Row
 
-let _ = try? Query<User>().filter("name", "John").first()
-let _ = try? Query<User>().filter("name", .Equals, "Parker Collins").distinct().first() // with distinct
+let _ = try? Query<User>(database: sqlite).filter("name", "John").first()
+let _ = try? Query<User>(database: sqlite).filter("name", .Equals, "Parker Collins").distinct().first() // with distinct
 
 // Chucking
 
@@ -49,34 +84,34 @@ let _ = try? Query<User>().filter("name", .Equals, "Parker Collins").distinct().
 
 // List / Pluck
 
-let _ = try? Query<User>().list("title")
+let _ = try? Query<User>(database: sqlite).list("title")
 
 
 // Aggregates
 
-let _ = try? Query<User>().count()
-let _ = try? Query<User>().count("name")
-let _ = try? Query<User>().maximum()
-let _ = try? Query<User>().minimum()
-let _ = try? Query<User>().average()
+let _ = try? Query<User>(database: sqlite).count()
+let _ = try? Query<User>(database: sqlite).count("name")
+let _ = try? Query<User>(database: sqlite).maximum()
+let _ = try? Query<User>(database: sqlite).minimum()
+let _ = try? Query<User>(database: sqlite).average()
 
 // Joins
 
-let _ = try? Query<User>().join(Address.self)?.all("\(Address.entity).*")
+let _ = try? Query<User>(database: sqlite).join(Address.self)?.all("\(Address.entity).*")
 
 // Where
 
-let _ = try? Query<User>().filter("name", .Equals, "John").or { query in
+let _ = try? Query<User>(database: sqlite).filter("name", .Equals, "John").or { query in
     query.filter("phone", .NotEquals, "2234567890").and { query in
         query.filter("address", .Equals, "100 Apt Ln").filter("other", 1)
-   }
-}.all()
+    }
+    }.all()
 
 // Order By
 
-let _ = try? Query<User>().filter("name", .Equals, "John").sort("name", .Ascending).all()
+let _ = try? Query<User>(database: sqlite).filter("name", .Equals, "John").sort("name", .Ascending).all()
 
 // Limit And Offset
 
-let _ = try? Query<User>().filter("name", .Equals, "John").limit().all()
-let _ = try? Query<User>().filter("name", .Equals, "Jane").limit(10).offset(5).all()
+let _ = try? Query<User>(database: sqlite).filter("name", .Equals, "John").limit().all()
+let _ = try? Query<User>(database: sqlite).filter("name", .Equals, "Jane").limit(10).offset(5).all() */
