@@ -1,38 +1,38 @@
 public enum Action {
-    case Select(Bool) // distinct
-    case Delete
-    case Insert
-    case Update
-    case Count
-    case Maximum
-    case Minimum
-    case Average
-    case Sum
+    case select(distinct: Bool)
+    case delete
+    case insert
+    case update
+    case count
+    case maximum
+    case minimum
+    case average
+    case sum
 }
 
 extension Action: CustomStringConvertible {
     public var description: String {
         switch self {
-        case Select(let distinct):
+        case select(distinct: let distinct):
             if distinct {
                 return "select distinct * from"
             }
             return "select * from"
-        case Delete:
+        case delete:
             return "delete from"
-        case Insert:
+        case insert:
             return "insert into"
-        case Update:
+        case update:
             return "update"
-        case Count:
+        case count:
             return "select count(*) from"
-        case Maximum:
+        case maximum:
             return "select max(*) from"
-        case Minimum:
+        case minimum:
             return "select min(*) from"
-        case Average:
+        case average:
             return "select avg(*) from"
-        case Sum:
+        case sum:
             return "select sum(*) from"
         }
     }

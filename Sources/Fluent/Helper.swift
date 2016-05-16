@@ -6,11 +6,11 @@
 //  Copyright © 2016 Qutheory. All rights reserved.
 //
 
-public class Helper<T: Model> {
+public class Helper<T: Entity> {
     
-    var query: Query<T>
+    var query: QueryParameters<T>
     
-    public init(query: Query<T>) {
+    public init(query: QueryParameters<T>) {
         self.query = query
     }
 }

@@ -1,4 +1,4 @@
 public protocol Driver {
-    func execute<T: Model>(_ query: Query<T>) throws -> [[String: Value]]
+    func execute<T: Entity>(_ query: QueryParameters<T>) throws -> [[String: Value]]
 }
 

@@ -1,9 +1,9 @@
 public struct Offset {
-    var count: Int
+    var amount: Int
 }
 
 extension Offset: CustomStringConvertible {
     public var description: String {
-        return "Offset \(count)"
+        return "Offset \(amount)"
     }
 }
