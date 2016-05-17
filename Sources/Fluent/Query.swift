@@ -189,7 +189,7 @@ public class Query<T: Model> {
     
     public func minimum(_ field: String = "*") throws -> Double {
         let result = try aggregate(.Minimum, field: field)
-        guard let value = Double(result["MIN(\(field))"]!.string) else {
+        guard let value = Double(result["MIN(\(field))"]!.string!) else {
             throw QueryError.InvalidValue(message: "Result value was invalid")
         }
         return value
@@ -198,7 +198,7 @@ public class Query<T: Model> {
     public func sum(_ field: String = "*") throws -> Double {
         let result = try aggregate(.Sum, field: field)
         
-        guard let value = Double(result["SUM(\(field))"]!.string) else {
+        guard let value = Double(result["SUM(\(field))"]!.string!) else {
             throw QueryError.InvalidValue(message: "Result value was invalid")
         }
         return value

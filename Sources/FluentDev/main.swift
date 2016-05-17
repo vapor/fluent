@@ -25,16 +25,16 @@ print("Hello, Fluent!")
 
 do {
     let sqliteUser = try Query<User>(database: sqlite).all()
-    let mongoUser = try Query<User>(database: mongo).all()
+    let mongoUser = try Query<User>(database: mongo).filter("name", "Jill").all()
     let printUser = try Query<User>(database: fake).all()
 
-    print([
-        "sqlite": sqliteUser,
-        "mongo": mongoUser,
-        "print": printUser
-    ])
+    print("SQLITE")
+    print(sqliteUser)
+
+    print("MONGO")
+    print(mongoUser)
 } catch {
-    print("Could not fetch \(error)")
+    print("Could not fetch. Error: \(error)")
 }
 
 /*

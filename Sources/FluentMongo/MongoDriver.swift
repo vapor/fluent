@@ -12,10 +12,30 @@ public class MongoDriver: Fluent.Driver {
     }
     
     public func execute<T: Model>(_ query: Fluent.Query<T>) throws -> [[String: Fluent.Value]] {
-
         let collection: Cursor<Document>
+
         if query.filters.count > 0 {
-            collection = try database[query.entity].find()
+            var q: MongoKitten.Query?
+
+            for filter in query.filters {
+                switch filter {
+                case .Compare(let key, let comparison, let val):
+                    if
+                        let key = key.string,
+                        let val = val.string
+                    {
+                        q = key == val
+                    }
+                default:
+                    break
+                }
+            }
+
+            if let q = q {
+                collection = try database[query.entity].find(matching: q)
+            } else {
+                collection = try database[query.entity].find()
+            }
         } else {
             collection = try database[query.entity].find()
         }
@@ -26,7 +46,18 @@ public class MongoDriver: Fluent.Driver {
             var item: [String: Fluent.Value] = [:]
 
             for (key, val) in document {
-                item[key] = "\(val)"
+                switch val {
+                case .double(let double):
+                    item[key] = double
+                case .int64(let int):
+                    item[key] = Int(int)
+                case .int32(let int):
+                    item[key] = Int(int)
+                case .string(let string):
+                    item[key] = string
+                default:
+                    item[key] = "unsupported"
+                }
             }
 
             items.append(item)

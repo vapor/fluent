@@ -1,5 +1,5 @@
 public class SQL<T: Model>: Helper<T> {
-    public var values: [String]
+    public var values: [Value]
 
     public var statement: String {
         var statement = [query.action.sql(query.fields)]
@@ -49,7 +49,7 @@ public class SQL<T: Model>: Helper<T> {
             let fieldsString = items.keys.joined(separator: ", ")
             let rawValuesString = items.map { (key, value) -> String in
                 if let value = value {
-                    self.values.append(value.string)
+                    self.values.append(value)
                     return self.nextPlaceholder
                 } else {
                     return "NULL"
@@ -61,7 +61,7 @@ public class SQL<T: Model>: Helper<T> {
         case .Update:
             let rawUpdatesString = items.map { (key, value) -> String in
                 if let value = value {
-                    self.values.append(value.string)
+                    self.values.append(value)
                     return "\(key) = \(self.nextPlaceholder)"
                 } else {
                     return "\(key) = NULL"
@@ -105,12 +105,12 @@ public class SQL<T: Model>: Helper<T> {
     func filterOutput(_ filter: Filter) -> String {
         switch filter {
         case .Compare(let field, let comparison, let value):
-            self.values.append(value.string)
+            self.values.append(value)
 
             return "\(field) \(comparison.sql) \(nextPlaceholder)"
         case .Subset(let field, let scope, let values):
             let rawValueStrings = values.map { value -> String in
-                self.values.append(value.string)
+                self.values.append(value)
                 return nextPlaceholder
             }
 

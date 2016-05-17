@@ -1,6 +1,18 @@
 
-public protocol Model: Entity {
+public protocol Model: Entity, CustomStringConvertible {
     static var database: Database { get }
+}
+
+extension Model {
+    public var description: String {
+        var readable: [String: String] = [:]
+
+        serialize().forEach { key, val in
+            readable[key] = val?.string ?? "nil"
+        }
+
+        return "\(readable)"
+    }
 }
 
 extension Model {

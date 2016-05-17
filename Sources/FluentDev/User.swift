@@ -20,7 +20,12 @@ class User: Model {
     }
     
     required init(serialized: [String: Value]) {
-        id = serialized["id"]?.string
+        if let id = serialized["id"]?.fuzzyString {
+            self.id = id
+        } else if let id = serialized["_id"]?.fuzzyString {
+            self.id = id
+        }
+        
         name = serialized["name"]?.string ?? ""
     }
 }

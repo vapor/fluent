@@ -14,3 +14,4 @@ extension Union: CustomStringConvertible {
         return "\(operation) \(entity) by \(foreignKey) = \(otherKey)"
     }
 }
+
