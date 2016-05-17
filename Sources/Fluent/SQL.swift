@@ -40,14 +40,14 @@ public class SQL<T: Model>: Helper<T> {
     }
 
     var dataClause: String? {
-        guard let items = query.items else {
+        guard let data = query.data else {
             return nil
         }
 
         switch query.action {
-        case .Insert:
-            let fieldsString = items.keys.joined(separator: ", ")
-            let rawValuesString = items.map { (key, value) -> String in
+        case .insert:
+            let fieldsString = data.keys.joined(separator: ", ")
+            let rawValuesString = data.map { (key, value) -> String in
                 if let value = value {
                     self.values.append(value)
                     return self.nextPlaceholder
@@ -58,8 +58,8 @@ public class SQL<T: Model>: Helper<T> {
 
             let valuesString = rawValuesString.joined(separator: ", ")
             return "(\(fieldsString)) VALUES (\(valuesString))"
-        case .Update:
-            let rawUpdatesString = items.map { (key, value) -> String in
+        case .update:
+            let rawUpdatesString = data.map { (key, value) -> String in
                 if let value = value {
                     self.values.append(value)
                     return "\(key) = \(self.nextPlaceholder)"
@@ -134,12 +134,8 @@ public class SQL<T: Model>: Helper<T> {
 extension Action {
     func sql(_ fields: [String]) -> String {
         switch self {
-        case .Select(let distinct):
+        case .select:
             var select = ["SELECT"]
-
-            if distinct {
-                select.append("DISTINCT")
-            }
 
             if fields.count > 0 {
                 select.append(fields.joined(separator: ", "))
@@ -150,22 +146,12 @@ extension Action {
             select.append("FROM")
 
             return select.joined(separator: " ")
-        case .Delete:
+        case .delete:
             return "DELETE FROM"
-        case .Insert:
+        case .insert:
             return "INSERT INTO"
-        case .Update:
+        case .update:
             return "UPDATE"
-        case .Count:
-            return "SELECT count(\(fields.first ?? "*")) FROM"
-        case .Maximum:
-            return "SELECT max(\(fields.first ?? "*")) FROM"
-        case .Minimum:
-            return "SELECT min(\(fields.first ?? "*")) FROM"
-        case .Average:
-            return "SELECT avg(\(fields.first ?? "*")) FROM"
-        case .Sum:
-            return "SELECT sum(\(fields.first ?? "*")) FROM"
         }
     }
 }

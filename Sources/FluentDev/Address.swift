@@ -5,15 +5,12 @@ class Address: Model {
         return "addresses"
     }
     
-    var id: String?
+    var id: Value?
     
     func serialize() -> [String: Value?] {
-        return [
-            "id": id
-        ]
+        return [:]
     }
     
     required init(serialized: [String: Value]) {
-        self.id = serialized["id"]?.string
     }
 }

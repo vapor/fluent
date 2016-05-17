@@ -1,7 +1,70 @@
 
-public protocol Model: Entity, CustomStringConvertible {
-    static var database: Database { get }
+public protocol Model: CustomStringConvertible {
+    static var database: Database { get set }
+
+    static var entity: String { get }
+    var id: Value? { get set }
+
+    func serialize() -> [String: Value?]
+    init(serialized: [String: Value])
 }
+
+//MARK: Defaults
+
+extension Model {
+    public static var entity: String {
+        return String(self).lowercased() + "s"
+    }
+}
+
+//MARK: CRUD
+
+extension Model {
+    public mutating func save() throws {
+        try Self.database.query().save(&self)
+    }
+
+    public func delete() throws {
+        try Self.database.query().delete(self)
+    }
+
+    public static func all() throws -> [Self] {
+        return try Self.database.query().all()
+    }
+    
+    public static func find(_ id: Value) throws -> Self? {
+        return try Self.database.query().filter(database.driver.idKey, .Equals, id).first()
+    }
+
+    public static var query: Query<Self> {
+        return Query()
+    }
+}
+
+//MARK: Database
+
+extension Model {
+    public static var name: String {
+        return "\(self)"
+    }
+    
+    public static var database: Database {
+        get {
+            if let db = Database.map[Self.name] {
+                return db
+            } else {
+                let db = Database()
+                Database.map[Self.name] = db
+                return db
+            }
+        }
+        set {
+            Database.map[Self.name] = newValue
+        }
+    }
+}
+
+//MARK: CustomStringConvertible
 
 extension Model {
     public var description: String {
@@ -11,84 +74,6 @@ extension Model {
             readable[key] = val?.string ?? "nil"
         }
 
-        return "\(readable)"
-    }
-}
-
-extension Model {
-    public static var database: Database {
-        return Database()
-    }
-    
-    public func save() throws {
-        try Self.database.query().save(self)
-    }
-    
-    public static func saveMany<T: Model>(_ models: [T]) throws {
-        for model in models {
-            try model.save()
-        }
-    }
-    
-    public func delete() throws {
-        try Self.database.query().delete(self)
-    }
-
-    public static func all() throws -> [Self] {
-        return try Self.database.query().all()
-    }
-    
-    public static func find(_ ids: Value...) throws -> [Self] {
-        let result: [Self] = try Self.database.query().filter("id", in: ids).all()
-        guard result.count > 0 else {
-            throw ModelError.NotFound(message: "Model not found")
-        }
-        return result
-        
-    }
-    
-    public static func find(_ id: Value) throws -> Self {
-        guard let result: Self = try Self.database.query().filter("id", .Equals, id).first() else {
-            throw ModelError.NotFound(message: "Model not found")
-        }
-        return result
-    }
-    
-    public static func find(_ field: String, _ comparison: Filter.Comparison, _ value: Value) throws -> [Self] {
-        let result: [Self] = try Self.database.query().filter(field, comparison, value).all()
-        guard result.count > 0 else {
-            throw ModelError.NotFound(message: "Model not found")
-        }
-        return result
-    }
-    
-    public static func find(_ field: String, in value: [Value]) throws -> [Self] {
-        let result: [Self] = try Self.database.query().filter(field, in: value).all()
-        guard result.count > 0 else {
-            throw ModelError.NotFound(message: "Model not found")
-        }
-        return result
-    }
-    
-    public static func take(_ count: Int = 1) throws -> [Self] {
-        let result: [Self] = try Self.database.query().limit(count).all()
-        guard result.count > 0 else {
-            throw ModelError.NotFound(message: "Model not found")
-        }
-        return result
-    }
-    
-    public static func first(_ count: Int = 1) throws -> Self {
-        guard let result: Self = try Self.database.query().sort("id", .Ascending).limit(count).first() else {
-            throw ModelError.NotFound(message: "Model not found")
-        }
-        return result
-    }
-    
-    public static func last(_ count: Int = 1) throws -> Self {
-        guard let result: Self = try Self.database.query().sort("id", .Descending).limit(count).first() else {
-            throw ModelError.NotFound(message: "Model not found")
-        }
-        return result
+        return "[\(id)] \(readable)"
     }
 }

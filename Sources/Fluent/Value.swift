@@ -6,8 +6,6 @@ public protocol Polymorphic {
     var int: Int? { get }
     var string: String? { get }
     var double: Double? { get }
-
-    var fuzzyString: String? { get }
 }
 
 public enum StructuredData {
@@ -21,7 +19,7 @@ public enum StructuredData {
 }
 
 extension Value {
-    public var fuzzyString: String? {
+    public var string: String? {
         switch structuredData {
         case .bool(let bool):
             return "\(bool)"
@@ -36,17 +34,9 @@ extension Value {
         }
     }
 
-
     public var int: Int? {
         if case .integer(let int) = structuredData {
             return int
-        }
-        return nil
-    }
-
-    public var string: String? {
-        if case .string(let string) = structuredData {
-            return string
         }
         return nil
     }
@@ -61,7 +51,7 @@ extension Value {
 
 extension Value {
     public var description: String {
-        return "\(self)"
+        return self.string ?? ""
     }
 }
 
@@ -86,5 +76,11 @@ extension String: Value {
 extension Bool: Value {
     public var structuredData: StructuredData {
         return .bool(self)
+    }
+}
+
+extension StructuredData: Value {
+    public var structuredData: StructuredData {
+        return self
     }
 }

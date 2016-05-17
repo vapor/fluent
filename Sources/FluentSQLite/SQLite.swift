@@ -10,6 +10,9 @@ public class SQLite {
     typealias PrepareClosure = ((SQLite) throws -> ())
 
     private var statementPointer: UnsafeMutablePointer<OpaquePointer?>! = nil
+    private var statement: OpaquePointer {
+        return statementPointer.pointee!
+    }
 
 	var database: OpaquePointer?
 
@@ -33,11 +36,11 @@ public class SQLite {
         case close(String)
         case prepare(String)
         case bind(String)
-        case finalize(String)
+        case execute(String)
     }
 
 	func close() {
-        sqlite3_close(self.database)
+        sqlite3_close(database)
 	}
 
 	struct Result {
@@ -56,24 +59,27 @@ public class SQLite {
 		}
 	}
 
-    func execute(_ statement: String, prepareClosure: PrepareClosure = { _ in }) throws -> [Result.Row] {
+    func execute(_ queryString: String, prepareClosure: PrepareClosure = { _ in }) throws -> [Result.Row] {
+        print("SQLITE EXECUTE")
+
+        bindPosition = 0
         statementPointer = UnsafeMutablePointer<OpaquePointer?>.init(allocatingCapacity: 1)
 
-        if sqlite3_prepare_v2(self.database, statement, -1, statementPointer, nil) != SQLITE_OK {
+        if sqlite3_prepare_v2(database, queryString, -1, statementPointer, nil) != SQLITE_OK {
             throw Error.prepare(errorMessage)
         }
 
         try prepareClosure(self)
 
         var result = Result()
-        while sqlite3_step(statementPointer.pointee) == SQLITE_ROW {
+        while sqlite3_step(statement) == SQLITE_ROW {
             
             var row = Result.Row()
-            let count = sqlite3_column_count(statementPointer.pointee)
+            let count = sqlite3_column_count(statement)
 
             for i in 0..<count {
-                let text = sqlite3_column_text(statementPointer.pointee, i)
-                let name = sqlite3_column_name(statementPointer.pointee, i)
+                let text = sqlite3_column_text(statement, i)
+                let name = sqlite3_column_name(statement, i)
 
                 let value = String(cString: UnsafePointer(text))
                 let column = String(cString: name)
@@ -84,11 +90,16 @@ public class SQLite {
             result.rows.append(row)
         }
         
-        if sqlite3_finalize(statementPointer.pointee) != SQLITE_OK {
-            throw Error.finalize(errorMessage)
+        if sqlite3_finalize(statement) != SQLITE_OK {
+            throw Error.execute(errorMessage)
         }
         
         return result.rows
+    }
+
+    var lastId: Int {
+        let id = sqlite3_last_insert_rowid(database)
+        return Int(id)
     }
     
     var errorMessage: String {
@@ -109,7 +120,7 @@ public class SQLite {
     }
 
     func bind(_ value: Int) throws {
-        if sqlite3_bind_int64(statementPointer.pointee, nextBindPosition, Int64(value)) != SQLITE_OK {
+        if sqlite3_bind_int(statementPointer.pointee, nextBindPosition, Int32(value)) != SQLITE_OK {
             throw Error.bind(errorMessage)
         }
     }

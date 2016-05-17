@@ -24,15 +24,62 @@ do {
 print("Hello, Fluent!")
 
 do {
-    let sqliteUser = try Query<User>(database: sqlite).all()
-    let mongoUser = try Query<User>(database: mongo).filter("name", "Jill").all()
-    let printUser = try Query<User>(database: fake).all()
+    User.database = sqlite
+    let sqliteUsers = try User.all()
 
-    print("SQLITE")
+    User.database = mongo
+    let mongoUsers = try User.all()
+
+    User.database = fake
+    let _ = try User.all()
+
+    print("SQLite Users")
+    print(sqliteUsers)
+
+    print("Mongo Users")
+    print(mongoUsers)
+
+    User.database = sqlite
+    let sqliteUsersFilter = try User.query.filter("name", "Jill").all()
+
+    User.database = mongo
+    let mongoUsersFilter = try User.query.filter("name", "Jill").all()
+
+    print("SQLite Users Filter")
+    print(sqliteUsersFilter)
+
+    print("Mongo Users Filter")
+    print(mongoUsersFilter)
+
+    User.database = fake
+    let _ = try? User.find(1)
+
+    User.database = sqlite
+    let sqliteUser = try User.find(1)
+
+    User.database = mongo
+    let mongoUser = try User.find(1)
+
+    print("SQLite Users Find")
     print(sqliteUser)
 
-    print("MONGO")
+    print("Mongo Users Find")
     print(mongoUser)
+
+    var newMongoUser = User(name: "Bill")
+    var newSqliteUser = User(name: "Bills")
+
+    User.database = sqlite
+    try newSqliteUser.save()
+
+    User.database = mongo
+    try newMongoUser.save()
+
+    print("SQLite User Save")
+    print(newSqliteUser)
+
+    print("Mongo User Save")
+    print(newMongoUser)
 } catch {
     print("Could not fetch. Error: \(error)")
 }

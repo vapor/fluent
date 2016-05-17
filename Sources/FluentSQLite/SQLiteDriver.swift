@@ -11,9 +11,10 @@ public class SQLiteDriver: Fluent.Driver {
     public func execute<T: Model>(_ query: Query<T>) throws -> [[String: Value]] {
         let sql = SQL(query: query)
         
-        let results: [SQLite.Result.Row]
+        var results: [SQLite.Result.Row]
 
-        results = try self.database.execute(sql.statement) { preparer in
+        let stmt = sql.statement
+        results = try database.execute(stmt) { preparer in
             for value in sql.values {
                 switch value.structuredData {
                 case .integer(let int):
@@ -22,17 +23,25 @@ public class SQLiteDriver: Fluent.Driver {
                     try preparer.bind(double)
                 case .string(let string):
                     try preparer.bind(string)
-                default: break
+                default:
+                    print("Unsupported type")
+                    print(value.structuredData)
                 }
             }
         }
 
-        return results.map { row in
-            var data: [String: Value] = [:]
-            row.data.forEach { key, val in
-                data[key] = val
+        if query.action == .insert {
+            return [
+               ["id" : database.lastId]
+            ]
+        } else {
+            return results.map { row in
+                var data: [String: Value] = [:]
+                row.data.forEach { key, val in
+                    data[key] = val
+                }
+                return data
             }
-            return data
         }
     }
 
