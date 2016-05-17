@@ -2,13 +2,10 @@ public class Query<T: Model> {
     public typealias FilterHandler = (query: Query) -> Query
     public var filters: [Filter]
     
-    public var sorts: [Sort]
-    public var unions: [Union]
     public var fields: [String]
     public var data: [String: Value?]?
-    public var limit: Limit?
-    public var offset: Offset?
     public var action: Action
+    public var limit: Limit?
     public var entity: String {
         return T.entity
     }
@@ -18,8 +15,6 @@ public class Query<T: Model> {
     init() {
         fields = []
         filters = []
-        sorts = []
-        unions = []
         action = .select
         database = T.database
     }
@@ -28,7 +23,7 @@ public class Query<T: Model> {
         limit = Limit(count: 1)
         return try run(fields).first
     }
-    
+
     public func all(_ fields: String...) throws -> [T] {
         return try run(fields)
     }

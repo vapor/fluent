@@ -16,7 +16,6 @@ public class MongoDriver: Fluent.Driver {
         database = server[name]
     }
 
-
     
     public func execute<T: Model>(_ query: Fluent.Query<T>) throws -> [[String: Fluent.Value]] {
         print("MONGO EXECUTE")
