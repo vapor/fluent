@@ -1,6 +1,6 @@
 /**
     Represents an entity that can be
-    stored and retreived from the `Database`.
+    stored and retrieved from the `Database`.
 */
 public protocol Model: CustomStringConvertible {
     /**

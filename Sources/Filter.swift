@@ -1,7 +1,7 @@
 /**
     Defines a `Filter` that can be 
     added on fetch, delete, and update
-    operations to limit the amount of 
+    operations to limit the set of 
     data affected.
 */
 public enum Filter {
@@ -15,7 +15,7 @@ extension Filter: CustomStringConvertible {
         case .compare(let field, let comparison, let value):
             return "\(field) \(comparison) \(value)"
         case .subset(let field, let scope, let values):
-            let valueDescriptions = values.map { return $0.description }
+            let valueDescriptions = values.map { $0.description }
             return "\(field) \(scope) \(valueDescriptions)"
         }
     }

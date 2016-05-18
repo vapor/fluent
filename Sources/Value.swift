@@ -1,5 +1,5 @@
 /**
-    A type of data that can be retreived
+    A type of data that can be retrieved
     of stored in a database.
 */
 public protocol Value: CustomStringConvertible, Polymorphic {
