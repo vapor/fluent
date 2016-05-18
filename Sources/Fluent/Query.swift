@@ -3,6 +3,8 @@
 */
 public class Query<T: Model> {
 
+    //MARK: Properties
+
     /**
         The type of action to perform
         on the data. Defaults to `.fetch`
@@ -35,6 +37,8 @@ public class Query<T: Model> {
         return T.entity
     }
 
+    //MARK: Internal
+
     /**
         The database to which the query
         should be sent.
@@ -51,20 +55,17 @@ public class Query<T: Model> {
         database = T.database
     }
 
-    public func first() throws -> T? {
-        limit = Limit(count: 1)
-        return try run().first
-    }
-
-    public func all() throws -> [T] {
-        return try run()
-    }
-    
+    /**
+        Runs the query given its properties
+        and current state. 
+     
+        Returns an array of entities.
+    */
     func run() throws -> [T] {
         var models: [T] = []
-        
+
         let results = try database.driver.execute(self)
-        
+
         for result in results {
             guard var model = T(serialized: result) else {
                 continue
@@ -73,10 +74,52 @@ public class Query<T: Model> {
             model.id = result[database.driver.idKey]
             models.append(model)
         }
-        
+
         return models
     }
-    
+
+    //MARK: Fetch
+
+    /**
+        Returns the first entity retreived
+        by the query.
+    */
+    public func first() throws -> T? {
+        limit = Limit(count: 1)
+        return try run().first
+    }
+
+    /**
+        Returns all entities retreived
+        by the query.
+    */
+    public func all() throws -> [T] {
+        return try run()
+    }
+
+    //MARK: Create
+
+    /**
+        Attempts the create action for the supplied
+        serialized data. 
+     
+        Returns an entity if one was created.
+    */
+    public func create(_ serialized: [String: Value?]) throws -> T? {
+        action = .create
+        data = serialized
+
+        let results = try run()
+        guard results.count > 0 else {
+            return nil
+        }
+        return results[0]
+    }
+
+    /**
+        Attempts to save a supplied entity
+        and updates its identifier if successful.
+    */
     public func save(_ model: inout T) throws -> T {
         let data = model.serialize()
 
@@ -90,12 +133,22 @@ public class Query<T: Model> {
 
         return model
     }
-    
+
+    //MARK: Delete
+
+    /**
+        Attempts to delete all entities
+        in the model's collection.
+    */
     public func delete() throws {
         action = .delete
         try run()
     }
-    
+
+    /**
+        Attempts to delete the supplied entity
+        if its identifier is set.
+    */
     public func delete(_ model: T) throws {
         guard let id = model.id else {
             return
@@ -107,38 +160,54 @@ public class Query<T: Model> {
         
         try run()
     }
-    
+
+    //MARK: Update
+
+    /**
+        Attempts to update model's collection with 
+        the supplied serialized data.
+    */
     public func update(_ serialized: [String: Value?]) throws {
         action = .update
         data = serialized
         try run()
     }
 
-    public func create(_ serialized: [String: Value?]) throws -> T? {
-        action = .create
-        data = serialized
 
-        let results = try run()
-        guard results.count > 0 else {
-            return nil
-        }
-        return results[0]
+    //MARK: Filter
+
+    /**
+        Adds a `.compare` filter to the query's
+        filters.
+     
+        Used for filtering results based on how
+        a result's value compares to the supplied value.
+    */
+    public func filter(_ field: String, _ comparison: Filter.Comparison, _ value: Value) -> Self {
+        let filter = Filter.compare(field, comparison, value)
+        filters.append(filter)
+        return self
     }
-    
-    public func filter(_ field: String, _ value: Value) -> Self {
-        return filter(field, .equals, value)
-    }
-    
+
+    /**
+        Adds a `.subset` filter to the query's
+        filters. 
+     
+        Used for filtering results based on whether
+        a result's value is or is not in a set.
+    */
     public func filter(_ field: String, _ scope: Filter.Scope, _ set: [Value]) -> Self {
         let filter = Filter.subset(field, scope, set)
         filters.append(filter)
         return self
     }
-    
-    public func filter(_ field: String, _ comparison: Filter.Comparison, _ value: Value) -> Self {
-        let filter = Filter.compare(field, comparison, value)
-        filters.append(filter)
-        return self
+
+
+    /**
+        Shortcut for creating a `.equals` filter.
+    */
+    public func filter(_ field: String, _ value: Value) -> Self {
+        return filter(field, .equals, value)
     }
 
 }

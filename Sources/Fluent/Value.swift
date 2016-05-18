@@ -35,17 +35,33 @@ extension Value {
     }
 
     public var int: Int? {
-        if case .integer(let int) = structuredData {
+        switch structuredData {
+        case .integer(let int):
             return int
+        case .string(let string):
+            return Int(string)
+        case .double(let double):
+            return Int(double)
+        case .bool(let bool):
+            return bool ? 1 : 0
+        default:
+            return nil
         }
-        return nil
     }
 
     public var double: Double? {
-        if case .double(let double) = structuredData {
+        switch structuredData {
+        case .double(let double):
             return double
+        case .string(let string):
+            return Double(string)
+        case .integer(let int):
+            return Double(int)
+        case .bool(let bool):
+            return bool ? 1.0 : 0.0
+        default:
+            return nil
         }
-        return nil
     }
 }
 
