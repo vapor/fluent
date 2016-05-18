@@ -8,181 +8,47 @@ Simple ActiveRecord implementation for working with your database in Swift.
 - [x] Beautiful syntax
 - [x] Generically typed
 
-## Getting Started
+![Swift](https://camo.githubusercontent.com/0727f3687a1e263cac101c5387df41048641339c/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f53776966742d332e302d6f72616e67652e7376673f7374796c653d666c6174)
+[![Slack Status](http://qutheory.io:8001/badge.svg)](http://slack.qutheory.io)
+[![PRs Welcome](https://img.shields.io/badge/prs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+
+Fluent is the first Swift ORM that works with both SQL and NoSQL. It provides a beautifully expressive and easy to use syntax for interacting with your database.
+
+This repository is the framework's source code. To view a sample project, check out the [Fluent Example](https://github.com/qutheory/fluent-example).
 
 Clone the [Example](https://github.com/qutheory/fluent-example) project to start making your application. If you are also looking for a web server, check out [Vapor](https://github.com/qutheory/vapor). It was built to work well with Fluent.
 
-You must have Swift 2.2 or later installed. You can learn more about Swift 2.2 at [Swift.org](http://swift.org)
+You must have Swift 3 or later installed. You can learn more about Swift 3 at [Swift.org](http://swift.org)
 
-### Work in Progress
+## 📖 Documentation
 
-This is a work in progress, so don't rely on this for anything important. And pull requests are welcome!
+Visit the [Documentation](http://docs.qutheory.io) for extensive information on getting setup, using, and deploying Vapor. 
 
-## Example
+Fluent specific documentation is coming soon.
 
-Using Fluent is simple and expressive.
+## 🚀 Contributing
 
-```swift
-if let user = User.find(5) {
-	print("Found \(user.name)")
+To contribute a **feature or idea** to Fluent, submit an issue and fill in the template. If the request is approved, you or one of the members of the community can start working on it.
 
-	user.name = "New Name"
-	user.save()
-}
-```
+If you find a **bug**, please submit a pull request with a failing test case displaying the bug or create an issue.
 
-Underlying Fluent is a powerful Query builder.
+If you find a **security vulnerability**, please contact [tanner@qutheory.io](tanner@qutheory.io) as soon as possible. We take these matters seriously.
 
-```swift
-let user = Query<User>().filter("id", notIn: [1, 2, 3]).filter("age", .GreaterThan, 21).first
-```
+## 💙 Code of Conduct
 
-## Setup
+Our goal is to create a safe and empowering environment for anyone who decides to use or contribute to Fluent. Please help us make the community a better place by abiding to this [Code of Conduct](https://github.com/qutheory/vapor/blob/master/CODE_OF_CONDUCT.md) during your interactions surrounding this project. 
 
-Start by importing Fluent into your application.
+## 🔧 Compatibility
 
-```swift
-import Fluent
-```
+Vapor has been tested on OS X 10.11, Ubuntu 14.04, and Ubuntu 15.10. 
 
-`Package.swift`
+Our homepage [http://qutheory.io](http://qutheory.io) is currently running using Vapor + Fluent on DigitalOcean.
 
-```swift
-import PackageDescription
+## ⚠️ Work in Progress
 
-let package = Package(
-    name: "FluentApp",
-    dependencies: [
-        .Package(url: "https://github.com/qutheory/fluent.git", majorVersion: 0)
-    ]
-)
-```
+This is a work in progress, so *do not* rely on this for anything important. And pull requests are welcome!
 
-## Drivers
+## 👥 Authors
 
-Fluent currently supports `SQLite`. Support for `MySQL`, and `MongoDB` are in the works.
+Made by [Tanner Nelson](https://twitter.com/tanner0101), [Logan Wright](https://twitter.com/logmaestro), and the hundreds of members of the Qutheory community.
 
-### Print Driver
-
-By default, the `PrintDriver` is enabled. This driver will simply print out the commands you make to Fluent. This is only useful for development of Fluent. 
-
-### SQLite
-
-Start by ensuring `SQLite3` is installed on your machine. If you are on a Mac, it will already be installed. For Linux, simply run `sudo apt-get install libsqlite3-dev`. 
-
-Once `SQLite3` is installed, add the Fluent `SQLiteDriver` to your project.
-
-`Package.swift`
-
-```swift
-.Package(url: "https://github.com/tannernelson/fluent-sqlite-driver.git", majorVersion: 0)
-```
-
-Then `import` the driver and set it as your default database driver.
-
-```swift
-import SQLiteDriver
-
-Database.driver = SQLiteDriver()
-```
-
-You are now ready to use SQLite. The database file will be stored in `Database/main.sqlite`.
-
-## Models
-
-Make your application models conform to the `Model` protocol to allow them to work with Fluent.
-
-```swift
-public protocol Model {
-	///The entities database identifier. `nil` when not saved yet.
-	var id: String? { get }
-
-	///The database table in which entities are stored.
-	static var table: String { get }
-
-	/**
-		This method will be called when the entity is saved. 
-		The keys of the dictionary are the column names
-		in the database.
-	*/
-	func serialize() -> [String: String]
-
-	init(serialized: [String: String])
-}
-```
-
-When your application models conform to the `Model` protocol, they gain access to the following helper functions.
-
-```swift
-extension Model {
-	public func save()
-	public func delete()
-	public static func find(id: Int) -> Self?
-}
-```
-
-## Querying
-
-Create an instance of the query builder by passing one of your application models that conforms to the `Model` protocol.
-
-```swift
-let query = Query<User>()
-```
-
-### Filters
-
-You can filter by equivalence relations, as well is `in/not in` relations.
-
-
-#### Compare
-
-```swift
-query.filter("age", .GreaterThan, 21)
-```
-
-```swift
-public enum Comparison {
-	case Equals, NotEquals, GreaterThanOrEquals, LessThanOrEquals, GreaterThan, LessThan
-}
-```
-
-#### Subset
-
-```swift
-query.filter("id", in: [1, 2, 3])
-```
-
-```swift
-public enum Comparison {
-	case In, NotIn
-}
-```
-
-### Results
-
-Call `.results` for all of the results from the query, or `.first` for only the first result.
-
-### Delete
-
-Call `.delete` to delete all rows affected by the query.
-
-### Save
-
-Call `.save(model: T)`, passing in an instance of the class used to instantiate the `Query` to save it. This performs the same function as calling `.save()` on the model itself.
-
-## Deploying
-
-Fluent has been successfully tested on Ubuntu 14.04 LTS (DigitalOcean) and Ubuntu 15.10 (VirtualBox). 
-
-To deploy to DigitalOcean, simply 
-
-- Install Swift 2.2
-	- `wget` the .tar.gz from Apple
-	- Set the `export PATH` in your `~/.bashrc`
-	- (you may need to install `binutils` as well if you see `ar not found`)
-- Clone your fork of the `fluent-example` repository to the server
-- `cd` into the repository
-	- Run `swift build`
-	- Run `.build/debug/MyApp`
-
-My website `http://tanner.xyz` is currently running using Vapor and Fluent.

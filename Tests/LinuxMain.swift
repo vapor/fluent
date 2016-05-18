@@ -4,7 +4,7 @@ import XCTest
 @testable import FluentTestSuite
 
 XCTMain([
-    testCase(QueryTests.allTests),
+    testCase(ModelFindTests.allTests),
 ])
 
 #endif
