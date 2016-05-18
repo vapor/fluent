@@ -21,19 +21,19 @@ extension Model {
 
 extension Model {
     public mutating func save() throws {
-        try Self.database.query().save(&self)
+        try Self.query.save(&self)
     }
 
     public func delete() throws {
-        try Self.database.query().delete(self)
+        try Self.query.delete(self)
     }
 
     public static func all() throws -> [Self] {
-        return try Self.database.query().all()
+        return try Self.query.all()
     }
     
     public static func find(_ id: Value) throws -> Self? {
-        return try Self.database.query().filter(database.driver.idKey, .equals, id).first()
+        return try Self.query.filter(database.driver.idKey, .equals, id).first()
     }
 
     public static var query: Query<Self> {
@@ -53,9 +53,7 @@ extension Model {
             if let db = Database.map[Self.name] {
                 return db
             } else {
-                let db = Database()
-                Database.map[Self.name] = db
-                return db
+                return Database.default
             }
         }
         set {

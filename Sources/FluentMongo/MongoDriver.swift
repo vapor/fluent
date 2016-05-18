@@ -21,13 +21,13 @@ public class MongoDriver: Fluent.Driver {
         print("Mongo executing: \(query)")
 
         switch query.action {
-        case .select:
+        case .fetch:
             let cursor = try select(query)
             for document in cursor {
                 let item = convert(document: document)
                 items.append(item)
             }
-        case .insert:
+        case .create:
             let document = try insert(query)
             if let document = document {
                 let item = convert(document: document)
@@ -100,6 +100,10 @@ extension Fluent.Filter {
                 query = AQTQuery(aqt: .greaterThan(key: key, val: val.bson))
             case .lessThan:
                 query = AQTQuery(aqt: .smallerThan(key: key, val: val.bson))
+            case .greaterThanOrEquals:
+                query = AQTQuery(aqt: .greaterThanOrEqual(key: key, val: val.bson))
+            case .lessThanOrEquals:
+                query = AQTQuery(aqt: .smallerThanOrEqual(key: key, val: val.bson))
             case .notEquals:
                 query = AQTQuery(aqt: .valNotEquals(key: key, val: val.bson))
             }

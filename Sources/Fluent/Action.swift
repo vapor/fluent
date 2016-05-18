@@ -1,21 +1,11 @@
+/**
+    The types of actions that can be performed
+    on database entities, such as fetching, deleting,
+    creating, and updating.
+*/
 public enum Action {
-    case select
+    case fetch
     case delete
-    case insert
+    case create
     case update
-}
-
-extension Action: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case select:
-            return "select"
-        case delete:
-            return "delete"
-        case insert:
-            return "insert"
-        case update:
-            return "update"
-        }
-    }
 }

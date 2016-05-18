@@ -35,7 +35,7 @@ public class SQL<T: Model>: Helper<T> {
             return nil
         }
 
-        guard query.action == .insert || query.action == .update else {
+        guard query.action == .create || query.action == .update else {
             return nil
         }
 
@@ -45,7 +45,7 @@ public class SQL<T: Model>: Helper<T> {
 
         var clause: String?
 
-        if case .insert = query.action {
+        if case .create = query.action {
             let fields = data.keys.joined(separator: ", ")
 
             let values = data.flatMap { key, value in
@@ -113,11 +113,11 @@ extension Filter {
 extension Action {
     var sql: String {
         switch self {
-        case .select:
+        case .fetch:
             return "SELECT * FROM"
         case .delete:
             return "DELETE FROM"
-        case .insert:
+        case .create:
             return "INSERT INTO"
         case .update:
             return "UPDATE"
@@ -175,12 +175,16 @@ extension Filter.Comparison {
         switch self {
         case .equals:
             return "="
-        case .notEquals:
-            return "!="
         case .greaterThan:
             return ">"
         case .lessThan:
             return "<"
+        case .greaterThanOrEquals:
+            return ">="
+        case .lessThanOrEquals:
+            return "<="
+        case .notEquals:
+            return "!="
         }
     }
 }

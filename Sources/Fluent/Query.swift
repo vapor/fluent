@@ -1,50 +1,38 @@
 public class Query<T: Model> {
-    public typealias FilterHandler = (query: Query) -> Query
-    public var filters: [Filter]
-    
-    public var fields: [String]
-    public var data: [String: Value?]?
+
     public var action: Action
+    public var filters: [Filter]
+    public var data: [String: Value?]?
     public var limit: Limit?
     public var entity: String {
         return T.entity
     }
 
     var database: Database
-    
+
     init() {
-        fields = []
         filters = []
-        action = .select
+        action = .fetch
         database = T.database
     }
 
-    public func first(_ fields: String...) throws -> T? {
+    public func first() throws -> T? {
         limit = Limit(count: 1)
-        return try run(fields).first
+        return try run().first
     }
 
-    public func all(_ fields: String...) throws -> [T] {
-        return try run(fields)
+    public func all() throws -> [T] {
+        return try run()
     }
     
-    func run(_ fields: [String]? = nil) throws -> [T] {
-        if let fields = fields {
-            self.fields += fields
-        }
-        
+    func run() throws -> [T] {
         var models: [T] = []
         
         let results = try database.driver.execute(self)
         
         for result in results {
-            let id = result[database.driver.idKey]
-
-            var filtered = result
-            filtered.removeValue(forKey: database.driver.idKey)
-
             var model = T(serialized: result)
-            model.id = id
+            model.id = result[database.driver.idKey]
             models.append(model)
         }
         
@@ -55,12 +43,11 @@ public class Query<T: Model> {
         let data = model.serialize()
 
         if let id = model.id {
-            try filter(database.driver.idKey, .equals, id).update(data)
+            filter(database.driver.idKey, .equals, id)
+            try update(data)
         } else {
-            let new = try insert(data)
-            if let new = new {
-                model.id = new.id
-            }
+            let new = try create(data)
+            model.id = new?.id
         }
 
         return model
@@ -89,8 +76,8 @@ public class Query<T: Model> {
         try run()
     }
 
-    public func insert(_ serialized: [String: Value?]) throws -> T? {
-        action = .insert
+    public func create(_ serialized: [String: Value?]) throws -> T? {
+        action = .create
         data = serialized
 
         let results = try run()

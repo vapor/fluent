@@ -38,7 +38,7 @@ public class SQLiteDriver: Fluent.Driver {
             }
         }
 
-        if query.action == .insert {
+        if query.action == .create {
             return [
                [idKey : database.lastId]
             ]
