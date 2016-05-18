@@ -12,16 +12,6 @@ public protocol Polymorphic {
     var double: Double? { get }
 }
 
-public enum StructuredData {
-    case null
-    case bool(Bool)
-    case integer(Int)
-    case double(Double)
-    case string(String)
-    case array([StructuredData])
-    case dictionary([String: StructuredData])
-}
-
 extension Value {
     public var string: String? {
         switch structuredData {
