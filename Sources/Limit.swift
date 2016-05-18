@@ -5,7 +5,7 @@
 public struct Limit {
 
     /**
-        The maxiumum number of 
+        The maximum number of 
         results to be returned.
     */
     var count: Int
