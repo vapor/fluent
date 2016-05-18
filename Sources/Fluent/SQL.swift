@@ -1,6 +1,20 @@
+/**
+    A helper for creating generic 
+    SQL statements from Fluent queries.
+ 
+    Subclass this to support specific 
+    SQL flavors, such as MySQL.
+*/
 public class SQL<T: Model>: Helper<T> {
+    /**
+        The values to be parameterized
+        into the statement.
+    */
     public var values: [Value]
 
+    /**
+        The SQL statement string.
+    */
     public var statement: String {
         values = []
 
@@ -22,14 +36,25 @@ public class SQL<T: Model>: Helper<T> {
         return "\(statement.joined(separator: " "));"
     }
 
+    /**
+        The next placeholder to use in
+        place of a value for parameterization.
+    */
     public var nextPlaceholder: String {
         return "?"
     }
 
+    /**
+        The table to query.
+    */
     var table: String {
         return query.entity
     }
 
+    /**
+        The data clause containing
+        values for INSERT and UPDATE queries.
+    */
     var dataClause: String? {
         guard let data = query.data else {
             return nil
@@ -65,6 +90,10 @@ public class SQL<T: Model>: Helper<T> {
         return clause
     }
 
+    /**
+        The where clause that filters
+        SELECT, UPDATE, and DELETE queries.
+    */
     var whereClause: String? {
         if query.filters.count == 0 {
             return nil
@@ -89,6 +118,10 @@ public class SQL<T: Model>: Helper<T> {
         return clause.joined(separator: " AND ")
     }
 
+    /**
+        Creates a SQL helper for the 
+        given query.
+    */
     public override init(query: Query<T>) {
         values = []
         super.init(query: query)
@@ -96,6 +129,9 @@ public class SQL<T: Model>: Helper<T> {
 }
 
 extension Filter {
+    /**
+        Translates a filter to SQL.
+    */
     func sql(placeholder: String) -> String {
         switch self {
         case .compare(let field, let comparison, _):
@@ -111,6 +147,9 @@ extension Filter {
 }
 
 extension Action {
+    /**
+        Translates an action to SQL.
+    */
     var sql: String {
         switch self {
         case .fetch:
@@ -126,6 +165,9 @@ extension Action {
 }
 
 extension Filter.Scope {
+    /**
+        Translates a scope to SQL.
+    */
     var sql: String {
         switch self {
         case .in:
@@ -136,24 +178,40 @@ extension Filter.Scope {
     }
 }
 
+/**
+    Allows optionals to be targeted
+    in protocol extensions
+*/
 public protocol Extractable {
     associatedtype Wrapped
     func extract() -> Wrapped?
 }
 
+/**
+    Conforms `Optional`
+*/
 extension Optional: Extractable {
     public func extract() -> Wrapped? {
         return self
     }
 }
 
+/**
+    Protocol extensions for `Value?`
+*/
 extension Extractable where Wrapped == Value {
+    /**
+        Translates a `Value?` to SQL.
+    */
     func sql(placeholder: String) -> String {
         return self.extract()?.sql(placeholder: placeholder) ?? "NULL"
     }
 }
 
 extension Value {
+    /**
+        Translates a `Value` to SQL.
+    */
     func sql(placeholder: String) -> String {
         switch structuredData {
         case .null:
@@ -165,12 +223,18 @@ extension Value {
 }
 
 extension Limit {
+    /**
+        Translates a `Limit` to SQL.
+    */
     var sql: String {
         return "LIMIT \(count)"
     }
 }
 
 extension Filter.Comparison {
+    /**
+        Translates a `Comparison` to SQL.
+    */
     var sql: String {
         switch self {
         case .equals:
