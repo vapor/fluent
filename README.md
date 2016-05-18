@@ -22,7 +22,9 @@ You must have Swift 3 or later installed. You can learn more about Swift 3 at [S
 
 ## 📖 Documentation
 
-Visit the [Documentation](http://docs.qutheory.io) for extensive information on getting setup, using, and deploying Vapor. Fluent specific documentation is coming soon.
+Visit the [Documentation](http://docs.qutheory.io) for extensive information on getting setup, using, and deploying Vapor. 
+
+Fluent specific documentation is coming soon.
 
 ## 🚀 Contributing
 
