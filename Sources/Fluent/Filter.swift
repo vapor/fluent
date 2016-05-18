@@ -1,3 +1,9 @@
+/**
+    Defines a `Filter` that can be 
+    added on fetch, delete, and update
+    operations to limit the amount of 
+    data affected.
+*/
 public enum Filter {
     case compare(String, Comparison, Value)
     case subset(String, Scope, [Value])

@@ -1,15 +1,50 @@
+/**
+    Represents an abstract database query.
+*/
 public class Query<T: Model> {
 
+    /**
+        The type of action to perform
+        on the data. Defaults to `.fetch`
+    */
     public var action: Action
+
+    /**
+        An array of filters to apply
+        during the query's action.
+    */
     public var filters: [Filter]
+
+    /**
+        Optional data to be used during
+        `.create` or `.updated` actions.
+    */
     public var data: [String: Value?]?
+
+    /**
+        Optionally limit the amount of
+        entities affected by the action.
+    */
     public var limit: Limit?
+
+    /**
+        The collection or table name upon
+        which the action should be performed.
+    */
     public var entity: String {
         return T.entity
     }
 
+    /**
+        The database to which the query
+        should be sent.
+    */
     var database: Database
 
+    /**
+        Creates a new `Query` with the
+        `Model`'s database.
+    */
     init() {
         filters = []
         action = .fetch
@@ -31,7 +66,10 @@ public class Query<T: Model> {
         let results = try database.driver.execute(self)
         
         for result in results {
-            var model = T(serialized: result)
+            guard var model = T(serialized: result) else {
+                continue
+            }
+
             model.id = result[database.driver.idKey]
             models.append(model)
         }

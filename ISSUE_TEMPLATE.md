@@ -28,7 +28,7 @@ A short description of what the feature is. Try to keep it to a single-paragraph
 
 ## Motivation
 
-Describe the problems that this proposal seeks to address. If the problem is that some common pattern is currently hard to express, show how one can currently get a similar effect and describe its drawbacks. If it's completely new functionality that cannot be emulated, motivate why this new functionality would help Vapor be a better framework.
+Describe the problems that this proposal seeks to address. If the problem is that some common pattern is currently hard to express, show how one can currently get a similar effect and describe its drawbacks. If it's completely new functionality that cannot be emulated, motivate why this new functionality would help Fluent be a better framework.
 
 ## Proposed solution
 
@@ -40,7 +40,7 @@ Give us an idea of what this new idea will look like in code. The more code snip
 
 ## Impact
 
-Describe the impact that this change will have on existing code. Will some Vapor applications stop compiling due to this change? Will applications still compile but produce different behavior than they used to?
+Describe the impact that this change will have on existing code. Will some Fluent applications stop compiling due to this change? Will applications still compile but produce different behavior than they used to?
 
 ## Alternatives considered
 

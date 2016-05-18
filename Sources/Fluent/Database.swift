@@ -27,7 +27,6 @@ public class Database {
 
     /**
         The default database for all `Model` types.
-
     */
     public static var `default`: Database = Database(driver: PrintDriver())
 }
