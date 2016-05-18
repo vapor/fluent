@@ -28,8 +28,8 @@ extension StructuredData: DictionaryLiteralConvertible {
     public init(dictionaryLiteral elements: (String, StructuredData)...) {
         var dict = [String: StructuredData]()
         
-        for element in elements {
-            dict[element.0] = element.1
+        for (key, value) in elements {
+            dict[key] = value
         }
         
         self = .dictionary(dict)
