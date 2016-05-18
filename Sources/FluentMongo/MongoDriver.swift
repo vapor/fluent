@@ -9,18 +9,16 @@ public class MongoDriver: Fluent.Driver {
         case unsupported(String)
     }
     
-    public init(name: String) throws {
-        print("MONGO INIT")
-
-        let server = try Server("mongodb://test:test@localhost:27017", automatically: true)
-        database = server[name]
+    public init(database: String, user: String, password: String, port: Int) throws {
+        let server = try Server("mongodb://\(user):\(password)@localhost:\(port)", automatically: true)
+        self.database = server[database]
     }
 
     
     public func execute<T: Model>(_ query: Fluent.Query<T>) throws -> [[String: Fluent.Value]] {
-        print("MONGO EXECUTE")
-
         var items: [[String: Fluent.Value]] = []
+
+        print("Mongo executing: \(query)")
 
         switch query.action {
         case .select:
@@ -33,9 +31,10 @@ public class MongoDriver: Fluent.Driver {
             let document = try insert(query)
             if let document = document {
                 let item = convert(document: document)
-                print(item)
                 items.append(item)
             }
+        case .delete:
+            try delete(query)
         default:
             throw Error.unsupported("Action \(query.action) is not yet supported.")
         }
@@ -51,6 +50,14 @@ public class MongoDriver: Fluent.Driver {
         }
 
         return item
+    }
+
+    private func delete<T: Model>(_ query: Fluent.Query<T>) throws {
+        if let q = query.mongoKittenQuery {
+            try database[query.entity].remove(matching: q)
+        } else {
+            try database[query.entity].drop()
+        }
     }
 
     private func insert<T: Model>(_ query: Fluent.Query<T>) throws -> Document? {
@@ -70,30 +77,76 @@ public class MongoDriver: Fluent.Driver {
     private func select<T: Model>(_ query: Fluent.Query<T>) throws -> Cursor<Document> {
         let cursor: Cursor<Document>
 
-        if query.filters.count > 0 {
-            var q: MongoKitten.Query?
-
-            for filter in query.filters {
-                switch filter {
-                case .Compare(let key, _, let val):
-                    if let key = key.string {
-                        q = key == val.bson
-                    }
-                default:
-                    break
-                }
-            }
-
-            if let q = q {
-                cursor = try database[query.entity].find(matching: q)
-            } else {
-                cursor = try database[query.entity].find()
-            }
+        if let q = query.mongoKittenQuery {
+            cursor = try database[query.entity].find(matching: q)
         } else {
             cursor = try database[query.entity].find()
         }
 
         return cursor
+    }
+}
+
+extension Fluent.Filter {
+    var mongoKittenFilter: AQTQuery {
+        let query: AQTQuery
+
+        switch self {
+        case .compare(let key, let comparison, let val):
+            switch comparison {
+            case .equals:
+                query = AQTQuery(aqt: .valEquals(key: key, val: val.bson))
+            case .greaterThan:
+                query = AQTQuery(aqt: .greaterThan(key: key, val: val.bson))
+            case .lessThan:
+                query = AQTQuery(aqt: .smallerThan(key: key, val: val.bson))
+            case .notEquals:
+                query = AQTQuery(aqt: .valNotEquals(key: key, val: val.bson))
+            }
+        case .subset(let key, let scope, let values):
+            switch scope {
+            case .in:
+                var ors: [AQT] = []
+
+                for val in values {
+                    ors.append(.valEquals(key: key, val: val.bson))
+                }
+
+                query = AQTQuery(aqt: .or(ors))
+            case .notIn:
+                var ands: [AQT] = []
+
+                for val in values {
+                    ands.append(.valNotEquals(key: key, val: val.bson))
+                }
+
+                query = AQTQuery(aqt: .and(ands))
+            }
+        }
+
+        return query
+    }
+}
+
+extension Fluent.Query {
+    var mongoKittenQuery: AQTQuery? {
+        guard filters.count != 0 else {
+            return nil
+        }
+
+        var query: AQTQuery?
+
+        for filter in filters {
+            let subquery = filter.mongoKittenFilter
+
+            if let q = query {
+                query = subquery && q
+            } else {
+                query = subquery
+            }
+        }
+
+        return query
     }
 }
 
@@ -108,6 +161,8 @@ extension BSON.Value {
             return .string(string)
         case .objectId(let objId):
             return .string(objId.hexString)
+        case .null:
+            return .null
         default:
             print("Unsupported type BSON.Value -> SD: \(self)")
             return .null

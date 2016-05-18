@@ -60,8 +60,6 @@ public class SQLite {
 	}
 
     func execute(_ queryString: String, prepareClosure: PrepareClosure = { _ in }) throws -> [Result.Row] {
-        print("SQLITE EXECUTE")
-
         bindPosition = 0
         statementPointer = UnsafeMutablePointer<OpaquePointer?>.init(allocatingCapacity: 1)
 

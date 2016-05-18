@@ -33,7 +33,7 @@ extension Model {
     }
     
     public static func find(_ id: Value) throws -> Self? {
-        return try Self.database.query().filter(database.driver.idKey, .Equals, id).first()
+        return try Self.database.query().filter(database.driver.idKey, .equals, id).first()
     }
 
     public static var query: Query<Self> {

@@ -2,14 +2,16 @@ public class SQL<T: Model>: Helper<T> {
     public var values: [Value]
 
     public var statement: String {
-        var statement = [query.action.sql(query.fields)]
+        values = []
+
+        var statement = [query.action.sql]
         statement.append(table)
 
-        if let dataClause = self.dataClause {
+        if let dataClause = dataClause {
             statement.append(dataClause)
         }
 
-        if let whereClause = self.whereClause {
+        if let whereClause = whereClause {
             statement.append("WHERE \(whereClause)")
         }
 
@@ -33,35 +35,34 @@ public class SQL<T: Model>: Helper<T> {
             return nil
         }
 
-        switch query.action {
-        case .insert:
-            let fieldsString = data.keys.joined(separator: ", ")
-            let rawValuesString = data.map { (key, value) -> String in
-                if let value = value {
-                    self.values.append(value)
-                    return self.nextPlaceholder
-                } else {
-                    return "NULL"
-                }
-            }
-
-            let valuesString = rawValuesString.joined(separator: ", ")
-            return "(\(fieldsString)) VALUES (\(valuesString))"
-        case .update:
-            let rawUpdatesString = data.map { (key, value) -> String in
-                if let value = value {
-                    self.values.append(value)
-                    return "\(key) = \(self.nextPlaceholder)"
-                } else {
-                    return "\(key) = NULL"
-                }
-            }
-
-            let updatesString = rawUpdatesString.joined(separator: ", ")
-            return "SET \(updatesString)"
-        default:
+        guard query.action == .insert || query.action == .update else {
             return nil
         }
+
+        values += data.values.flatMap { value in
+            return value
+        }
+
+        var clause: String?
+
+        if case .insert = query.action {
+            let fields = data.keys.joined(separator: ", ")
+
+            let values = data.flatMap { key, value in
+                return value.sql(placeholder: nextPlaceholder)
+            }.joined(separator: ", ")
+
+            clause = "(\(fields)) VALUES (\(values))"
+        } else if case .update = query.action {
+            let updates = data.flatMap { key, value in
+                let string = value.sql(placeholder: nextPlaceholder)
+                return "\(key) = \(string)"
+            }.joined(separator: ", ")
+
+            clause = "SET \(updates)"
+        }
+
+        return clause
     }
 
     var whereClause: String? {
@@ -69,54 +70,51 @@ public class SQL<T: Model>: Helper<T> {
             return nil
         }
 
-        var filterClause: [String] = []
         for filter in query.filters {
-            filterClause.append(filterOutput(filter))
+            switch filter {
+            case .compare(_, _, let value):
+                values.append(value)
+            case .subset(_, _, let values):
+                self.values += values
+            }
         }
 
-        return filterClause.joined(separator: " AND ")
+        var clause: [String] = []
+
+        for filter in query.filters {
+            let sql = filter.sql(placeholder: nextPlaceholder)
+            clause.append(sql)
+        }
+
+        return clause.joined(separator: " AND ")
     }
 
     public override init(query: Query<T>) {
         values = []
         super.init(query: query)
     }
+}
 
-    func filterOutput(_ filter: Filter) -> String {
-        switch filter {
-        case .Compare(let field, let comparison, let value):
-            self.values.append(value)
+extension Filter {
+    func sql(placeholder: String) -> String {
+        switch self {
+        case .compare(let field, let comparison, _):
+            return "\(field) \(comparison.sql) \(placeholder)"
+        case .subset(let field, let scope, let values):
+            let string = values.map { value in
+                return placeholder
+            }.joined(separator: ", ")
 
-            return "\(field) \(comparison.sql) \(nextPlaceholder)"
-        case .Subset(let field, let scope, let values):
-            let rawValueStrings = values.map { value -> String in
-                self.values.append(value)
-                return nextPlaceholder
-            }
-
-            let valueStrings = rawValueStrings.joined(separator: ", ")
-            return "\(field) \(scope.sql) (\(valueStrings))"
+            return "\(field) \(scope.sql) (\(string))"
         }
     }
 }
 
-//:
-
 extension Action {
-    func sql(_ fields: [String]) -> String {
+    var sql: String {
         switch self {
         case .select:
-            var select = ["SELECT"]
-
-            if fields.count > 0 {
-                select.append(fields.joined(separator: ", "))
-            } else {
-                select.append("*")
-            }
-
-            select.append("FROM")
-
-            return select.joined(separator: " ")
+            return "SELECT * FROM"
         case .delete:
             return "DELETE FROM"
         case .insert:
@@ -130,10 +128,38 @@ extension Action {
 extension Filter.Scope {
     var sql: String {
         switch self {
-        case .In:
+        case .in:
             return "IN"
-        case .NotIn:
+        case .notIn:
             return "NOT IN"
+        }
+    }
+}
+
+public protocol Extractable {
+    associatedtype Wrapped
+    func extract() -> Wrapped?
+}
+
+extension Optional: Extractable {
+    public func extract() -> Wrapped? {
+        return self
+    }
+}
+
+extension Extractable where Wrapped == Value {
+    func sql(placeholder: String) -> String {
+        return self.extract()?.sql(placeholder: placeholder) ?? "NULL"
+    }
+}
+
+extension Value {
+    func sql(placeholder: String) -> String {
+        switch structuredData {
+        case .null:
+            return "NULL"
+        default:
+            return placeholder
         }
     }
 }
@@ -147,13 +173,13 @@ extension Limit {
 extension Filter.Comparison {
     var sql: String {
         switch self {
-        case .Equals:
+        case .equals:
             return "="
-        case .NotEquals:
+        case .notEquals:
             return "!="
-        case .GreaterThan:
+        case .greaterThan:
             return ">"
-        case .LessThan:
+        case .lessThan:
             return "<"
         }
     }

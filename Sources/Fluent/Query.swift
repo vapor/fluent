@@ -55,7 +55,7 @@ public class Query<T: Model> {
         let data = model.serialize()
 
         if let id = model.id {
-            try filter(database.driver.idKey, .Equals, id).update(data)
+            try filter(database.driver.idKey, .equals, id).update(data)
         } else {
             let new = try insert(data)
             if let new = new {
@@ -77,7 +77,7 @@ public class Query<T: Model> {
         }
         action = .delete
         
-        let filter = Filter.Compare(database.driver.idKey, .Equals, id)
+        let filter = Filter.compare(database.driver.idKey, .equals, id)
         filters.append(filter)
         
         try run()
@@ -101,19 +101,25 @@ public class Query<T: Model> {
     }
     
     public func filter(_ field: String, _ value: Value) -> Self {
-        return filter(field, .Equals, value)
+        return filter(field, .equals, value)
     }
     
-    public func filter(_ field: String, in superSet: [Value]) -> Self {
-        let filter = Filter.Subset(field, .In, superSet)
+    public func filter(_ field: String, _ scope: Filter.Scope, _ set: [Value]) -> Self {
+        let filter = Filter.subset(field, scope, set)
         filters.append(filter)
         return self
     }
     
     public func filter(_ field: String, _ comparison: Filter.Comparison, _ value: Value) -> Self {
-        let filter = Filter.Compare(field, comparison, value)
+        let filter = Filter.compare(field, comparison, value)
         filters.append(filter)
         return self
     }
 
+}
+
+extension Query: CustomStringConvertible {
+    public var description: String {
+        return "\(action) \(entity), \(filters.count) filters"
+    }
 }

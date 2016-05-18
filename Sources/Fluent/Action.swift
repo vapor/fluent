@@ -9,11 +9,11 @@ extension Action: CustomStringConvertible {
     public var description: String {
         switch self {
         case select:
-            return "select * from"
+            return "select"
         case delete:
-            return "delete from"
+            return "delete"
         case insert:
-            return "insert into"
+            return "insert"
         case update:
             return "update"
         }

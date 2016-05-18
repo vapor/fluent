@@ -7,14 +7,18 @@ public class SQLiteDriver: Fluent.Driver {
     public init() throws {
         database = try SQLite(path: self.databaseFilePath)
     }
+
+    public enum Error: ErrorProtocol {
+        case unsupported(String)
+    }
     
     public func execute<T: Model>(_ query: Query<T>) throws -> [[String: Value]] {
         let sql = SQL(query: query)
         
         var results: [SQLite.Result.Row]
 
-        let stmt = sql.statement
-        results = try database.execute(stmt) { preparer in
+        print("SQLite executing: \(sql.statement)")
+        results = try database.execute(sql.statement) { preparer in
             for value in sql.values {
                 switch value.structuredData {
                 case .integer(let int):
@@ -23,16 +27,20 @@ public class SQLiteDriver: Fluent.Driver {
                     try preparer.bind(double)
                 case .string(let string):
                     try preparer.bind(string)
-                default:
-                    print("Unsupported type")
-                    print(value.structuredData)
+                case .array(_):
+                    throw Error.unsupported("Array values not supported.")
+                case .dictionary(_):
+                    throw Error.unsupported("Dictionary values not supported.")
+                case .null: break
+                case .bool(let bool):
+                    try preparer.bind(bool)
                 }
             }
         }
 
         if query.action == .insert {
             return [
-               ["id" : database.lastId]
+               [idKey : database.lastId]
             ]
         } else {
             return results.map { row in

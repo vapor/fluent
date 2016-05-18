@@ -13,10 +13,16 @@ do {
     let sqliteDriver = try FluentSQLite.SQLiteDriver()
     sqlite = Database(driver: sqliteDriver)
 
-    let mongoDriver = try FluentMongo.MongoDriver(name: "test")
+    let mongoDriver = try FluentMongo.MongoDriver(
+        database: "test",
+        user: "test",
+        password: "test",
+        port: 27017
+    )
+    
     mongo = Database(driver: mongoDriver)
 
-    fake = Database()
+    //fake = Database()
 } catch {
     fatalError("Could not open database \(error)")
 }
@@ -30,8 +36,8 @@ do {
     User.database = mongo
     let mongoUsers = try User.all()
 
-    User.database = fake
-    let _ = try User.all()
+    //User.database = fake
+    //let _ = try User.all()
 
     print("SQLite Users")
     print(sqliteUsers)
@@ -51,8 +57,8 @@ do {
     print("Mongo Users Filter")
     print(mongoUsersFilter)
 
-    User.database = fake
-    let _ = try? User.find(1)
+    //User.database = fake
+    //let _ = try? User.find(1)
 
     User.database = sqlite
     let sqliteUser = try User.find(1)
@@ -80,6 +86,31 @@ do {
 
     print("Mongo User Save")
     print(newMongoUser)
+
+
+    User.database = sqlite
+    let sqliteUsersSubset = try User.query.filter("name", .in, ["Jill", "Tanner"]).all()
+
+    User.database = mongo
+    let mongoUsersSubset = try User.query.filter("name", .in, ["Jill", "Tanner"]).all()
+
+    print("SQLite Users Subset")
+    print(sqliteUsersSubset)
+
+    print("Mongo Users Subset")
+    print(mongoUsersSubset)
+
+    User.database = sqlite
+    let sqliteUsersInverseSubset = try User.query.filter("name", .notIn, ["Bills", "Tanner"]).all()
+
+    User.database = mongo
+    let mongoUsersInverseSubset = try User.query.filter("name", .notIn, ["Bill", "Tanner"]).all()
+
+    print("SQLite Users Inverse Subset")
+    print(sqliteUsersInverseSubset)
+
+    print("Mongo Users Inverse Subset")
+    print(mongoUsersInverseSubset)
 } catch {
     print("Could not fetch. Error: \(error)")
 }

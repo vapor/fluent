@@ -1,19 +1,19 @@
 extension Filter {
     public enum Comparison {
-        case Equals, GreaterThan, LessThan, NotEquals
+        case equals, greaterThan, lessThan, notEquals
     }
 }
 
 extension Filter.Comparison: CustomStringConvertible {
     public var description: String {
         switch self {
-        case .Equals:
+        case .equals:
             return "="
-        case .GreaterThan:
+        case .greaterThan:
             return ">"
-        case .LessThan:
+        case .lessThan:
             return "<"
-        case .NotEquals:
+        case .notEquals:
             return "!="
         }
     }
