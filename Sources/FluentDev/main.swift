@@ -87,6 +87,18 @@ do {
     print("Mongo User Save")
     print(newMongoUser)
 
+    User.database = sqlite
+    try newSqliteUser.delete()
+
+    User.database = mongo
+    try newMongoUser.delete()
+
+    print("SQLite User Delete")
+    print(newSqliteUser)
+
+    print("Mongo User Delete")
+    print(newMongoUser)
+
 
     User.database = sqlite
     let sqliteUsersSubset = try User.query.filter("name", .in, ["Jill", "Tanner"]).all()
