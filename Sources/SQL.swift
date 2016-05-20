@@ -164,7 +164,7 @@ extension Action {
     }
 }
 
-extension Filter.Scope {
+extension Fluent.Filter.Scope {
     /**
         Translates a scope to SQL.
     */
@@ -231,7 +231,7 @@ extension Limit {
     }
 }
 
-extension Filter.Comparison {
+extension Fluent.Filter.Comparison {
     /**
         Translates a `Comparison` to SQL.
     */
