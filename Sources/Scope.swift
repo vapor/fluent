@@ -13,3 +13,18 @@ extension Filter.Scope: CustomStringConvertible {
         return self == .in ? "in" : "not in"
     }
 }
+
+/// Temporarily not in SQL.swift file
+extension Filter.Scope {
+    /**
+     Translates a scope to SQL.
+     */
+    var sql: String {
+        switch self {
+        case .in:
+            return "IN"
+        case .notIn:
+            return "NOT IN"
+        }
+    }
+}
