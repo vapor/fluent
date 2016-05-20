@@ -1,6 +1,6 @@
 /**
-    A type of data that can be retreived
-    of stored in a database.
+    A type of data that can be retrieved
+    or stored in a database.
 */
 public protocol Value: CustomStringConvertible, Polymorphic {
     var structuredData: StructuredData { get }

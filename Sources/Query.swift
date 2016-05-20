@@ -108,12 +108,8 @@ public class Query<T: Model> {
     public func create(_ serialized: [String: Value?]) throws -> T? {
         action = .create
         data = serialized
-
-        let results = try run()
-        guard results.count > 0 else {
-            return nil
-        }
-        return results[0]
+        
+        return try run().first
     }
 
     /**
