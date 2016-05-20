@@ -13,4 +13,3 @@ script:
   - swift build --configuration release
   # Test Fluent
   - swift test
-  
