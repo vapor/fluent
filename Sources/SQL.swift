@@ -164,19 +164,6 @@ extension Action {
     }
 }
 
-extension Filter.Scope {
-    /**
-        Translates a scope to SQL.
-    */
-    var sql: String {
-        switch self {
-        case .in:
-            return "IN"
-        case .notIn:
-            return "NOT IN"
-        }
-    }
-}
 
 /**
     Allows optionals to be targeted
@@ -231,24 +218,3 @@ extension Limit {
     }
 }
 
-extension Filter.Comparison {
-    /**
-        Translates a `Comparison` to SQL.
-    */
-    var sql: String {
-        switch self {
-        case .equals:
-            return "="
-        case .greaterThan:
-            return ">"
-        case .lessThan:
-            return "<"
-        case .greaterThanOrEquals:
-            return ">="
-        case .lessThanOrEquals:
-            return "<="
-        case .notEquals:
-            return "!="
-        }
-    }
-}
