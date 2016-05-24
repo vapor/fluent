@@ -5,6 +5,7 @@ import XCTest
 
 XCTMain([
     testCase(ModelFindTests.allTests),
+    testCase(QueryFiltersTests.allTests),
 ])
 
 #endif
