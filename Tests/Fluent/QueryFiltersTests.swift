@@ -32,7 +32,7 @@ class QueryFiltersTests: XCTestCase {
         }
     }
 
-    static var allTests : [(String, QueryFiltersTests -> () throws -> Void)] {
+    static var allTests : [(String, (QueryFiltersTests) -> () throws -> Void)] {
         return [
             ("testBasalQuery", testBasalQuery),
             ("testBasicQuery", testBasicQuery),

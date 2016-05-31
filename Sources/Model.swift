@@ -61,7 +61,7 @@ extension Model {
         data store and sets the `id` property.
     */
     public mutating func save() throws {
-        try Self.query.save(&self)
+        let _ = try Self.query.save(&self)
     }
 
     /**

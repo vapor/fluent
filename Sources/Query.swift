@@ -120,7 +120,7 @@ public class Query<T: Model> {
         let data = model.serialize()
 
         if let id = model.id {
-            filter(database.driver.idKey, .equals, id)
+            let _ = filter(database.driver.idKey, .equals, id)
             try update(data)
         } else {
             let new = try create(data)
@@ -138,7 +138,7 @@ public class Query<T: Model> {
     */
     public func delete() throws {
         action = .delete
-        try run()
+        let _ = try run()
     }
 
     /**
@@ -153,8 +153,8 @@ public class Query<T: Model> {
         
         let filter = Filter.compare(database.driver.idKey, .equals, id)
         filters.append(filter)
-        
-        try run()
+
+        let _ = try run()
     }
 
     //MARK: Update
@@ -166,7 +166,7 @@ public class Query<T: Model> {
     public func update(_ serialized: [String: Value?]) throws {
         action = .update
         data = serialized
-        try run()
+        let _ = try run()
     }
 
 
