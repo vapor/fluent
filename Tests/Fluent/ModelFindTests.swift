@@ -52,7 +52,7 @@ class ModelFindTests: XCTestCase {
         }
     }
 
-    static var allTests : [(String, ModelFindTests -> () throws -> Void)] {
+    static var allTests : [(String, (ModelFindTests) -> () throws -> Void)] {
         return [
             ("testFindFailing", testFindFailing),
             ("testFindSucceeding", testFindSucceeding),
