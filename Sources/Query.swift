@@ -61,6 +61,7 @@ public class Query<T: Model> {
      
         Returns an array of entities.
     */
+    @discardableResult
     func run() throws -> [T] {
         var models: [T] = []
 
@@ -116,18 +117,16 @@ public class Query<T: Model> {
         Attempts to save a supplied entity
         and updates its identifier if successful.
     */
-    public func save(_ model: inout T) throws -> T {
+    public func save(_ model: inout T) throws {
         let data = model.serialize()
 
         if let id = model.id {
-            let _ = filter(database.driver.idKey, .equals, id)
+            filter(database.driver.idKey, .equals, id)
             try update(data)
         } else {
             let new = try create(data)
             model.id = new?.id
         }
-
-        return model
     }
 
     //MARK: Delete
@@ -138,7 +137,7 @@ public class Query<T: Model> {
     */
     public func delete() throws {
         action = .delete
-        let _ = try run()
+        try run()
     }
 
     /**
@@ -154,7 +153,7 @@ public class Query<T: Model> {
         let filter = Filter.compare(database.driver.idKey, .equals, id)
         filters.append(filter)
 
-        let _ = try run()
+        try run()
     }
 
     //MARK: Update
@@ -166,7 +165,7 @@ public class Query<T: Model> {
     public func update(_ serialized: [String: Value?]) throws {
         action = .update
         data = serialized
-        let _ = try run()
+        try run()
     }
 
 
@@ -179,6 +178,7 @@ public class Query<T: Model> {
         Used for filtering results based on how
         a result's value compares to the supplied value.
     */
+    @discardableResult
     public func filter(_ field: String, _ comparison: Filter.Comparison, _ value: Value) -> Self {
         let filter = Filter.compare(field, comparison, value)
         filters.append(filter)
@@ -192,6 +192,7 @@ public class Query<T: Model> {
         Used for filtering results based on whether
         a result's value is or is not in a set.
     */
+    @discardableResult
     public func filter(_ field: String, _ scope: Filter.Scope, _ set: [Value]) -> Self {
         let filter = Filter.subset(field, scope, set)
         filters.append(filter)
@@ -202,6 +203,7 @@ public class Query<T: Model> {
     /**
         Shortcut for creating a `.equals` filter.
     */
+    @discardableResult
     public func filter(_ field: String, _ value: Value) -> Self {
         return filter(field, .equals, value)
     }
