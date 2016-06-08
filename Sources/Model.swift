@@ -121,3 +121,17 @@ extension Model {
         }
     }
 }
+
+//MARK: CustomStringConvertible
+
+extension Model {
+    public var description: String {
+        var readable: [String: String] = [:]
+
+        serialize().forEach { key, val in
+            readable[key] = val?.string ?? "nil"
+        }
+
+        return "[\(id)] \(readable)"
+    }
+}
