@@ -169,7 +169,7 @@ extension Action {
     Allows optionals to be targeted
     in protocol extensions
 */
-public protocol Extractable {
+private protocol Extractable {
     associatedtype Wrapped
     func extract() -> Wrapped?
 }
@@ -178,7 +178,7 @@ public protocol Extractable {
     Conforms `Optional`
 */
 extension Optional: Extractable {
-    public func extract() -> Wrapped? {
+    private func extract() -> Wrapped? {
         return self
     }
 }
