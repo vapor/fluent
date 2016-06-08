@@ -178,7 +178,7 @@ private protocol Extractable {
     Conforms `Optional`
 */
 extension Optional: Extractable {
-    public func extract() -> Wrapped? {
+    private func extract() -> Wrapped? {
         return self
     }
 }
