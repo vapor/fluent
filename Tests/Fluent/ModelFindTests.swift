@@ -30,7 +30,7 @@ class ModelFindTests: XCTestCase {
             case broken
         }
 
-        func execute<T: Model>(_ query: Query<T>) throws -> [[String: Value]] {
+        func query<T: Model>(_ query: Query<T>) throws -> [[String: Value]] {
             if
                 let filter = query.filters.first,
                 case .compare(let key, let comparison, let value) = filter
@@ -50,15 +50,17 @@ class ModelFindTests: XCTestCase {
             
             return []
         }
+
+        func build(_ builder: Schema.Builder) throws {
+            //
+        }
     }
 
-    static var allTests : [(String, (ModelFindTests) -> () throws -> Void)] {
-        return [
-            ("testFindFailing", testFindFailing),
-            ("testFindSucceeding", testFindSucceeding),
-            ("testFindErroring", testFindErroring),
-        ]
-    }
+    static let allTests = [
+        ("testFindFailing", testFindFailing),
+        ("testFindSucceeding", testFindSucceeding),
+        ("testFindErroring", testFindErroring),
+    ]
 
     override func setUp() {
         database = Database(driver: DummyDriver())

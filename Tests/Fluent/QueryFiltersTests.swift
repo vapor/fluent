@@ -27,8 +27,12 @@ class QueryFiltersTests: XCTestCase {
             case broken
         }
 
-        func execute<T: Model>(_ query: Query<T>) throws -> [[String: Value]] {
+        func query<T: Model>(_ query: Query<T>) throws -> [[String: Value]] {
             return []
+        }
+
+        func build(_ builder: Schema.Builder) throws {
+            
         }
     }
 

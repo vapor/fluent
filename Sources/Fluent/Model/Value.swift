@@ -2,9 +2,7 @@
     A type of data that can be retrieved
     or stored in a database.
 */
-public protocol Value: CustomStringConvertible, Polymorphic {
-    var structuredData: StructuredData { get }
-}
+public protocol Value: CustomStringConvertible, StructuredDataRepresentable, Polymorphic {}
 
 extension Int: Value {
     public var structuredData: StructuredData {

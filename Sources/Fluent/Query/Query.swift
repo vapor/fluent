@@ -65,7 +65,7 @@ public class Query<T: Model> {
     func run() throws -> [T] {
         var models: [T] = []
 
-        let results = try database.driver.execute(self)
+        let results = try database.driver.query(self)
 
         for result in results {
             guard var model = T(serialized: result) else {
