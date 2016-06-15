@@ -16,3 +16,9 @@ extension SQL {
         }
     }
 }
+
+extension Query {
+    public var sql: SQL {
+        return SQL(query: self)
+    }
+}

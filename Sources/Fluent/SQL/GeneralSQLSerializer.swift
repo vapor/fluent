@@ -1,11 +1,11 @@
-class GeneralSQLSerializer: SQLSerializer {
-    let sql: SQL
+public class GeneralSQLSerializer: SQLSerializer {
+    public let sql: SQL
 
-    required init(sql: SQL) {
+    public required init(sql: SQL) {
         self.sql = sql
     }
 
-    func serialize() -> (String, [Value]) {
+    public func serialize() -> (String, [Value]) {
         switch sql {
         case .table(let action, let table, let columns):
             var statement: [String] = []
@@ -23,7 +23,7 @@ class GeneralSQLSerializer: SQLSerializer {
         }
     }
 
-    func makeSQL(_ tableAction: SQL.TableAction) -> String {
+    public func makeSQL(_ tableAction: SQL.TableAction) -> String {
         switch tableAction {
         case .alter:
             return "ALTER TABLE"
@@ -32,7 +32,7 @@ class GeneralSQLSerializer: SQLSerializer {
         }
     }
 
-    func makeSQL(_ column: SQL.Column) -> String {
+    public func makeSQL(_ column: SQL.Column) -> String {
         switch column {
         case .integer(let name):
             return makeSQL(name) + " INTEGER"
@@ -41,15 +41,15 @@ class GeneralSQLSerializer: SQLSerializer {
         }
     }
 
-    func makeSQL(_ columns: [SQL.Column]) -> String {
+    public func makeSQL(_ columns: [SQL.Column]) -> String {
         return "(" + columns.map { makeSQL($0) }.joined(separator: ", ") + ")"
     }
 
-    func makeSQL(_ string: String) -> String {
+    public func makeSQL(_ string: String) -> String {
         return "`\(string)`"
     }
 }
 
-func +=(lhs: inout [String], rhs: String) {
+public func +=(lhs: inout [String], rhs: String) {
     lhs.append(rhs)
 }

@@ -1,4 +1,4 @@
-protocol SQLSerializer {
+public protocol SQLSerializer {
     init(sql: SQL)
     func serialize() -> (String, [Value])
 }
@@ -12,8 +12,4 @@ final class SQLiteSerializer: GeneralSQLSerializer {
             return makeSQL(name) + " TEXT"
         }
     }
-}
-
-final class MySQLSerializer: GeneralSQLSerializer {
-    
 }

@@ -1,9 +1,9 @@
-enum SQL {
-    enum TableAction {
+public enum SQL {
+    public enum TableAction {
         case create, alter
     }
 
-    enum Column {
+    public enum Column {
         case integer(String)
         case string(String, Int)
     }
