@@ -21,7 +21,7 @@ public class Query<T: Model> {
         Optional data to be used during
         `.create` or `.updated` actions.
     */
-    public var data: [String: Value?]?
+    public var data: [String: Value]?
 
     /**
         Optionally limit the amount of
@@ -108,7 +108,7 @@ public class Query<T: Model> {
     */
     public func create(_ serialized: [String: Value?]) throws -> T? {
         action = .create
-        data = serialized
+        data = nilToNull(serialized)
         
         return try run().first
     }
@@ -164,7 +164,7 @@ public class Query<T: Model> {
     */
     public func update(_ serialized: [String: Value?]) throws {
         action = .update
-        data = serialized
+        data = nilToNull(serialized)
         let _ = try run() // discardableResult
     }
 
@@ -206,6 +206,16 @@ public class Query<T: Model> {
     // @discardableResult
     public func filter(_ field: String, _ value: Value) -> Self {
         return filter(field, .equals, value)
+    }
+
+    private func nilToNull(_ serialized: [String: Value?]) -> [String: Value] {
+        var converted: [String: Value] = [:]
+
+        for (key, value) in serialized {
+            converted[key] = value ?? StructuredData.null
+        }
+
+        return converted
     }
 
 }

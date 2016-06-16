@@ -4,12 +4,12 @@ public protocol SQLSerializer {
 }
 
 final class SQLiteSerializer: GeneralSQLSerializer {
-    override func makeSQL(_ column: SQL.Column) -> String {
+    override func sql(_ column: SQL.Column) -> String {
         switch column {
         case .integer(let name):
-            return makeSQL(name) + " INTEGER"
+            return sql(name) + " INTEGER"
         case .string(let name, _):
-            return makeSQL(name) + " TEXT"
+            return sql(name) + " TEXT"
         }
     }
 }

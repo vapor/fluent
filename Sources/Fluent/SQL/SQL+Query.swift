@@ -7,11 +7,22 @@ extension SQL {
                 filters: query.filters,
                 limit: query.limit?.count
             )
-        default:
-            self = .select(
-                table: "",
-                filters: [],
-                limit: 0
+        case .create:
+            self = .insert(
+                table: query.entity,
+                data: query.data ?? [:]
+            )
+        case .delete:
+            self = .delete(
+                table: query.entity,
+                filters: query.filters,
+                limit: query.limit?.count
+            )
+        case .update:
+            self = .update(
+                table: query.entity,
+                filters: query.filters,
+                data: query.data ?? [:]
             )
         }
     }
