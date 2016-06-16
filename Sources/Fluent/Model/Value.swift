@@ -38,6 +38,12 @@ extension StructuredData: Fluent.Value {
     }
 }
 
+extension Bool: Value {
+    public var structuredData: StructuredData {
+        return .bool(self)
+    }
+}
+
 extension StructuredData: CustomStringConvertible {
     public var description: String {
         switch self {

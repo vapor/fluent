@@ -23,34 +23,85 @@ public class GeneralSQLSerializer: SQLSerializer {
 
             statement += "INSERT INTO"
             statement += sql(table)
-            statement += sql(data)
+            let (dataClause, dataValues) = sql(data)
+            statement += dataClause
 
             return (
-                statement.joined(separator: " "),
-                Array(data.values)
+                sql(statement),
+                dataValues
             )
         case .select(let table, let filters, let limit):
             var statement: [String] = []
+            var values: [Value] = []
 
             statement += "SELECT * FROM"
             statement += sql(table)
-            let (clause, values) = sql(filters)
-            statement += clause
+
+            if !filters.isEmpty {
+                let (filtersClause, filtersValues) = sql(filters)
+                statement += filtersClause
+                values += filtersValues
+            }
 
             if let limit = limit {
-                statement += "LIMIT"
-                statement += limit.description
+                statement += sql(limit: limit)
             }
 
             return (
-                statement.joined(separator: " "),
+                sql(statement),
                 values
             )
         case .delete(let table, let filters, let limit):
-            return ("", [])
+            var statement: [String] = []
+            var values: [Value] = []
+
+            statement += "DELETE FROM"
+            statement += sql(table)
+
+            if !filters.isEmpty {
+                let (filtersClause, filtersValues) = sql(filters)
+                statement += filtersClause
+                values += filtersValues
+            }
+
+            if let limit = limit {
+                statement += sql(limit: limit)
+            }
+
+            return (
+                sql(statement),
+                values
+            )
         case .update(let table, let filters, let data):
-            return ("", [])
+            var statement: [String] = []
+
+            var values: [Value] = []
+
+            statement += "UPDATE"
+            statement += sql(table)
+
+            let (dataClause, dataValues) = sql(data)
+            statement += dataClause
+            values += dataValues
+
+            let (filterclause, filterValues) = sql(filters)
+            statement += filterclause
+            values += filterValues
+
+            return (
+                sql(statement),
+                values
+            )
         }
+    }
+
+    public func sql(limit: Int) -> String {
+        var statement: [String] = []
+
+        statement += "LIMIT"
+        statement += limit.description
+
+        return statement.joined(separator: " ")
     }
 
     public func sql(_ filters: [Filter]) -> (String, [Value]) {
@@ -70,7 +121,7 @@ public class GeneralSQLSerializer: SQLSerializer {
         statement += subStatement.joined(separator: "AND")
 
         return (
-            statement.joined(separator: " "),
+            sql(statement),
             values
         )
     }
@@ -93,7 +144,7 @@ public class GeneralSQLSerializer: SQLSerializer {
         }
 
         return (
-            statement.joined(separator: " "),
+            sql(statement),
             values
         )
     }
@@ -142,18 +193,31 @@ public class GeneralSQLSerializer: SQLSerializer {
         }
     }
 
-    public func sql(_ data: [String: Value]) -> String {
+    public func sql(_ data: [String: Value]) -> (String, [Value]) {
         var clause: [String] = []
 
-        clause += sql(Array(data.keys))
-        clause += "VALUES"
-        clause += sql(Array(data.values))
+        let values = Array(data.values)
 
-        return clause.joined(separator: " ")
+        clause += sql(keys: Array(data.keys))
+        clause += "VALUES"
+        clause += sql(values)
+
+        return (
+            sql(clause),
+            values
+        )
     }
 
-    public func sql(_ columns: [String]) -> String {
-        return "(" + columns.joined(separator: ",") + ")"
+    public func sql(_ strings: [String]) -> String {
+        return strings.joined(separator: " ")
+    }
+
+    public func sql(keys: [String]) -> String {
+        return sql(list: keys.map { sql($0) })
+    }
+
+    public func sql(list: [String]) -> String {
+        return "(" + list.joined(separator: ",") + ")"
     }
 
     public func sql(_ values: [Value]) -> String {
