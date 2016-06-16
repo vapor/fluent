@@ -51,7 +51,7 @@ class ModelFindTests: XCTestCase {
             return []
         }
 
-        func build(_ builder: Schema.Builder) throws {
+        func schema(_ builder: Schema) throws {
             //
         }
     }

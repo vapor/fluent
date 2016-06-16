@@ -7,13 +7,13 @@ class SchemaCreateTests: XCTestCase {
     ]
 
     func testCreate() throws {
-        let builder = Schema.Builder("users")
+        let builder = Schema.Creator("users")
 
         builder.int("id")
         builder.string("name")
         builder.string("email", length: 256)
 
-        let sql = SQL(builder: builder)
+        let sql = builder.schema.sql
 
         let serializer = GeneralSQLSerializer(sql: sql)
         let sqliteSerializer = SQLiteSerializer(sql: sql)

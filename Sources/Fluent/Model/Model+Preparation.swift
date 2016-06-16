@@ -1,8 +1,6 @@
 extension Model {
     public static func prepare(database: Database) throws {
         try database.create(entity) { builder in
-            print("Preparing \(self.dynamicType)")
-
             let model = self.init()
             let mirror = Mirror(reflecting: model)
 

@@ -7,27 +7,33 @@ class PreparationTests: XCTestCase {
     ]
 
     func testManualPreparation() {
-        let driver = TestBuildDriver { builder in
-            XCTAssertEqual(builder.entity, "users")
-            guard builder.fields.count == 3 else {
+        let driver = TestSchemaDriver { schema in
+            guard case .create(let entity, let fields) = schema else {
+                XCTFail("Invalid schema")
+                return
+            }
+
+            XCTAssertEqual(entity, "users")
+
+            guard fields.count == 3 else {
                 XCTFail("Invalid field count")
                 return
             }
 
-            guard case .int(let colOneName) = builder.fields[0] else {
+            guard case .int(let colOneName) = fields[0] else {
                 XCTFail("Invalid first field")
                 return
             }
             XCTAssertEqual(colOneName, "id")
 
-            guard case .string(let colTwoName, let colTwoLength) = builder.fields[1] else {
+            guard case .string(let colTwoName, let colTwoLength) = fields[1] else {
                 XCTFail("Invalid second field")
                 return
             }
             XCTAssertEqual(colTwoName, "name")
             XCTAssertEqual(colTwoLength, nil)
 
-            guard case .string(let colThreeName, let colThreeLength) = builder.fields[2] else {
+            guard case .string(let colThreeName, let colThreeLength) = fields[2] else {
                 XCTFail("Invalid second field")
                 return
             }
@@ -37,42 +43,47 @@ class PreparationTests: XCTestCase {
 
         let database = Database(driver: driver)
 
-        let preparation = TestPreparation(entity: "users") { builder in
+        TestPreparation.entity = "users"
+        TestPreparation.testClosure = { builder in
             builder.int("id")
             builder.string("name")
             builder.string("email", length: 128)
         }
-        database.preparations = [preparation]
 
         do {
-            try database.prepare()
+            try database.prepare(TestPreparation)
         } catch {
             XCTFail("Preparation failed: \(error)")
         }
     }
 
     func testModelPreparation() {
-        let driver = TestBuildDriver { builder in
-            XCTAssertEqual(builder.entity, "testmodels")
-            guard builder.fields.count == 3 else {
+        let driver = TestSchemaDriver { schema in
+            guard case .create(let entity, let fields) = schema else {
+                XCTFail("Invalid schema")
+                return
+            }
+
+            XCTAssertEqual(entity, "testmodels")
+
+            guard fields.count == 3 else {
                 XCTFail("Invalid field count")
                 return
             }
 
-            guard case .int(let colOneName) = builder.fields[0] else {
+            guard case .id = fields[0] else {
                 XCTFail("Invalid first field")
                 return
             }
-            XCTAssertEqual(colOneName, "id")
 
-            guard case .string(let colTwoName, let colTwoLength) = builder.fields[1] else {
+            guard case .string(let colTwoName, let colTwoLength) = fields[1] else {
                 XCTFail("Invalid second field")
                 return
             }
             XCTAssertEqual(colTwoName, "name")
             XCTAssertEqual(colTwoLength, nil)
 
-            guard case .int(let colThreeName) = builder.fields[2] else {
+            guard case .int(let colThreeName) = fields[2] else {
                 XCTFail("Invalid second field")
                 return
             }
@@ -81,12 +92,8 @@ class PreparationTests: XCTestCase {
 
         let database = Database(driver: driver)
 
-        database.preparations = [
-            TestModel()
-        ]
-
         do {
-            try database.prepare()
+            try database.prepare(TestModel)
         } catch {
             XCTFail("Preparation failed: \(error)")
         }
@@ -108,38 +115,33 @@ final class TestModel: Model {
 }
 
 class TestPreparation: Preparation {
-    var entity: String
-    var testClosure: (Schema.Builder) -> ()
+    static var entity: String = ""
+    static var testClosure: (Schema.Creator) -> () = { _ in }
 
-    init(entity: String, testClosure: (Schema.Builder) -> ()) {
-        self.entity = entity
-        self.testClosure = testClosure
-    }
-
-    func up(database: Database) throws {
+    static func prepare(database: Database) throws {
         try database.create(entity) { builder in
             self.testClosure(builder)
         }
     }
 
-    func down(database: Database) throws {
+    static func revert(database: Database) throws {
         try database.delete(entity)
     }
 }
 
-class TestBuildDriver: Driver {
+class TestSchemaDriver: Driver {
     var idKey: String = "id"
 
     @discardableResult
     func query<T: Model>(_ query: Query<T>) throws -> [[String: Value]] { return [] }
 
-    var testClosure: (Schema.Builder) -> ()
-    init(testClosure: (Schema.Builder) -> ()) {
+    var testClosure: (Schema) -> ()
+    init(testClosure: (Schema) -> ()) {
         self.testClosure = testClosure
     }
 
-    func build(_ builder: Schema.Builder) throws {
-        testClosure(builder)
+    func schema(_ schema: Schema) throws {
+        testClosure(schema)
     }
 }
 

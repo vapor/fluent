@@ -31,7 +31,7 @@ class QueryFiltersTests: XCTestCase {
             return []
         }
 
-        func build(_ builder: Schema.Builder) throws {
+        func schema(_ schema: Schema) throws {
             
         }
     }
