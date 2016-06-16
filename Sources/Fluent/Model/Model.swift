@@ -1,8 +1,10 @@
+import Foundation
+
 /**
     Represents an entity that can be
     stored and retrieved from the `Database`.
 */
-public protocol Model: CustomStringConvertible {
+public protocol Model: CustomStringConvertible, Preparation {
     /**
         The `Database` this model will use.
         It can be changed at any point.
@@ -35,10 +37,10 @@ public protocol Model: CustomStringConvertible {
     func serialize() -> [String: Value?]
 
     /**
-        Attempts to initialize an entity
+        Initializes an entity
         from the database representation.
     */
-    init?(serialized: [String: Value])
+    init(serialized: [String: Value])
 }
 
 //MARK: Defaults
@@ -92,14 +94,24 @@ extension Model {
     public static var query: Query<Self> {
         return Query()
     }
+
+    /**
+        Creates a `Query` with a first filter.
+    */
+    @discardableResult
+    public static func filter(_ field: String, _ comparison: Filter.Comparison, _ value: Value) -> Query<Self> {
+        return query.filter(field, comparison, value)
+    }
+
+    @discardableResult
+    public static func filter(_ field: String, _ value: Value) -> Query<Self> {
+        return filter(field, .equals, value)
+    }
 }
 
 //MARK: Database
 
 extension Model {
-    /**
-        Used to identify this `Model`.
-    */
     private static var name: String {
         return "\(self)"
     }

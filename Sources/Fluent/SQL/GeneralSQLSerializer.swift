@@ -7,12 +7,10 @@ public class GeneralSQLSerializer: SQLSerializer {
 
     public func serialize() -> (String, [Value]) {
         switch sql {
-        case .table(let action, let table, let columns):
+        case .table(let action, let table):
             var statement: [String] = []
 
-            statement += sql(action)
-            statement += sql(table)
-            statement += sql(columns)
+            statement += sql(action, table)
 
             return (
                 statement.joined(separator: " "),
@@ -175,21 +173,55 @@ public class GeneralSQLSerializer: SQLSerializer {
         }
     }
 
-    public func sql(_ tableAction: SQL.TableAction) -> String {
+    public func sql(_ tableAction: SQL.TableAction, _ table: String) -> String {
         switch tableAction {
-        case .alter:
-            return "ALTER TABLE"
-        case .create:
-            return "CREATE TABLE"
+        case .alter(let create, let delete):
+            var clause: [String] = []
+
+            clause += "ALTER TABLE"
+            clause += sql(table)
+
+            for column in create {
+                clause += "ADD"
+                clause += sql(column)
+            }
+
+            for name in delete {
+                clause += "DROP COLUMN"
+                clause += sql(name)
+            }
+
+            return sql(clause)
+        case .create(let columns):
+            var clause: [String] = []
+
+            clause += "CREATE TABLE"
+            clause += sql(table)
+            clause += sql(columns)
+
+            return sql(clause)
+        case .drop:
+            var clause: [String] = []
+
+            clause += "DROP TABLE"
+            clause += sql(table)
+
+            return sql(clause)
         }
     }
 
     public func sql(_ column: SQL.Column) -> String {
         switch column {
+        case .primaryKey:
+            return sql("id") + " INTEGER PRIMARY KEY"
         case .integer(let name):
             return sql(name) + " INTEGER"
         case .string(let name, let length):
-            return sql(name) + " VARCHAR(\(length))"
+            if let length = length {
+                return sql(name) + " STRING(\(length))"
+            } else {
+                return sql(name) + " STRING"
+            }
         }
     }
 

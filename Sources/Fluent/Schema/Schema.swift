@@ -1,20 +1,37 @@
-public final class Schema {
-
-    public static func build(_ entity: String, closure: (Builder) -> ()) throws {
-        let builder = Builder(entity)
-        closure(builder)
-        _ = try Database.default.driver.build(builder)
-    }
-
+public enum Schema {
+    case create(entity: String, create: [Field])
+    case modify(entity: String, create: [Field], delete: [String])
+    case delete(entity: String)
 }
 
 extension Schema {
     public enum Field {
+        case id
         case int(String)
-        case string(String, Int)
+        case string(String, Int?)
+    }
+}
+
+extension Schema {
+    public class Modifier: Creator {
+        public var delete: [String]
+
+        public override init(_ entity: String) {
+            delete = []
+            super.init(entity)
+        }
+
+        public func delete(_ name: String) {
+            delete.append(name)
+
+        }
+
+        public override var schema: Schema {
+            return .modify(entity: entity, create: fields, delete: delete)
+        }
     }
 
-    public final class Builder {
+    public class Creator {
         public let entity: String
         public var fields: [Field]
 
@@ -23,12 +40,40 @@ extension Schema {
             fields = []
         }
 
+        public func id() {
+            fields.append(.id)
+        }
+
         public func int(_ name: String) {
             fields.append(.int(name))
         }
 
-        public func string(_ name: String, length: Int = 128) {
+        public func string(_ name: String, length: Int? = nil) {
             fields.append(.string(name, length))
         }
+
+        public var schema: Schema {
+            return .create(entity: entity, create: fields)
+        }
+    }
+}
+
+
+extension Database {
+    public func modify(_ entity: String, closure: (Schema.Modifier) -> ()) throws {
+        let modifier = Schema.Modifier(entity)
+        closure(modifier)
+        _ = try driver.schema(modifier.schema)
+    }
+
+    public func create(_ entity: String, closure: (Schema.Creator) -> ()) throws {
+        let creator = Schema.Creator(entity)
+        closure(creator)
+        _ = try driver.schema(creator.schema)
+    }
+
+    public func delete(_ entity: String) throws {
+        let schema = Schema.delete(entity: entity)
+        _ = try driver.schema(schema)
     }
 }

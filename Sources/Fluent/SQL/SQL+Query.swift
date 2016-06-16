@@ -18,7 +18,7 @@ extension SQL {
                 filters: query.filters,
                 limit: query.limit?.count
             )
-        case .update:
+        case .modify:
             self = .update(
                 table: query.entity,
                 filters: query.filters,

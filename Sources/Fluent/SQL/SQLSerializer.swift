@@ -6,6 +6,8 @@ public protocol SQLSerializer {
 final class SQLiteSerializer: GeneralSQLSerializer {
     override func sql(_ column: SQL.Column) -> String {
         switch column {
+        case .primaryKey:
+            return sql("id") + " INTEGER PRIMARY KEY"
         case .integer(let name):
             return sql(name) + " INTEGER"
         case .string(let name, _):
