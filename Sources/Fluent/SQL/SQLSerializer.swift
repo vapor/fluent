@@ -12,6 +12,8 @@ final class SQLiteSerializer: GeneralSQLSerializer {
             return sql(name) + " INTEGER"
         case .string(let name, _):
             return sql(name) + " TEXT"
+        case .double(let name, _, _):
+            return sql(name) + " DOUBLE"
         }
     }
 }

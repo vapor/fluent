@@ -8,7 +8,8 @@ public enum SQL {
     public enum Column {
         case primaryKey
         case integer(String)
-        case string(String, Int?)
+        case string(String, length: Int?)
+        case double(String, digits: Int?, decimal: Int?)
     }
 
     case insert(table: String, data: [String: Value])

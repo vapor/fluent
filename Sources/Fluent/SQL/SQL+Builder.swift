@@ -32,7 +32,9 @@ extension Collection where Iterator.Element == Schema.Field {
             case .int(let name):
                 column = .integer(name)
             case .string(let name, let length):
-                column = .string(name, length)
+                column = .string(name, length: length)
+            case .double(let name, let digits, let decimal):
+                column = .double(name, digits: digits, decimal: decimal)
             }
 
             columns.append(column)

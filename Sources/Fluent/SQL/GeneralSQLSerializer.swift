@@ -216,12 +216,10 @@ public class GeneralSQLSerializer: SQLSerializer {
             return sql("id") + " INTEGER PRIMARY KEY"
         case .integer(let name):
             return sql(name) + " INTEGER"
-        case .string(let name, let length):
-            if let length = length {
-                return sql(name) + " STRING(\(length))"
-            } else {
-                return sql(name) + " STRING"
-            }
+        case .string(let name, _):
+            return sql(name) + " STRING"
+        case .double(let name, _, _):
+            return sql(name) + " DOUBLE"
         }
     }
 

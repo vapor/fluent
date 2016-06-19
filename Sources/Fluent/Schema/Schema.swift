@@ -8,7 +8,8 @@ extension Schema {
     public enum Field {
         case id
         case int(String)
-        case string(String, Int?)
+        case string(String, length: Int?)
+        case double(String, digits: Int?, decimal: Int?)
     }
 }
 
@@ -49,7 +50,11 @@ extension Schema {
         }
 
         public func string(_ name: String, length: Int? = nil) {
-            fields.append(.string(name, length))
+            fields.append(.string(name, length: length))
+        }
+
+        public func double(_ name: String, digits: Int? = nil, decimal: Int? = nil) {
+            fields.append(.double(name, digits: digits, decimal: decimal))
         }
 
         public var schema: Schema {
