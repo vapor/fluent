@@ -1,7 +1,5 @@
 Packages
 .build
-
-Database
-
 .DS_Store
 *.xcodeproj
+

@@ -49,7 +49,7 @@ public class Query<T: Model> {
         Creates a new `Query` with the
         `Model`'s database.
     */
-    init() {
+    public init() {
         filters = []
         action = .fetch
         database = T.database
