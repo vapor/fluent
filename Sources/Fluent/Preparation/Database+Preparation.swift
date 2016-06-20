@@ -42,3 +42,10 @@ extension Database {
         try migration.save()
     }
 }
+
+extension Preparation {
+    public static var name: String {
+        let type = "\(self.dynamicType)"
+        return type.components(separatedBy: ".Type").first ?? type
+    }
+}

@@ -1,19 +1,7 @@
+/**
+    A SQL serializer.
+*/
 public protocol SQLSerializer {
     init(sql: SQL)
     func serialize() -> (String, [Value])
-}
-
-final class SQLiteSerializer: GeneralSQLSerializer {
-    override func sql(_ column: SQL.Column) -> String {
-        switch column {
-        case .primaryKey:
-            return sql("id") + " INTEGER PRIMARY KEY"
-        case .integer(let name):
-            return sql(name) + " INTEGER"
-        case .string(let name, _):
-            return sql(name) + " TEXT"
-        case .double(let name, _, _):
-            return sql(name) + " DOUBLE"
-        }
-    }
 }

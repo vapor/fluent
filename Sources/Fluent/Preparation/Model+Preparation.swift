@@ -1,6 +1,9 @@
 // MARK: Preparation
 
 extension Model {
+    /**
+        Automates the preparation of a model.
+    */
     public static func prepare(database: Database) throws {
         try database.create(entity) { builder in
             let model = self.init()
@@ -29,6 +32,9 @@ extension Model {
         }
     }
 
+    /**
+        Automates reverting the model's preparation.
+    */
     public static func revert(database: Database) throws {
         try database.delete(entity)
     }
@@ -41,6 +47,9 @@ extension Model {
         self.init(serialized: [:])
     }
 
+    /**
+        Automates the serialization of a model.
+    */
     public func serialize() -> [String: Value?] {
         var serialized: [String: Value?] = [:]
 

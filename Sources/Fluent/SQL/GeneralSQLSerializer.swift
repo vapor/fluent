@@ -1,3 +1,8 @@
+/**
+    A generic SQL serializer.
+    This class can be subclassed by
+    specific SQL serializers.
+*/
 public class GeneralSQLSerializer: SQLSerializer {
     public let sql: SQL
 
@@ -181,15 +186,18 @@ public class GeneralSQLSerializer: SQLSerializer {
             clause += "ALTER TABLE"
             clause += sql(table)
 
+            var subclause: [String] = []
+
             for column in create {
-                clause += "ADD"
-                clause += sql(column)
+                subclause += "ADD " + sql(column)
             }
 
             for name in delete {
-                clause += "DROP COLUMN"
-                clause += sql(name)
+                subclause += "DROP " + sql(name)
             }
+
+            clause += sql(list: subclause)
+
 
             return sql(clause)
         case .create(let columns):
@@ -247,11 +255,11 @@ public class GeneralSQLSerializer: SQLSerializer {
     }
 
     public func sql(list: [String]) -> String {
-        return "(" + list.joined(separator: ",") + ")"
+        return "(" + list.joined(separator: ", ") + ")"
     }
 
     public func sql(_ values: [Value]) -> String {
-        return "(" + values.map { sql($0) }.joined(separator: ",") + ")"
+        return "(" + values.map { sql($0) }.joined(separator: ", ") + ")"
     }
 
     public func sql(_ value: Value) -> String {
