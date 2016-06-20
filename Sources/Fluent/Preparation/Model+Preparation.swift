@@ -1,3 +1,5 @@
+// MARK: Preparation
+
 extension Model {
     public static func prepare(database: Database) throws {
         try database.create(entity) { builder in
@@ -5,7 +7,9 @@ extension Model {
             let mirror = Mirror(reflecting: model)
 
             for property in mirror.children {
-                let name = property.label ?? ""
+                guard let name = property.label else {
+                    throw PreparationError.automationFailed("Unable to unwrap property name.")
+                }
                 let type = "\(property.value.dynamicType)"
 
                 if name == database.driver.idKey {
@@ -15,6 +19,10 @@ extension Model {
                         builder.string(name)
                     } else if type.contains("Int") {
                         builder.int(name)
+                    } else if type.contains("Double") || type.contains("Float") {
+                        builder.double(name)
+                    } else {
+                        throw PreparationError.automationFailed("Unable to prepare property '\(name): \(type)', only String, Int, Double, and Float are supported.")
                     }
                 }
             }
@@ -24,7 +32,11 @@ extension Model {
     public static func revert(database: Database) throws {
         try database.delete(entity)
     }
+}
 
+// MARK: Automation
+
+extension Model {
     private init() {
         self.init(serialized: [:])
     }
@@ -50,9 +62,9 @@ extension Model {
                     serialized[name] = int
                 }
             }
-            
+
         }
-        
+
         return serialized
     }
 }

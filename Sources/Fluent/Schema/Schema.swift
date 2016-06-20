@@ -65,15 +65,15 @@ extension Schema {
 
 
 extension Database {
-    public func modify(_ entity: String, closure: (Schema.Modifier) -> ()) throws {
+    public func modify(_ entity: String, closure: (Schema.Modifier) throws -> ()) throws {
         let modifier = Schema.Modifier(entity)
-        closure(modifier)
+        try closure(modifier)
         _ = try driver.schema(modifier.schema)
     }
 
-    public func create(_ entity: String, closure: (Schema.Creator) -> ()) throws {
+    public func create(_ entity: String, closure: (Schema.Creator) throws -> ()) throws {
         let creator = Schema.Creator(entity)
-        closure(creator)
+        try closure(creator)
         _ = try driver.schema(creator.schema)
     }
 
