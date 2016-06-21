@@ -7,5 +7,5 @@ public enum Action {
     case fetch
     case delete
     case create
-    case update
+    case modify
 }

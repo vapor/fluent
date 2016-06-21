@@ -21,7 +21,7 @@ public class Query<T: Model> {
         Optional data to be used during
         `.create` or `.updated` actions.
     */
-    public var data: [String: Value?]?
+    public var data: [String: Value]?
 
     /**
         Optionally limit the amount of
@@ -49,7 +49,7 @@ public class Query<T: Model> {
         Creates a new `Query` with the
         `Model`'s database.
     */
-    init() {
+    public init() {
         filters = []
         action = .fetch
         database = T.database
@@ -65,13 +65,10 @@ public class Query<T: Model> {
     func run() throws -> [T] {
         var models: [T] = []
 
-        let results = try database.driver.execute(self)
+        let results = try database.driver.query(self)
 
         for result in results {
-            guard var model = T(serialized: result) else {
-                continue
-            }
-
+            var model = T(serialized: result)
             model.id = result[database.driver.idKey]
             models.append(model)
         }
@@ -108,7 +105,7 @@ public class Query<T: Model> {
     */
     public func create(_ serialized: [String: Value?]) throws -> T? {
         action = .create
-        data = serialized
+        data = nilToNull(serialized)
         
         return try run().first
     }
@@ -122,7 +119,7 @@ public class Query<T: Model> {
 
         if let id = model.id {
             let _ = filter(database.driver.idKey, .equals, id) // discardableResult
-            try update(data)
+            try modify(data)
         } else {
             let new = try create(data)
             model.id = new?.id
@@ -159,12 +156,12 @@ public class Query<T: Model> {
     //MARK: Update
 
     /**
-        Attempts to update model's collection with 
+        Attempts to modify model's collection with
         the supplied serialized data.
     */
-    public func update(_ serialized: [String: Value?]) throws {
-        action = .update
-        data = serialized
+    public func modify(_ serialized: [String: Value?]) throws {
+        action = .modify
+        data = nilToNull(serialized)
         let _ = try run() // discardableResult
     }
 
@@ -178,7 +175,7 @@ public class Query<T: Model> {
         Used for filtering results based on how
         a result's value compares to the supplied value.
     */
-    // @discardableResult
+    @discardableResult
     public func filter(_ field: String, _ comparison: Filter.Comparison, _ value: Value) -> Self {
         let filter = Filter.compare(field, comparison, value)
         filters.append(filter)
@@ -192,7 +189,7 @@ public class Query<T: Model> {
         Used for filtering results based on whether
         a result's value is or is not in a set.
     */
-    // @discardableResult
+    @discardableResult
     public func filter(_ field: String, _ scope: Filter.Scope, _ set: [Value]) -> Self {
         let filter = Filter.subset(field, scope, set)
         filters.append(filter)
@@ -203,9 +200,19 @@ public class Query<T: Model> {
     /**
         Shortcut for creating a `.equals` filter.
     */
-    // @discardableResult
+    @discardableResult
     public func filter(_ field: String, _ value: Value) -> Self {
         return filter(field, .equals, value)
+    }
+
+    private func nilToNull(_ serialized: [String: Value?]) -> [String: Value] {
+        var converted: [String: Value] = [:]
+
+        for (key, value) in serialized {
+            converted[key] = value ?? StructuredData.null
+        }
+
+        return converted
     }
 
 }

@@ -1,3 +1,5 @@
+import Foundation
+
 /**
     References a database with a single `Driver`.
     Statically maps `Model`s to `Database`s.

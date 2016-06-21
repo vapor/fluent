@@ -20,5 +20,12 @@ public protocol Driver {
         returns an array of results fetched,
         created, or updated by the action.
     */
-    func execute<T: Model>(_ query: Query<T>) throws -> [[String: Value]]
+    @discardableResult
+    func query<T: Model>(_ query: Query<T>) throws -> [[String: Value]]
+
+    /**
+        Creates the `Schema` indicated
+        by the `Builder`.
+    */
+    func schema(_ schema: Schema) throws
 }
