@@ -137,7 +137,7 @@ public class GeneralSQLSerializer: SQLSerializer {
         case .compare(let key, let comparison, let value):
             statement += sql(key)
             statement += sql(comparison)
-            statement += "?"
+            statement += "? "
             values += value
         case .subset(let key, let scope, let subValues):
             statement += sql(key)
