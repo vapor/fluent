@@ -19,7 +19,7 @@ class SQLSerializerTests: XCTestCase {
         let sql = SQL.select(table: "users", filters: [filter], limit: 5)
         let (statement, values) = serialize(sql)
 
-        XCTAssertEqual(statement, "SELECT * FROM `users` WHERE `age` >= ? LIMIT 5")
+        XCTAssertEqual(statement, "SELECT * FROM `users` WHERE `age` >= ?  LIMIT 5")
         XCTAssertEqual(values.first?.int, 21)
         XCTAssertEqual(values.count, 1)
     }
@@ -30,7 +30,7 @@ class SQLSerializerTests: XCTestCase {
         let select = SQL.select(table: "friends", filters: [filter], limit: nil)
         let (statement, values) = serialize(select)
 
-        XCTAssertEqual(statement, "SELECT * FROM `friends` WHERE `name` != ?")
+        XCTAssertEqual(statement, "SELECT * FROM `friends` WHERE `name` != ? ")
         XCTAssertEqual(values.first?.string, "duck")
         XCTAssertEqual(values.count, 1)
     }
@@ -41,7 +41,7 @@ class SQLSerializerTests: XCTestCase {
         let update = SQL.update(table: "friends", filters: [filter], data: ["not it": true])
         let (statement, values) = serialize(update)
 
-        XCTAssertEqual(statement, "UPDATE `friends` (`not it`) VALUES (?) WHERE `name` = ?")
+        XCTAssertEqual(statement, "UPDATE `friends` (`not it`) VALUES (?) WHERE `name` = ? ")
         XCTAssertEqual(values.first?.bool, true)
         XCTAssertEqual(values.last?.string, "duck")
         XCTAssertEqual(values.count, 2)
@@ -53,7 +53,7 @@ class SQLSerializerTests: XCTestCase {
         let delete = SQL.delete(table: "friends", filters: [filter], limit: nil)
         let (statement, values) = serialize(delete)
 
-        XCTAssertEqual(statement, "DELETE FROM `friends` WHERE `name` > ?")
+        XCTAssertEqual(statement, "DELETE FROM `friends` WHERE `name` > ? ")
         XCTAssertEqual(values.first?.string, "duck")
         XCTAssertEqual(values.count, 1)
     }
