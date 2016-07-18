@@ -4,7 +4,7 @@ import Foundation
     Represents an entity that can be
     stored and retrieved from the `Database`.
 */
-public protocol Model: CustomStringConvertible, Preparation {
+public protocol Entity: CustomStringConvertible, Preparation {
     /**
         The `Database` this model will use.
         It can be changed at any point.
@@ -45,7 +45,7 @@ public protocol Model: CustomStringConvertible, Preparation {
 
 //MARK: Defaults
 
-extension Model {
+extension Entity {
     /**
         The default entity is the
         lowercase model pluralized.
@@ -57,7 +57,7 @@ extension Model {
 
 //MARK: CRUD
 
-extension Model {
+extension Entity {
     /**
         Persists the entity into the 
         data store and sets the `id` property.
@@ -111,7 +111,7 @@ extension Model {
 
 //MARK: Database
 
-extension Model {
+extension Entity {
     private static var name: String {
         return "\(self)"
     }
@@ -136,7 +136,7 @@ extension Model {
 
 //MARK: CustomStringConvertible
 
-extension Model {
+extension Entity {
     public var description: String {
         var readable: [String: String] = [:]
 

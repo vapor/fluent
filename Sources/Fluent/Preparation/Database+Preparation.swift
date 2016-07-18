@@ -26,7 +26,7 @@ extension Database {
         Migration.database = self
 
         // set the current database on involved Models
-        if let model = preparation as? Model.Type {
+        if let model = preparation as? Entity.Type {
             model.database = self
         }
 

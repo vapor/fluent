@@ -1,7 +1,7 @@
 /**
     Represents an abstract database query.
 */
-public class Query<T: Model> {
+public class Query<T: Entity> {
 
     //MARK: Properties
 

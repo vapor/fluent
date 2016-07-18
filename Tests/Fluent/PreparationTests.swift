@@ -102,7 +102,7 @@ class PreparationTests: XCTestCase {
 
 // MARK: Utilities
 
-final class TestModel: Model {
+final class TestModel: Entity {
     var id: Value?
     var name: String
     var age: Int
@@ -133,7 +133,7 @@ class TestSchemaDriver: Driver {
     var idKey: String = "id"
 
     @discardableResult
-    func query<T: Model>(_ query: Query<T>) throws -> [[String: Value]] { return [] }
+    func query<T: Entity>(_ query: Query<T>) throws -> [[String: Value]] { return [] }
 
     var testClosure: (Schema) -> ()
     init(testClosure: (Schema) -> ()) {

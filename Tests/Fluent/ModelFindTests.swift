@@ -4,7 +4,7 @@ import XCTest
 class ModelFindTests: XCTestCase {
 
     /// Dummy Model implementation for testing.
-    final class DummyModel: Model {
+    final class DummyModel: Entity {
         static var entity: String {
             return "dummy_models"
         }
@@ -30,7 +30,7 @@ class ModelFindTests: XCTestCase {
             case broken
         }
 
-        func query<T: Model>(_ query: Query<T>) throws -> [[String: Value]] {
+        func query<T: Entity>(_ query: Query<T>) throws -> [[String: Value]] {
             if
                 let filter = query.filters.first,
                 case .compare(let key, let comparison, let value) = filter

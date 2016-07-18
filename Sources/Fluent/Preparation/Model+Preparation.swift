@@ -1,6 +1,6 @@
 // MARK: Preparation
 
-extension Model {
+extension Entity {
     /**
         Automates the preparation of a model.
     */
@@ -42,7 +42,7 @@ extension Model {
 
 // MARK: Automation
 
-extension Model {
+extension Entity {
     private init() {
         self.init(serialized: [:])
     }

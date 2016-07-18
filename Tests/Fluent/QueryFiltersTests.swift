@@ -2,7 +2,7 @@ import XCTest
 @testable import Fluent
 
 class QueryFiltersTests: XCTestCase {
-    final class DummyModel: Model {
+    final class DummyModel: Entity {
         static var entity: String {
             return "dummy_models"
         }
@@ -27,7 +27,7 @@ class QueryFiltersTests: XCTestCase {
             case broken
         }
 
-        func query<T: Model>(_ query: Query<T>) throws -> [[String: Value]] {
+        func query<T: Entity>(_ query: Query<T>) throws -> [[String: Value]] {
             return []
         }
 

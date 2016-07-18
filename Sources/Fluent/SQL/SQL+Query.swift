@@ -1,5 +1,5 @@
 extension SQL {
-	init<T: Model>(query: Query<T>) {
+	init<T: Entity>(query: Query<T>) {
         switch query.action {
         case .fetch:
             self = .select(

@@ -1,4 +1,4 @@
-final class Migration: Model {
+final class Migration: Entity {
     static var entity = "fluent"
 
     var id: Value?
