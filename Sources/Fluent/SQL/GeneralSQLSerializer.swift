@@ -144,14 +144,14 @@ public class GeneralSQLSerializer: SQLSerializer {
         var statement: [String] = []
         var values: [Node] = []
 
-        switch filter {
+        switch filter.method {
         case .compare(let key, let comparison, let value):
-            statement += sql(key)
+            statement += "\(sql(filter.entity.entity)).\(sql(key))"
             statement += sql(comparison)
             statement += "?"
             values += value
         case .subset(let key, let scope, let subValues):
-            statement += sql(key)
+            statement += "\(sql(filter.entity.entity)).\(sql(key))"
             statement += sql(scope)
             statement += sql(subValues)
             values += subValues
@@ -281,9 +281,9 @@ public class GeneralSQLSerializer: SQLSerializer {
         clause += "JOIN"
         clause += sql(join.foreign.entity)
         clause += "ON"
-        clause += "\(sql(join.local.entity)).\(join.localKey)"
+        clause += "\(sql(join.local.entity)).\(sql(join.localKey))"
         clause += "="
-        clause += "\(sql(join.foreign.entity)).\(join.foreignKey)"
+        clause += "\(sql(join.foreign.entity)).\(sql(join.foreignKey))"
 
         return sql(clause)
     }

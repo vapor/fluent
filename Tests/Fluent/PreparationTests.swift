@@ -41,7 +41,7 @@ class PreparationTests: XCTestCase {
             XCTAssertEqual(colThreeLength, 128)
         }
 
-        let database = Database(driver: driver)
+        let database = Database(driver)
 
         TestPreparation.entity = "users"
         TestPreparation.testClosure = { builder in
@@ -90,7 +90,7 @@ class PreparationTests: XCTestCase {
             XCTAssertEqual(colThreeName, "age")
         }
 
-        let database = Database(driver: driver)
+        let database = Database(driver)
 
         do {
             try database.prepare(TestModel.self)

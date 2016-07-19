@@ -8,8 +8,10 @@ extension Entity {
             throw RelationError.noIdentifier
         }
 
-        let foreignId = "\(Self.name)_\(Self.database.driver.idKey)"
-        return Query<Child>().filter(foreignId, ident)
+        let query = try Child.query()
+
+        let foreignId = "\(Self.name)_\(query.idKey)"
+        return try Child.query().filter(foreignId, ident)
     }
 
     public func belongsToMany<Sibling: Entity>() throws -> Query<Sibling> {
@@ -21,16 +23,19 @@ extension Entity {
             throw RelationError.noIdentifier
         }
 
-        let localKey = Right.database.driver.idKey
-        let foreignKey = "\(Right.name)_\(Left.database.driver.idKey)"
+        let query = try Right.query()
 
-        let query = Query<Right>().union(
+        let localKey = query.idKey
+        let foreignKey = "\(Right.name)_\(query.idKey)"
+
+
+        query.union(
             Pivot<Left, Right>.self,
             localKey: localKey,
             foreignKey: foreignKey
         )
 
-        query.filter("\(Self.name)_\(Self.database.driver.idKey)", ident)
+        query.filter("\(Self.name)_\(query.idKey)", ident)
 
         return query
     }
@@ -40,7 +45,8 @@ extension Entity {
             throw RelationError.noIdentifier
         }
 
-        return try Query<Parent>().filter(Self.database.driver.idKey, ident).first()
+        let query = try Parent.query()
+        return try query.filter(query.idKey, ident).first()
     }
 }
 

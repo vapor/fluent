@@ -36,7 +36,7 @@ class ModelFindTests: XCTestCase {
         func query<T: Entity>(_ query: Query<T>) throws -> Node {
             if
                 let filter = query.filters.first,
-                case .compare(let key, let comparison, let value) = filter
+                case .compare(let key, let comparison, let value) = filter.method
                 where query.action == .fetch &&
                     query.filters.count == 1 &&
                     key == idKey &&
@@ -66,7 +66,7 @@ class ModelFindTests: XCTestCase {
     ]
 
     override func setUp() {
-        database = Database(driver: DummyDriver())
+        database = Database(DummyDriver())
         Database.default = database
     }
 

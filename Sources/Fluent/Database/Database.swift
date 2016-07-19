@@ -15,7 +15,7 @@ public class Database {
         Creates a `Database` with the supplied
         `Driver`. This cannot be changed later.
     */
-    public init(driver: Driver) {
+    public init(_ driver: Driver) {
         self.driver = driver
     }
 
@@ -30,5 +30,5 @@ public class Database {
     /**
         The default database for all `Model` types.
     */
-    public static var `default`: Database = Database(driver: PrintDriver())
+    public static var `default`: Database?
 }

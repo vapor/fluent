@@ -37,6 +37,8 @@ public protocol Driver {
     This allows Fluent extensions to be written that
     can support custom querying behavior.
 */
+
 public protocol RawQueryable {
+    @discardableResult
     func raw(_ raw: String, _ values: [Node]) throws -> Node
 }

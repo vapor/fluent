@@ -4,24 +4,67 @@
     operations to limit the set of 
     data affected.
 */
-public enum Filter {
-    case compare(String, Comparison, Node)
-    case subset(String, Scope, [Node])
+public struct Filter {
+    public enum Method {
+        case compare(String, Comparison, Node)
+        case subset(String, Scope, [Node])
+    }
+
+    public init(_ entity: Entity.Type, _ method: Method) {
+        self.entity = entity
+        self.method = method
+    }
+
+    public var entity: Entity.Type
+    public var method: Method
 }
 
 extension Filter: CustomStringConvertible {
     public var description: String {
-        switch self {
+        switch method {
         case .compare(let field, let comparison, let value):
-            return "\(field) \(comparison) \(value)"
+            return "(\(entity)) \(field) \(comparison) \(value)"
         case .subset(let field, let scope, let values):
             let valueDescriptions = values.map { $0.string ?? "" }
-            return "\(field) \(scope) \(valueDescriptions)"
+            return "(\(entity)) \(field) \(scope) \(valueDescriptions)"
         }
     }
 }
 
 extension Query {
+    @discardableResult
+    public func filter<T: Entity>(
+        _ entity: T.Type,
+        _ field: String,
+        _ comparison: Filter.Comparison,
+        _ value: NodeRepresentable
+    ) -> Self {
+        let filter = Filter(entity, .compare(field, comparison, value.makeNode()))
+        filters.append(filter)
+        return self
+    }
+
+    @discardableResult
+    public func filter<T: Entity>(
+        _ entity: T.Type,
+        _ field: String,
+        _ scope: Filter.Scope,
+        _ set: [NodeRepresentable]
+    ) -> Self {
+        let filter = Filter(T.self, .subset(field, scope, set.map({ $0.makeNode() })))
+        filters.append(filter)
+        return self
+    }
+
+    @discardableResult
+    public func filter<T: Entity>(
+        _ entity: T.Type,
+        _ field: String,
+        _ value: NodeRepresentable
+    ) -> Self {
+        return filter(entity, field, .equals, value)
+    }
+
     //MARK: Filter
 
     /**
@@ -33,9 +76,7 @@ extension Query {
     */
     @discardableResult
     public func filter(_ field: String, _ comparison: Filter.Comparison, _ value: NodeRepresentable) -> Self {
-        let filter = Filter.compare(field, comparison, value.makeNode())
-        filters.append(filter)
-        return self
+        return filter(T.self, field, comparison, value)
     }
 
     /**
@@ -47,9 +88,7 @@ extension Query {
     */
     @discardableResult
     public func filter(_ field: String, _ scope: Filter.Scope, _ set: [NodeRepresentable]) -> Self {
-        let filter = Filter.subset(field, scope, set.map({ $0.makeNode() }))
-        filters.append(filter)
-        return self
+        return filter(T.self, field, scope, set)
     }
 
 
@@ -58,7 +97,7 @@ extension Query {
     */
     @discardableResult
     public func filter(_ field: String, _ value: NodeRepresentable) -> Self {
-        return filter(field, .equals, value)
+        return filter(T.self, field, .equals, value)
     }
 
 }

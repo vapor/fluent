@@ -15,45 +15,45 @@ class SQLSerializerTests: XCTestCase {
     }
 
     func testRegularSelect() {
-        let filter = Filter.compare("age", .greaterThanOrEquals, .int(21))
+        let filter = Filter(User.self, .compare("age", .greaterThanOrEquals, .int(21)))
         let sql = SQL.select(table: "users", filters: [filter], joins: [], limit: 5)
         let (statement, values) = serialize(sql)
 
-        XCTAssertEqual(statement, "SELECT * FROM `users` WHERE `age` >= ? LIMIT 5")
+        XCTAssertEqual(statement, "SELECT * FROM `users` WHERE `users`.`age` >= ? LIMIT 5")
         XCTAssertEqual(values.first?.int, 21)
         XCTAssertEqual(values.count, 1)
     }
 
     func testFilterCompareSelect() {
-        let filter = Filter.compare("name", .notEquals, .string("duck"))
+        let filter = Filter(User.self, .compare("name", .notEquals, .string("duck")))
 
         let select = SQL.select(table: "friends", filters: [filter], joins: [], limit: nil)
         let (statement, values) = serialize(select)
 
-        XCTAssertEqual(statement, "SELECT * FROM `friends` WHERE `name` != ?")
+        XCTAssertEqual(statement, "SELECT * FROM `friends` WHERE `users`.`name` != ?")
         XCTAssertEqual(values.first?.string, "duck")
         XCTAssertEqual(values.count, 1)
     }
 
     func testFilterCompareUpdate() {
-        let filter = Filter.compare("name", .equals, .string("duck"))
+        let filter = Filter(User.self, .compare("name", .equals, .string("duck")))
 
         let update = SQL.update(table: "friends", filters: [filter], data: Node(["not it": true]))
         let (statement, values) = serialize(update)
 
-        XCTAssertEqual(statement, "UPDATE `friends` (`not it`) VALUES (?) WHERE `name` = ?")
+        XCTAssertEqual(statement, "UPDATE `friends` (`not it`) VALUES (?) WHERE `users`.`name` = ?")
         XCTAssertEqual(values.first?.bool, true)
         XCTAssertEqual(values.last?.string, "duck")
         XCTAssertEqual(values.count, 2)
     }
 
     func testFilterCompareDelete() {
-        let filter = Filter.compare("name", .greaterThan, .string("duck"))
+        let filter = Filter(User.self, .compare("name", .greaterThan, .string("duck")))
 
         let delete = SQL.delete(table: "friends", filters: [filter], limit: nil)
         let (statement, values) = serialize(delete)
 
-        XCTAssertEqual(statement, "DELETE FROM `friends` WHERE `name` > ?")
+        XCTAssertEqual(statement, "DELETE FROM `friends` WHERE `users`.`name` > ?")
         XCTAssertEqual(values.first?.string, "duck")
         XCTAssertEqual(values.count, 1)
     }

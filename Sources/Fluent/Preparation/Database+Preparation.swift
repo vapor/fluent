@@ -10,7 +10,7 @@ extension Database {
 
         do {
             // check to see if this preparation has already run
-            if let _ = try Migration.filter("name", preparation.name).first() {
+            if let _ = try Migration.query().filter("name", preparation.name).first() {
                 return true
             }
         } catch {

@@ -6,12 +6,6 @@ import Foundation
 */
 public protocol Entity: CustomStringConvertible, Preparation, NodeConvertible {
     /**
-        The `Database` this model will use.
-        It can be changed at any point.
-    */
-    static var database: Database { get set }
-
-    /**
         The collection or table name
         for this entity.
     */
@@ -49,7 +43,7 @@ extension Entity {
         data store and sets the `id` property.
     */
     public mutating func save() throws {
-        try Self.query.save(&self)
+        try Self.query().save(&self)
     }
 
     /**
@@ -57,42 +51,40 @@ extension Entity {
         store if the `id` property is set.
     */
     public func delete() throws {
-        try Self.query.delete(self)
+        try Self.query().delete(self)
     }
 
     /**
         Returns all entities for this `Model`.
     */
     public static func all() throws -> [Self] {
-        return try Self.query.all()
+        return try Self.query().all()
     }
 
     /**
         Finds the entity with the given `id`.
     */
     public static func find(_ id: NodeRepresentable) throws -> Self? {
-        return try Self.query.filter(database.driver.idKey, .equals, id).first()
+        guard let idKey = database?.driver.idKey else {
+            return nil
+        }
+
+        return try Self.query().filter(idKey, .equals, id).first()
     }
 
     /**
         Creates a `Query` instance for this `Model`.
     */
-    public static var query: Query<Self> {
-        return Query()
+    public static func query() throws -> Query<Self> {
+        guard let db = database else {
+            throw EntityError.noDatabase
+        }
+        return Query(db)
     }
+}
 
-    /**
-        Creates a `Query` with a first filter.
-    */
-    @discardableResult
-    public static func filter(_ field: String, _ comparison: Filter.Comparison, _ value: NodeRepresentable) -> Query<Self> {
-        return query.filter(field, comparison, value)
-    }
-
-    @discardableResult
-    public static func filter(_ field: String, _ value: NodeRepresentable) -> Query<Self> {
-        return filter(field, .equals, value)
-    }
+public enum EntityError: ErrorProtocol {
+    case noDatabase
 }
 
 //MARK: Database
@@ -102,7 +94,7 @@ extension Entity {
         Fetches or sets the `Database` for this
         `Model` from the static database map.
     */
-    public static var database: Database {
+    public static var database: Database? {
         get {
             if let db = Database.map[Self.name] {
                 return db

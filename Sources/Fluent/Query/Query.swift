@@ -56,11 +56,15 @@ public class Query<T: Entity> {
         Creates a new `Query` with the
         `Model`'s database.
     */
-    public init() {
+    public init(_ database: Database) {
         filters = []
         action = .fetch
-        database = T.database
+        self.database = database
         unions = []
+    }
+
+    var idKey: String {
+        return database.driver.idKey
     }
 
     /**
@@ -166,7 +170,7 @@ public class Query<T: Entity> {
         }
         action = .delete
         
-        let filter = Filter.compare(database.driver.idKey, .equals, id)
+        let filter = Filter(T.self, .compare(database.driver.idKey, .equals, id))
         filters.append(filter)
 
        let _ = try _run() // discardableResult

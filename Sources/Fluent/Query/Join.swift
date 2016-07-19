@@ -8,13 +8,14 @@ public struct Union {
     init(
         local: Entity.Type,
         foreign: Entity.Type,
+        idKey: String,
         localKey: String? = nil,
         foreignKey: String? = nil
     ) {
         self.local = local
         self.foreign = foreign
-        self.localKey = localKey ?? "\(foreign.name)_\(local.database.driver.idKey)"
-        self.foreignKey = foreignKey ?? "\(foreign.database.driver.idKey)"
+        self.localKey = localKey ?? "\(foreign.name)_\(idKey)"
+        self.foreignKey = foreignKey ?? idKey
     }
 }
 
@@ -48,8 +49,20 @@ public final class Pivot<
 
     public init(_ node: Node) throws {
         id = try node.extract("id")
-        leftId = try node.extract("\(self.dynamicType.left.name)_\(self.dynamicType.left.database.driver.idKey)")
-        rightId = try node.extract("\(self.dynamicType.right.name)_\(self.dynamicType.right.database.driver.idKey)")
+
+        let firstQ = try First.query()
+        let secondQ = try Second.query()
+
+        let firstKey = "\(First.name)_\(firstQ.idKey)"
+        let secondKey = "\(Second.name)_\(secondQ.idKey)"
+
+        if First.self == self.dynamicType.left {
+            leftId = try node.extract(firstKey)
+            rightId = try node.extract(secondKey)
+        } else {
+            leftId = try node.extract(secondKey)
+            rightId = try node.extract(firstKey)
+        }
     }
 
     public func makeNode() -> Node {
@@ -74,12 +87,14 @@ public final class Pivot<
 }
 
 extension Query {
+    @discardableResult
     public func union<Sibling: Entity>(
         _ sibling: Sibling.Type
     ) -> Query {
         let union = Union(
             local: T.self,
             foreign: sibling,
+            idKey: database.driver.idKey,
             localKey: nil,
             foreignKey: nil
         )
@@ -88,6 +103,7 @@ extension Query {
         return self
     }
 
+    @discardableResult
     public func union<Sibling: Entity>(
         _ sibling: Sibling.Type,
         foreignKey: String
@@ -95,6 +111,7 @@ extension Query {
         let union = Union(
             local: T.self,
             foreign: sibling,
+            idKey: database.driver.idKey,
             localKey: nil,
             foreignKey: foreignKey
         )
@@ -103,6 +120,7 @@ extension Query {
         return self
     }
 
+    @discardableResult
     public func union<Sibling: Entity>(
         _ sibling: Sibling.Type,
         localKey: String
@@ -110,6 +128,7 @@ extension Query {
         let union = Union(
             local: T.self,
             foreign: sibling,
+            idKey: database.driver.idKey,
             localKey: localKey,
             foreignKey: nil
         )
@@ -117,7 +136,8 @@ extension Query {
         unions.append(union)
         return self
     }
-    
+
+    @discardableResult
     public func union<Sibling: Entity>(
         _ sibling: Sibling.Type,
         localKey: String,
@@ -126,6 +146,7 @@ extension Query {
         let union = Union(
             local: T.self,
             foreign: sibling,
+            idKey: database.driver.idKey,
             localKey: localKey,
             foreignKey: foreignKey
         )
