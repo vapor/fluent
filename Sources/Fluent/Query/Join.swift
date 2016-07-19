@@ -35,6 +35,26 @@ public final class Associative<
         leftId = try node.extract("\(Left.entity)_\(Left.database.driver.idKey)")
         rightId = try node.extract("\(Right.entity)_\(Right.database.driver.idKey)")
     }
+
+    public func makeNode() -> Node {
+        return Node([
+            "id": id,
+            "\(Left.entity)_id": leftId,
+            "\(Right.entity)_id": rightId,
+        ])
+    }
+
+    public static func prepare(database: Database) throws {
+        try database.create(entity) { builder in
+            builder.id()
+            builder.int("\(Left.entity)_id")
+            builder.int("\(Right.entity)_id")
+        }
+    }
+
+    public static func revert(database: Database) throws {
+        try database.delete(entity)
+    }
 }
 
 extension Query {

@@ -112,6 +112,26 @@ final class TestModel: Entity {
         name = try node.extract("name")
         age = try node.extract("age")
     }
+
+    func makeNode() -> Node {
+        return Node([
+            "id": id,
+            "name": name,
+            "age": age
+        ])
+    }
+
+    static func prepare(database: Database) throws {
+        try database.create(entity) { builder in
+            builder.id()
+            builder.string("name")
+            builder.int("age")
+        }
+    }
+
+    static func revert(database: Database) throws {
+        try database.delete(entity)
+    }
 }
 
 class TestPreparation: Preparation {

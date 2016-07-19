@@ -31,27 +31,47 @@ class RelationTests: XCTestCase {
         func nucleus() throws -> Nucleus? {
             return try hasOne()
         }
+
+        func makeNode() -> Node { return .null }
+        static func prepare(database: Database) throws {}
+        static func revert(database: Database) throws {}
     }
 
     final class Group: Entity {
         var id: Node?
         init(_ node: Node) throws { }
+
+        func makeNode() -> Node { return .null }
+        static func prepare(database: Database) throws {}
+        static func revert(database: Database) throws {}
     }
 
     final class Compound: Entity {
         var id: Node?
         init(_ node: Node) throws { }
+
+        func makeNode() -> Node { return .null }
+        static func prepare(database: Database) throws {}
+        static func revert(database: Database) throws {}
     }
 
     final class Proton: Entity {
         var id: Node?
         init(_ node: Node) throws { }
+
+        func makeNode() -> Node { return .null }
+        static func prepare(database: Database) throws {}
+        static func revert(database: Database) throws {}
     }
 
     final class Nucleus: Entity {
         static var entity = "nuclei"
         var id: Node?
         init(_ node: Node) throws { }
+
+        func makeNode() -> Node { return .null }
+        static func prepare(database: Database) throws {}
+        static func revert(database: Database) throws {}
     }
 
     func testHasMany() throws {

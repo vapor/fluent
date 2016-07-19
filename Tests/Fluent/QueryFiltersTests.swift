@@ -16,6 +16,9 @@ class QueryFiltersTests: XCTestCase {
         init(_ node: Node) throws {
 
         }
+
+        static func prepare(database: Database) throws {}
+        static func revert(database: Database) throws {}
     }
 
     class DummyDriver: Driver {

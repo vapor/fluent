@@ -18,6 +18,9 @@ class ModelFindTests: XCTestCase {
         init(_ node: Node) throws {
 
         }
+        
+        static func prepare(database: Database) throws {}
+        static func revert(database: Database) throws {}
     }
 
     /// Dummy Driver implementation for testing.
