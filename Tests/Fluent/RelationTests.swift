@@ -33,8 +33,8 @@ class RelationTests: XCTestCase {
         }
 
         func makeNode() -> Node { return .null }
-        static func prepare(database: Database) throws {}
-        static func revert(database: Database) throws {}
+        static func prepare(_ database: Database) throws {}
+        static func revert(_ database: Database) throws {}
     }
 
     final class Group: Entity {
@@ -42,8 +42,8 @@ class RelationTests: XCTestCase {
         init(_ node: Node) throws { }
 
         func makeNode() -> Node { return .null }
-        static func prepare(database: Database) throws {}
-        static func revert(database: Database) throws {}
+        static func prepare(_ database: Database) throws {}
+        static func revert(_ database: Database) throws {}
     }
 
     final class Compound: Entity {
@@ -51,8 +51,8 @@ class RelationTests: XCTestCase {
         init(_ node: Node) throws { }
 
         func makeNode() -> Node { return .null }
-        static func prepare(database: Database) throws {}
-        static func revert(database: Database) throws {}
+        static func prepare(_ database: Database) throws {}
+        static func revert(_ database: Database) throws {}
     }
 
     final class Proton: Entity {
@@ -60,8 +60,8 @@ class RelationTests: XCTestCase {
         init(_ node: Node) throws { }
 
         func makeNode() -> Node { return .null }
-        static func prepare(database: Database) throws {}
-        static func revert(database: Database) throws {}
+        static func prepare(_ database: Database) throws {}
+        static func revert(_ database: Database) throws {}
     }
 
     final class Nucleus: Entity {
@@ -70,8 +70,8 @@ class RelationTests: XCTestCase {
         init(_ node: Node) throws { }
 
         func makeNode() -> Node { return .null }
-        static func prepare(database: Database) throws {}
-        static func revert(database: Database) throws {}
+        static func prepare(_ database: Database) throws {}
+        static func revert(_ database: Database) throws {}
     }
 
     func testHasMany() throws {

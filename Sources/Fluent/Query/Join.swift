@@ -18,12 +18,28 @@ public struct Union {
     }
 }
 
-public final class Associative<
-    Left: Entity,
-    Right: Entity
+public final class Pivot<
+    First: Entity,
+    Second: Entity
 >: Entity {
     public static var entity: String {
-        return "\(Left.entity)_\(Right.entity)"
+        return "\(left.name)_\(right.name)"
+    }
+
+    public static var left: Entity.Type {
+        if First.entity < Second.entity {
+            return First.self
+        } else {
+            return Second.self
+        }
+    }
+
+    public static var right: Entity.Type {
+        if First.entity < Second.entity {
+            return Second.self
+        } else {
+            return First.self
+        }
     }
 
     public var id: Node?
@@ -32,27 +48,27 @@ public final class Associative<
 
     public init(_ node: Node) throws {
         id = try node.extract("id")
-        leftId = try node.extract("\(Left.entity)_\(Left.database.driver.idKey)")
-        rightId = try node.extract("\(Right.entity)_\(Right.database.driver.idKey)")
+        leftId = try node.extract("\(self.dynamicType.left.name)_\(self.dynamicType.left.database.driver.idKey)")
+        rightId = try node.extract("\(self.dynamicType.right.name)_\(self.dynamicType.right.database.driver.idKey)")
     }
 
     public func makeNode() -> Node {
         return Node([
             "id": id,
-            "\(Left.entity)_id": leftId,
-            "\(Right.entity)_id": rightId,
+            "\(self.dynamicType.left.name)_id": leftId,
+            "\(self.dynamicType.right.name)_id": rightId,
         ])
     }
 
-    public static func prepare(database: Database) throws {
+    public static func prepare(_ database: Database) throws {
         try database.create(entity) { builder in
             builder.id()
-            builder.int("\(Left.entity)_id")
-            builder.int("\(Right.entity)_id")
+            builder.int("\(left.name)_id")
+            builder.int("\(right.name)_id")
         }
     }
 
-    public static func revert(database: Database) throws {
+    public static func revert(_ database: Database) throws {
         try database.delete(entity)
     }
 }

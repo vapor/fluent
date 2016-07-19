@@ -17,8 +17,8 @@ class QueryFiltersTests: XCTestCase {
 
         }
 
-        static func prepare(database: Database) throws {}
-        static func revert(database: Database) throws {}
+        static func prepare(_ database: Database) throws {}
+        static func revert(_ database: Database) throws {}
     }
 
     class DummyDriver: Driver {

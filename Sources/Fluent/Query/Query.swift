@@ -141,17 +141,7 @@ public class Query<T: Entity> {
             let _ = filter(database.driver.idKey, .equals, id) // discardableResult
             try modify(data)
         } else {
-            let data = try create(data)
-
-            if case .array(let array) = data {
-                if let first = array.first {
-                    if case .dictionary(let dict) = first {
-                        model.id = dict[T.database.driver.idKey]
-                    }
-                }
-            } else {
-                // FIXME: other ways to grab id?
-            }
+            model.id = try create(data)
         }
     }
 

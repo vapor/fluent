@@ -20,14 +20,14 @@ final class Migration: Entity {
         ])
     }
 
-    static func prepare(database: Database) throws {
+    static func prepare(_ database: Database) throws {
         try database.create(entity) { builder in
             builder.id()
             builder.string("name")
         }
     }
 
-    static func revert(database: Database) throws {
+    static func revert(_ database: Database) throws {
         try database.delete(entity)
     }
 }

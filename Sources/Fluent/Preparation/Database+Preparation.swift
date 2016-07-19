@@ -16,7 +16,7 @@ extension Database {
         } catch {
             // could not fetch migrations
             // try to create `.fluent` table
-            try Migration.prepare(database: self)
+            try Migration.prepare(self)
         }
 
         return false
@@ -35,7 +35,7 @@ extension Database {
             throw PreparationError.alreadyPrepared
         }
 
-        try preparation.prepare(database: self)
+        try preparation.prepare(self)
 
         // record that this preparation has run
         var migration = Migration(name: preparation.name)

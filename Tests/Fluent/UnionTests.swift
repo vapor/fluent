@@ -21,8 +21,8 @@ class UnionTests: XCTestCase {
             return try belongsToMany()
         }
 
-        static func prepare(database: Database) throws {}
-        static func revert(database: Database) throws {}
+        static func prepare(_ database: Database) throws {}
+        static func revert(_ database: Database) throws {}
     }
 
     final class Garden: Entity {
@@ -37,16 +37,16 @@ class UnionTests: XCTestCase {
             return .null
         }
 
-        static func prepare(database: Database) throws {}
-        static func revert(database: Database) throws {}
+        static func prepare(_ database: Database) throws {}
+        static func revert(_ database: Database) throws {}
     }
 
     final class Vegetable: Entity {
         var id: Node?
         init(_ node: Node) { }
         func makeNode() -> Node { return .null }
-        static func prepare(database: Database) throws {}
-        static func revert(database: Database) throws {}
+        static func prepare(_ database: Database) throws {}
+        static func revert(_ database: Database) throws {}
     }
 
     func testBasic() throws {

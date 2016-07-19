@@ -121,7 +121,7 @@ final class TestModel: Entity {
         ])
     }
 
-    static func prepare(database: Database) throws {
+    static func prepare(_ database: Database) throws {
         try database.create(entity) { builder in
             builder.id()
             builder.string("name")
@@ -129,7 +129,7 @@ final class TestModel: Entity {
         }
     }
 
-    static func revert(database: Database) throws {
+    static func revert(_ database: Database) throws {
         try database.delete(entity)
     }
 }
@@ -138,13 +138,13 @@ class TestPreparation: Preparation {
     static var entity: String = ""
     static var testClosure: (Schema.Creator) -> () = { _ in }
 
-    static func prepare(database: Database) throws {
+    static func prepare(_ database: Database) throws {
         try database.create(entity) { builder in
             self.testClosure(builder)
         }
     }
 
-    static func revert(database: Database) throws {
+    static func revert(_ database: Database) throws {
         try database.delete(entity)
     }
 }

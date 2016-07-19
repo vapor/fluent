@@ -25,7 +25,7 @@ extension Entity {
         let foreignKey = "\(Right.name)_\(Left.database.driver.idKey)"
 
         let query = Query<Right>().union(
-            Associative<Left, Right>.self,
+            Pivot<Left, Right>.self,
             localKey: localKey,
             foreignKey: foreignKey
         )
