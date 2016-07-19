@@ -70,7 +70,7 @@ extension Entity {
     /**
         Finds the entity with the given `id`.
     */
-    public static func find(_ id: Node) throws -> Self? {
+    public static func find(_ id: NodeRepresentable) throws -> Self? {
         return try Self.query.filter(database.driver.idKey, .equals, id).first()
     }
 

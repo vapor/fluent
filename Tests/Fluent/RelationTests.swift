@@ -8,12 +8,12 @@ class RelationTests: XCTestCase {
     ]
 
     final class Atom: Entity {
-        var id: Value?
-        var groupId: Value?
+        var id: Node?
+        var groupId: Node?
 
-        init(serialized: [String: Value]) {
-            id = serialized["id"]
-            groupId = serialized["group_id"]
+        init(_ node: Node) throws {
+            id = try node.extract("id")
+            groupId = try node.extract("group_id")
         }
 
         func group() throws -> Group? {
@@ -34,28 +34,28 @@ class RelationTests: XCTestCase {
     }
 
     final class Group: Entity {
-        var id: Value?
-        init(serialized: [String: Value]) { }
+        var id: Node?
+        init(_ node: Node) throws { }
     }
 
     final class Compound: Entity {
-        var id: Value?
-        init(serialized: [String: Value]) { }
+        var id: Node?
+        init(_ node: Node) throws { }
     }
 
     final class Proton: Entity {
-        var id: Value?
-        init(serialized: [String: Value]) { }
+        var id: Node?
+        init(_ node: Node) throws { }
     }
 
     final class Nucleus: Entity {
         static var entity = "nuclei"
-        var id: Value?
-        init(serialized: [String: Value]) { }
+        var id: Node?
+        init(_ node: Node) throws { }
     }
 
     func testHasMany() throws {
-        let hydrogen = Atom(serialized: [
+        let hydrogen = try Atom([
             "id": 42,
             "group_id": 1337
         ])
@@ -66,7 +66,7 @@ class RelationTests: XCTestCase {
     }
 
     func testBelongsToMany() throws {
-        let hydrogen = Atom(serialized: [
+        let hydrogen = try Atom([
             "id": 42,
             "group_id": 1337
         ])

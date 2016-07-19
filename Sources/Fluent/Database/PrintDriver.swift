@@ -4,7 +4,7 @@
 public class PrintDriver: Driver {
     public var idKey: String = "foo"
     
-    public func query<T: Entity>(_ query: Query<T>) throws -> [Node] {
+    public func query<T: Entity>(_ query: Query<T>) throws -> Node {
 
         let sql = SQL(query: query)
         let serializer = GeneralSQLSerializer(sql: sql)
@@ -19,7 +19,7 @@ public class PrintDriver: Driver {
         print("Filters \(query.filters)")
         print()
         
-        return []
+        return .array([])
     }
 
     public func schema(_ schema: Schema) throws {

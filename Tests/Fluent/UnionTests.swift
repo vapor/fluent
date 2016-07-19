@@ -7,10 +7,10 @@ class UnionTests: XCTestCase {
     ]
 
     final class Recipe: Entity {
-        var id: Value?
+        var id: Node?
 
-        init(serialized: [String: Value]) {
-            id = serialized["id"]
+        init(_ node: Node) throws {
+            id = try node.extract("id")
         }
 
         func vegetables() throws -> Query<Vegetable> {
@@ -19,8 +19,8 @@ class UnionTests: XCTestCase {
     }
 
     final class Garden: Entity {
-        var id: Value?
-        init(serialized: [String: Value]) { }
+        var id: Node?
+        init(_ node: Node) { }
 
         func vegetables() throws -> Query<Vegetable> {
             return try hasMany()
@@ -28,8 +28,8 @@ class UnionTests: XCTestCase {
     }
 
     final class Vegetable: Entity {
-        var id: Value?
-        init(serialized: [String: Value]) { }
+        var id: Node?
+        init(_ node: Node) { }
     }
 
     func testBasic() throws {

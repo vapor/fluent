@@ -75,12 +75,16 @@ public class Query<T: Entity> {
 
         let results = try database.driver.query(self)
 
-        for result in results {
-            var model = try T(result)
-            if case .dictionary(let dict) = result {
-                model.id = dict[database.driver.idKey]
+        if case .array(let array) = results {
+            for result in array {
+                var model = try T(result)
+                if case .dictionary(let dict) = result {
+                    model.id = dict[database.driver.idKey]
+                }
+                models.append(model)
             }
-            models.append(model)
+        } else {
+            // FIXME: support other types?
         }
 
         return models

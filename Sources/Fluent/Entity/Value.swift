@@ -10,29 +10,10 @@ public enum Node {
     case data([UInt8])
     case array([Node])
     case dictionary([String: Node])
-
-    public init(_ raw: [NodeRepresentable]) {
-        var converted: [Node] = []
-
-        for (representable) in raw {
-            converted.append(representable.makeNode())
-        }
-
-        self = .array(converted)
-    }
-
-    public init(_ raw: [String: NodeRepresentable]) {
-        var converted: [String: Node] = [:]
-
-        for (key, representable) in raw {
-            converted[key] = representable.makeNode()
-        }
-
-        self = .dictionary(converted)
-    }
+    case null
 }
 
-extension Node: NodeConvertible {
+extension Node: NodeRepresentable {
     public init(_ node: Node) throws {
         self = node
     }
@@ -78,6 +59,55 @@ extension Node: Polymorphic {
     public var object: [String : Polymorphic]? {
         return nil
     }
+
+
+    public init(_ representable: NodeRepresentable) {
+        self = representable.makeNode()
+    }
+
+    public init(_ representable: NodeRepresentable?) {
+        self = representable?.makeNode() ?? .null
+    }
+
+    public init(_ representable: [NodeRepresentable]) {
+        var node: [Node] = []
+
+        for (representable) in representable {
+            node.append(Node(representable))
+        }
+
+        self = .array(node)
+    }
+
+    public init(_ representable: [NodeRepresentable?]) {
+        var node: [Node] = []
+
+        for (representable) in representable {
+            node.append(Node(representable))
+        }
+
+        self = .array(node)
+    }
+
+    public init(_ representable: [String: NodeRepresentable]) {
+        var node: [String: Node] = [:]
+
+        for (key, representable) in representable {
+            node[key] = Node(representable)
+        }
+
+        self = .dictionary(node)
+    }
+
+    public init(_ representable: [String: NodeRepresentable?]) {
+        var node: [String: Node] = [:]
+
+        for (key, representable) in representable {
+            node[key] = Node(representable)
+        }
+
+        self = .dictionary(node)
+    }
 }
 
 public enum ExtractionError: ErrorProtocol {
@@ -107,6 +137,23 @@ extension String: NodeRepresentable {
     }
 }
 
+extension Bool: NodeRepresentable {
+    public func makeNode() -> Node {
+        return .bool(self)
+    }
+}
+
+extension NodeInitializable {
+    public init(_ representable: [NodeRepresentable]) throws {
+        let node = Node(representable)
+        try self.init(node)
+    }
+
+    public init(_ representable: [String: NodeRepresentable]) throws {
+        let node = Node(representable)
+        try self.init(node)
+    }
+}
 
 extension Node {
     public func extract(_ key: String) throws -> Int {

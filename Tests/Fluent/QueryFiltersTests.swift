@@ -7,13 +7,13 @@ class QueryFiltersTests: XCTestCase {
             return "dummy_models"
         }
 
-        var id: Value?
+        var id: Node?
 
-        func serialize() -> [String: Value?] {
-            return [:]
+        func makeNode() -> Node {
+            return .null
         }
 
-        init(serialized: [String: Value]) {
+        init(_ node: Node) throws {
 
         }
     }
@@ -27,8 +27,8 @@ class QueryFiltersTests: XCTestCase {
             case broken
         }
 
-        func query<T: Entity>(_ query: Query<T>) throws -> [[String: Value]] {
-            return []
+        func query<T: Entity>(_ query: Query<T>) throws -> Node {
+            return .array([])
         }
 
         func schema(_ schema: Schema) throws {

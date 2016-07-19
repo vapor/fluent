@@ -103,14 +103,14 @@ class PreparationTests: XCTestCase {
 // MARK: Utilities
 
 final class TestModel: Entity {
-    var id: Value?
+    var id: Node?
     var name: String
     var age: Int
 
-    init(serialized: [String: Value]) {
-        id = serialized["id"]
-        name = serialized["name"]?.string ?? ""
-        age = serialized["age"]?.int ?? 0
+    init(_ node: Node) throws {
+        id = try node.extract("id")
+        name = try node.extract("name")
+        age = try node.extract("age")
     }
 }
 
@@ -133,7 +133,7 @@ class TestSchemaDriver: Driver {
     var idKey: String = "id"
 
     @discardableResult
-    func query<T: Entity>(_ query: Query<T>) throws -> [[String: Value]] { return [] }
+    func query<T: Entity>(_ query: Query<T>) throws -> Node { return .array([]) }
 
     var testClosure: (Schema) -> ()
     init(testClosure: (Schema) -> ()) {
@@ -146,7 +146,7 @@ class TestSchemaDriver: Driver {
 }
 
 extension SQLSerializerTests {
-    private func serialize(_ sql: SQL) -> (String, [Value]) {
+    private func serialize(_ sql: SQL) -> (String, [Node]) {
         let serializer = GeneralSQLSerializer(sql: sql)
         return serializer.serialize()
     }

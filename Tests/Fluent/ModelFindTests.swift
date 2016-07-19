@@ -9,13 +9,13 @@ class ModelFindTests: XCTestCase {
             return "dummy_models"
         }
 
-        var id: Value?
+        var id: Node?
 
-        func serialize() -> [String: Value?] {
-            return [:]
+        func makeNode() -> Node {
+            return .null
         }
 
-        init(serialized: [String: Value]) {
+        init(_ node: Node) throws {
 
         }
     }
@@ -30,7 +30,7 @@ class ModelFindTests: XCTestCase {
             case broken
         }
 
-        func query<T: Entity>(_ query: Query<T>) throws -> [[String: Value]] {
+        func query<T: Entity>(_ query: Query<T>) throws -> Node {
             if
                 let filter = query.filters.first,
                 case .compare(let key, let comparison, let value) = filter
@@ -40,15 +40,15 @@ class ModelFindTests: XCTestCase {
                     comparison == .equals
             {
                 if value.int == 42 {
-                    return [
-                               [idKey: 42]
-                    ]
+                    return Node([
+                        Node([idKey: 42])
+                    ])
                 } else if value.int == 500 {
                     throw Error.broken
                 }
             }
             
-            return []
+            return .array([])
         }
 
         func schema(_ builder: Schema) throws {
