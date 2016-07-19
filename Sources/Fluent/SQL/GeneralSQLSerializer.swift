@@ -229,16 +229,33 @@ public class GeneralSQLSerializer: SQLSerializer {
         }
     }
 
-    public func sql(_ column: SQL.Column) -> String {
-        switch column {
-        case .primaryKey:
-            return sql("id") + " INTEGER PRIMARY KEY"
-        case .integer(let name):
-            return sql(name) + " INTEGER"
-        case .string(let name, _):
-            return sql(name) + " STRING"
-        case .double(let name, _, _):
-            return sql(name) + " DOUBLE"
+    public func sql(_ column: Schema.Field) -> String {
+        var clause: [String] = []
+
+        clause += sql(column.name)
+        clause += sql(column.type)
+        if !column.optional {
+            clause += "NOT NULL"
+        }
+
+        return clause.joined(separator: " ")
+    }
+
+
+    public func sql(_ type: Schema.Field.DataType) -> String {
+        switch type {
+        case .id:
+            return "INTEGER PRIMARY KEY"
+        case .int:
+            return "INTEGER"
+        case .string(_):
+            return "STRING"
+        case .double:
+            return "DOUBLE"
+        case .bool:
+            return "BOOL"
+        case .data:
+            return "BLOB"
         }
     }
 
@@ -308,7 +325,7 @@ public class GeneralSQLSerializer: SQLSerializer {
         return "?"
     }
 
-    public func sql(_ columns: [SQL.Column]) -> String {
+    public func sql(_ columns: [Schema.Field]) -> String {
         return "(" + columns.map { sql($0) }.joined(separator: ", ") + ")"
     }
 

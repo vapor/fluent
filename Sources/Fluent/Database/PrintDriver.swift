@@ -19,10 +19,14 @@ public class PrintDriver: Driver {
         print("Filters \(query.filters)")
         print()
         
-        return .array([])
+        return .null
     }
 
     public func schema(_ schema: Schema) throws {
         //let sql = SQL(builder: builder)
+    }
+
+    public func raw(_ raw: String, _ values: [Node]) throws -> Node {
+        return .null
     }
 }

@@ -47,6 +47,16 @@ public final class Pivot<
     public var leftId: Node?
     public var rightId: Node?
 
+    public init(_ first: Entity, _ second: Entity) {
+        if First.self == self.dynamicType.left {
+            self.leftId = first.id
+            self.rightId = second.id
+        } else {
+            self.leftId = second.id
+            self.rightId = first.id
+        }
+    }
+
     public init(_ node: Node) throws {
         id = try node.extract("id")
 

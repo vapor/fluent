@@ -5,6 +5,7 @@ class LastQueryDriver: Driver {
 
     var lastQuery: SQL?
     var lastSchema: Schema?
+    var lastRaw: (String, [Node])?
 
     @discardableResult
     func query<T: Entity>(_ query: Query<T>) throws -> Node {
@@ -16,5 +17,10 @@ class LastQueryDriver: Driver {
 
     func schema(_ schema: Schema) throws {
         lastSchema = schema
+    }
+
+    func raw(_ raw: String, _ values: [Node]) throws -> Node {
+        lastRaw = (raw, values)
+        return .null
     }
 }

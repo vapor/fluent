@@ -85,6 +85,9 @@ extension Node: Polymorphic {
         return nil
     }
 
+    public init(_ data: [UInt8]) {
+        self = .data(data)
+    }
 
     public init(_ representable: NodeRepresentable) {
         self = representable.makeNode()
@@ -168,6 +171,13 @@ extension Bool: NodeRepresentable {
     }
 }
 
+extension Double: NodeRepresentable {
+    public func makeNode() -> Node {
+        return .double(self)
+    }
+}
+
+
 extension NodeInitializable {
     public init(_ representable: [NodeRepresentable]) throws {
         let node = Node(representable)
@@ -181,6 +191,52 @@ extension NodeInitializable {
 }
 
 extension Node {
+    public func extract(_ key: String) throws -> [UInt8] {
+        guard case .dictionary(let dict) = self else {
+            throw ExtractionError.notDictionary
+        }
+
+        guard let node = dict[key] else {
+            throw ExtractionError.invalidType
+        }
+
+
+        switch node {
+        case .data(let data):
+            return data
+        case .string(_):
+            return []
+        default:
+            throw ExtractionError.invalidType
+        }
+    }
+
+    public func extract(_ key: String) throws -> Bool {
+        guard case .dictionary(let dict) = self else {
+            throw ExtractionError.notDictionary
+        }
+
+        guard let bool = dict[key]?.bool else {
+            print("\(key) not Bool")
+            throw ExtractionError.invalidType
+        }
+
+        return bool
+    }
+
+    public func extract(_ key: String) throws -> Double {
+        guard case .dictionary(let dict) = self else {
+            throw ExtractionError.notDictionary
+        }
+
+        guard let double = dict[key]?.double else {
+            print("\(key) not Double")
+            throw ExtractionError.invalidType
+        }
+
+        return double
+    }
+
     public func extract(_ key: String) throws -> Int {
         guard case .dictionary(let dict) = self else {
             throw ExtractionError.notDictionary

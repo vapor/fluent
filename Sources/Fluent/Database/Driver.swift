@@ -28,17 +28,13 @@ public protocol Driver {
         by the `Builder`.
     */
     func schema(_ schema: Schema) throws
-}
 
-/**
-    Drivers that also conform to RawQueryable
-    accept string queries and parameterized values.
- 
-    This allows Fluent extensions to be written that
-    can support custom querying behavior.
-*/
+    /**
+        Drivers that support raw querying
+        accept string queries and parameterized values.
 
-public protocol RawQueryable {
-    @discardableResult
+        This allows Fluent extensions to be written that
+        can support custom querying behavior.
+    */
     func raw(_ raw: String, _ values: [Node]) throws -> Node
 }

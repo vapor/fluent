@@ -57,6 +57,10 @@ class ModelFindTests: XCTestCase {
         func schema(_ builder: Schema) throws {
             //
         }
+
+        func raw(_ raw: String, _ values: [Node]) throws -> Node {
+            return .null
+        }
     }
 
     static let allTests = [

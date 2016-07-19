@@ -20,24 +20,24 @@ class PreparationTests: XCTestCase {
                 return
             }
 
-            guard case .int(let colOneName) = fields[0] else {
+            guard case .int = fields[0].type else {
                 XCTFail("Invalid first field")
                 return
             }
-            XCTAssertEqual(colOneName, "id")
+            XCTAssertEqual(fields[0].name, "id")
 
-            guard case .string(let colTwoName, let colTwoLength) = fields[1] else {
+            guard case .string(let colTwoLength) = fields[1].type else {
                 XCTFail("Invalid second field")
                 return
             }
-            XCTAssertEqual(colTwoName, "name")
+            XCTAssertEqual(fields[1].name, "name")
             XCTAssertEqual(colTwoLength, nil)
 
-            guard case .string(let colThreeName, let colThreeLength) = fields[2] else {
+            guard case .string(let colThreeLength) = fields[2].type else {
                 XCTFail("Invalid second field")
                 return
             }
-            XCTAssertEqual(colThreeName, "email")
+            XCTAssertEqual(fields[2].name, "email")
             XCTAssertEqual(colThreeLength, 128)
         }
 
@@ -71,23 +71,23 @@ class PreparationTests: XCTestCase {
                 return
             }
 
-            guard case .id = fields[0] else {
+            guard case .id = fields[0].type else {
                 XCTFail("Invalid first field")
                 return
             }
 
-            guard case .string(let colTwoName, let colTwoLength) = fields[1] else {
+            guard case .string(let colTwoLength) = fields[1].type else {
                 XCTFail("Invalid second field")
                 return
             }
-            XCTAssertEqual(colTwoName, "name")
+            XCTAssertEqual(fields[1].name, "name")
             XCTAssertEqual(colTwoLength, nil)
 
-            guard case .int(let colThreeName) = fields[2] else {
+            guard case .int = fields[2].type else {
                 XCTFail("Invalid second field")
                 return
             }
-            XCTAssertEqual(colThreeName, "age")
+            XCTAssertEqual(fields[2].name, "age")
         }
 
         let database = Database(driver)
@@ -153,7 +153,7 @@ class TestSchemaDriver: Driver {
     var idKey: String = "id"
 
     @discardableResult
-    func query<T: Entity>(_ query: Query<T>) throws -> Node { return .array([]) }
+    func query<T: Entity>(_ query: Query<T>) throws -> Node { return .null }
 
     var testClosure: (Schema) -> ()
     init(testClosure: (Schema) -> ()) {
@@ -163,6 +163,9 @@ class TestSchemaDriver: Driver {
     func schema(_ schema: Schema) throws {
         testClosure(schema)
     }
+
+
+    func raw(_ raw: String, _ values: [Node]) throws -> Node { return .null }
 }
 
 extension SQLSerializerTests {

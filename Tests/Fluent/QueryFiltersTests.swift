@@ -37,6 +37,10 @@ class QueryFiltersTests: XCTestCase {
         func schema(_ schema: Schema) throws {
             
         }
+
+        func raw(_ raw: String, _ values: [Node]) throws -> Node {
+            return .null
+        }
     }
 
     static var allTests : [(String, (QueryFiltersTests) -> () throws -> Void)] {
