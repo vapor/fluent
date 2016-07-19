@@ -5,6 +5,7 @@ extension SQL {
             self = .select(
                 table: query.entity,
                 filters: query.filters,
+                joins: query.unions,
                 limit: query.limit?.count
             )
         case .create:

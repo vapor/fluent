@@ -20,3 +20,45 @@ extension Filter: CustomStringConvertible {
         }
     }
 }
+
+extension Query {
+    //MARK: Filter
+
+    /**
+        Adds a `.compare` filter to the query's
+        filters.
+
+        Used for filtering results based on how
+        a result's value compares to the supplied value.
+    */
+    @discardableResult
+    public func filter(_ field: String, _ comparison: Filter.Comparison, _ value: Value) -> Self {
+        let filter = Filter.compare(field, comparison, value)
+        filters.append(filter)
+        return self
+    }
+
+    /**
+        Adds a `.subset` filter to the query's
+        filters.
+
+        Used for filtering results based on whether
+        a result's value is or is not in a set.
+    */
+    @discardableResult
+    public func filter(_ field: String, _ scope: Filter.Scope, _ set: [Value]) -> Self {
+        let filter = Filter.subset(field, scope, set)
+        filters.append(filter)
+        return self
+    }
+
+
+    /**
+        Shortcut for creating a `.equals` filter.
+    */
+    @discardableResult
+    public func filter(_ field: String, _ value: Value) -> Self {
+        return filter(field, .equals, value)
+    }
+
+}

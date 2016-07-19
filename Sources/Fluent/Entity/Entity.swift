@@ -51,7 +51,11 @@ extension Entity {
         lowercase model pluralized.
     */
     public static var entity: String {
-        return String(self).lowercased() + "s"
+        return name + "s"
+    }
+
+    public static var name: String {
+        return String(self).lowercased()
     }
 }
 
@@ -112,10 +116,6 @@ extension Entity {
 //MARK: Database
 
 extension Entity {
-    private static var name: String {
-        return "\(self)"
-    }
-
     /**
         Fetches or sets the `Database` for this
         `Model` from the static database map.

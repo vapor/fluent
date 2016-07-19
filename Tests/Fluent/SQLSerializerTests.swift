@@ -7,7 +7,7 @@ class SQLSerializerTests: XCTestCase {
     ]
 
     func testBasicSelect() {
-        let sql = SQL.select(table: "users", filters: [], limit: nil)
+        let sql = SQL.select(table: "users", filters: [], joins: [], limit: nil)
         let (statement, values) = serialize(sql)
 
         XCTAssertEqual(statement, "SELECT * FROM `users`")
@@ -16,7 +16,7 @@ class SQLSerializerTests: XCTestCase {
 
     func testRegularSelect() {
         let filter = Filter.compare("age", .greaterThanOrEquals, 21)
-        let sql = SQL.select(table: "users", filters: [filter], limit: 5)
+        let sql = SQL.select(table: "users", filters: [filter], joins: [], limit: 5)
         let (statement, values) = serialize(sql)
 
         XCTAssertEqual(statement, "SELECT * FROM `users` WHERE `age` >= ? LIMIT 5")
@@ -27,7 +27,7 @@ class SQLSerializerTests: XCTestCase {
     func testFilterCompareSelect() {
         let filter = Filter.compare("name", .notEquals, "duck")
 
-        let select = SQL.select(table: "friends", filters: [filter], limit: nil)
+        let select = SQL.select(table: "friends", filters: [filter], joins: [], limit: nil)
         let (statement, values) = serialize(select)
 
         XCTAssertEqual(statement, "SELECT * FROM `friends` WHERE `name` != ?")

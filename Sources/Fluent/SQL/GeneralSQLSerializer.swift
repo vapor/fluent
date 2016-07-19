@@ -33,12 +33,16 @@ public class GeneralSQLSerializer: SQLSerializer {
                 sql(statement),
                 dataValues
             )
-        case .select(let table, let filters, let limit):
+        case .select(let table, let filters, let unions, let limit):
             var statement: [String] = []
             var values: [Value] = []
 
             statement += "SELECT * FROM"
             statement += sql(table)
+
+            if !unions.isEmpty {
+                statement += sql(unions)
+            }
 
             if !filters.isEmpty {
                 let (filtersClause, filtersValues) = sql(filters)
@@ -244,6 +248,29 @@ public class GeneralSQLSerializer: SQLSerializer {
             sql(clause),
             values
         )
+    }
+
+    public func sql(_ joins: [Union]) -> String {
+        var clause: [String] = []
+
+        for join in joins {
+            clause += sql(join)
+        }
+
+        return sql(clause)
+    }
+
+    public func sql(_ join: Union) -> String {
+        var clause: [String] = []
+
+        clause += "JOIN"
+        clause += sql(join.foreign.entity)
+        clause += "ON"
+        clause += "\(sql(join.local.entity)).\(join.localKey)"
+        clause += "="
+        clause += "\(sql(join.foreign.entity)).\(join.foreignKey)"
+
+        return sql(clause)
     }
 
     public func sql(_ strings: [String]) -> String {

@@ -37,6 +37,13 @@ public class Query<T: Entity> {
         return T.entity
     }
 
+    /**
+        An array of unions, or other entities
+        that will be queried during this query's 
+        execution.
+    */
+    public var unions: [Union]
+
     //MARK: Internal
 
     /**
@@ -53,6 +60,7 @@ public class Query<T: Entity> {
         filters = []
         action = .fetch
         database = T.database
+        unions = []
     }
 
     /**
@@ -105,7 +113,7 @@ public class Query<T: Entity> {
     */
     public func create(_ serialized: [String: Value?]) throws -> T? {
         action = .create
-        data = nilToNull(serialized)
+        data = _nilToNull(serialized)
         
         return try run().first
     }
@@ -161,51 +169,11 @@ public class Query<T: Entity> {
     */
     public func modify(_ serialized: [String: Value?]) throws {
         action = .modify
-        data = nilToNull(serialized)
+        data = _nilToNull(serialized)
         let _ = try run() // discardableResult
     }
 
-
-    //MARK: Filter
-
-    /**
-        Adds a `.compare` filter to the query's
-        filters.
-     
-        Used for filtering results based on how
-        a result's value compares to the supplied value.
-    */
-    @discardableResult
-    public func filter(_ field: String, _ comparison: Filter.Comparison, _ value: Value) -> Self {
-        let filter = Filter.compare(field, comparison, value)
-        filters.append(filter)
-        return self
-    }
-
-    /**
-        Adds a `.subset` filter to the query's
-        filters. 
-     
-        Used for filtering results based on whether
-        a result's value is or is not in a set.
-    */
-    @discardableResult
-    public func filter(_ field: String, _ scope: Filter.Scope, _ set: [Value]) -> Self {
-        let filter = Filter.subset(field, scope, set)
-        filters.append(filter)
-        return self
-    }
-
-
-    /**
-        Shortcut for creating a `.equals` filter.
-    */
-    @discardableResult
-    public func filter(_ field: String, _ value: Value) -> Self {
-        return filter(field, .equals, value)
-    }
-
-    private func nilToNull(_ serialized: [String: Value?]) -> [String: Value] {
+    private func _nilToNull(_ serialized: [String: Value?]) -> [String: Value] {
         var converted: [String: Value] = [:]
 
         for (key, value) in serialized {
@@ -214,7 +182,6 @@ public class Query<T: Entity> {
 
         return converted
     }
-
 }
 
 extension Query: CustomStringConvertible {
