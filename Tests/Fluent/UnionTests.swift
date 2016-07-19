@@ -9,10 +9,15 @@ class UnionTests: XCTestCase {
         ("testSQLFilters", testSQLFilters),
     ]
 
-    func testBasic() throws {
-        let lqd = LastQueryDriver()
-        let db = Database(lqd)
+    var lqd: LastQueryDriver!
+    var db: Database!
 
+    override func setUp() {
+        lqd = LastQueryDriver()
+        db = Database(lqd)
+    }
+
+    func testBasic() throws {
         let query = Query<Atom>(db).union(Compound.self)
         try lqd.query(query)
 
@@ -38,9 +43,6 @@ class UnionTests: XCTestCase {
     }
 
     func testCustom() throws {
-        let lqd = LastQueryDriver()
-        let db = Database(lqd)
-
         let localKey = "#local_key"
         let foreignKey = "#foreign_key"
 
@@ -70,9 +72,6 @@ class UnionTests: XCTestCase {
     }
 
     func testSQL() throws {
-        let lqd = LastQueryDriver()
-        let db = Database(lqd)
-
         let localKey = "#local_key"
         let foreignKey = "#foreign_key"
 
@@ -91,9 +90,6 @@ class UnionTests: XCTestCase {
     }
 
     func testSQLFilters() throws {
-        let lqd = LastQueryDriver()
-        let db = Database(lqd)
-
         let localKey = "#local_key"
         let foreignKey = "#foreign_key"
 
@@ -121,4 +117,26 @@ class UnionTests: XCTestCase {
         }
     }
 
+    func testBelongsToMany() throws {
+        Atom.database = db
+        Compound.database = db
+
+        let atom = Atom(name: "Hydrogen", protons: 1)
+        atom.id = Node(42)
+
+        do {
+            _ = try atom.compounds().all()
+        }
+
+        if let sql = lqd.lastQuery {
+            let serializer = GeneralSQLSerializer(sql: sql)
+            let (statement, values) = serializer.serialize()
+            XCTAssertEqual(
+                statement,
+                "SELECT * FROM `compounds` JOIN `atom_compound` ON `compounds`.`\(lqd.idKey)` = `atom_compound`.`compound_\(lqd.idKey)` WHERE `atom_compound`.`atom_\(lqd.idKey)` = ?"
+            )
+            XCTAssertEqual(values.count, 1)
+            XCTAssertEqual(values.first?.int, 42)
+        }
+    }
 }

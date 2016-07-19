@@ -5,6 +5,12 @@ final class Atom: Entity {
     var name: String
     var protons: Int
 
+    init(name: String, protons: Int) {
+        id = nil
+        self.name = name
+        self.protons = protons
+    }
+
     init(_ node: Node) throws {
         id = try node.extract("id")
         name = try node.extract("name")

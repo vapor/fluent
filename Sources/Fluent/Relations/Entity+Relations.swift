@@ -28,14 +28,15 @@ extension Entity {
         let localKey = query.idKey
         let foreignKey = "\(Right.name)_\(query.idKey)"
 
+        let pivot = Pivot<Left, Right>.self
 
         query.union(
-            Pivot<Left, Right>.self,
+            pivot,
             localKey: localKey,
             foreignKey: foreignKey
         )
 
-        query.filter("\(Self.name)_\(query.idKey)", ident)
+        query.filter(pivot, "\(Self.name)_\(query.idKey)", ident)
 
         return query
     }
