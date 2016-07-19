@@ -70,18 +70,24 @@ public class Query<T: Entity> {
         Returns an array of entities.
     */
     // @discardableResult
-    func run() throws -> [T] {
+    private func _runRaw() throws -> Node {
+        return try database.driver.query(self)
+    }
+
+    private func _run() throws -> [T] {
         var models: [T] = []
 
-        let results = try database.driver.query(self)
-
-        if case .array(let array) = results {
+        if case .array(let array) = try _runRaw() {
             for result in array {
-                var model = try T(result)
-                if case .dictionary(let dict) = result {
-                    model.id = dict[database.driver.idKey]
+                do {
+                    var model = try T(result)
+                    if case .dictionary(let dict) = result {
+                        model.id = dict[database.driver.idKey]
+                    }
+                    models.append(model)
+                } catch {
+                    // FIXME: do what when init fails?
                 }
-                models.append(model)
             }
         } else {
             // FIXME: support other types?
@@ -98,7 +104,7 @@ public class Query<T: Entity> {
     */
     public func first() throws -> T? {
         limit = Limit(count: 1)
-        return try run().first
+        return try _run().first
     }
 
     /**
@@ -106,7 +112,7 @@ public class Query<T: Entity> {
         by the query.
     */
     public func all() throws -> [T] {
-        return try run()
+        return try _run()
     }
 
     //MARK: Create
@@ -117,10 +123,11 @@ public class Query<T: Entity> {
      
         Returns an entity if one was created.
     */
-    public func create(_ serialized: Node?) throws -> T? {
+    public func create(_ serialized: Node?) throws -> Node {
         action = .create
         data = serialized
-        return try run().first
+
+        return try _runRaw()
     }
 
     /**
@@ -134,8 +141,17 @@ public class Query<T: Entity> {
             let _ = filter(database.driver.idKey, .equals, id) // discardableResult
             try modify(data)
         } else {
-            let new = try create(data)
-            model.id = new?.id
+            let data = try create(data)
+
+            if case .array(let array) = data {
+                if let first = array.first {
+                    if case .dictionary(let dict) = first {
+                        model.id = dict[T.database.driver.idKey]
+                    }
+                }
+            } else {
+                // FIXME: other ways to grab id?
+            }
         }
     }
 
@@ -147,7 +163,7 @@ public class Query<T: Entity> {
     */
     public func delete() throws {
         action = .delete
-        let _ = try run() // discardableResult
+        let _ = try _run() // discardableResult
     }
 
     /**
@@ -163,7 +179,7 @@ public class Query<T: Entity> {
         let filter = Filter.compare(database.driver.idKey, .equals, id)
         filters.append(filter)
 
-       let _ = try run() // discardableResult
+       let _ = try _run() // discardableResult
     }
 
     //MARK: Update
@@ -175,7 +191,7 @@ public class Query<T: Entity> {
     public func modify(_ serialized: Node?) throws {
         action = .modify
         data = serialized
-        let _ = try run() // discardableResult
+        let _ = try _run() // discardableResult
     }
 }
 

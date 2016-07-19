@@ -41,15 +41,40 @@ extension Node: Polymorphic {
     }
 
     public var double: Double? {
-        return nil
+        switch self {
+        case .int(let int):
+            return Double(int)
+        case .double(let double):
+            return double
+        case .string(let string):
+            return Double(string)
+        default:
+            return nil
+        }
     }
 
     public var int: Int? {
-        return nil
+        switch self {
+        case .int(let int):
+            return int
+        case .double(let double):
+            return Int(double)
+        case .string(let string):
+            return Int(string)
+        default:
+            return nil
+        }
     }
 
     public var string: String? {
-        return nil
+        switch self {
+        case .string(let string):
+            return string
+        case .int(let int):
+            return int.description
+        default:
+            return nil
+        }
     }
 
     public var array: [Polymorphic]? {
@@ -162,6 +187,7 @@ extension Node {
         }
 
         guard let int = dict[key]?.int else {
+            print("\(key) not Int")
             throw ExtractionError.invalidType
         }
 
@@ -174,6 +200,7 @@ extension Node {
         }
 
         guard let string = dict[key]?.string else {
+            print("\(key) not String. \(dict)")
             throw ExtractionError.invalidType
         }
 
@@ -186,6 +213,7 @@ extension Node {
         }
 
         guard let node = dict[key] else {
+            print("\(key) not Node")
             throw ExtractionError.invalidType
         }
 

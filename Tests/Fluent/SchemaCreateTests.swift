@@ -46,7 +46,7 @@ class SchemaCreateTests: XCTestCase {
 
         let (statement, values) = serializer.serialize()
 
-        XCTAssertEqual(statement, "DROP TABLE `users`")
+        XCTAssertEqual(statement, "DROP TABLE IF EXISTS `users`")
         XCTAssertEqual(values.count, 0)
     }
 }
