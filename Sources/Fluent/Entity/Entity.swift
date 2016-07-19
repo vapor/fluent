@@ -4,7 +4,7 @@ import Foundation
     Represents an entity that can be
     stored and retrieved from the `Database`.
 */
-public protocol Entity: CustomStringConvertible, Preparation {
+public protocol Entity: CustomStringConvertible, Preparation, NodeConvertible {
     /**
         The `Database` this model will use.
         It can be changed at any point.
@@ -22,25 +22,7 @@ public protocol Entity: CustomStringConvertible, Preparation {
         This is the same value used for
         `find(:_)`.
     */
-    var id: Value? { get set }
-
-    /**
-        Creates a representation of the entity 
-        suitable for storing in the database.
-     
-        For SQL databases, this usually means a 
-        flat dictionary of keys and values.
-     
-        For NoSQL databses, arrays and dictionaries 
-        can be stored in a hierarchy.
-    */
-    func serialize() -> [String: Value?]
-
-    /**
-        Initializes an entity
-        from the database representation.
-    */
-    init(serialized: [String: Value])
+    var id: Node? { get set }
 }
 
 //MARK: Defaults
@@ -88,7 +70,7 @@ extension Entity {
     /**
         Finds the entity with the given `id`.
     */
-    public static func find(_ id: Value) throws -> Self? {
+    public static func find(_ id: Node) throws -> Self? {
         return try Self.query.filter(database.driver.idKey, .equals, id).first()
     }
 
@@ -103,12 +85,12 @@ extension Entity {
         Creates a `Query` with a first filter.
     */
     @discardableResult
-    public static func filter(_ field: String, _ comparison: Filter.Comparison, _ value: Value) -> Query<Self> {
+    public static func filter(_ field: String, _ comparison: Filter.Comparison, _ value: NodeRepresentable) -> Query<Self> {
         return query.filter(field, comparison, value)
     }
 
     @discardableResult
-    public static func filter(_ field: String, _ value: Value) -> Query<Self> {
+    public static func filter(_ field: String, _ value: NodeRepresentable) -> Query<Self> {
         return filter(field, .equals, value)
     }
 }
@@ -140,8 +122,8 @@ extension Entity {
     public var description: String {
         var readable: [String: String] = [:]
 
-        serialize().forEach { key, val in
-            readable[key] = val?.string ?? "nil"
+        makeNode().object?.forEach { key, val in
+            readable[key] = val.string ?? "nil"
         }
 
         return "[\(id)] \(readable)"

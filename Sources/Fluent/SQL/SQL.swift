@@ -17,9 +17,9 @@ public enum SQL {
         case double(String, digits: Int?, decimal: Int?)
     }
 
-    case insert(table: String, data: [String: Value])
+    case insert(table: String, data: Node?)
     case select(table: String, filters: [Filter], joins: [Union], limit: Int?)
-    case update(table: String, filters: [Filter], data: [String: Value])
+    case update(table: String, filters: [Filter], data: Node?)
     case delete(table: String, filters: [Filter], limit: Int?)
     case table(action: TableAction, table: String)
 }

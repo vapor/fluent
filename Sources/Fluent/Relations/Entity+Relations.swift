@@ -35,7 +35,7 @@ extension Entity {
         return query
     }
 
-    public func belongsTo<Parent: Entity>(_ foreignId: Value?) throws -> Parent? {
+    public func belongsTo<Parent: Entity>(_ foreignId: Node?) throws -> Parent? {
         guard let ident = foreignId else {
             throw RelationError.noIdentifier
         }

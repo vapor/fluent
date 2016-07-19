@@ -60,9 +60,9 @@ class RelationTests: XCTestCase {
             "group_id": 1337
         ])
 
-        let protons = try hydrogen.protons().all()
-        let nucleus = try hydrogen.nucleus()
-        let group = try hydrogen.group()
+        _ = try hydrogen.protons().all()
+        _ = try hydrogen.nucleus()
+        _ = try hydrogen.group()
     }
 
     func testBelongsToMany() throws {
@@ -71,6 +71,6 @@ class RelationTests: XCTestCase {
             "group_id": 1337
         ])
 
-        let compounds = try hydrogen.compounds().all()
+        _ = try hydrogen.compounds().all()
     }
 }

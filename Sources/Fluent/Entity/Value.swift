@@ -2,67 +2,146 @@
     A type of data that can be retrieved
     or stored in a database.
 */
-public protocol Value: CustomStringConvertible, StructuredDataRepresentable, Polymorphic {}
+public enum Node {
+    case string(String)
+    case int(Int)
+    case double(Double)
+    case bool(Bool)
+    case data([UInt8])
+    case array([Node])
+    case dictionary([String: Node])
 
-extension Int: Value {
-    public var structuredData: StructuredData {
+    public init(_ raw: [NodeRepresentable]) {
+        var converted: [Node] = []
+
+        for (representable) in raw {
+            converted.append(representable.makeNode())
+        }
+
+        self = .array(converted)
+    }
+
+    public init(_ raw: [String: NodeRepresentable]) {
+        var converted: [String: Node] = [:]
+
+        for (key, representable) in raw {
+            converted[key] = representable.makeNode()
+        }
+
+        self = .dictionary(converted)
+    }
+}
+
+extension Node: NodeConvertible {
+    public init(_ node: Node) throws {
+        self = node
+    }
+
+    public func makeNode() -> Node {
+        return self
+    }
+}
+
+extension Node: Polymorphic {
+    public var isNull: Bool {
+        return false
+    }
+
+    public var bool: Bool? {
+        guard case .bool(let bool) = self else {
+            return nil
+        }
+
+        return bool
+    }
+
+    public var float: Float? {
+        return nil
+    }
+
+    public var double: Double? {
+        return nil
+    }
+
+    public var int: Int? {
+        return nil
+    }
+
+    public var string: String? {
+        return nil
+    }
+
+    public var array: [Polymorphic]? {
+        return nil
+    }
+
+    public var object: [String : Polymorphic]? {
+        return nil
+    }
+}
+
+public enum ExtractionError: ErrorProtocol {
+    case notDictionary
+    case invalidType
+}
+
+public protocol NodeInitializable {
+    init(_ node: Node) throws
+}
+
+public protocol NodeRepresentable {
+    func makeNode() -> Node
+}
+
+public protocol NodeConvertible: NodeInitializable, NodeRepresentable {}
+
+extension Int: NodeRepresentable {
+    public func makeNode() -> Node {
         return .int(self)
     }
 }
 
-extension String: Value {
-    public var structuredData: StructuredData {
+extension String: NodeRepresentable {
+    public func makeNode() -> Node {
         return .string(self)
     }
-
-    public var description: String {
-        return self
-    }
 }
 
-extension Double: Value {
-    public var structuredData: StructuredData {
-        return .double(self)
-    }
-}
 
-extension Float: Value {
-    public var structuredData: StructuredData {
-        return .double(Double(self))
-    }
-}
-
-extension StructuredData: Fluent.Value {
-    public var structuredData: StructuredData {
-        return self
-    }
-}
-
-extension Bool: Value {
-    public var structuredData: StructuredData {
-        return .bool(self)
-    }
-}
-
-extension StructuredData: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case .array(let array):
-            return array.description
-        case .bool(let bool):
-            return bool.description
-        case .data(let data):
-            return data.description
-        case .dictionary(let dict):
-            return dict.description
-        case .double(let double):
-            return double.description
-        case .int(let int):
-            return int.description
-        case .null:
-            return "NULL"
-        case .string(let string):
-            return string
+extension Node {
+    public func extract(_ key: String) throws -> Int {
+        guard case .dictionary(let dict) = self else {
+            throw ExtractionError.notDictionary
         }
+
+        guard let int = dict[key]?.int else {
+            throw ExtractionError.invalidType
+        }
+
+        return int
+    }
+
+    public func extract(_ key: String) throws -> String {
+        guard case .dictionary(let dict) = self else {
+            throw ExtractionError.notDictionary
+        }
+
+        guard let string = dict[key]?.string else {
+            throw ExtractionError.invalidType
+        }
+
+        return string
+    }
+
+    public func extract(_ key: String) throws -> Node {
+        guard case .dictionary(let dict) = self else {
+            throw ExtractionError.notDictionary
+        }
+
+        guard let node = dict[key] else {
+            throw ExtractionError.invalidType
+        }
+
+        return node
     }
 }

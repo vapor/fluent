@@ -3,5 +3,5 @@
 */
 public protocol SQLSerializer {
     init(sql: SQL)
-    func serialize() -> (String, [Value])
+    func serialize() -> (String, [Node])
 }

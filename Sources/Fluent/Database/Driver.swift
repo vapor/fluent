@@ -21,7 +21,7 @@ public protocol Driver {
         created, or updated by the action.
     */
     @discardableResult
-    func query<T: Entity>(_ query: Query<T>) throws -> [[String: Value]]
+    func query<T: Entity>(_ query: Query<T>) throws -> [Node]
 
     /**
         Creates the `Schema` indicated

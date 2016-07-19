@@ -11,7 +11,7 @@ extension SQL {
         case .create:
             self = .insert(
                 table: query.entity,
-                data: query.data ?? [:]
+                data: query.data
             )
         case .delete:
             self = .delete(
@@ -23,7 +23,7 @@ extension SQL {
             self = .update(
                 table: query.entity,
                 filters: query.filters,
-                data: query.data ?? [:]
+                data: query.data
             )
         }
     }

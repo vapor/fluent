@@ -26,14 +26,14 @@ public final class Associative<
         return "\(Left.entity)_\(Right.entity)"
     }
 
-    public var id: Value?
-    public var leftId: Value?
-    public var rightId: Value?
+    public var id: Node?
+    public var leftId: Node?
+    public var rightId: Node?
 
-    public init(serialized: [String: Value]) {
-        id = serialized["id"]
-        leftId = serialized["\(Left.entity)_\(Left.database.driver.idKey)"]
-        rightId = serialized["\(Right.entity)_\(Right.database.driver.idKey)"]
+    public init(_ node: Node) throws {
+        id = try node.extract("id")
+        leftId = try node.extract("\(Left.entity)_\(Left.database.driver.idKey)")
+        rightId = try node.extract("\(Right.entity)_\(Right.database.driver.idKey)")
     }
 }
 

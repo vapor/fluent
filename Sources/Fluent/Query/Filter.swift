@@ -5,8 +5,8 @@
     data affected.
 */
 public enum Filter {
-    case compare(String, Comparison, Value)
-    case subset(String, Scope, [Value])
+    case compare(String, Comparison, Node)
+    case subset(String, Scope, [Node])
 }
 
 extension Filter: CustomStringConvertible {
@@ -15,7 +15,7 @@ extension Filter: CustomStringConvertible {
         case .compare(let field, let comparison, let value):
             return "\(field) \(comparison) \(value)"
         case .subset(let field, let scope, let values):
-            let valueDescriptions = values.map { $0.description }
+            let valueDescriptions = values.map { $0.string ?? "" }
             return "\(field) \(scope) \(valueDescriptions)"
         }
     }
@@ -32,8 +32,8 @@ extension Query {
         a result's value compares to the supplied value.
     */
     @discardableResult
-    public func filter(_ field: String, _ comparison: Filter.Comparison, _ value: Value) -> Self {
-        let filter = Filter.compare(field, comparison, value)
+    public func filter(_ field: String, _ comparison: Filter.Comparison, _ value: NodeRepresentable) -> Self {
+        let filter = Filter.compare(field, comparison, value.makeNode())
         filters.append(filter)
         return self
     }
@@ -46,8 +46,8 @@ extension Query {
         a result's value is or is not in a set.
     */
     @discardableResult
-    public func filter(_ field: String, _ scope: Filter.Scope, _ set: [Value]) -> Self {
-        let filter = Filter.subset(field, scope, set)
+    public func filter(_ field: String, _ scope: Filter.Scope, _ set: [NodeRepresentable]) -> Self {
+        let filter = Filter.subset(field, scope, set.map({ $0.makeNode() }))
         filters.append(filter)
         return self
     }
@@ -57,7 +57,7 @@ extension Query {
         Shortcut for creating a `.equals` filter.
     */
     @discardableResult
-    public func filter(_ field: String, _ value: Value) -> Self {
+    public func filter(_ field: String, _ value: NodeRepresentable) -> Self {
         return filter(field, .equals, value)
     }
 

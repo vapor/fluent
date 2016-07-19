@@ -6,7 +6,7 @@ extension Entity {
     */
     public static func prepare(database: Database) throws {
         try database.create(entity) { builder in
-            let model = self.init()
+            let model = try self.init()
             let mirror = Mirror(reflecting: model)
 
             for property in mirror.children {
@@ -43,15 +43,16 @@ extension Entity {
 // MARK: Automation
 
 extension Entity {
-    private init() {
-        self.init(serialized: [:])
+    private init() throws {
+        let node: Node = .int(42)
+        try self.init(node)
     }
 
     /**
         Automates the serialization of a model.
     */
-    public func serialize() -> [String: Value?] {
-        var serialized: [String: Value?] = [:]
+    public func makeNode() -> Node {
+        var serialized: [String: NodeRepresentable] = [:]
 
         let mirror = Mirror(reflecting: self)
         for property in mirror.children {
@@ -74,6 +75,6 @@ extension Entity {
 
         }
 
-        return serialized
+        return Node(serialized)
     }
 }

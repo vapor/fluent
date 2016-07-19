@@ -21,7 +21,7 @@ public class Query<T: Entity> {
         Optional data to be used during
         `.create` or `.updated` actions.
     */
-    public var data: [String: Value]?
+    public var data: Node?
 
     /**
         Optionally limit the amount of
@@ -76,8 +76,10 @@ public class Query<T: Entity> {
         let results = try database.driver.query(self)
 
         for result in results {
-            var model = T(serialized: result)
-            model.id = result[database.driver.idKey]
+            var model = try T(result)
+            if case .dictionary(let dict) = result {
+                model.id = dict[database.driver.idKey]
+            }
             models.append(model)
         }
 
@@ -111,10 +113,9 @@ public class Query<T: Entity> {
      
         Returns an entity if one was created.
     */
-    public func create(_ serialized: [String: Value?]) throws -> T? {
+    public func create(_ serialized: Node?) throws -> T? {
         action = .create
-        data = _nilToNull(serialized)
-        
+        data = serialized
         return try run().first
     }
 
@@ -123,7 +124,7 @@ public class Query<T: Entity> {
         and updates its identifier if successful.
     */
     public func save(_ model: inout T) throws {
-        let data = model.serialize()
+        let data = model.makeNode()
 
         if let id = model.id {
             let _ = filter(database.driver.idKey, .equals, id) // discardableResult
@@ -167,20 +168,10 @@ public class Query<T: Entity> {
         Attempts to modify model's collection with
         the supplied serialized data.
     */
-    public func modify(_ serialized: [String: Value?]) throws {
+    public func modify(_ serialized: Node?) throws {
         action = .modify
-        data = _nilToNull(serialized)
+        data = serialized
         let _ = try run() // discardableResult
-    }
-
-    private func _nilToNull(_ serialized: [String: Value?]) -> [String: Value] {
-        var converted: [String: Value] = [:]
-
-        for (key, value) in serialized {
-            converted[key] = value ?? StructuredData.null
-        }
-
-        return converted
     }
 }
 
