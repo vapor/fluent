@@ -121,7 +121,7 @@ public class GeneralSQLSerializer: SQLSerializer {
             values += subValues
         }
 
-        statement += subStatement.joined(separator: "AND")
+        statement += subStatement.joined(separator: " AND ")
 
         return (
             sql(statement),
