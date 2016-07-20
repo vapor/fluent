@@ -82,8 +82,9 @@ public class GeneralSQLSerializer: SQLSerializer {
 
             statement += "UPDATE"
             statement += sql(table)
+            statement += "SET"
 
-            let (dataClause, dataValues) = sql(data)
+            let (dataClause, dataValues) = sql(update: data)
             statement += dataClause
             values += dataValues
 
@@ -244,6 +245,17 @@ public class GeneralSQLSerializer: SQLSerializer {
             sql(clause),
             values
         )
+    }
+
+    public func sql(update data: [String: Value]) -> (String, [Value]) {
+        return (
+            data.map(sql).joined(separator: ", "),
+            Array(data.values)
+        )
+    }
+
+    public func sql(key: String, value: Value) -> String {
+        return sql(key) + " = " + sql(value)
     }
 
     public func sql(_ strings: [String]) -> String {
