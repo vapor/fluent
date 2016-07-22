@@ -93,7 +93,7 @@ class UnionTests: XCTestCase {
         let localKey = "#local_key"
         let foreignKey = "#foreign_key"
 
-        let query = Query<Atom>(db)
+        let query = try Query<Atom>(db)
             .union(Compound.self, localKey: localKey, foreignKey: foreignKey)
             .filter("protons", .greaterThan, 5)
             .filter(Compound.self, "atoms", .lessThan, 128)

@@ -1,4 +1,4 @@
-public enum PreparationError: ErrorProtocol {
+public enum PreparationError: Error {
     case alreadyPrepared
     case revertImpossible
     case automationFailed(String)

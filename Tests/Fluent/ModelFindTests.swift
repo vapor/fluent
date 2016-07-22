@@ -15,7 +15,7 @@ class ModelFindTests: XCTestCase {
             return .null
         }
 
-        init(_ node: Node) throws {
+        init(with node: Node, in context: Context) throws {
 
         }
         
@@ -29,22 +29,22 @@ class ModelFindTests: XCTestCase {
             return "foo"
         }
 
-        enum Error: ErrorProtocol {
+        enum Error: Swift.Error {
             case broken
         }
 
         func query<T: Entity>(_ query: Query<T>) throws -> Node {
             if
                 let filter = query.filters.first,
-                case .compare(let key, let comparison, let value) = filter.method
-                where query.action == .fetch &&
+                case .compare(let key, let comparison, let value) = filter.method,
+                query.action == .fetch &&
                     query.filters.count == 1 &&
                     key == idKey &&
                     comparison == .equals
             {
                 if value.int == 42 {
-                    return Node([
-                        Node([idKey: 42])
+                    return .array([
+                        .object([idKey: 42])
                     ])
                 } else if value.int == 500 {
                     throw Error.broken

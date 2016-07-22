@@ -11,15 +11,15 @@ final class User: Entity {
         self.email = email
     }
 
-    func makeNode() -> Node {
-        return Node([
+    func makeNode() throws -> Node {
+        return try Node([
             "id": id,
             "name": name,
             "email": email
         ])
     }
 
-    init(_ node: Node) throws {
+    init(with node: Node, in context: Context) throws {
         id = try node.extract("id")
         name = try node.extract("name")
         email = try node.extract("email")

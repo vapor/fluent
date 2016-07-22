@@ -83,7 +83,7 @@ extension Entity {
     }
 }
 
-public enum EntityError: ErrorProtocol {
+public enum EntityError: Error {
     case noDatabase
 }
 
@@ -114,10 +114,14 @@ extension Entity {
     public var description: String {
         var readable: [String: String] = [:]
 
-        makeNode().object?.forEach { key, val in
-            readable[key] = val.string ?? "nil"
-        }
+        do {
+            try makeNode().object?.forEach { key, val in
+                readable[key] = val.string ?? "nil"
+            }
 
-        return "[\(id)] \(readable)"
+            return "[\(id)] \(readable)"
+        } catch {
+            return "[Error: \(error)]"
+        }
     }
 }

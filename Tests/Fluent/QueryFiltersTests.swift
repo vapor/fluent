@@ -13,7 +13,7 @@ class QueryFiltersTests: XCTestCase {
             return .null
         }
 
-        init(_ node: Node) throws {
+        init(with node: Node, in context: Context) throws {
 
         }
 
@@ -26,7 +26,7 @@ class QueryFiltersTests: XCTestCase {
             return "foo"
         }
 
-        enum Error: ErrorProtocol {
+        enum Error: Swift.Error {
             case broken
         }
 
@@ -71,7 +71,7 @@ class QueryFiltersTests: XCTestCase {
     func testBasicQuery() throws {
         let query = try DummyModel.query().filter("name", "Vapor")
 
-        guard let filter = query.filters.first where query.filters.count == 1 else {
+        guard let filter = query.filters.first, query.filters.count == 1 else {
             XCTFail("Should be one filter")
             return
         }

@@ -38,8 +38,8 @@ extension Query {
         _ field: String,
         _ comparison: Filter.Comparison,
         _ value: NodeRepresentable
-    ) -> Self {
-        let filter = Filter(entity, .compare(field, comparison, value.makeNode()))
+    ) throws -> Self {
+        let filter = Filter(entity, .compare(field, comparison, try value.makeNode()))
         filters.append(filter)
         return self
     }
@@ -50,8 +50,8 @@ extension Query {
         _ field: String,
         _ scope: Filter.Scope,
         _ set: [NodeRepresentable]
-    ) -> Self {
-        let filter = Filter(T.self, .subset(field, scope, set.map({ $0.makeNode() })))
+    ) throws -> Self {
+        let filter = Filter(T.self, .subset(field, scope, try set.map({ try $0.makeNode() })))
         filters.append(filter)
         return self
     }
@@ -61,8 +61,8 @@ extension Query {
         _ entity: T.Type,
         _ field: String,
         _ value: NodeRepresentable
-    ) -> Self {
-        return filter(entity, field, .equals, value)
+    ) throws -> Self {
+        return try filter(entity, field, .equals, value)
     }
 
     //MARK: Filter
@@ -75,8 +75,12 @@ extension Query {
         a result's value compares to the supplied value.
     */
     @discardableResult
-    public func filter(_ field: String, _ comparison: Filter.Comparison, _ value: NodeRepresentable) -> Self {
-        return filter(T.self, field, comparison, value)
+    public func filter(
+        _ field: String,
+        _ comparison: Filter.Comparison,
+        _ value: NodeRepresentable
+    ) throws -> Self {
+        return try filter(T.self, field, comparison, value)
     }
 
     /**
@@ -87,8 +91,12 @@ extension Query {
         a result's value is or is not in a set.
     */
     @discardableResult
-    public func filter(_ field: String, _ scope: Filter.Scope, _ set: [NodeRepresentable]) -> Self {
-        return filter(T.self, field, scope, set)
+    public func filter(
+        _ field: String,
+        _ scope: Filter.Scope,
+        _ set: [NodeRepresentable]
+    ) throws -> Self {
+        return try filter(T.self, field, scope, set)
     }
 
 
@@ -96,8 +104,11 @@ extension Query {
         Shortcut for creating a `.equals` filter.
     */
     @discardableResult
-    public func filter(_ field: String, _ value: NodeRepresentable) -> Self {
-        return filter(T.self, field, .equals, value)
+    public func filter(
+        _ field: String,
+        _ value: NodeRepresentable
+    ) throws -> Self {
+        return try filter(T.self, field, .equals, value)
     }
 
 }

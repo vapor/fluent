@@ -36,7 +36,7 @@ extension Entity {
             foreignKey: foreignKey
         )
 
-        query.filter(pivot, "\(Self.name)_\(query.idKey)", ident)
+        try query.filter(pivot, "\(Self.name)_\(query.idKey)", ident)
 
         return query
     }
@@ -51,6 +51,6 @@ extension Entity {
     }
 }
 
-public enum RelationError: ErrorProtocol {
+public enum RelationError: Error {
     case noIdentifier
 }

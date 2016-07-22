@@ -15,7 +15,7 @@ class SQLSerializerTests: XCTestCase {
     }
 
     func testRegularSelect() {
-        let filter = Filter(User.self, .compare("age", .greaterThanOrEquals, .int(21)))
+        let filter = Filter(User.self, .compare("age", .greaterThanOrEquals, 21))
         let sql = SQL.select(table: "users", filters: [filter], joins: [], limit: 5)
         let (statement, values) = serialize(sql)
 
@@ -25,7 +25,7 @@ class SQLSerializerTests: XCTestCase {
     }
 
     func testFilterCompareSelect() {
-        let filter = Filter(User.self, .compare("name", .notEquals, .string("duck")))
+        let filter = Filter(User.self, .compare("name", .notEquals, "duck"))
 
         let select = SQL.select(table: "friends", filters: [filter], joins: [], limit: nil)
         let (statement, values) = serialize(select)
@@ -36,9 +36,9 @@ class SQLSerializerTests: XCTestCase {
     }
 
     func testFilterCompareUpdate() {
-        let filter = Filter(User.self, .compare("name", .equals, .string("duck")))
+        let filter = Filter(User.self, .compare("name", .equals, "duck"))
 
-        let update = SQL.update(table: "friends", filters: [filter], data: Node(["not it": true]))
+        let update = SQL.update(table: "friends", filters: [filter], data: ["not it": true])
         let (statement, values) = serialize(update)
 
         XCTAssertEqual(statement, "UPDATE `friends` (`not it`) VALUES (?) WHERE `users`.`name` = ?")

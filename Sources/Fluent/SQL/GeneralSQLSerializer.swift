@@ -264,7 +264,7 @@ public class GeneralSQLSerializer: SQLSerializer {
             return nil
         }
 
-        guard case .dictionary(let dict) = node else {
+        guard case .object(let dict) = node else {
             return nil
         }
 

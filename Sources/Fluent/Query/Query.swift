@@ -84,8 +84,8 @@ public class Query<T: Entity> {
         if case .array(let array) = try _runRaw() {
             for result in array {
                 do {
-                    var model = try T(result)
-                    if case .dictionary(let dict) = result {
+                    var model = try T(with: result)
+                    if case .object(let dict) = result {
                         model.id = dict[database.driver.idKey]
                     }
                     models.append(model)
@@ -139,10 +139,10 @@ public class Query<T: Entity> {
         and updates its identifier if successful.
     */
     public func save(_ model: inout T) throws {
-        let data = model.makeNode()
+        let data = try model.makeNode()
 
         if let id = model.id {
-            let _ = filter(database.driver.idKey, .equals, id) // discardableResult
+            let _ = try filter(database.driver.idKey, .equals, id) // discardableResult
             try modify(data)
         } else {
             model.id = try create(data)
