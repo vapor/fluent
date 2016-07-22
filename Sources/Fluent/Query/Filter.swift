@@ -7,6 +7,7 @@
 public enum Filter {
     case compare(String, Comparison, Value)
     case subset(String, Scope, [Value])
+    case partial_compare(String, PartialComparison, String)
 }
 
 extension Filter: CustomStringConvertible {
@@ -17,6 +18,17 @@ extension Filter: CustomStringConvertible {
         case .subset(let field, let scope, let values):
             let valueDescriptions = values.map { $0.description }
             return "\(field) \(scope) \(valueDescriptions)"
+        case .partial_compare(let field, let partial, let value):
+            let valueDescription: String
+            switch partial {
+            case .beginsWith:
+                valueDescription = "\(value)%"
+            case .endsWith:
+                valueDescription = "%\(value)"
+            case .contains:
+                valueDescription = "%\(value)%"
+            }
+            return "\(field) LIKE '\(valueDescription)'"
         }
     }
 }

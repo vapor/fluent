@@ -11,6 +11,12 @@ extension Filter {
         case lessThanOrEquals
         case notEquals
     }
+
+    public enum PartialComparison {
+        case beginsWith
+        case endsWith
+        case contains
+    }
 }
 
 extension Filter.Comparison: CustomStringConvertible {

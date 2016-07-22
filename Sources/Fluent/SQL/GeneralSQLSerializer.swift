@@ -145,6 +145,10 @@ public class GeneralSQLSerializer: SQLSerializer {
             statement += sql(scope)
             statement += sql(subValues)
             values += subValues
+        case .partial_compare(let key, let partialComparison, let value):
+            statement += sql(key)
+            statement += "LIKE"
+            statement += sql(partialComparison, value)
         }
 
         return (
@@ -167,6 +171,17 @@ public class GeneralSQLSerializer: SQLSerializer {
             return "<="
         case .notEquals:
             return "!="
+        }
+    }
+
+    public func sql(_ partialComparison: Filter.PartialComparison, _ value: String) -> String {
+        switch partialComparison {
+        case .beginsWith:
+            return "'\(value)%'"
+        case .endsWith:
+            return "'%\(value)'"
+        case .contains:
+            return "'%\(value)%'"
         }
     }
 

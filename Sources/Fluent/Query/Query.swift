@@ -196,13 +196,28 @@ public class Query<T: Model> {
         return self
     }
 
-
     /**
         Shortcut for creating a `.equals` filter.
     */
     @discardableResult
     public func filter(_ field: String, _ value: Value) -> Self {
         return filter(field, .equals, value)
+    }
+
+    /**
+        Adds a `.partial_compare` filter to the query's
+        filters.
+
+        Used for filtering results based on whether
+        a result's value begins/ends/contains the 
+        supplied value.
+    */
+    @discardableResult
+    public func partialFilter(_ field: String, _ partialComparison: Filter.PartialComparison, _ value: String) -> Self
+    {
+        let filter = Filter.partial_compare(field, partialComparison, value)
+        filters.append(filter)
+        return self
     }
 
     private func nilToNull(_ serialized: [String: Value?]) -> [String: Value] {
