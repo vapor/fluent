@@ -21,6 +21,18 @@ Clone the [Example](https://github.com/qutheory/fluent-example) project to start
 
 You must have Swift 3 or later installed. You can learn more about Swift 3 at [Swift.org](http://swift.org)
 
+## 🌏 Environment
+
+|Fluent|Xcode|Swift|
+|:-:|:-:|:-:|
+|0.8.x|8.0 Beta **3**|DEVELOPMENT-SNAPSHOT-2016-07-20-qutheory|
+|0.7.x|7.3.x|DEVELOPMENT-SNAPSHOT-2016-06-06-a|
+|0.6.x|7.3.x|DEVELOPMENT-SNAPSHOT-2016-06-06-a|
+|0.5.x|7.3.x|DEVELOPMENT-SNAPSHOT-2016-06-06-a|
+|0.4.x|7.3.x|3.0-preview-1-SNAPSHOT-2016-05-31-a|
+|0.3.x|7.3.x|DEVELOPMENT-SNAPSHOT-2016-05-03-a|
+|0.2.x|7.3.x|DEVELOPMENT-SNAPSHOT-2016-03-01-a|
+
 ## 📖 Documentation
 
 Visit the [Documentation](http://docs.qutheory.io) for extensive information on getting setup, using, and deploying Vapor. 
