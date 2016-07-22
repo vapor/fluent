@@ -28,8 +28,20 @@ public func ==(_ lhs: Filter.Comparison, _ rhs: Filter.Comparison) -> Bool
     switch (lhs, rhs) {
     case (.like(let leftPos), .like(let rightPos)):
         return leftPos == rightPos
+    case (.equals, .equals):
+        fallthrough
+    case (.greaterThan, .greaterThan):
+        fallthrough
+    case (.lessThan, .lessThan):
+        fallthrough
+    case (.greaterThanOrEquals, .greaterThanOrEquals):
+        fallthrough
+    case (.lessThanOrEquals, .lessThanOrEquals):
+        fallthrough
+    case (.notEquals, .notEquals):
+        return true
     default:
-        return lhs == rhs
+        return false
     }
 }
 
