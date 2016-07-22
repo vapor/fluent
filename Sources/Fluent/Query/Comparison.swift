@@ -1,21 +1,35 @@
 extension Filter {
     /**
+     Describes the various positions for
+     the 'like' operator's regex.
+     */
+    public enum Position {
+        case anywhere, start, end
+    }
+
+    /**
         Describes the various operators for
         comparing values.
     */
-    public enum Comparison {
+    public enum Comparison : Equatable {
         case equals
         case greaterThan
         case lessThan
         case greaterThanOrEquals
         case lessThanOrEquals
         case notEquals
+        case like(at: Position)
     }
+    
+}
 
-    public enum PartialComparison {
-        case beginsWith
-        case endsWith
-        case contains
+public func ==(_ lhs: Filter.Comparison, _ rhs: Filter.Comparison) -> Bool
+{
+    switch (lhs, rhs) {
+    case (.like(let leftPos), .like(let rightPos)):
+        return leftPos == rightPos
+    default:
+        return lhs == rhs
     }
 }
 
@@ -34,6 +48,8 @@ extension Filter.Comparison: CustomStringConvertible {
             return "<="
         case .notEquals:
             return "!="
+        case .like(at: _):
+            return "LIKE"
         }
     }
 }
@@ -57,6 +73,8 @@ extension Filter.Comparison {
             return "<="
         case .notEquals:
             return "!="
+        case .like(at: _):
+            return "LIKE"
         }
     }
 }

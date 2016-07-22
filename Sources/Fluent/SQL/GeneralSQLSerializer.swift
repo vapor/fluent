@@ -139,16 +139,22 @@ public class GeneralSQLSerializer: SQLSerializer {
             statement += sql(key)
             statement += sql(comparison)
             statement += "?"
-            values += value
+            /**
+                `.like` comparison operator requires additional
+                processing of `value`
+             */
+            switch comparison
+            {
+            case .like(at: let position):
+                values += sql(position, value)
+            default:
+                values += value
+            }
         case .subset(let key, let scope, let subValues):
             statement += sql(key)
             statement += sql(scope)
             statement += sql(subValues)
             values += subValues
-        case .partial_compare(let key, let partialComparison, let value):
-            statement += sql(key)
-            statement += "LIKE"
-            statement += sql(partialComparison, value)
         }
 
         return (
@@ -171,17 +177,19 @@ public class GeneralSQLSerializer: SQLSerializer {
             return "<="
         case .notEquals:
             return "!="
+        case .like(at: _):
+            return "LIKE"
         }
     }
 
-    public func sql(_ partialComparison: Filter.PartialComparison, _ value: String) -> String {
-        switch partialComparison {
-        case .beginsWith:
-            return "'\(value)%'"
-        case .endsWith:
-            return "'%\(value)'"
-        case .contains:
-            return "'%\(value)%'"
+    public func sql(_ position: Filter.Position, _ value: Value) -> String {
+        switch position {
+        case .start:
+            return "\(value)%"
+        case .end:
+            return "%\(value)"
+        case .anywhere:
+            return "%\(value)%"
         }
     }
 

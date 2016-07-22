@@ -205,17 +205,11 @@ public class Query<T: Model> {
     }
 
     /**
-        Adds a `.partial_compare` filter to the query's
-        filters.
-
-        Used for filtering results based on whether
-        a result's value begins/ends/contains the 
-        supplied value.
+        Shortcut for creating a `.like(anywhere) filter.`
     */
     @discardableResult
-    public func partialFilter(_ field: String, _ partialComparison: Filter.PartialComparison, _ value: String) -> Self
-    {
-        let filter = Filter.partial_compare(field, partialComparison, value)
+    public func filter(_ field: String, like: String) -> Self {
+        let filter = Filter.compare(field, .like(at: .anywhere), like)
         filters.append(filter)
         return self
     }
@@ -229,7 +223,6 @@ public class Query<T: Model> {
 
         return converted
     }
-
 }
 
 extension Query: CustomStringConvertible {

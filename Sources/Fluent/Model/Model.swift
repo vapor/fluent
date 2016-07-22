@@ -108,19 +108,9 @@ extension Model {
         return filter(field, .equals, value)
     }
 
-     @discardableResult
-    public static func beginsWith(_ field: String, _ prefix: String) -> Query<Self> {
-        return query.partialFilter(field, .beginsWith, prefix)
-    }
-    
     @discardableResult
-    public static func endsWith(_ field: String, _ suffix: String) -> Query<Self> {
-        return query.partialFilter(field, .endsWith, suffix)
-    }
-    
-    @discardableResult
-    public static func contains(_ field: String, _ substring: String) -> Query<Self> {
-        return query.partialFilter(field, .contains, substring)
+    public static func filter(_ field: String, like value: String) -> Query<Self> {
+        return filter(field, .like(at: .anywhere), value)
     }
 }
 
