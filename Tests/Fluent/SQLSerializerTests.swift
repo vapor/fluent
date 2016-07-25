@@ -35,6 +35,17 @@ class SQLSerializerTests: XCTestCase {
         XCTAssertEqual(values.count, 1)
     }
 
+    func testFilterLikeSelect() {
+        let filter = Filter.compare("name", .like(at: .start), "duc")
+
+        let select = SQL.select(table: "friends", filters: [filter], limit: nil)
+        let (statement, values) = serialize(select)
+
+        XCTAssertEqual(statement, "SELECT * FROM `friends` WHERE `name` LIKE ?")
+        XCTAssertEqual(values.first?.string, "duc%")
+        XCTAssertEqual(values.count, 1)
+    }
+
     func testFilterCompareUpdate() {
         let filter = Filter.compare("name", .equals, "duck")
 

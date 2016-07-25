@@ -25,6 +25,12 @@ extension Filter {
 
 public func ==(_ lhs: Filter.Comparison, _ rhs: Filter.Comparison) -> Bool
 {
+    /**
+        Uses nested `switch` in order to 
+        throw an error when a new enum is
+        added to `Comparison` and the author
+        forgets to its case here.
+     */
     switch lhs {
     case .equals:
         switch rhs {
