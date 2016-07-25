@@ -25,23 +25,63 @@ extension Filter {
 
 public func ==(_ lhs: Filter.Comparison, _ rhs: Filter.Comparison) -> Bool
 {
-    switch (lhs, rhs) {
-    case (.like(let leftPos), .like(let rightPos)):
-        return leftPos == rightPos
-    case (.equals, .equals):
-        fallthrough
-    case (.greaterThan, .greaterThan):
-        fallthrough
-    case (.lessThan, .lessThan):
-        fallthrough
-    case (.greaterThanOrEquals, .greaterThanOrEquals):
-        fallthrough
-    case (.lessThanOrEquals, .lessThanOrEquals):
-        fallthrough
-    case (.notEquals, .notEquals):
-        return true
-    default:
-        return false
+    switch lhs {
+    case .equals:
+        switch rhs {
+        case .equals:
+            return true
+        default:
+            return false
+        }
+
+    case .greaterThan:
+        switch rhs {
+        case .greaterThan:
+            return true
+        default:
+            return false
+        }
+
+    case .lessThan:
+        switch rhs {
+        case .lessThan:
+            return true
+        default:
+            return false
+        }
+
+    case .greaterThanOrEquals:
+        switch rhs {
+        case .greaterThanOrEquals:
+            return true
+        default:
+            return false
+        }
+
+    case .lessThanOrEquals:
+        switch rhs {
+        case .lessThanOrEquals:
+            return true
+        default:
+            return false
+        }
+
+    case .notEquals:
+        switch rhs {
+        case .notEquals:
+            return true
+        default:
+            return false
+        }
+
+    case .like(let leftPos):
+        switch rhs {
+        case .like(let rightPos):
+            return leftPos == rightPos
+        default:
+            return false
+        }
+        
     }
 }
 
