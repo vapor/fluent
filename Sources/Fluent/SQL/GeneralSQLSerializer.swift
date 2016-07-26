@@ -94,16 +94,11 @@ public class GeneralSQLSerializer: SQLSerializer {
             statement += sql(table)
             statement += "SET"
 
-<<<<<<< HEAD
-            if let (dataClause, dataValues) = sql(data) {
+            if let data = data, case .object(let obj) = data {
+                let (dataClause, dataValues) = sql(update: obj)
                 statement += dataClause
                 values += dataValues
             }
-=======
-            let (dataClause, dataValues) = sql(update: data)
-            statement += dataClause
-            values += dataValues
->>>>>>> master
 
             let (filterclause, filterValues) = sql(filters)
             statement += filterclause
@@ -289,7 +284,6 @@ public class GeneralSQLSerializer: SQLSerializer {
         )
     }
 
-<<<<<<< HEAD
     public func sql(_ joins: [Union]) -> String {
         var clause: [String] = []
 
@@ -311,17 +305,17 @@ public class GeneralSQLSerializer: SQLSerializer {
         clause += "\(sql(join.foreign.entity)).\(sql(join.foreignKey))"
 
         return sql(clause)
-=======
-    public func sql(update data: [String: Value]) -> (String, [Value]) {
+    }
+
+    public func sql(update data: [String: Node]) -> (String, [Node]) {
         return (
             data.map(sql).joined(separator: ", "),
             Array(data.values)
         )
     }
 
-    public func sql(key: String, value: Value) -> String {
+    public func sql(key: String, value: Node) -> String {
         return sql(key) + " = " + sql(value)
->>>>>>> master
     }
 
     public func sql(_ strings: [String]) -> String {

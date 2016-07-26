@@ -40,12 +40,7 @@ class SQLSerializerTests: XCTestCase {
 
         let update = SQL.update(table: "friends", filters: [filter], data: ["not it": true])
         let (statement, values) = serialize(update)
-
-<<<<<<< HEAD
-        XCTAssertEqual(statement, "UPDATE `friends` (`not it`) VALUES (?) WHERE `users`.`name` = ?")
-=======
-        XCTAssertEqual(statement, "UPDATE `friends` SET `not it` = ? WHERE `name` = ?")
->>>>>>> master
+        XCTAssertEqual(statement, "UPDATE `friends` SET `not it` = ? WHERE `users`.`name` = ?")
         XCTAssertEqual(values.first?.bool, true)
         XCTAssertEqual(values.last?.string, "duck")
         XCTAssertEqual(values.count, 2)
