@@ -1,94 +1,20 @@
 extension Filter {
     /**
-     Describes the various positions for
-     the 'like' operator's regex.
-     */
-    public enum Position {
-        case anywhere, start, end
-    }
-
-    /**
         Describes the various operators for
         comparing values.
     */
-    public enum Comparison : Equatable {
+    public enum Comparison {
         case equals
         case greaterThan
         case lessThan
         case greaterThanOrEquals
         case lessThanOrEquals
         case notEquals
-        case like(at: Position)
+        case hasSuffix
+        case hasPrefix
+        case contains
     }
     
-}
-
-public func ==(_ lhs: Filter.Comparison, _ rhs: Filter.Comparison) -> Bool
-{
-    /**
-        Uses nested `switch` in order to 
-        throw an error when a new enum is
-        added to `Comparison` and the author
-        forgets to its case here.
-     */
-    switch lhs {
-    case .equals:
-        switch rhs {
-        case .equals:
-            return true
-        default:
-            return false
-        }
-
-    case .greaterThan:
-        switch rhs {
-        case .greaterThan:
-            return true
-        default:
-            return false
-        }
-
-    case .lessThan:
-        switch rhs {
-        case .lessThan:
-            return true
-        default:
-            return false
-        }
-
-    case .greaterThanOrEquals:
-        switch rhs {
-        case .greaterThanOrEquals:
-            return true
-        default:
-            return false
-        }
-
-    case .lessThanOrEquals:
-        switch rhs {
-        case .lessThanOrEquals:
-            return true
-        default:
-            return false
-        }
-
-    case .notEquals:
-        switch rhs {
-        case .notEquals:
-            return true
-        default:
-            return false
-        }
-
-    case .like(let leftPos):
-        switch rhs {
-        case .like(let rightPos):
-            return leftPos == rightPos
-        default:
-            return false
-        }
-        
-    }
 }
 
 extension Filter.Comparison: CustomStringConvertible {
@@ -106,7 +32,11 @@ extension Filter.Comparison: CustomStringConvertible {
             return "<="
         case .notEquals:
             return "!="
-        case .like(at: _):
+        case .hasSuffix:
+            fallthrough
+        case .hasPrefix:
+            fallthrough
+        case .contains:
             return "LIKE"
         }
     }
@@ -131,7 +61,11 @@ extension Filter.Comparison {
             return "<="
         case .notEquals:
             return "!="
-        case .like(at: _):
+        case .hasSuffix:
+            fallthrough
+        case .hasPrefix:
+            fallthrough
+        case .contains:
             return "LIKE"
         }
     }

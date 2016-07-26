@@ -139,14 +139,19 @@ public class GeneralSQLSerializer: SQLSerializer {
             statement += sql(key)
             statement += sql(comparison)
             statement += "?"
+
             /**
                 `.like` comparison operator requires additional
                 processing of `value`
              */
             switch comparison
             {
-            case .like(at: let position):
-                values += sql(position, value)
+            case .hasPrefix:
+                values += sql(hasPrefix: value)
+            case .hasSuffix:
+                values += sql(hasSuffix: value)
+            case .contains:
+                values += sql(contains: value)
             default:
                 values += value
             }
@@ -177,20 +182,25 @@ public class GeneralSQLSerializer: SQLSerializer {
             return "<="
         case .notEquals:
             return "!="
-        case .like(at: _):
+        case .hasSuffix:
+            fallthrough
+        case .hasPrefix:
+            fallthrough
+        case .contains:
             return "LIKE"
         }
     }
 
-    public func sql(_ position: Filter.Position, _ value: Value) -> String {
-        switch position {
-        case .start:
-            return "\(value)%"
-        case .end:
-            return "%\(value)"
-        case .anywhere:
-            return "%\(value)%"
-        }
+    public func sql(hasPrefix substring: Value) -> String {
+        return "\(substring)%"
+    }
+
+    public func sql(hasSuffix substring: Value) -> String {
+        return "%\(substring)"
+    }
+
+    public func sql(contains substring: Value) -> String {
+        return "%\(substring)%"
     }
 
     public func sql(_ scope: Filter.Scope) -> String {

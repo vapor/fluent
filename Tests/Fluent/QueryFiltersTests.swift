@@ -81,7 +81,7 @@ class QueryFiltersTests: XCTestCase {
     }
 
     func testLikeQuery() {
-        let query = DummyModel.query.filter("name", .like(at: .start), "Vap")
+        let query = DummyModel.query.filter("name", .hasPrefix, "Vap")
 
         guard let filter = query.filters.first where query.filters.count == 1 else {
             XCTFail("Should be one filter")
@@ -93,13 +93,8 @@ class QueryFiltersTests: XCTestCase {
             return
         }
 
-        guard case .like(let position) = comparison else {
-            XCTFail("Comparison should be like")
-            return
-        }
-
         XCTAssert(key == "name", "Key should be name")
-        XCTAssert(position == .start, "Position should be start")
+        XCTAssert(comparison == .hasPrefix, "Position should be start")
         XCTAssert(value.string == "Vap", "Value should be Vap")
     }
 

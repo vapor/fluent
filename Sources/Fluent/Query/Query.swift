@@ -205,13 +205,11 @@ public class Query<T: Model> {
     }
 
     /**
-        Shortcut for creating a `.like(anywhere) filter.`
+        Shortcut for creating a `.contains`
     */
     @discardableResult
-    public func filter(_ field: String, like: String) -> Self {
-        let filter = Filter.compare(field, .like(at: .anywhere), like)
-        filters.append(filter)
-        return self
+    public func filter(_ field: String, contains value: String) -> Self {
+        return filter(field, .contains, value)
     }
 
     private func nilToNull(_ serialized: [String: Value?]) -> [String: Value] {

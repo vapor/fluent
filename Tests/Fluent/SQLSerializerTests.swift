@@ -36,7 +36,7 @@ class SQLSerializerTests: XCTestCase {
     }
 
     func testFilterLikeSelect() {
-        let filter = Filter.compare("name", .like(at: .start), "duc")
+        let filter = Filter.compare("name", .hasPrefix, "duc")
 
         let select = SQL.select(table: "friends", filters: [filter], limit: nil)
         let (statement, values) = serialize(select)

@@ -109,8 +109,8 @@ extension Model {
     }
 
     @discardableResult
-    public static func filter(_ field: String, like value: String) -> Query<Self> {
-        return filter(field, .like(at: .anywhere), value)
+    public static func filter(_ field: String, contains value: String) -> Query<Self> {
+        return filter(field, .contains, value)
     }
 }
 
