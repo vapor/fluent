@@ -96,55 +96,61 @@ public final class Pivot<
     }
 }
 
-extension Query {
+extension QueryRepresentable {
     @discardableResult
     public func union<Sibling: Entity>(
         _ sibling: Sibling.Type
-    ) -> Query {
+    ) throws -> Query<Self.T> {
+        let query = try makeQuery()
+
         let union = Union(
             local: T.self,
             foreign: sibling,
-            idKey: database.driver.idKey,
+            idKey: query.database.driver.idKey,
             localKey: nil,
             foreignKey: nil
         )
 
-        unions.append(union)
-        return self
+        query.unions.append(union)
+        return query
     }
 
     @discardableResult
     public func union<Sibling: Entity>(
         _ sibling: Sibling.Type,
         foreignKey: String
-    ) -> Query {
+    ) throws -> Query<Self.T> {
+        let query = try makeQuery()
+
         let union = Union(
             local: T.self,
             foreign: sibling,
-            idKey: database.driver.idKey,
+            idKey: query.database.driver.idKey,
             localKey: nil,
             foreignKey: foreignKey
         )
 
-        unions.append(union)
-        return self
+        query.unions.append(union)
+        return query
     }
 
     @discardableResult
     public func union<Sibling: Entity>(
         _ sibling: Sibling.Type,
         localKey: String
-    ) -> Query {
+    ) throws -> Query<Self.T> {
+        let query = try makeQuery()
+
         let union = Union(
             local: T.self,
             foreign: sibling,
-            idKey: database.driver.idKey,
+            idKey: query.database.driver.idKey,
             localKey: localKey,
             foreignKey: nil
         )
 
-        unions.append(union)
-        return self
+        query.unions.append(union)
+        return query
     }
 
     @discardableResult
@@ -152,16 +158,19 @@ extension Query {
         _ sibling: Sibling.Type,
         localKey: String,
         foreignKey: String
-    ) -> Query {
+    ) throws -> Query<Self.T> {
+        let query = try makeQuery()
+
         let union = Union(
             local: T.self,
             foreign: sibling,
-            idKey: database.driver.idKey,
+            idKey: query.database.driver.idKey,
             localKey: localKey,
             foreignKey: foreignKey
         )
 
-        unions.append(union)
-        return self
+        query.unions.append(union)
+
+        return query
     }
 }

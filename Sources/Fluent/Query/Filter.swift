@@ -31,17 +31,18 @@ extension Filter: CustomStringConvertible {
     }
 }
 
-extension Query {
+extension QueryRepresentable {
     @discardableResult
     public func filter<T: Entity>(
         _ entity: T.Type,
         _ field: String,
         _ comparison: Filter.Comparison,
         _ value: NodeRepresentable
-    ) throws -> Self {
+    ) throws -> Query<Self.T> {
+        let query = try makeQuery()
         let filter = Filter(entity, .compare(field, comparison, try value.makeNode()))
-        filters.append(filter)
-        return self
+        query.filters.append(filter)
+        return query
     }
 
     @discardableResult
@@ -50,10 +51,11 @@ extension Query {
         _ field: String,
         _ scope: Filter.Scope,
         _ set: [NodeRepresentable]
-    ) throws -> Self {
+        ) throws -> Query<Self.T> {
+        let query = try makeQuery()
         let filter = Filter(T.self, .subset(field, scope, try set.map({ try $0.makeNode() })))
-        filters.append(filter)
-        return self
+        query.filters.append(filter)
+        return query
     }
 
     @discardableResult
@@ -61,8 +63,8 @@ extension Query {
         _ entity: T.Type,
         _ field: String,
         _ value: NodeRepresentable
-    ) throws -> Self {
-        return try filter(entity, field, .equals, value)
+    ) throws -> Query<Self.T> {
+        return try makeQuery().filter(entity, field, .equals, value)
     }
 
     //MARK: Filter
@@ -79,8 +81,8 @@ extension Query {
         _ field: String,
         _ comparison: Filter.Comparison,
         _ value: NodeRepresentable
-    ) throws -> Self {
-        return try filter(T.self, field, comparison, value)
+    ) throws -> Query<Self.T> {
+        return try makeQuery().filter(T.self, field, comparison, value)
     }
 
     /**
@@ -95,8 +97,8 @@ extension Query {
         _ field: String,
         _ scope: Filter.Scope,
         _ set: [NodeRepresentable]
-    ) throws -> Self {
-        return try filter(T.self, field, scope, set)
+    ) throws -> Query<Self.T> {
+        return try makeQuery().filter(T.self, field, scope, set)
     }
 
 
@@ -107,8 +109,8 @@ extension Query {
     public func filter(
         _ field: String,
         _ value: NodeRepresentable
-    ) throws -> Self {
-        return try filter(T.self, field, .equals, value)
+    ) throws -> Query<Self.T> {
+        return try makeQuery().filter(T.self, field, .equals, value)
     }
 
 }

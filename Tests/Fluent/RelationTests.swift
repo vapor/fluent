@@ -17,19 +17,19 @@ class RelationTests: XCTestCase {
         }
 
         func group() throws -> Group? {
-            return try belongsTo(groupId)
+            return try parent(groupId).first()
         }
 
-        func compounds() throws -> Query<Compound> {
-            return try belongsToMany()
+        func compounds() throws -> Siblings<Compound> {
+            return try siblings()
         }
 
-        func protons() throws -> Query<Proton> {
-            return try hasMany()
+        func protons() throws -> Children<Proton> {
+            return children()
         }
 
         func nucleus() throws -> Nucleus? {
-            return try hasOne()
+            return try children().first()
         }
 
         func makeNode() -> Node { return .null }

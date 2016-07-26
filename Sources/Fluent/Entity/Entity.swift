@@ -4,7 +4,7 @@ import Foundation
     Represents an entity that can be
     stored and retrieved from the `Database`.
 */
-public protocol Entity: CustomStringConvertible, Preparation, NodeConvertible {
+public protocol Entity: Preparation, NodeConvertible {
     /**
         The collection or table name
         for this entity.
@@ -104,24 +104,6 @@ extension Entity {
         }
         set {
             Database.map[Self.name] = newValue
-        }
-    }
-}
-
-//MARK: CustomStringConvertible
-
-extension Entity {
-    public var description: String {
-        var readable: [String: String] = [:]
-
-        do {
-            try makeNode().object?.forEach { key, val in
-                readable[key] = val.string ?? "nil"
-            }
-
-            return "[\(id)] \(readable)"
-        } catch {
-            return "[Error: \(error)]"
         }
     }
 }

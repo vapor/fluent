@@ -25,8 +25,8 @@ final class Atom: Entity {
         ])
     }
 
-    func compounds() throws -> Query<Compound> {
-        return try belongsToMany()
+    func compounds() throws -> Siblings<Compound> {
+        return try siblings()
     }
 
     static func prepare(_ database: Fluent.Database) throws {

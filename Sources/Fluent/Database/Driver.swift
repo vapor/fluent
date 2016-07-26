@@ -36,5 +36,14 @@ public protocol Driver {
         This allows Fluent extensions to be written that
         can support custom querying behavior.
     */
+    @discardableResult
     func raw(_ raw: String, _ values: [Node]) throws -> Node
+}
+
+extension Driver {
+    @discardableResult
+    public func raw(_ raw: String, _ values: [NodeRepresentable] = []) throws -> Node {
+        let nodes = try values.map { try $0.makeNode() }
+        return try self.raw(raw, nodes)
+    }
 }

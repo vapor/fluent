@@ -18,7 +18,7 @@ class UnionTests: XCTestCase {
     }
 
     func testBasic() throws {
-        let query = Query<Atom>(db).union(Compound.self)
+        let query = try Query<Atom>(db).union(Compound.self)
         try lqd.query(query)
 
         if let sql = lqd.lastQuery {
@@ -46,7 +46,7 @@ class UnionTests: XCTestCase {
         let localKey = "#local_key"
         let foreignKey = "#foreign_key"
 
-        let query = Query<Atom>(db).union(Compound.self, localKey: localKey, foreignKey: foreignKey)
+        let query = try Query<Atom>(db).union(Compound.self, localKey: localKey, foreignKey: foreignKey)
         try lqd.query(query)
 
 
@@ -75,7 +75,7 @@ class UnionTests: XCTestCase {
         let localKey = "#local_key"
         let foreignKey = "#foreign_key"
 
-        let query = Query<Atom>(db).union(Compound.self, localKey: localKey, foreignKey: foreignKey)
+        let query = try Query<Atom>(db).union(Compound.self, localKey: localKey, foreignKey: foreignKey)
         try lqd.query(query)
 
 
