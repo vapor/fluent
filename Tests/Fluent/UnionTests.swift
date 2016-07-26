@@ -121,7 +121,7 @@ class UnionTests: XCTestCase {
         Atom.database = db
         Compound.database = db
 
-        let atom = Atom(name: "Hydrogen", protons: 1)
+        let atom = Atom(name: "Hydrogen")
         atom.id = Node(42)
 
         do {
