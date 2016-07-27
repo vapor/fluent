@@ -10,7 +10,11 @@ extension Filter {
         case greaterThanOrEquals
         case lessThanOrEquals
         case notEquals
+        case hasSuffix
+        case hasPrefix
+        case contains
     }
+    
 }
 
 extension Filter.Comparison: CustomStringConvertible {
@@ -28,6 +32,12 @@ extension Filter.Comparison: CustomStringConvertible {
             return "<="
         case .notEquals:
             return "!="
+        case .hasSuffix:
+            fallthrough
+        case .hasPrefix:
+            fallthrough
+        case .contains:
+            return "LIKE"
         }
     }
 }
@@ -51,6 +61,12 @@ extension Filter.Comparison {
             return "<="
         case .notEquals:
             return "!="
+        case .hasSuffix:
+            fallthrough
+        case .hasPrefix:
+            fallthrough
+        case .contains:
+            return "LIKE"
         }
     }
 }

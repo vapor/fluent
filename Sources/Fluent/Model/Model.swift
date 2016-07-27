@@ -107,6 +107,11 @@ extension Model {
     public static func filter(_ field: String, _ value: Value) -> Query<Self> {
         return filter(field, .equals, value)
     }
+
+    @discardableResult
+    public static func filter(_ field: String, contains value: String) -> Query<Self> {
+        return filter(field, .contains, value)
+    }
 }
 
 //MARK: Database

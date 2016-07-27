@@ -196,13 +196,20 @@ public class Query<T: Model> {
         return self
     }
 
-
     /**
         Shortcut for creating a `.equals` filter.
     */
     @discardableResult
     public func filter(_ field: String, _ value: Value) -> Self {
         return filter(field, .equals, value)
+    }
+
+    /**
+        Shortcut for creating a `.contains`
+    */
+    @discardableResult
+    public func filter(_ field: String, contains value: String) -> Self {
+        return filter(field, .contains, value)
     }
 
     private func nilToNull(_ serialized: [String: Value?]) -> [String: Value] {
@@ -214,7 +221,6 @@ public class Query<T: Model> {
 
         return converted
     }
-
 }
 
 extension Query: CustomStringConvertible {
