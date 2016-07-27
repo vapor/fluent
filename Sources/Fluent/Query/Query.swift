@@ -1,7 +1,7 @@
 /**
     Represents an abstract database query.
 */
-public class Query<T: Model> {
+public class Query<T: Entity>: QueryRepresentable {
 
     //MARK: Properties
 
@@ -21,7 +21,7 @@ public class Query<T: Model> {
         Optional data to be used during
         `.create` or `.updated` actions.
     */
-    public var data: [String: Value]?
+    public var data: Node?
 
     /**
         Optionally limit the amount of
@@ -37,6 +37,13 @@ public class Query<T: Model> {
         return T.entity
     }
 
+    /**
+        An array of unions, or other entities
+        that will be queried during this query's 
+        execution.
+    */
+    public var unions: [Union]
+
     //MARK: Internal
 
     /**
@@ -49,42 +56,73 @@ public class Query<T: Model> {
         Creates a new `Query` with the
         `Model`'s database.
     */
-    public init() {
+    public init(_ database: Database) {
         filters = []
         action = .fetch
-        database = T.database
+        self.database = database
+        unions = []
     }
+
+    var idKey: String {
+        return database.driver.idKey
+    }
+
 
     /**
         Runs the query given its properties
-        and current state. 
-     
-        Returns an array of entities.
+        and current state.
+
+        Returns the Node from the driver.
     */
-    // @discardableResult
-    func run() throws -> [T] {
+    @discardableResult
+    public func raw() throws -> Node {
+        return try database.driver.query(self)
+    }
+
+    /**
+        Runs the query using Raw then converts
+        the results to an array of models.
+    */
+    @discardableResult
+    public func run() throws -> [T] {
         var models: [T] = []
 
-        let results = try database.driver.query(self)
-
-        for result in results {
-            var model = T(serialized: result)
-            model.id = result[database.driver.idKey]
-            models.append(model)
+        if case .array(let array) = try raw() {
+            for result in array {
+                do {
+                    var model = try T(with: result)
+                    if case .object(let dict) = result {
+                        model.id = dict[database.driver.idKey]
+                    }
+                    models.append(model)
+                } catch {
+                    // FIXME: do what when init fails?
+                }
+            }
+        } else {
+            // FIXME: support other types?
         }
 
         return models
     }
 
-    //MARK: Fetch
+    /**
+        Conformance to `QueryRepresentable`
+    */
+    public func makeQuery() -> Query<T> {
+        return self
+    }
+}
 
+extension QueryRepresentable {
     /**
         Returns the first entity retreived
         by the query.
     */
     public func first() throws -> T? {
-        limit = Limit(count: 1)
-        return try run().first
+        let query = try makeQuery()
+        query.limit = Limit(count: 1)
+        return try query.run().first
     }
 
     /**
@@ -92,7 +130,8 @@ public class Query<T: Model> {
         by the query.
     */
     public func all() throws -> [T] {
-        return try run()
+        let query = try makeQuery()
+        return try query.run()
     }
 
     //MARK: Create
@@ -101,13 +140,15 @@ public class Query<T: Model> {
         Attempts the create action for the supplied
         serialized data. 
      
-        Returns an entity if one was created.
+        Returns the new entity's identifier.
     */
-    public func create(_ serialized: [String: Value?]) throws -> T? {
-        action = .create
-        data = nilToNull(serialized)
-        
-        return try run().first
+    public func create(_ serialized: Node?) throws -> Node {
+        let query = try makeQuery()
+
+        query.action = .create
+        query.data = serialized
+
+        return try query.raw()
     }
 
     /**
@@ -115,14 +156,18 @@ public class Query<T: Model> {
         and updates its identifier if successful.
     */
     public func save(_ model: inout T) throws {
-        let data = model.serialize()
+        let query = try makeQuery()
+        let data = try model.makeNode()
 
         if let id = model.id {
-            let _ = filter(database.driver.idKey, .equals, id) // discardableResult
+            let _ = try filter(
+                query.database.driver.idKey,
+                .equals,
+                id
+            )
             try modify(data)
         } else {
-            let new = try create(data)
-            model.id = new?.id
+            model.id = try query.create(data)
         }
     }
 
@@ -133,8 +178,9 @@ public class Query<T: Model> {
         in the model's collection.
     */
     public func delete() throws {
-        action = .delete
-        let _ = try run() // discardableResult
+        let query = try makeQuery()
+        query.action = .delete
+        try query.run()
     }
 
     /**
@@ -145,12 +191,22 @@ public class Query<T: Model> {
         guard let id = model.id else {
             return
         }
-        action = .delete
-        
-        let filter = Filter.compare(database.driver.idKey, .equals, id)
-        filters.append(filter)
+        let query = try makeQuery()
 
-       let _ = try run() // discardableResult
+        query.action = .delete
+        
+        let filter = Filter(
+            T.self,
+            .compare(
+                query.database.driver.idKey,
+                .equals,
+                id
+            )
+        )
+
+        query.filters.append(filter)
+
+        try query.run()
     }
 
     //MARK: Update
@@ -159,72 +215,17 @@ public class Query<T: Model> {
         Attempts to modify model's collection with
         the supplied serialized data.
     */
-    public func modify(_ serialized: [String: Value?]) throws {
-        action = .modify
-        data = nilToNull(serialized)
-        let _ = try run() // discardableResult
-    }
+    public func modify(_ serialized: Node?) throws {
+        let query = try makeQuery()
 
+        query.action = .modify
+        query.data = serialized
 
-    //MARK: Filter
-
-    /**
-        Adds a `.compare` filter to the query's
-        filters.
-     
-        Used for filtering results based on how
-        a result's value compares to the supplied value.
-    */
-    @discardableResult
-    public func filter(_ field: String, _ comparison: Filter.Comparison, _ value: Value) -> Self {
-        let filter = Filter.compare(field, comparison, value)
-        filters.append(filter)
-        return self
-    }
-
-    /**
-        Adds a `.subset` filter to the query's
-        filters. 
-     
-        Used for filtering results based on whether
-        a result's value is or is not in a set.
-    */
-    @discardableResult
-    public func filter(_ field: String, _ scope: Filter.Scope, _ set: [Value]) -> Self {
-        let filter = Filter.subset(field, scope, set)
-        filters.append(filter)
-        return self
-    }
-
-    /**
-        Shortcut for creating a `.equals` filter.
-    */
-    @discardableResult
-    public func filter(_ field: String, _ value: Value) -> Self {
-        return filter(field, .equals, value)
-    }
-
-    /**
-        Shortcut for creating a `.contains`
-    */
-    @discardableResult
-    public func filter(_ field: String, contains value: String) -> Self {
-        return filter(field, .contains, value)
-    }
-
-    private func nilToNull(_ serialized: [String: Value?]) -> [String: Value] {
-        var converted: [String: Value] = [:]
-
-        for (key, value) in serialized {
-            converted[key] = value ?? StructuredData.null
-        }
-
-        return converted
+        try query.run()
     }
 }
 
-extension Query: CustomStringConvertible {
-    public var description: String {
-        return "\(action) \(entity), \(filters.count) filters"
-    }
+public protocol QueryRepresentable {
+    associatedtype T: Entity
+    func makeQuery() throws -> Query<T>
 }

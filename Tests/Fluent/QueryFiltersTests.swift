@@ -2,20 +2,23 @@ import XCTest
 @testable import Fluent
 
 class QueryFiltersTests: XCTestCase {
-    final class DummyModel: Model {
+    final class DummyModel: Entity {
         static var entity: String {
             return "dummy_models"
         }
 
-        var id: Value?
+        var id: Node?
 
-        func serialize() -> [String: Value?] {
-            return [:]
+        func makeNode() -> Node {
+            return .null
         }
 
-        init(serialized: [String: Value]) {
+        init(with node: Node, in context: Context) throws {
 
         }
+
+        static func prepare(_ database: Database) throws {}
+        static func revert(_ database: Database) throws {}
     }
 
     class DummyDriver: Driver {
@@ -23,16 +26,20 @@ class QueryFiltersTests: XCTestCase {
             return "foo"
         }
 
-        enum Error: ErrorProtocol {
+        enum Error: Swift.Error {
             case broken
         }
 
-        func query<T: Model>(_ query: Query<T>) throws -> [[String: Value]] {
-            return []
+        func query<T: Entity>(_ query: Query<T>) throws -> Node {
+            return .array([])
         }
 
         func schema(_ schema: Schema) throws {
             
+        }
+
+        func raw(_ raw: String, _ values: [Node]) throws -> Node {
+            return .null
         }
     }
 
@@ -45,14 +52,14 @@ class QueryFiltersTests: XCTestCase {
     }
 
     override func setUp() {
-        database = Database(driver: DummyDriver())
+        database = Database(DummyDriver())
         Database.default = database
     }
 
     var database: Database!
 
-    func testBasalQuery() {
-        let query = DummyModel.query
+    func testBasalQuery() throws {
+        let query = try DummyModel.query()
 
         XCTAssert(query.action == .fetch, "Default action should be fetch")
         XCTAssert(query.filters.count == 0, "Filters should be empty")
@@ -62,15 +69,15 @@ class QueryFiltersTests: XCTestCase {
     }
 
 
-    func testBasicQuery() {
-        let query = DummyModel.query.filter("name", "Vapor")
+    func testBasicQuery() throws {
+        let query = try DummyModel.query().filter("name", "Vapor")
 
-        guard let filter = query.filters.first where query.filters.count == 1 else {
+        guard let filter = query.filters.first, query.filters.count == 1 else {
             XCTFail("Should be one filter")
             return
         }
 
-        guard case .compare(let key, let comparison, let value) = filter else {
+        guard case .compare(let key, let comparison, let value) = filter.method else {
             XCTFail("Should be compare filter")
             return
         }
@@ -80,15 +87,18 @@ class QueryFiltersTests: XCTestCase {
         XCTAssert(value.string == "Vapor", "Value should be vapor")
     }
 
-    func testLikeQuery() {
-        let query = DummyModel.query.filter("name", .hasPrefix, "Vap")
+    func testLikeQuery() throws {
+        let query = try DummyModel.query().filter("name", .hasPrefix, "Vap")
 
-        guard let filter = query.filters.first where query.filters.count == 1 else {
+        guard
+            let filter = query.filters.first,
+            query.filters.count == 1 else
+        {
             XCTFail("Should be one filter")
             return
         }
 
-        guard case .compare(let key, let comparison, let value) = filter else {
+        guard case .compare(let key, let comparison, let value) = filter.method else {
             XCTFail("Should be a compare filter")
             return
         }
@@ -98,8 +108,8 @@ class QueryFiltersTests: XCTestCase {
         XCTAssert(value.string == "Vap", "Value should be Vap")
     }
 
-    func testDeleteQuery() {
-        let query = DummyModel.query.filter("id", 5)
+    func testDeleteQuery() throws {
+        let query = try DummyModel.query().filter("id", 5)
 
         do {
             try query.delete()

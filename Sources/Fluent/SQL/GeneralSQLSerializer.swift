@@ -10,7 +10,7 @@ public class GeneralSQLSerializer: SQLSerializer {
         self.sql = sql
     }
 
-    public func serialize() -> (String, [Value]) {
+    public func serialize() -> (String, [Node]) {
         switch sql {
         case .table(let action, let table):
             var statement: [String] = []
@@ -26,19 +26,29 @@ public class GeneralSQLSerializer: SQLSerializer {
 
             statement += "INSERT INTO"
             statement += sql(table)
-            let (dataClause, dataValues) = sql(data)
-            statement += dataClause
+
+            let values: [Node]
+            if let (dataClause, dataValues) = sql(data) {
+                statement += dataClause
+                values = dataValues
+            } else {
+                values = []
+            }
 
             return (
                 sql(statement),
-                dataValues
+                values
             )
-        case .select(let table, let filters, let limit):
+        case .select(let table, let filters, let unions, let limit):
             var statement: [String] = []
-            var values: [Value] = []
+            var values: [Node] = []
 
             statement += "SELECT * FROM"
             statement += sql(table)
+
+            if !unions.isEmpty {
+                statement += sql(unions)
+            }
 
             if !filters.isEmpty {
                 let (filtersClause, filtersValues) = sql(filters)
@@ -56,7 +66,7 @@ public class GeneralSQLSerializer: SQLSerializer {
             )
         case .delete(let table, let filters, let limit):
             var statement: [String] = []
-            var values: [Value] = []
+            var values: [Node] = []
 
             statement += "DELETE FROM"
             statement += sql(table)
@@ -78,15 +88,17 @@ public class GeneralSQLSerializer: SQLSerializer {
         case .update(let table, let filters, let data):
             var statement: [String] = []
 
-            var values: [Value] = []
+            var values: [Node] = []
 
             statement += "UPDATE"
             statement += sql(table)
             statement += "SET"
 
-            let (dataClause, dataValues) = sql(update: data)
-            statement += dataClause
-            values += dataValues
+            if let data = data, case .object(let obj) = data {
+                let (dataClause, dataValues) = sql(update: obj)
+                statement += dataClause
+                values += dataValues
+            }
 
             let (filterclause, filterValues) = sql(filters)
             statement += filterclause
@@ -108,9 +120,9 @@ public class GeneralSQLSerializer: SQLSerializer {
         return statement.joined(separator: " ")
     }
 
-    public func sql(_ filters: [Filter]) -> (String, [Value]) {
+    public func sql(_ filters: [Filter]) -> (String, [Node]) {
         var statement: [String] = []
-        var values: [Value] = []
+        var values: [Node] = []
 
         statement += "WHERE"
 
@@ -130,13 +142,13 @@ public class GeneralSQLSerializer: SQLSerializer {
         )
     }
 
-    public func sql(_ filter: Filter) -> (String, [Value]) {
+    public func sql(_ filter: Filter) -> (String, [Node]) {
         var statement: [String] = []
-        var values: [Value] = []
+        var values: [Node] = []
 
-        switch filter {
+        switch filter.method {
         case .compare(let key, let comparison, let value):
-            statement += sql(key)
+            statement += "\(sql(filter.entity.entity)).\(sql(key))"
             statement += sql(comparison)
             statement += "?"
 
@@ -144,8 +156,7 @@ public class GeneralSQLSerializer: SQLSerializer {
                 `.like` comparison operator requires additional
                 processing of `value`
              */
-            switch comparison
-            {
+            switch comparison {
             case .hasPrefix:
                 values += sql(hasPrefix: value)
             case .hasSuffix:
@@ -156,7 +167,7 @@ public class GeneralSQLSerializer: SQLSerializer {
                 values += value
             }
         case .subset(let key, let scope, let subValues):
-            statement += sql(key)
+            statement += "\(sql(filter.entity.entity)).\(sql(key))"
             statement += sql(scope)
             statement += sql(subValues)
             values += subValues
@@ -191,16 +202,28 @@ public class GeneralSQLSerializer: SQLSerializer {
         }
     }
 
-    public func sql(hasPrefix substring: Value) -> String {
-        return "\(substring)%"
+    public func sql(hasPrefix value: Node) -> Node {
+        guard let string = value.string else {
+            return value
+        }
+
+        return .string("\(string)%")
     }
 
-    public func sql(hasSuffix substring: Value) -> String {
-        return "%\(substring)"
+    public func sql(hasSuffix value: Node) -> Node {
+        guard let string = value.string else {
+            return value
+        }
+
+        return .string("%\(string)")
     }
 
-    public func sql(contains substring: Value) -> String {
-        return "%\(substring)%"
+    public func sql(contains value: Node) -> Node {
+        guard let string = value.string else {
+            return value
+        }
+
+        return .string("%\(string)%")
     }
 
     public func sql(_ scope: Filter.Scope) -> String {
@@ -245,32 +268,57 @@ public class GeneralSQLSerializer: SQLSerializer {
         case .drop:
             var clause: [String] = []
 
-            clause += "DROP TABLE"
+            clause += "DROP TABLE IF EXISTS"
             clause += sql(table)
 
             return sql(clause)
         }
     }
 
-    public func sql(_ column: SQL.Column) -> String {
-        switch column {
-        case .primaryKey:
-            return sql("id") + " INTEGER PRIMARY KEY"
-        case .integer(let name):
-            return sql(name) + " INTEGER"
-        case .string(let name, _):
-            return sql(name) + " STRING"
-        case .double(let name, _, _):
-            return sql(name) + " DOUBLE"
+    public func sql(_ column: Schema.Field) -> String {
+        var clause: [String] = []
+
+        clause += sql(column.name)
+        clause += sql(column.type)
+        if !column.optional {
+            clause += "NOT NULL"
+        }
+
+        return clause.joined(separator: " ")
+    }
+
+
+    public func sql(_ type: Schema.Field.DataType) -> String {
+        switch type {
+        case .id:
+            return "INTEGER PRIMARY KEY"
+        case .int:
+            return "INTEGER"
+        case .string(_):
+            return "STRING"
+        case .double:
+            return "DOUBLE"
+        case .bool:
+            return "BOOL"
+        case .data:
+            return "BLOB"
         }
     }
 
-    public func sql(_ data: [String: Value]) -> (String, [Value]) {
+    public func sql(_ data: Node?) -> (String, [Node])? {
+        guard let node = data else {
+            return nil
+        }
+
+        guard case .object(let dict) = node else {
+            return nil
+        }
+
         var clause: [String] = []
 
-        let values = Array(data.values)
+        let values = Array(dict.values)
 
-        clause += sql(keys: Array(data.keys))
+        clause += sql(keys: Array(dict.keys))
         clause += "VALUES"
         clause += sql(values)
 
@@ -280,14 +328,37 @@ public class GeneralSQLSerializer: SQLSerializer {
         )
     }
 
-    public func sql(update data: [String: Value]) -> (String, [Value]) {
+    public func sql(_ joins: [Union]) -> String {
+        var clause: [String] = []
+
+        for join in joins {
+            clause += sql(join)
+        }
+
+        return sql(clause)
+    }
+
+    public func sql(_ join: Union) -> String {
+        var clause: [String] = []
+
+        clause += "JOIN"
+        clause += sql(join.foreign.entity)
+        clause += "ON"
+        clause += "\(sql(join.local.entity)).\(sql(join.localKey))"
+        clause += "="
+        clause += "\(sql(join.foreign.entity)).\(sql(join.foreignKey))"
+
+        return sql(clause)
+    }
+
+    public func sql(update data: [String: Node]) -> (String, [Node]) {
         return (
             data.map(sql).joined(separator: ", "),
             Array(data.values)
         )
     }
 
-    public func sql(key: String, value: Value) -> String {
+    public func sql(key: String, value: Node) -> String {
         return sql(key) + " = " + sql(value)
     }
 
@@ -303,15 +374,15 @@ public class GeneralSQLSerializer: SQLSerializer {
         return "(" + list.joined(separator: ", ") + ")"
     }
 
-    public func sql(_ values: [Value]) -> String {
+    public func sql(_ values: [Node]) -> String {
         return "(" + values.map { sql($0) }.joined(separator: ", ") + ")"
     }
 
-    public func sql(_ value: Value) -> String {
+    public func sql(_ value: Node) -> String {
         return "?"
     }
 
-    public func sql(_ columns: [SQL.Column]) -> String {
+    public func sql(_ columns: [Schema.Field]) -> String {
         return "(" + columns.map { sql($0) }.joined(separator: ", ") + ")"
     }
 
@@ -324,6 +395,6 @@ public func +=(lhs: inout [String], rhs: String) {
     lhs.append(rhs)
 }
 
-public func +=(lhs: inout [Value], rhs: Value) {
+public func +=(lhs: inout [Node], rhs: Node) {
     lhs.append(rhs)
 }

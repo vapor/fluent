@@ -21,11 +21,29 @@ public protocol Driver {
         created, or updated by the action.
     */
     @discardableResult
-    func query<T: Model>(_ query: Query<T>) throws -> [[String: Value]]
+    func query<T: Entity>(_ query: Query<T>) throws -> Node
 
     /**
         Creates the `Schema` indicated
         by the `Builder`.
     */
     func schema(_ schema: Schema) throws
+
+    /**
+        Drivers that support raw querying
+        accept string queries and parameterized values.
+
+        This allows Fluent extensions to be written that
+        can support custom querying behavior.
+    */
+    @discardableResult
+    func raw(_ raw: String, _ values: [Node]) throws -> Node
+}
+
+extension Driver {
+    @discardableResult
+    public func raw(_ raw: String, _ values: [NodeRepresentable] = []) throws -> Node {
+        let nodes = try values.map { try $0.makeNode() }
+        return try self.raw(raw, nodes)
+    }
 }

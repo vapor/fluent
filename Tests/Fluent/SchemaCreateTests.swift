@@ -18,7 +18,7 @@ class SchemaCreateTests: XCTestCase {
 
         let (statement, values) = serializer.serialize()
 
-        XCTAssertEqual(statement, "CREATE TABLE `users` (`id` INTEGER, `name` STRING, `email` STRING)")
+        XCTAssertEqual(statement, "CREATE TABLE `users` (`id` INTEGER NOT NULL, `name` STRING NOT NULL, `email` STRING NOT NULL)")
         XCTAssertEqual(values.count, 0)
     }
 
@@ -35,7 +35,7 @@ class SchemaCreateTests: XCTestCase {
 
         let (statement, values) = serializer.serialize()
 
-        XCTAssertEqual(statement, "ALTER TABLE `users` (ADD `id` INTEGER, ADD `name` STRING, ADD `email` STRING, DROP `age`)")
+        XCTAssertEqual(statement, "ALTER TABLE `users` (ADD `id` INTEGER NOT NULL, ADD `name` STRING NOT NULL, ADD `email` STRING NOT NULL, DROP `age`)")
         XCTAssertEqual(values.count, 0)
     }
 
@@ -46,7 +46,7 @@ class SchemaCreateTests: XCTestCase {
 
         let (statement, values) = serializer.serialize()
 
-        XCTAssertEqual(statement, "DROP TABLE `users`")
+        XCTAssertEqual(statement, "DROP TABLE IF EXISTS `users`")
         XCTAssertEqual(values.count, 0)
     }
 }

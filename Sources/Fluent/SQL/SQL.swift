@@ -5,21 +5,14 @@
 */
 public enum SQL {
     public enum TableAction {
-        case create(columns: [Column])
-        case alter(create: [Column], delete: [String])
+        case create(columns: [Schema.Field])
+        case alter(create: [Schema.Field], delete: [String])
         case drop
     }
-
-    public enum Column {
-        case primaryKey
-        case integer(String)
-        case string(String, length: Int?)
-        case double(String, digits: Int?, decimal: Int?)
-    }
-
-    case insert(table: String, data: [String: Value])
-    case select(table: String, filters: [Filter], limit: Int?)
-    case update(table: String, filters: [Filter], data: [String: Value])
+    
+    case insert(table: String, data: Node?)
+    case select(table: String, filters: [Filter], joins: [Union], limit: Int?)
+    case update(table: String, filters: [Filter], data: Node?)
     case delete(table: String, filters: [Filter], limit: Int?)
     case table(action: TableAction, table: String)
 }

@@ -10,13 +10,13 @@ extension Database {
 
         do {
             // check to see if this preparation has already run
-            if let _ = try Migration.filter("name", preparation.name).first() {
+            if let _ = try Migration.query().filter("name", preparation.name).first() {
                 return true
             }
         } catch {
             // could not fetch migrations
             // try to create `.fluent` table
-            try Migration.prepare(database: self)
+            try Migration.prepare(self)
         }
 
         return false
@@ -26,7 +26,7 @@ extension Database {
         Migration.database = self
 
         // set the current database on involved Models
-        if let model = preparation as? Model.Type {
+        if let model = preparation as? Entity.Type {
             model.database = self
         }
 
@@ -35,7 +35,7 @@ extension Database {
             throw PreparationError.alreadyPrepared
         }
 
-        try preparation.prepare(database: self)
+        try preparation.prepare(self)
 
         // record that this preparation has run
         var migration = Migration(name: preparation.name)

@@ -3,10 +3,24 @@ extension Schema {
         Various types of fields
         that can be used in a Schema.
     */
-    public enum Field {
-        case id
-        case int(String)
-        case string(String, length: Int?)
-        case double(String, digits: Int?, decimal: Int?)
+    public struct Field {
+        public var name: String
+        public var type: DataType
+        public var optional: Bool
+
+        public enum DataType {
+            case id
+            case int
+            case string(length: Int?)
+            case double
+            case bool
+            case data
+        }
+
+        public init(name: String, type: DataType, optional: Bool = false) {
+            self.name = name
+            self.type = type
+            self.optional = optional
+        }
     }
 }

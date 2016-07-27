@@ -7,7 +7,7 @@ public protocol Preparation {
         The prepare method should call any methods
         it needs on the database to prepare.
     */
-    static func prepare(database: Database) throws
+    static func prepare(_ database: Database) throws
 
     /**
         The revert method should undo any actions
@@ -16,5 +16,5 @@ public protocol Preparation {
         If this is impossible, the `PreparationError.revertImpossible`
         error should be thrown.
     */
-    static func revert(database: Database) throws
+    static func revert(_ database: Database) throws
 }

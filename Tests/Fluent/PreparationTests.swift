@@ -20,28 +20,28 @@ class PreparationTests: XCTestCase {
                 return
             }
 
-            guard case .int(let colOneName) = fields[0] else {
+            guard case .int = fields[0].type else {
                 XCTFail("Invalid first field")
                 return
             }
-            XCTAssertEqual(colOneName, "id")
+            XCTAssertEqual(fields[0].name, "id")
 
-            guard case .string(let colTwoName, let colTwoLength) = fields[1] else {
+            guard case .string(let colTwoLength) = fields[1].type else {
                 XCTFail("Invalid second field")
                 return
             }
-            XCTAssertEqual(colTwoName, "name")
+            XCTAssertEqual(fields[1].name, "name")
             XCTAssertEqual(colTwoLength, nil)
 
-            guard case .string(let colThreeName, let colThreeLength) = fields[2] else {
+            guard case .string(let colThreeLength) = fields[2].type else {
                 XCTFail("Invalid second field")
                 return
             }
-            XCTAssertEqual(colThreeName, "email")
+            XCTAssertEqual(fields[2].name, "email")
             XCTAssertEqual(colThreeLength, 128)
         }
 
-        let database = Database(driver: driver)
+        let database = Database(driver)
 
         TestPreparation.entity = "users"
         TestPreparation.testClosure = { builder in
@@ -51,7 +51,7 @@ class PreparationTests: XCTestCase {
         }
 
         do {
-            try database.prepare(TestPreparation)
+            try database.prepare(TestPreparation.self)
         } catch {
             XCTFail("Preparation failed: \(error)")
         }
@@ -71,29 +71,29 @@ class PreparationTests: XCTestCase {
                 return
             }
 
-            guard case .id = fields[0] else {
+            guard case .id = fields[0].type else {
                 XCTFail("Invalid first field")
                 return
             }
 
-            guard case .string(let colTwoName, let colTwoLength) = fields[1] else {
+            guard case .string(let colTwoLength) = fields[1].type else {
                 XCTFail("Invalid second field")
                 return
             }
-            XCTAssertEqual(colTwoName, "name")
+            XCTAssertEqual(fields[1].name, "name")
             XCTAssertEqual(colTwoLength, nil)
 
-            guard case .int(let colThreeName) = fields[2] else {
+            guard case .int = fields[2].type else {
                 XCTFail("Invalid second field")
                 return
             }
-            XCTAssertEqual(colThreeName, "age")
+            XCTAssertEqual(fields[2].name, "age")
         }
 
-        let database = Database(driver: driver)
+        let database = Database(driver)
 
         do {
-            try database.prepare(TestModel)
+            try database.prepare(TestModel.self)
         } catch {
             XCTFail("Preparation failed: \(error)")
         }
@@ -102,15 +102,35 @@ class PreparationTests: XCTestCase {
 
 // MARK: Utilities
 
-final class TestModel: Model {
-    var id: Value?
+final class TestModel: Entity {
+    var id: Node?
     var name: String
     var age: Int
 
-    init(serialized: [String: Value]) {
-        id = serialized["id"]
-        name = serialized["name"]?.string ?? ""
-        age = serialized["age"]?.int ?? 0
+    init(with node: Node, in context: Context) throws {
+        id = try node.extract("id")
+        name = try node.extract("name")
+        age = try node.extract("age")
+    }
+
+    func makeNode() throws -> Node {
+        return try Node([
+            "id": id,
+            "name": name,
+            "age": age
+        ])
+    }
+
+    static func prepare(_ database: Database) throws {
+        try database.create(entity) { builder in
+            builder.id()
+            builder.string("name")
+            builder.int("age")
+        }
+    }
+
+    static func revert(_ database: Database) throws {
+        try database.delete(entity)
     }
 }
 
@@ -118,13 +138,13 @@ class TestPreparation: Preparation {
     static var entity: String = ""
     static var testClosure: (Schema.Creator) -> () = { _ in }
 
-    static func prepare(database: Database) throws {
+    static func prepare(_ database: Database) throws {
         try database.create(entity) { builder in
             self.testClosure(builder)
         }
     }
 
-    static func revert(database: Database) throws {
+    static func revert(_ database: Database) throws {
         try database.delete(entity)
     }
 }
@@ -133,7 +153,7 @@ class TestSchemaDriver: Driver {
     var idKey: String = "id"
 
     @discardableResult
-    func query<T: Model>(_ query: Query<T>) throws -> [[String: Value]] { return [] }
+    func query<T: Entity>(_ query: Query<T>) throws -> Node { return .null }
 
     var testClosure: (Schema) -> ()
     init(testClosure: (Schema) -> ()) {
@@ -143,10 +163,13 @@ class TestSchemaDriver: Driver {
     func schema(_ schema: Schema) throws {
         testClosure(schema)
     }
+
+
+    func raw(_ raw: String, _ values: [Node]) throws -> Node { return .null }
 }
 
 extension SQLSerializerTests {
-    private func serialize(_ sql: SQL) -> (String, [Value]) {
+    private func serialize(_ sql: SQL) -> (String, [Node]) {
         let serializer = GeneralSQLSerializer(sql: sql)
         return serializer.serialize()
     }

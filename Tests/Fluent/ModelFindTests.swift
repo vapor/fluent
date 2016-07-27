@@ -4,20 +4,23 @@ import XCTest
 class ModelFindTests: XCTestCase {
 
     /// Dummy Model implementation for testing.
-    final class DummyModel: Model {
+    final class DummyModel: Entity {
         static var entity: String {
             return "dummy_models"
         }
 
-        var id: Value?
+        var id: Node?
 
-        func serialize() -> [String: Value?] {
-            return [:]
+        func makeNode() -> Node {
+            return .null
         }
 
-        init(serialized: [String: Value]) {
+        init(with node: Node, in context: Context) throws {
 
         }
+        
+        static func prepare(_ database: Database) throws {}
+        static func revert(_ database: Database) throws {}
     }
 
     /// Dummy Driver implementation for testing.
@@ -26,33 +29,37 @@ class ModelFindTests: XCTestCase {
             return "foo"
         }
 
-        enum Error: ErrorProtocol {
+        enum Error: Swift.Error {
             case broken
         }
 
-        func query<T: Model>(_ query: Query<T>) throws -> [[String: Value]] {
+        func query<T: Entity>(_ query: Query<T>) throws -> Node {
             if
                 let filter = query.filters.first,
-                case .compare(let key, let comparison, let value) = filter
-                where query.action == .fetch &&
+                case .compare(let key, let comparison, let value) = filter.method,
+                query.action == .fetch &&
                     query.filters.count == 1 &&
                     key == idKey &&
                     comparison == .equals
             {
                 if value.int == 42 {
-                    return [
-                               [idKey: 42]
-                    ]
+                    return .array([
+                        .object([idKey: 42])
+                    ])
                 } else if value.int == 500 {
                     throw Error.broken
                 }
             }
             
-            return []
+            return .array([])
         }
 
         func schema(_ builder: Schema) throws {
             //
+        }
+
+        func raw(_ raw: String, _ values: [Node]) throws -> Node {
+            return .null
         }
     }
 
@@ -63,7 +70,7 @@ class ModelFindTests: XCTestCase {
     ]
 
     override func setUp() {
-        database = Database(driver: DummyDriver())
+        database = Database(DummyDriver())
         Database.default = database
     }
 

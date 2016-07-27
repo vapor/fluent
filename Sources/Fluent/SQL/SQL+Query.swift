@@ -1,16 +1,17 @@
 extension SQL {
-	init<T: Model>(query: Query<T>) {
+	init<T: Entity>(query: Query<T>) {
         switch query.action {
         case .fetch:
             self = .select(
                 table: query.entity,
                 filters: query.filters,
+                joins: query.unions,
                 limit: query.limit?.count
             )
         case .create:
             self = .insert(
                 table: query.entity,
-                data: query.data ?? [:]
+                data: query.data
             )
         case .delete:
             self = .delete(
@@ -22,7 +23,7 @@ extension SQL {
             self = .update(
                 table: query.entity,
                 filters: query.filters,
-                data: query.data ?? [:]
+                data: query.data
             )
         }
     }
