@@ -151,7 +151,21 @@ public class GeneralSQLSerializer: SQLSerializer {
             statement += "\(sql(filter.entity.entity)).\(sql(key))"
             statement += sql(comparison)
             statement += "?"
-            values += value
+
+            /**
+                `.like` comparison operator requires additional
+                processing of `value`
+             */
+            switch comparison {
+            case .hasPrefix:
+                values += sql(hasPrefix: value)
+            case .hasSuffix:
+                values += sql(hasSuffix: value)
+            case .contains:
+                values += sql(contains: value)
+            default:
+                values += value
+            }
         case .subset(let key, let scope, let subValues):
             statement += "\(sql(filter.entity.entity)).\(sql(key))"
             statement += sql(scope)
@@ -179,7 +193,37 @@ public class GeneralSQLSerializer: SQLSerializer {
             return "<="
         case .notEquals:
             return "!="
+        case .hasSuffix:
+            fallthrough
+        case .hasPrefix:
+            fallthrough
+        case .contains:
+            return "LIKE"
         }
+    }
+
+    public func sql(hasPrefix value: Node) -> Node {
+        guard let string = value.string else {
+            return value
+        }
+
+        return .string("\(string)%")
+    }
+
+    public func sql(hasSuffix value: Node) -> Node {
+        guard let string = value.string else {
+            return value
+        }
+
+        return .string("%\(string)")
+    }
+
+    public func sql(contains value: Node) -> Node {
+        guard let string = value.string else {
+            return value
+        }
+
+        return .string("%\(string)%")
     }
 
     public func sql(_ scope: Filter.Scope) -> String {

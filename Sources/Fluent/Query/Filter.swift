@@ -113,4 +113,12 @@ extension QueryRepresentable {
         return try makeQuery().filter(T.self, field, .equals, value)
     }
 
+
+    @discardableResult
+    public func filter(
+        _ field: String,
+        contains value: NodeRepresentable
+    ) throws -> Query<Self.T> {
+        return try filter(T.self, field, .contains, value)
+    }
 }

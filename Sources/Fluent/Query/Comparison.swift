@@ -10,5 +10,9 @@ extension Filter {
         case greaterThanOrEquals
         case lessThanOrEquals
         case notEquals
+        case hasSuffix
+        case hasPrefix
+        case contains
     }
+    
 }

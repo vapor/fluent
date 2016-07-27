@@ -47,6 +47,7 @@ class QueryFiltersTests: XCTestCase {
         return [
             ("testBasalQuery", testBasalQuery),
             ("testBasicQuery", testBasicQuery),
+            ("testLikeQuery", testLikeQuery),
         ]
     }
 
@@ -84,6 +85,27 @@ class QueryFiltersTests: XCTestCase {
         XCTAssert(key == "name", "Key should be name")
         XCTAssert(comparison == .equals, "Comparison should be equals")
         XCTAssert(value.string == "Vapor", "Value should be vapor")
+    }
+
+    func testLikeQuery() throws {
+        let query = try DummyModel.query().filter("name", .hasPrefix, "Vap")
+
+        guard
+            let filter = query.filters.first,
+            query.filters.count == 1 else
+        {
+            XCTFail("Should be one filter")
+            return
+        }
+
+        guard case .compare(let key, let comparison, let value) = filter.method else {
+            XCTFail("Should be a compare filter")
+            return
+        }
+
+        XCTAssert(key == "name", "Key should be name")
+        XCTAssert(comparison == .hasPrefix, "Position should be start")
+        XCTAssert(value.string == "Vap", "Value should be Vap")
     }
 
     func testDeleteQuery() throws {
