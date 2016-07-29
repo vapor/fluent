@@ -57,7 +57,7 @@ public final class Pivot<
         }
     }
 
-    public init(with node: Node, in context: Context) throws {
+    public init(node: Node, in context: Context) throws {
         id = try node.extract("id")
 
         let firstQ = try First.query()
@@ -76,7 +76,7 @@ public final class Pivot<
     }
 
     public func makeNode() throws -> Node {
-        return try Node([
+        return try Node(node: [
             "id": id,
             "\(self.dynamicType.left.name)_id": leftId,
             "\(self.dynamicType.right.name)_id": rightId,

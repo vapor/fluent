@@ -10,14 +10,14 @@ final class Atom: Entity {
         self.name = name
     }
 
-    init(with node: Node, in context: Context) throws {
+    init(node: Node, in context: Context) throws {
         id = try node.extract("id")
         name = try node.extract("name")
         groupId = try node.extract("group_id")
     }
 
     func makeNode() throws -> Node {
-        return try Node([
+        return try Node(node: [
             "id": id,
             "name": name,
             "group": try group().get()
