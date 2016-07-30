@@ -73,6 +73,17 @@ extension Entity {
     }
 
     /**
+        Finds the entities with the given `ids`.
+    */
+    public static func find(_ ids: [NodeRepresentable]) throws -> [Self] {
+        guard let idKey = database?.driver.idKey else {
+            return []
+        }
+
+        return try Self.query().filter(idKey, .in, ids).all()
+    }
+
+    /**
         Creates a `Query` instance for this `Model`.
     */
     public static func query() throws -> Query<Self> {

@@ -88,7 +88,7 @@ class QueryFiltersTests: XCTestCase {
     }
 
     func testLikeQuery() throws {
-        let query = try DummyModel.query().filter("name", .hasPrefix, "Vap")
+        let query = try DummyModel.query().filter("name", .hasPrefix(caseSensitive: false), "Vap")
 
         guard
             let filter = query.filters.first,
@@ -104,7 +104,7 @@ class QueryFiltersTests: XCTestCase {
         }
 
         XCTAssert(key == "name", "Key should be name")
-        XCTAssert(comparison == .hasPrefix, "Position should be start")
+        XCTAssert(comparison == .hasPrefix(caseSensitive: false), "Position should be start")
         XCTAssert(value.string == "Vap", "Value should be Vap")
     }
 

@@ -119,6 +119,6 @@ extension QueryRepresentable {
         _ field: String,
         contains value: NodeRepresentable
     ) throws -> Query<Self.T> {
-        return try filter(T.self, field, .contains, value)
+        return try filter(T.self, field, .contains(caseSensitive: false), value)
     }
 }

@@ -36,12 +36,12 @@ class SQLSerializerTests: XCTestCase {
     }
 
     func testFilterLikeSelect() {
-        let filter = Filter(User.self, .compare("name", .hasPrefix, "duc"))
+        let filter = Filter(User.self, .compare("name", .hasPrefix(caseSensitive: false), "duc"))
 
         let select = SQL.select(table: "friends", filters: [filter], joins: [], limit: nil)
         let (statement, values) = serialize(select)
 
-        XCTAssertEqual(statement, "SELECT * FROM `friends` WHERE `users`.`name` LIKE ?")
+        XCTAssertEqual(statement, "SELECT * FROM `friends` WHERE `users`.`name` LIKE ? COLLATE utf8_general_ci")
         XCTAssertEqual(values.first?.string, "duc%")
         XCTAssertEqual(values.count, 1)
     }
