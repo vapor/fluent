@@ -10,4 +10,18 @@ public struct Limit {
     */
     var count: Int
     
+    /**
+    	The number of results to
+    	offset the query by.
+    */
+    var offset: Int
+
+    /**
+    	Default `offset` to 0
+    */
+    init(count: Int, offset: Int = 0)
+    {
+    	self.count = count
+    	self.offset = offset
+    }
 }

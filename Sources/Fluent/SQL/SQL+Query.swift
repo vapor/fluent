@@ -6,7 +6,7 @@ extension SQL {
                 table: query.entity,
                 filters: query.filters,
                 joins: query.unions,
-                limit: query.limit?.count
+                limit: query.limit
             )
         case .create:
             self = .insert(
@@ -17,7 +17,7 @@ extension SQL {
             self = .delete(
                 table: query.entity,
                 filters: query.filters,
-                limit: query.limit?.count
+                limit: query.limit
             )
         case .modify:
             self = .update(
