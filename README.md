@@ -15,9 +15,9 @@ Simple ActiveRecord implementation for working with your database in Swift.
 
 Fluent is the first Swift ORM that works with both SQL and NoSQL. It provides a beautifully expressive and easy to use syntax for interacting with your database.
 
-This repository is the framework's source code. To view a sample project, check out the [Fluent Example](https://github.com/qutheory/fluent-example).
+This repository is the framework's source code. To view a sample project, check out the [Fluent Example](https://github.com/vapor/fluent-example).
 
-Clone the [Example](https://github.com/qutheory/fluent-example) project to start making your application. If you are also looking for a web server, check out [Vapor](https://github.com/qutheory/vapor). It was built to work well with Fluent.
+Clone the [Example](https://github.com/vapor/fluent-example) project to start making your application. If you are also looking for a web server, check out [Vapor](https://github.com/vapor/vapor). It was built to work well with Fluent.
 
 You must have Swift 3 or later installed. You can learn more about Swift 3 at [Swift.org](http://swift.org)
 
@@ -49,7 +49,7 @@ If you find a **security vulnerability**, please contact [tanner@qutheory.io](ta
 
 ## 💙 Code of Conduct
 
-Our goal is to create a safe and empowering environment for anyone who decides to use or contribute to Fluent. Please help us make the community a better place by abiding to this [Code of Conduct](https://github.com/qutheory/vapor/blob/master/CODE_OF_CONDUCT.md) during your interactions surrounding this project. 
+Our goal is to create a safe and empowering environment for anyone who decides to use or contribute to Fluent. Please help us make the community a better place by abiding to this [Code of Conduct](https://github.com/vapor/vapor/blob/master/CODE_OF_CONDUCT.md) during your interactions surrounding this project. 
 
 ## 🔧 Compatibility
 
