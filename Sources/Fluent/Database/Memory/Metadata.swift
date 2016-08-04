@@ -1,4 +1,3 @@
-
 import Foundation
 import Node
 
@@ -11,7 +10,7 @@ public final class Metadata: NodeConvertible {
     static var key: String = "__metadata"
     public init() {}
     
-    public init(node: Node, in context: Context) throws {
+    public init(with node: Node, in context: Context) throws {
         self.increment = try node.extract("increment")
         self.version = try node.extract("version")
         self.lastUpdatedDate =  Date(timeIntervalSinceNow: try node.extract("lastUpdatedDate"))
@@ -20,11 +19,11 @@ public final class Metadata: NodeConvertible {
     }
     
     public func makeNode() throws -> Node {
-        return Node([
-            "increment": Node(self.increment),
-            "version": Node(self.version),
-            "creationDate": Node(self.creationDate.timeIntervalSinceNow),
-            "lastUpdatedDate": Node(self.lastUpdatedDate.timeIntervalSinceNow)
+        return try Node([
+            "increment": self.increment,
+            "version": self.version,
+            "creationDate": self.creationDate.timeIntervalSinceNow,
+            "lastUpdatedDate": self.lastUpdatedDate.timeIntervalSinceNow
             ])
     }
 }

@@ -1,71 +1,61 @@
-
+import Node
 import Foundation
 
 extension Memory {
-    public func register(item name: String, metadata: Metadata = Metadata()) throws {
+    public func make(_ name: String, metadata: Metadata = Metadata()) throws {
         guard self[name] == nil else {
-            throw MemoryError.itemExistAlready(name)
+            throw MemoryError.doesExistAlready(name)
         }
         
-        var store = [String: Node]()
-        store[Metadata.key] = try metadata.makeNode()
-        self[name] = Node(store)
+        var obj = [String: Node]()
+        obj[Metadata.key] = try metadata.makeNode()
+        self[name] = Node(obj)
     }
     
-    public func store(item name: String, data: Node, idKey: String = "id") throws {
+    public func set(_ name: String, data: Node, idKey: String = "id") throws {
         if self[name] == nil {
-            try register(item: name)
+            try make(name)
         }
         
-        guard var mem = self[name] else {
+        guard var obj = self[name] else {
             return
         }
         
-        let meta = try Metadata(node: mem[Metadata.key])
-        meta.increment += 1
-        meta.lastUpdatedDate = Date()
+        let metadata = try Metadata(with: obj[Metadata.key]!)
+        metadata.increment += 1
+        metadata.lastUpdatedDate = Date()
         
-        mem["\(meta.increment)"] = data
-        mem[Metadata.key] = try meta.makeNode()
+        obj["\(metadata.increment)"] = data
+        obj[Metadata.key] = try metadata.makeNode()
         
-        self[name] = mem
+        self[name] = obj
         
     }
     
-    public func recall(item name: String, filters: [Fluent.Filter]? = nil, idKey: String = "id") throws -> Node {
-        //        guard let node = self[name] else {
-        //            throw MemoryError.itemDoesNotExist
-        //        }
-        //
-        //        guard case .array(let _) = node else {
-        //            return .null
-        //        }
-        
-        
-        /// TODO find my item
+    public func get(_ name: String, filters: [Fluent.Filter]? = nil, idKey: String = "id") throws -> Node {
         return .null
     }
     
-    public func update(item name: String, data: Node, idKey: String = "id", filter: Fluent.Filter) throws {
-        guard var mem = self[name],
-              let dataId = data[idKey]?.string,
-              let memId = mem[idKey]?.string,
-              memId == dataId else {
-            return
+    public func update(_ name: String, data: Node, idKey: String = "id", filter: Fluent.Filter) throws {
+        guard var obj = self[name],
+            let dataId = data[idKey]?.string,
+            let objId = obj[idKey]?.string,
+            objId == dataId else {
+                return
         }
         
-        mem[idKey] = data
+        obj[idKey] = data
     }
     
-    public func removeItem(with name: String, at index: Int) throws {
-        guard var mem = self[name]?.object else {
-                throw MemoryError.itemDoesNotExist(name)
+    public func remove(_ name: String, at index: Int) throws {
+        guard var obj = self[name]?.object else {
+            throw MemoryError.doesNotExist(name)
         }
         
-        mem.removeValue(forKey: "\(index)")
+        obj.removeValue(forKey: "\(index)")
     }
     
-    public func remove(item name: String) throws {
+    public func remove(_ name: String) throws {
         self.store.removeValue(forKey: name)
     }
 }
@@ -77,8 +67,8 @@ extension Memory: CustomStringConvertible {
 }
 
 public enum MemoryError: Error {
-    case itemExistAlready(String)
-    case itemDoesNotExist(String)
+    case doesExistAlready(String)
+    case doesNotExist(String)
     case incompatibleNodeType
     case missingIdKey
     case missingMetadata
