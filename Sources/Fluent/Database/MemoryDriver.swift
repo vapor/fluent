@@ -1,13 +1,3 @@
-//
-//  Memory+Driver.swift
-//  Fluent
-//
-//  Created by Prince Ugwuh on 8/3/16.
-//
-//
-
-import Foundation
-
 
 public class MemoryDriver: Driver {
     public var idKey: String = "id"

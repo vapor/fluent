@@ -14,7 +14,7 @@ public class Memory {
             set(newValue, forKey: key)
         }
     }
-
+    
     public func contains(key: String) -> Bool {
         return self.store[key] != nil
     }
@@ -30,7 +30,7 @@ public class Memory {
     public func value(forKey key: String) -> Node? {
         return self.store[key]
     }
-
+    
     deinit {
         purge()
     }
