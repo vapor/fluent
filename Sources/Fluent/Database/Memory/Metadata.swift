@@ -7,7 +7,7 @@ public final class Metadata: NodeConvertible {
     public var creationDate: Date = Date()
     public var lastUpdatedDate: Date = Date()
     
-    static var key: String = "__metadata"
+    public static var key: String = "__metadata"
     public init() {}
     
     public init(with node: Node, in context: Context) throws {
