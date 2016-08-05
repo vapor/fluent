@@ -107,14 +107,14 @@ final class TestModel: Entity {
     var name: String
     var age: Int
 
-    init(with node: Node, in context: Context) throws {
+    init(node: Node, in context: Context) throws {
         id = try node.extract("id")
         name = try node.extract("name")
         age = try node.extract("age")
     }
 
     func makeNode() throws -> Node {
-        return try Node([
+        return try Node(node: [
             "id": id,
             "name": name,
             "age": age

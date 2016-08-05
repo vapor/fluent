@@ -19,7 +19,7 @@ extension Node {
             throw ExtractionError.unexpectedNil
         }
 
-        return try N(with: node)
+        return try N(node: node)
     }
 
 
@@ -28,6 +28,6 @@ extension Node {
             throw ExtractionError.unexpectedNil
         }
 
-        return try [N](with: node)
+        return try [N](node: node)
     }
 }

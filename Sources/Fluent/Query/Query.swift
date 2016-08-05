@@ -90,7 +90,7 @@ public class Query<T: Entity>: QueryRepresentable {
         if case .array(let array) = try raw() {
             for result in array {
                 do {
-                    var model = try T(with: result)
+                    var model = try T(node: result)
                     if case .object(let dict) = result {
                         model.id = dict[database.driver.idKey]
                     }
