@@ -13,7 +13,7 @@ class QueryFiltersTests: XCTestCase {
             return .null
         }
 
-        init(with node: Node, in context: Context) throws {
+        init(node: Node, in context: Context) throws {
 
         }
 
