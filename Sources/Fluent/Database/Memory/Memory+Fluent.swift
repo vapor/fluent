@@ -23,7 +23,7 @@ extension Memory {
             throw MemoryError.doesNotExist(name)
         }
         
-        let metadata = try Metadata(with: table[Metadata.key]!)
+        let metadata = try Metadata(node: table[Metadata.key]!)
         metadata.increment += 1
         metadata.lastUpdatedDate = Date()
         
