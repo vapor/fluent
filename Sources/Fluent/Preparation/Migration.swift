@@ -8,13 +8,13 @@ final class Migration: Entity {
         self.name = name
     }
 
-    init(with node: Node, in context: Context) throws {
+    init(node: Node, in context: Context) throws {
         id = try node.extract("id")
         name = try node.extract("name")
     }
 
     func makeNode() throws -> Node {
-        return try Node([
+        return try Node(node: [
             "id": id,
             "name": name
         ])

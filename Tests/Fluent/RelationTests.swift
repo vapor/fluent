@@ -8,7 +8,7 @@ class RelationTests: XCTestCase {
     ]
 
     func testHasMany() throws {
-        let hydrogen = try Atom([
+        let hydrogen = try Atom(node: [
             "id": 42,
             "name": "Hydrogen",
             "group_id": 1337
@@ -20,7 +20,7 @@ class RelationTests: XCTestCase {
     }
 
     func testBelongsToMany() throws {
-        let hydrogen = try Atom([
+        let hydrogen = try Atom(node: [
             "id": 42,
             "name": "Hydrogen",
             "group_id": 1337
