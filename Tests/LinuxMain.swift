@@ -1,7 +1,7 @@
 #if os(Linux)
 
 import XCTest
-@testable import FluentTestSuite
+@testable import FluentTests
 
 XCTMain([
     testCase(ModelFindTests.allTests),
