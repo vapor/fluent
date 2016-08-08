@@ -1,4 +1,5 @@
-import Node
+
+import Fluent
 import Foundation
 
 private let idKey: String = "id"
@@ -37,7 +38,7 @@ extension Memory {
         
     }
     
-    public func get(_ name: String, filters: [Filter]? = nil) throws -> Node { // dirty
+    public func get(_ name: String, filters: [Fluent.Filter]? = nil) throws -> Node { // dirty
         guard let table = self[name]?.nodeObject else {
             throw MemoryError.doesNotExist(name)
         }
@@ -57,9 +58,9 @@ extension Memory {
                     pass = false
                 }
             }
-            
+
             if pass {
-                result.append(node)
+               result.append(node)
             }
             pass = false
         }
@@ -67,7 +68,7 @@ extension Memory {
         return Node(result)
     }
     
-    public func update(_ name: String, data: Node, filter: Filter) throws { // dirty
+    public func update(_ name: String, data: Node, filter: Fluent.Filter) throws { // dirty
         guard var table = self[name]?.nodeObject else {
             throw MemoryError.doesNotExist(name)
         }
@@ -76,8 +77,8 @@ extension Memory {
         var result: [Node] = []
         for node in values {
             if let o = node.nodeObject,
-                filterCheck(filter: filter, object: o) {
-                
+               filterCheck(filter: filter, object: o) {
+            
                 result.append(node)
             }
         }
@@ -96,10 +97,18 @@ extension Memory {
                 table[ids] = Node(object)
                 id = nil
             }
-            
+
         }
         
         self[name] = Node(table)
+    }
+    
+    public func remove(_ name: String, filter: Filter) throws {
+        guard var table = self[name]?.object else {
+            throw MemoryError.doesNotExist(name)
+        }
+        
+        table.removeValue(forKey: "\(index)")
     }
     
     public func remove(_ name: String, at index: Int) throws {
@@ -116,7 +125,7 @@ extension Memory {
     
     ///
     
-    internal func filterCheck(filter: Filter, object: [String: Node]) -> Bool {
+    internal func filterCheck(filter: Fluent.Filter, object: [String: Node]) -> Bool {
         switch filter.method {
         case .compare(let key, let comparison, let val):
             switch comparison {
@@ -216,7 +225,4 @@ extension Memory: CustomStringConvertible {
 public enum MemoryError: Error {
     case doesExistAlready(String)
     case doesNotExist(String)
-    case incompatibleNodeType
-    case missingIdKey
-    case missingMetadata
 }
