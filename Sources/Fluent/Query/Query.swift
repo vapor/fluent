@@ -96,11 +96,11 @@ public class Query<T: Entity>: QueryRepresentable {
                     }
                     models.append(model)
                 } catch {
-                    // FIXME: do what when init fails?
+                    print("Could not initialize \(T.self), skipping: \(error)")
                 }
             }
         } else {
-            // FIXME: support other types?
+            print("Unsupported Node type, only array is supported.")
         }
 
         return models
