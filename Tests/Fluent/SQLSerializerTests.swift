@@ -16,10 +16,10 @@ class SQLSerializerTests: XCTestCase {
 
     func testRegularSelect() {
         let filter = Filter(User.self, .compare("age", .greaterThanOrEquals, 21))
-        let sql = SQL.select(table: "users", filters: [filter], joins: [], limit: 5)
+        let sql = SQL.select(table: "users", filters: [filter], joins: [], limit: Limit(count: 5))
         let (statement, values) = serialize(sql)
 
-        XCTAssertEqual(statement, "SELECT * FROM `users` WHERE `users`.`age` >= ? LIMIT 5")
+        XCTAssertEqual(statement, "SELECT * FROM `users` WHERE `users`.`age` >= ? LIMIT 0, 5")
         XCTAssertEqual(values.first?.int, 21)
         XCTAssertEqual(values.count, 1)
     }
@@ -36,12 +36,12 @@ class SQLSerializerTests: XCTestCase {
     }
 
     func testFilterLikeSelect() {
-        let filter = Filter(User.self, .compare("name", .hasPrefix, "duc"))
+        let filter = Filter(User.self, .compare("name", .hasPrefix(caseSensitive: false), "duc"))
 
         let select = SQL.select(table: "friends", filters: [filter], joins: [], limit: nil)
         let (statement, values) = serialize(select)
 
-        XCTAssertEqual(statement, "SELECT * FROM `friends` WHERE `users`.`name` LIKE ?")
+        XCTAssertEqual(statement, "SELECT * FROM `friends` WHERE `users`.`name` LIKE ? COLLATE utf8_general_ci")
         XCTAssertEqual(values.first?.string, "duc%")
         XCTAssertEqual(values.count, 1)
     }

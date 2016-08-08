@@ -111,11 +111,11 @@ public class GeneralSQLSerializer: SQLSerializer {
         }
     }
 
-    public func sql(limit: Int) -> String {
+    public func sql(limit: Limit) -> String {
         var statement: [String] = []
 
         statement += "LIMIT"
-        statement += limit.description
+        statement += "\(limit.offset), \(limit.count)"
 
         return statement.joined(separator: " ")
     }
@@ -157,12 +157,15 @@ public class GeneralSQLSerializer: SQLSerializer {
                 processing of `value`
              */
             switch comparison {
-            case .hasPrefix:
+            case .hasPrefix(let caseSensitive):
                 values += sql(hasPrefix: value)
-            case .hasSuffix:
+                statement += sql(caseSensitive)
+            case .hasSuffix(let caseSensitive):
                 values += sql(hasSuffix: value)
-            case .contains:
+                statement += sql(caseSensitive)
+            case .contains(let caseSensitive):
                 values += sql(contains: value)
+                statement += sql(caseSensitive)
             default:
                 values += value
             }
@@ -224,6 +227,14 @@ public class GeneralSQLSerializer: SQLSerializer {
         }
 
         return .string("%\(string)%")
+    }
+
+    public func sql(_ caseSensitive: Bool) -> String {
+        if caseSensitive {
+            return "COLLATE utf8_bin"
+        } else {
+            return "COLLATE utf8_general_ci"
+        }
     }
 
     public func sql(_ scope: Filter.Scope) -> String {
