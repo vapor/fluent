@@ -35,7 +35,7 @@ extension Memory {
         
     }
     
-    public func get(_ name: String, filters: [Fluent.Filter]? = nil) throws -> Node { // dirty
+    public func get(_ name: String, filters: [Fluent.Filter]? = nil) throws -> Node { 
         guard let table = self[name]?.nodeObject else {
             throw MemoryError.doesNotExist(name)
         }
@@ -65,7 +65,7 @@ extension Memory {
         return Node(result)
     }
     
-    public func update(_ name: String, data: Node, filter: Fluent.Filter, idKey: String = "id") throws { // dirty
+    public func update(_ name: String, data: Node, filter: Fluent.Filter, idKey: String = "id") throws {
         guard var table = self[name]?.nodeObject else {
             throw MemoryError.doesNotExist(name)
         }
