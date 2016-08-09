@@ -1,8 +1,5 @@
 
-import Fluent
 import Foundation
-
-private let idKey: String = "id"
 
 extension Memory {
     public func make(_ name: String, metadata: Metadata = Metadata()) throws {
@@ -15,7 +12,7 @@ extension Memory {
         self[name] = Node(table)
     }
     
-    public func set(_ name: String, data: Node) throws {
+    public func set(_ name: String, data: Node, idKey: String = "id") throws {
         if self[name] == nil {
             try make(name)
         }
@@ -68,7 +65,7 @@ extension Memory {
         return Node(result)
     }
     
-    public func update(_ name: String, data: Node, filter: Fluent.Filter) throws { // dirty
+    public func update(_ name: String, data: Node, filter: Fluent.Filter, idKey: String = "id") throws { // dirty
         guard var table = self[name]?.nodeObject else {
             throw MemoryError.doesNotExist(name)
         }
@@ -85,19 +82,14 @@ extension Memory {
         
         for node in result {
             var object = node.nodeObject!
-            var id: String?
+            
             for (key, val) in data.nodeObject! {
-                if key == idKey {
-                    id = object[idKey]?.string ?? nil
-                    continue
-                }
                 object[key] = val
             }
-            if let ids = id {
-                table[ids] = Node(object)
-                id = nil
+            
+            if let id = object[idKey]?.string {
+                table[id] = Node(object)
             }
-
         }
         
         self[name] = Node(table)

@@ -1,7 +1,5 @@
 
-import Fluent
-
-class FluentInMemory: Fluent.Driver {
+class FluentInMemory: Driver {
     public var idKey: String = "id"
     
     internal var memory: Memory = Memory()
@@ -10,7 +8,12 @@ class FluentInMemory: Fluent.Driver {
     func query<T: Entity>(_ query: Query<T>) throws -> Node {
         switch query.action {
         case .create:
-            try self.memory.make(query.entity)
+            if let data = query.data {
+                try self.memory.set(query.entity, data: data)
+            } else {
+                try self.memory.make(query.entity)
+            }
+            
             return .null
         case .delete:
             if let data = query.data {
@@ -19,9 +22,9 @@ class FluentInMemory: Fluent.Driver {
                     try self.memory.remove(query.entity, at: id)
                     return .null
                 }
-            } else if let _ = query.filters.first {
-                //try self.memory.remove(query.entity, filter: filter)
-                throw FluentInMemoryError.notSupported
+            } else if let filter = query.filters.first {
+                try self.memory.remove(query.entity, filter: filter)
+                return .null    
             }
         
             try self.memory.remove(query.entity)
@@ -33,11 +36,13 @@ class FluentInMemory: Fluent.Driver {
             if let data = query.data {
                 if let filter = query.filters.first {
                     try self.memory.update(query.entity, data: data, filter: filter)
+                    return .null
                 } else {
                     if let nodeObject = data.nodeObject,
                        let idString = nodeObject[idKey] {
-                            let filter = Filter.init(T.self, .compare(idKey, .equals, idString))
-                            try self.memory.update(query.entity, data: data, filter: filter)
+                        let filter = Filter.init(T.self, .compare(idKey, .equals, idString))
+                        try self.memory.update(query.entity, data: data, filter: filter)
+                        return .null
                     }
                 }
             }
