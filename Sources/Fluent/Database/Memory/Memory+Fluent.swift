@@ -82,36 +82,58 @@ extension Memory {
         
         for node in result {
             var object = node.nodeObject!
-            
+            var id: String?
             for (key, val) in data.nodeObject! {
+                if key == idKey {
+                    id = object[idKey]?.string ?? nil
+                    continue
+                }
                 object[key] = val
             }
-            
-            if let id = object[idKey]?.string {
-                table[id] = Node(object)
+            if let ids = id {
+                table[ids] = Node(object)
+                id = nil
             }
+
         }
         
         self[name] = Node(table)
     }
     
-    public func remove(_ name: String, filter: Filter) throws {
-        guard var table = self[name]?.object else {
+    public func remove(_ name: String, filter: Filter, idKey: String = "id") throws {
+        guard var table = self[name]?.nodeObject else {
             throw MemoryError.doesNotExist(name)
         }
         
-        table.removeValue(forKey: "\(index)")
+        let values = [Node](table.values)
+        var pass: Bool = false
+        for node in values {
+            guard let o = node.nodeObject else {
+                continue
+            }
+            
+            pass = filterCheck(filter: filter, object: o)
+            
+            if let id = o[idKey]?.string, pass {
+                table.removeValue(forKey: id)
+            }
+            
+            pass = false
+        }
+        
+        self[name] = Node(table)
     }
     
     public func remove(_ name: String, at index: Int) throws {
-        guard var table = self[name]?.object else {
+        guard var table = self[name]?.nodeObject else {
             throw MemoryError.doesNotExist(name)
         }
         
         table.removeValue(forKey: "\(index)")
+        self[name] = Node(table)
     }
     
-    public func remove(_ name: String) throws {
+    public func remove(_ name: String) {
         self.store.removeValue(forKey: name)
     }
     

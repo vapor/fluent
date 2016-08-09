@@ -27,7 +27,7 @@ class FluentInMemory: Driver {
                 return .null    
             }
         
-            try self.memory.remove(query.entity)
+            self.memory.remove(query.entity)
             return .null
             
         case .fetch:
