@@ -72,7 +72,7 @@ class SQLSerializerTests: XCTestCase {
 // MARK: Utilities
 
 extension SQLSerializerTests {
-    private func serialize(_ sql: SQL) -> (String, [Node]) {
+    fileprivate func serialize(_ sql: SQL) -> (String, [Node]) {
         let serializer = GeneralSQLSerializer(sql: sql)
         return serializer.serialize()
     }

@@ -156,7 +156,7 @@ class TestSchemaDriver: Driver {
     func query<T: Entity>(_ query: Query<T>) throws -> Node { return .null }
 
     var testClosure: (Schema) -> ()
-    init(testClosure: (Schema) -> ()) {
+    init(testClosure: @escaping (Schema) -> ()) {
         self.testClosure = testClosure
     }
 

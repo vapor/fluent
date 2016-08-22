@@ -1,5 +1,5 @@
 public final class Siblings<T: Entity> {
-    private let _query: Query<T>
+    fileprivate let _query: Query<T>
 
     public init<E: Entity>(entity: E) throws {
         guard let ident = entity.id else {

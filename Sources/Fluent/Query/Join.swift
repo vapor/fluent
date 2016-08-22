@@ -48,7 +48,7 @@ public final class Pivot<
     public var rightId: Node?
 
     public init(_ first: Entity, _ second: Entity) {
-        if First.self == self.dynamicType.left {
+        if First.self == type(of: self).left {
             self.leftId = first.id
             self.rightId = second.id
         } else {
@@ -66,7 +66,7 @@ public final class Pivot<
         let firstKey = "\(First.name)_\(firstQ.idKey)"
         let secondKey = "\(Second.name)_\(secondQ.idKey)"
 
-        if First.self == self.dynamicType.left {
+        if First.self == type(of: self).left {
             leftId = try node.extract(firstKey)
             rightId = try node.extract(secondKey)
         } else {
@@ -78,8 +78,8 @@ public final class Pivot<
     public func makeNode() throws -> Node {
         return try Node(node: [
             "id": id,
-            "\(self.dynamicType.left.name)_id": leftId,
-            "\(self.dynamicType.right.name)_id": rightId,
+            "\(type(of: self).left.name)_id": leftId,
+            "\(type(of: self).right.name)_id": rightId,
         ])
     }
 
