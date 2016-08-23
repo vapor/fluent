@@ -14,7 +14,7 @@ extension Children: QueryRepresentable {
 
         let query = try T.query()
 
-        let foreignId = "\(parent.dynamicType.name)_\(query.idKey)"
+        let foreignId = "\(type(of: parent).name)_\(query.idKey)"
         return try T.query().filter(foreignId, ident)
     }
 }

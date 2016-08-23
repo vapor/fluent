@@ -31,7 +31,7 @@ extension Entity {
     }
 
     public static var name: String {
-        return String(self).lowercased()
+        return String(describing: self).lowercased()
     }
 }
 
