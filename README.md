@@ -8,10 +8,12 @@ Simple ActiveRecord implementation for working with your database in Swift.
 - [x] Beautiful syntax
 - [x] Generically typed
 
-![Swift](https://camo.githubusercontent.com/0727f3687a1e263cac101c5387df41048641339c/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f53776966742d332e302d6f72616e67652e7376673f7374796c653d666c6174)
-[![Slack Status](http://qutheory.io:8001/badge.svg)](http://slack.qutheory.io)
-[![Twitter Follow](https://img.shields.io/twitter/follow/shields_io.svg?style=social&label=Follow&maxAge=2592000)](https://twitter.com/qutheory)
-[![PRs Welcome](https://img.shields.io/badge/prs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+![Swift](http://img.shields.io/badge/swift-v3.0--dev.08.18-brightgreen.svg)
+[![Build Status](https://travis-ci.org/vapor/fluent.svg?branch=master)](https://travis-ci.org/vapor/fluent)
+[![CircleCI](https://circleci.com/gh/vapor/fluent.svg?style=shield)](https://circleci.com/gh/vapor/fluent)
+[![Code Coverage](https://codecov.io/gh/vapor/fluent/branch/master/graph/badge.svg)](https://codecov.io/gh/vapor/fluent)
+[![Codebeat](https://codebeat.co/badges/a793ad97-47e3-40d9-82cf-2aafc516ef4e)](https://codebeat.co/projects/github-com-vapor-fluent)
+[![Slack Status](http://vapor.team/badge.svg)](http://vapor.team)
 
 Fluent is the first Swift ORM that works with both SQL and NoSQL. It provides a beautifully expressive and easy to use syntax for interacting with your database.
 
@@ -25,6 +27,8 @@ You must have Swift 3 or later installed. You can learn more about Swift 3 at [S
 
 |Fluent|Xcode|Swift|
 |:-:|:-:|:-:|
+|0.10.x|8.0 Beta **6**|DEVELOPMENT-SNAPSHOT-2016-08-18-a|
+|0.9.x|8.0 Beta **3**|DEVELOPMENT-SNAPSHOT-2016-07-25-a|
 |0.8.x|8.0 Beta **3**|DEVELOPMENT-SNAPSHOT-2016-07-25-a|
 |0.7.x|7.3.x|DEVELOPMENT-SNAPSHOT-2016-06-06-a|
 |0.6.x|7.3.x|DEVELOPMENT-SNAPSHOT-2016-06-06-a|
@@ -35,7 +39,7 @@ You must have Swift 3 or later installed. You can learn more about Swift 3 at [S
 
 ## 📖 Documentation
 
-Visit the [Documentation](http://docs.qutheory.io) for extensive information on getting setup, using, and deploying Vapor. 
+Visit the [Documentation](http://docs.vapor.codes) for extensive information on getting setup, using, and deploying Vapor. 
 
 Fluent specific documentation is coming soon.
 
@@ -55,7 +59,7 @@ Our goal is to create a safe and empowering environment for anyone who decides t
 
 Vapor has been tested on OS X 10.11, Ubuntu 14.04, and Ubuntu 15.10. 
 
-Our homepage [http://qutheory.io](http://qutheory.io) is currently running using Vapor + Fluent on DigitalOcean.
+Our homepage [http://vapor.codes](http://vapor.codes) is currently running using Vapor + Fluent on DigitalOcean.
 
 ## ⚠️ Work in Progress
 
