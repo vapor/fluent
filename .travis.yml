@@ -5,9 +5,6 @@ language: generic
 sudo: required
 dist: trusty
 osx_image: xcode8
-install:
-  - eval "$(curl -sL swift.qutheory.io/travis)"
 script:
-  - swift build
-  - swift build --configuration release
-  - swift test
+  - eval "$(curl -sL swift.vapor.sh/ci)"
+  - eval "$(curl -sL swift.vapor.sh/codecov)"
