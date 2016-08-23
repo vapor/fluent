@@ -23,9 +23,10 @@ class UnionTests: XCTestCase {
 
         if let sql = lqd.lastQuery {
             switch sql {
-            case .select(let table, let filters, let joins, let limit):
+            case .select(let table, let filters, let joins, let orders, let limit):
                 XCTAssertEqual(table, "atoms")
                 XCTAssertEqual(filters.count, 0)
+                XCTAssertEqual(orders.count, 0)
                 XCTAssertEqual(joins.count, 1)
                 if let join = joins.first {
                     XCTAssert(join.local == Atom.self)
@@ -52,9 +53,10 @@ class UnionTests: XCTestCase {
 
         if let sql = lqd.lastQuery {
             switch sql {
-            case .select(let table, let filters, let joins, let limit):
+            case .select(let table, let filters, let joins, let orders, let limit):
                 XCTAssertEqual(table, "atoms")
                 XCTAssertEqual(filters.count, 0)
+                XCTAssertEqual(orders.count, 0)
                 XCTAssertEqual(joins.count, 1)
                 if let join = joins.first {
                     XCTAssert(join.local == Atom.self)

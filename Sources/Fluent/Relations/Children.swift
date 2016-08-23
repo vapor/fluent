@@ -1,7 +1,9 @@
 public final class Children<T: Entity> {
     public var parent: Entity
+    public var foreignKey: String?
 
-    public init(parent: Entity) {
+    public init(parent: Entity, foreignKey: String?) {
+        self.foreignKey = foreignKey
         self.parent = parent
     }
 }
@@ -14,15 +16,16 @@ extension Children: QueryRepresentable {
 
         let query = try T.query()
 
-        let foreignId = "\(type(of: parent).name)_\(query.idKey)"
+        let foreignId = foreignKey ?? "\(type(of: parent).name)_\(query.idKey)"
         return try T.query().filter(foreignId, ident)
     }
 }
 
 extension Entity {
     public func children<T: Entity>(
+        _ foreignKey: String? = nil,
         _ child: T.Type = T.self
     ) -> Children<T> {
-        return Children(parent: self)
+        return Children(parent: self, foreignKey: foreignKey)
     }
 }

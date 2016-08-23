@@ -56,8 +56,7 @@ class MemoryTests: XCTestCase {
 
         for _ in 0 ..< 100 {
             var new = User(id: nil, name: "Vapor", email: "test@email.com")
-            let store = Query<User>(database)
-            try store.save(&new)
+            try Query<User>(database).save(&new)
         }
 
         let results = try Query<User>(database).filter("name", "Vapor").all()
@@ -70,6 +69,23 @@ class MemoryTests: XCTestCase {
 
         let resultsThree = try Query<User>(database).filter("name", "updated").all()
         XCTAssertEqual(resultsThree.count, 100)
+    }
 
+    func testSort() throws {
+        let (_, database) = makeTestModels()
+        let fruits = ["Apple", "Orange", "Strawberry", "Mango"]
+
+        for _ in 0 ..< 100 {
+            let fruit = fruits.random
+            var new = User(id: nil, name: fruit, email: "\(fruit)@email.com")
+            try Query<User>(database).save(&new)
+        }
+
+        let sorted = try Query<User>(database).sort("name", .ascending).all()
+        let unsorted = try Query<User>(database).all()
+        XCTAssertNotEqual(sorted, unsorted)
+        XCTAssertEqual(sorted, unsorted.sorted(by: { u1, u2 in
+            return u1.name < u2.name
+        }))
     }
 }

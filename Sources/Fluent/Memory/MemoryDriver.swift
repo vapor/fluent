@@ -28,7 +28,7 @@ public final class MemoryDriver: Driver {
 
             return .null
         case .fetch:
-            let results = group.fetch(query.filters)
+            let results = group.fetch(query.filters, query.sorts)
 
             return Node.array(results)
         case .modify:

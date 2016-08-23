@@ -4,10 +4,16 @@ import XCTest
 class SQLSerializerTests: XCTestCase {
     static let allTests = [
         ("testBasicSelect", testBasicSelect),
+        ("testRegularSelect", testRegularSelect),
+        ("testFilterCompareSelect", testFilterCompareSelect),
+        ("testFilterLikeSelect", testFilterLikeSelect),
+        ("testFilterCompareUpdate", testFilterCompareUpdate),
+        ("testFilterCompareDelete", testFilterCompareDelete),
+        ("testFilterGroup", testFilterGroup)
     ]
 
     func testBasicSelect() {
-        let sql = SQL.select(table: "users", filters: [], joins: [], limit: nil)
+        let sql = SQL.select(table: "users", filters: [], joins: [], orders: [], limit: nil)
         let (statement, values) = serialize(sql)
 
         XCTAssertEqual(statement, "SELECT * FROM `users`")
@@ -16,7 +22,7 @@ class SQLSerializerTests: XCTestCase {
 
     func testRegularSelect() {
         let filter = Filter(User.self, .compare("age", .greaterThanOrEquals, 21))
-        let sql = SQL.select(table: "users", filters: [filter], joins: [], limit: 5)
+        let sql = SQL.select(table: "users", filters: [filter], joins: [], orders: [], limit: 5)
         let (statement, values) = serialize(sql)
 
         XCTAssertEqual(statement, "SELECT * FROM `users` WHERE `users`.`age` >= ? LIMIT 5")
@@ -27,7 +33,7 @@ class SQLSerializerTests: XCTestCase {
     func testFilterCompareSelect() {
         let filter = Filter(User.self, .compare("name", .notEquals, "duck"))
 
-        let select = SQL.select(table: "friends", filters: [filter], joins: [], limit: nil)
+        let select = SQL.select(table: "friends", filters: [filter], joins: [], orders: [], limit: nil)
         let (statement, values) = serialize(select)
 
         XCTAssertEqual(statement, "SELECT * FROM `friends` WHERE `users`.`name` != ?")
@@ -38,7 +44,7 @@ class SQLSerializerTests: XCTestCase {
     func testFilterLikeSelect() {
         let filter = Filter(User.self, .compare("name", .hasPrefix, "duc"))
 
-        let select = SQL.select(table: "friends", filters: [filter], joins: [], limit: nil)
+        let select = SQL.select(table: "friends", filters: [filter], joins: [], orders: [], limit: nil)
         let (statement, values) = serialize(select)
 
         XCTAssertEqual(statement, "SELECT * FROM `friends` WHERE `users`.`name` LIKE ?")
@@ -65,6 +71,39 @@ class SQLSerializerTests: XCTestCase {
 
         XCTAssertEqual(statement, "DELETE FROM `friends` WHERE `users`.`name` > ?")
         XCTAssertEqual(values.first?.string, "duck")
+        XCTAssertEqual(values.count, 1)
+    }
+
+    func testFilterGroup() throws {
+        let one = Filter(User.self, .compare("1", .equals, .string("1")))
+        let two = Filter(User.self, .compare("2", .equals, .string("2")))
+        let three = Filter(User.self, .compare("3", .equals, .string("3")))
+        let four = Filter(User.self, .compare("4", .equals, .string("4")))
+        let group = Filter(User.self, .group(.or, [two, three]))
+
+        let select = SQL.select(table: "users", filters: [one, group, four], joins: [], orders: [], limit: nil)
+        let (statement, values) = serialize(select)
+
+        XCTAssertEqual(statement, "SELECT * FROM `users` WHERE `users`.`1` = ? AND (`users`.`2` = ? OR `users`.`3` = ?) AND `users`.`4` = ?")
+        XCTAssertEqual(values.count, 4)
+    }
+
+    func testSort() throws {
+        let adult = Filter(User.self, .compare("age", .greaterThan, 17))
+        let name = Sort(User.self, "name", .ascending)
+        let select = SQL.select(table: "users", filters: [adult], joins: [], orders: [name], limit: nil)
+        let (statement, values) = serialize(select)
+        XCTAssertEqual(statement, "SELECT * FROM `users` WHERE `users`.`age` > ? ORDER BY `users`.`name` ASC")
+        XCTAssertEqual(values.count, 1)
+    }
+
+    func testSortMultiple() throws {
+        let adult = Filter(User.self, .compare("age", .greaterThan, 17))
+        let name = Sort(User.self, "name", .ascending)
+        let email = Sort(User.self, "email", .descending)
+        let select = SQL.select(table: "users", filters: [adult], joins: [], orders: [name, email], limit: nil)
+        let (statement, values) = serialize(select)
+        XCTAssertEqual(statement, "SELECT * FROM `users` WHERE `users`.`age` > ? ORDER BY `users`.`name` ASC, `users`.`email` DESC")
         XCTAssertEqual(values.count, 1)
     }
 }

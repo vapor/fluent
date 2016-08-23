@@ -5,9 +5,14 @@
     data affected.
 */
 public struct Filter {
+    public enum Relation {
+        case and, or
+    }
+
     public enum Method {
         case compare(String, Comparison, Node)
         case subset(String, Scope, [Node])
+        case group(Relation, [Filter])
     }
 
     public init(_ entity: Entity.Type, _ method: Method) {
@@ -27,6 +32,8 @@ extension Filter: CustomStringConvertible {
         case .subset(let field, let scope, let values):
             let valueDescriptions = values.map { $0.string ?? "" }
             return "(\(entity)) \(field) \(scope) \(valueDescriptions)"
+        case .group(let relation, let filters):
+            return filters.map { $0.description }.joined(separator: "\(relation)")
         }
     }
 }

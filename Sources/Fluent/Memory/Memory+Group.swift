@@ -22,8 +22,8 @@ extension MemoryDriver {
             data = data.fails(filters)
         }
 
-        func fetch(_ filters: [Filter]) -> [Node] {
-            return data.passes(filters)
+        func fetch(_ filters: [Filter], _ sorts: [Sort]) -> [Node] {
+            return data.passes(filters).sort(sorts)
         }
 
         func modify(_ update: Node, filters: [Filter]) -> [Node] {

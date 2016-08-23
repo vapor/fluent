@@ -52,12 +52,21 @@ extension Schema {
         public func data(
             _ name: String,
             optional: Bool = false
-            ) {
+        ) {
             fields += Field(name: name, type: .data, optional: optional)
         }
 
         public var schema: Schema {
             return .create(entity: entity, create: fields)
+        }
+
+        // MARK: Relations
+
+        public func parent<E: Entity>(
+            _ entity: E.Type = E.self,
+            optional: Bool = false
+        ) {
+            fields += Field(name: "\(entity.name)_id", type: .int, optional: optional)
         }
     }
 }

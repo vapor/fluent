@@ -30,6 +30,12 @@ public class Query<T: Entity>: QueryRepresentable {
     public var limit: Limit?
 
     /**
+        An array of sorts that will
+        be applied to the results.
+    */
+    public var sorts: [Sort]
+
+    /**
         The collection or table name upon
         which the action should be performed.
     */
@@ -61,6 +67,7 @@ public class Query<T: Entity>: QueryRepresentable {
         action = .fetch
         self.database = database
         unions = []
+        sorts = []
     }
 
     var idKey: String {
