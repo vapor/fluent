@@ -8,7 +8,7 @@ extension Int {
     public static func random(max: Int) -> Int {
         let max = UInt32(max)
         #if os(Linux)
-            let val = Int(libc.random() % Int(max))
+            let val = Int(Glibc.random() % Int(max))
         #else
             let val = Int(arc4random_uniform(max))
         #endif
