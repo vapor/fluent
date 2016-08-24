@@ -3,7 +3,7 @@
     This class can be subclassed by
     specific SQL serializers.
 */
-public class GeneralSQLSerializer: SQLSerializer {
+open class GeneralSQLSerializer: SQLSerializer {
     public let sql: SQL
 
     public required init(sql: SQL) {
@@ -39,7 +39,7 @@ public class GeneralSQLSerializer: SQLSerializer {
                 sql(statement),
                 values
             )
-        case .select(let table, let filters, let unions, let limit):
+        case .select(let table, let filters, let unions, let orders, let limit):
             var statement: [String] = []
             var values: [Node] = []
 
@@ -54,6 +54,10 @@ public class GeneralSQLSerializer: SQLSerializer {
                 let (filtersClause, filtersValues) = sql(filters)
                 statement += filtersClause
                 values += filtersValues
+            }
+
+            if !orders.isEmpty {
+                statement += sql(orders)
             }
 
             if let limit = limit {
@@ -120,11 +124,26 @@ public class GeneralSQLSerializer: SQLSerializer {
         return statement.joined(separator: " ")
     }
 
+
     public func sql(_ filters: [Filter]) -> (String, [Node]) {
+        var statement: [String] = []
+
+        statement += "WHERE"
+
+        let (clause, values) = sql(filters, relation: .and)
+
+        statement += clause
+
+        return (
+            sql(statement),
+            values
+        )
+    }
+
+    public func sql(_ filters: [Filter], relation: Filter.Relation) -> (String, [Node]) {
         var statement: [String] = []
         var values: [Node] = []
 
-        statement += "WHERE"
 
         var subStatement: [String] = []
 
@@ -134,12 +153,23 @@ public class GeneralSQLSerializer: SQLSerializer {
             values += subValues
         }
 
-        statement += subStatement.joined(separator: " AND ")
+        statement += subStatement.joined(separator: " \(sql(relation)) ")
 
         return (
             sql(statement),
             values
         )
+    }
+
+    public func sql(_ relation: Filter.Relation) -> String {
+        let word: String
+        switch relation {
+        case .and:
+            word = "AND"
+        case .or:
+            word = "OR"
+        }
+        return word
     }
 
     public func sql(_ filter: Filter) -> (String, [Node]) {
@@ -171,12 +201,43 @@ public class GeneralSQLSerializer: SQLSerializer {
             statement += sql(scope)
             statement += sql(subValues)
             values += subValues
+        case .group(let relation, let filters):
+            let (clause, subvals) = sql(filters, relation: relation)
+            statement += "(\(clause))"
+            values += subvals
         }
 
         return (
             sql(statement),
             values
         )
+    }
+
+    public func sql(_ sort: Sort) -> String {
+        var clause: [String] = []
+
+        clause += sql(sort.entity.entity) + "." + sql(sort.field)
+
+        switch sort.direction {
+        case .ascending:
+            clause += "ASC"
+        case .descending:
+            clause += "DESC"
+        }
+
+        return sql(clause)
+    }
+
+    public func sql(_ sorts: [Sort]) -> String {
+        var clause: [String] = []
+
+        clause += "ORDER BY"
+
+        clause += sorts.map { sort in
+            return sql(sort)
+        }.joined(separator: ", ")
+
+        return sql(clause)
     }
 
     public func sql(_ comparison: Filter.Comparison) -> String {

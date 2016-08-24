@@ -6,6 +6,7 @@ extension SQL {
                 table: query.entity,
                 filters: query.filters,
                 joins: query.unions,
+                orders: query.sorts,
                 limit: query.limit?.count
             )
         case .create:

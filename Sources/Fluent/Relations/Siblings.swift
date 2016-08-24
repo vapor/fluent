@@ -1,15 +1,21 @@
 public final class Siblings<T: Entity> {
     fileprivate let _query: Query<T>
 
-    public init<E: Entity>(entity: E) throws {
+    public let localKey: String
+    public let foreignKey: String
+
+    public init<E: Entity>(entity: E, localKey: String?, foreignKey: String?) throws {
         guard let ident = entity.id else {
             throw RelationError.noIdentifier
         }
 
         let query = try T.query()
 
-        let localKey = query.idKey
-        let foreignKey = "\(T.name)_\(query.idKey)"
+        let localKey = localKey ?? query.idKey
+        let foreignKey = foreignKey ?? "\(T.name)_\(query.idKey)"
+
+        self.localKey = localKey
+        self.foreignKey = foreignKey
 
         let pivot = Pivot<E, T>.self
 
@@ -32,7 +38,7 @@ extension Siblings: QueryRepresentable {
 }
 
 extension Entity {
-    public func siblings<T: Entity>() throws -> Siblings<T> {
-        return try Siblings(entity: self)
+    public func siblings<T: Entity>(_ localKey: String? = nil, _ foreignKey: String? = nil) throws -> Siblings<T> {
+        return try Siblings(entity: self, localKey: localKey, foreignKey: foreignKey)
     }
 }

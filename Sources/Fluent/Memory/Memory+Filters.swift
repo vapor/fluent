@@ -33,12 +33,23 @@ extension Sequence where Iterator.Element == Node {
 }
 
 extension Node {
+    func passesOne(_ filters: [Filter]) -> Bool {
+        for f in filters {
+            if passes(f) {
+                return true
+            }
+        }
+
+        return false
+    }
+
     func passes(_ filters: [Filter]) -> Bool {
         for f in filters {
             if !passes(f) {
                 return false
             }
         }
+
         return true
     }
 
@@ -129,6 +140,13 @@ extension Node {
 
                     return true
                 }
+            }
+        case .group(let relation, let filters):
+            switch relation {
+            case .and:
+                return passes(filters)
+            case .or:
+                return passesOne(filters)
             }
         }
         return false

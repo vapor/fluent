@@ -36,3 +36,9 @@ final class User: Entity {
         try database.delete(entity)
     }
 }
+
+extension User: Equatable {
+    static func ==(lhs: User, rhs: User) -> Bool {
+        return lhs.name == rhs.name
+    }
+}

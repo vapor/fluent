@@ -29,7 +29,7 @@ final class Atom: Entity {
     }
 
     func group() throws -> Parent<Group> {
-        return try parent(groupId)
+        return try parent(groupId, "parrrrent_id")
     }
 
     func protons() throws -> Children<Proton> {
@@ -37,7 +37,7 @@ final class Atom: Entity {
     }
 
     func nucleus() throws -> Nucleus? {
-        return try children().first()
+        return try children("nookleus_id").first()
     }
 
     static func prepare(_ database: Fluent.Database) throws {
