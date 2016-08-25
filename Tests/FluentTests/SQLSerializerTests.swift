@@ -5,6 +5,7 @@ class SQLSerializerTests: XCTestCase {
     static let allTests = [
         ("testBasicSelect", testBasicSelect),
         ("testRegularSelect", testRegularSelect),
+        ("testOffsetSelect", testOffsetSelect),
         ("testFilterCompareSelect", testFilterCompareSelect),
         ("testFilterLikeSelect", testFilterLikeSelect),
         ("testFilterCompareUpdate", testFilterCompareUpdate),
@@ -22,12 +23,20 @@ class SQLSerializerTests: XCTestCase {
 
     func testRegularSelect() {
         let filter = Filter(User.self, .compare("age", .greaterThanOrEquals, 21))
-        let sql = SQL.select(table: "users", filters: [filter], joins: [], orders: [], limit: 5)
+        let sql = SQL.select(table: "users", filters: [filter], joins: [], orders: [], limit: Limit(count: 5))
         let (statement, values) = serialize(sql)
 
-        XCTAssertEqual(statement, "SELECT * FROM `users` WHERE `users`.`age` >= ? LIMIT 5")
+        XCTAssertEqual(statement, "SELECT * FROM `users` WHERE `users`.`age` >= ? LIMIT 0, 5")
         XCTAssertEqual(values.first?.int, 21)
         XCTAssertEqual(values.count, 1)
+    }
+    
+    func testOffsetSelect() {
+        let filter = Filter(User.self, .compare("age", .greaterThanOrEquals, 21))
+        let sql = SQL.select(table: "users", filters: [filter], joins: [], orders: [], limit: Limit(count: 5, offset: 15))
+        let (statement, _) = serialize(sql)
+        
+        XCTAssertEqual(statement, "SELECT * FROM `users` WHERE `users`.`age` >= ? LIMIT 15, 5")
     }
 
     func testFilterCompareSelect() {

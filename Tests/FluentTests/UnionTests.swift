@@ -34,7 +34,7 @@ class UnionTests: XCTestCase {
                     XCTAssert(join.foreign == Compound.self)
                     XCTAssertEqual(join.foreignKey, lqd.idKey)
                 }
-                XCTAssertEqual(limit, nil)
+                XCTAssert(limit == nil)
             default:
                 XCTFail("Invalid SQL type.")
             }
@@ -64,7 +64,7 @@ class UnionTests: XCTestCase {
                     XCTAssert(join.foreign == Compound.self)
                     XCTAssertEqual(join.foreignKey, foreignKey)
                 }
-                XCTAssertEqual(limit, nil)
+                XCTAssert(limit == nil)
             default:
                 XCTFail("Invalid SQL type.")
             }
