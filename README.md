@@ -27,6 +27,7 @@ You must have Swift 3 or later installed. You can learn more about Swift 3 at [S
 
 |Fluent|Xcode|Swift|
 |:-:|:-:|:-:|
+|0.11.x|8.0 GM|DEVELOPMENT-SNAPSHOT-2016-09-06-a|
 |0.10.x|8.0 Beta **6**|DEVELOPMENT-SNAPSHOT-2016-08-18-a|
 |0.9.x|8.0 Beta **3**|DEVELOPMENT-SNAPSHOT-2016-07-25-a|
 |0.8.x|8.0 Beta **3**|DEVELOPMENT-SNAPSHOT-2016-07-25-a|
