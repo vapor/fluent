@@ -164,7 +164,7 @@ extension QueryRepresentable {
      */
     public func createOrModify(_ serialized: Node?) throws {
         let query = try makeQuery()
-
+        
         query.action = .createOrModify
         query.data = serialized
 
