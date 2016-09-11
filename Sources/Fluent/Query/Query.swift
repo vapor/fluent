@@ -228,6 +228,7 @@ extension QueryRepresentable {
         query.action = .modify
         query.data = serialized
 
+        // FIXME: There should be a flag to know if this existed to prevent overwriting existing id
         let idKey = query.database.driver.idKey
         serialized?[idKey].flatMap { id in
             let entity = T.self
