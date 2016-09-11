@@ -21,16 +21,24 @@ open class GeneralSQLSerializer: SQLSerializer {
                 statement.joined(separator: " "),
                 []
             )
-        case .insert(let table, let data):
+        case .insert(let table, let data, let shouldUpdate):
             var statement: [String] = []
 
             statement += "INSERT INTO"
             statement += sql(table)
 
-            let values: [Node]
+            var values: [Node] = []
             if let (dataClause, dataValues) = sql(data) {
                 statement += dataClause
                 values = dataValues
+
+                if shouldUpdate, let data = data, case .object(let obj) = data {
+                    let (updateClause, updateValues) = sql(update: obj)
+                    statement += "ON DUPLICATE KEY UPDATE"
+                    statement += updateClause
+                    values += updateValues
+                }
+
             } else {
                 values = []
             }
