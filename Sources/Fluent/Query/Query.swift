@@ -45,7 +45,7 @@ public class Query<T: Entity>: QueryRepresentable {
 
     /**
         An array of unions, or other entities
-        that will be queried during this query's 
+        that will be queried during this query's
         execution.
     */
     public var unions: [Union]
@@ -145,8 +145,8 @@ extension QueryRepresentable {
 
     /**
         Attempts the create action for the supplied
-        serialized data. 
-     
+        serialized data.
+
         Returns the new entity's identifier.
     */
     public func create(_ serialized: Node?) throws -> Node {
@@ -201,7 +201,7 @@ extension QueryRepresentable {
         let query = try makeQuery()
 
         query.action = .delete
-        
+
         let filter = Filter(
             T.self,
             .compare(
@@ -227,6 +227,14 @@ extension QueryRepresentable {
 
         query.action = .modify
         query.data = serialized
+
+        // FIXME: There should be a flag to know if this existed to prevent overwriting existing id
+        let idKey = query.database.driver.idKey
+        serialized?[idKey].flatMap { id in
+            let entity = T.self
+            let idFilter = Filter(entity, .compare(idKey, .equals, id))
+            query.filters.append(idFilter)
+        }
 
         try query.run()
     }
