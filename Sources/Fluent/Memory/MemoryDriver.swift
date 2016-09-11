@@ -16,7 +16,7 @@ public final class MemoryDriver: Driver {
         let group = prepare(group: query.entity)
 
         switch query.action {
-        case .create:
+        case .create, .createOrModify:
             guard let data = query.data else {
                 throw Error.dataRequired
             }

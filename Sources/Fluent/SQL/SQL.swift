@@ -10,7 +10,7 @@ public enum SQL {
         case drop
     }
     
-    case insert(table: String, data: Node?)
+    case insert(table: String, data: Node?, shouldUpdate: Bool)
     case select(table: String, filters: [Filter], joins: [Union], orders: [Sort], limit: Limit?)
     case update(table: String, filters: [Filter], data: Node?)
     case delete(table: String, filters: [Filter], limit: Limit?)

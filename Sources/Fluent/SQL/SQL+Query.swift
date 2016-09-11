@@ -12,7 +12,14 @@ extension SQL {
         case .create:
             self = .insert(
                 table: query.entity,
-                data: query.data
+                data: query.data,
+                shouldUpdate: false
+            )
+        case .createOrModify:
+            self = .insert(
+                table: query.entity,
+                data: query.data,
+                shouldUpdate: true
             )
         case .delete:
             self = .delete(

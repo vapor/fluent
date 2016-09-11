@@ -159,6 +159,19 @@ extension QueryRepresentable {
     }
 
     /**
+     Attempts to create or modify model's collection with
+     the supplied serialized data.
+     */
+    public func createOrModify(_ serialized: Node?) throws {
+        let query = try makeQuery()
+
+        query.action = .createOrModify
+        query.data = serialized
+
+        try query.run()
+    }
+
+    /**
         Attempts to save a supplied entity
         and updates its identifier if successful.
     */
@@ -172,7 +185,7 @@ extension QueryRepresentable {
                 .equals,
                 id
             )
-            try modify(data)
+            try createOrModify(data)
         } else {
             model.id = try query.create(data)
         }
