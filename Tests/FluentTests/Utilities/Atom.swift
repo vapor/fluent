@@ -5,8 +5,8 @@ struct Atom: Entity {
     var name: String
     var groupId: Node?
 
-    init(name: String) {
-        id = nil
+    init(name: String, id: Node? = nil) {
+        self.id = id
         self.name = name
     }
 
@@ -51,15 +51,29 @@ struct Atom: Entity {
         try database.delete(entity)
     }
 
-    func onCreate() {
-        print("Atom create.")
+    // MARK: Callbacks
+
+    func willCreate() {
+        print("Atom will create.")
     }
 
-    func onUpdate() {
-        print("Atom update.")
+    func didCreate() {
+        print("Atom did create.")
     }
 
-    func onDelete() {
-        print("Atom delete.")
+    func willUpdate() {
+        print("Atom will update.")
+    }
+
+    func didUpdate() {
+        print("Atom did update.")
+    }
+
+    func willDelete() {
+        print("Atom will delete.")
+    }
+
+    func didDelete() {
+        print("Atom did delete.")
     }
 }

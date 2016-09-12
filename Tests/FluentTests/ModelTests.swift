@@ -16,19 +16,19 @@ class ModelTests: XCTestCase {
 
     func testExamples() throws {
         Atom.database = db
-        var atom = Atom(name: "test")
+        var atom = Atom(name: "test", id: 5)
 
-        atom.id = 5
-        print(atom.exists)
+        XCTAssertFalse(atom.exists, "Model shouldn't exist yet.")
+
         try! atom.save()
+
+        XCTAssertTrue(atom.exists, "Model should exist after saving.")
 
         let (sql, _) = GeneralSQLSerializer(sql: lqd.lastQuery!).serialize()
         print(sql)
 
         atom.name = "bob"
         try atom.save()
-
-        print(atom.exists)
 
         let (sql2, _) = GeneralSQLSerializer(sql: lqd.lastQuery!).serialize()
         print(sql2)
