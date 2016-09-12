@@ -18,9 +18,35 @@ public protocol Entity: Preparation, NodeConvertible {
     */
     var id: Node? { get set }
 
-    func onCreate()
-    func onUpdate()
-    func onDelete()
+    /**
+        Called before the entity will be created.
+    */
+    func willCreate()
+
+    /**
+        Called after the entity has been created.
+    */
+    func didCreate()
+
+    /**
+        Called before the entity will be updated.
+    */
+    func willUpdate()
+
+    /**
+        Called after the entity has been updated.
+    */
+    func didUpdate()
+
+    /**
+        Called before the entity will be deleted.
+    */
+    func willDelete()
+
+    /**
+        Called after the entity has been deleted.
+    */
+    func didDelete()
 }
 
 //MARK: Defaults
@@ -60,9 +86,12 @@ extension Entity {
 
 
 extension Entity {
-    public func onCreate() {}
-    public func onUpdate() {}
-    public func onDelete() {}
+    public func willCreate() {}
+    public func didCreate() {}
+    public func willUpdate() {}
+    public func didUpdate() {}
+    public func willDelete() {}
+    public func didDelete() {}
 }
 
 //MARK: CRUD

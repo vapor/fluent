@@ -183,11 +183,13 @@ extension QueryRepresentable {
                 .equals,
                 id
             )
+            model.willUpdate()
             try modify(data)
-            model.onUpdate()
+            model.didUpdate()
         } else {
+            model.willCreate()
             model.id = try query.create(data)
-            model.onCreate()
+            model.didCreate()
         }
         model.exists = true
     }
@@ -227,9 +229,9 @@ extension QueryRepresentable {
 
         query.filters.append(filter)
 
+        model.willDelete()
         try query.run()
-
-        model.onDelete()
+        model.didDelete()
 
         var model = model
         model.exists = false
