@@ -249,6 +249,13 @@ extension QueryRepresentable {
         query.action = .modify
         query.data = serialized
 
+        let idKey = query.database.driver.idKey
+        serialized?[idKey].flatMap { id in
+            let entity = T.self
+            let idFilter = Filter(entity, .compare(idKey, .equals, id))
+            query.filters.append(idFilter)
+        } 
+        
         try query.run()
     }
 }
