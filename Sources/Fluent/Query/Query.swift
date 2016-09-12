@@ -178,11 +178,6 @@ extension QueryRepresentable {
         let data = try model.makeNode()
 
         if let id = model.id, model.exists {
-            let _ = try filter(
-                query.database.driver.idKey,
-                .equals,
-                id
-            )
             model.willUpdate()
             try modify(data)
             model.didUpdate()
