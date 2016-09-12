@@ -177,12 +177,7 @@ extension QueryRepresentable {
         let query = try makeQuery()
         let data = try model.makeNode()
 
-        if let id = model.id, model.exists {
-            let _ = try filter(
-                query.database.driver.idKey,
-                .equals,
-                id
-            )
+        if let _ = model.id, model.exists {
             model.willUpdate()
             try modify(data)
             model.didUpdate()
@@ -249,6 +244,10 @@ extension QueryRepresentable {
         query.action = .modify
         query.data = serialized
 
+        let idKey = query.database.driver.idKey
+        if let id = serialized?[idKey] {
+            _ = try filter(idKey, id)
+        }
         try query.run()
     }
 }
