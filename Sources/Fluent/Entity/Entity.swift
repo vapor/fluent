@@ -19,6 +19,16 @@ public protocol Entity: Preparation, NodeConvertible {
     var id: Node? { get set }
 
     /**
+        Whether or not entity was retrieved from database.
+        
+        This value shouldn't be interacted w/ external users 
+        w/o explicit knowledge.
+     
+        General implementation should just be `var exists = false`
+    */
+    var exists: Bool { get set }
+
+    /**
         Called before the entity will be created.
     */
     func willCreate()
@@ -49,9 +59,7 @@ public protocol Entity: Preparation, NodeConvertible {
     func didDelete()
 }
 
-//MARK: Defaults
-
-var existanceStorage: [String: Bool] = [:]
+// MARK: Defaults
 
 extension Entity {
     /**
@@ -66,20 +74,13 @@ extension Entity {
         return String(describing: self).lowercased()
     }
 
-    private var address: String {
-        mutating get {
-            var id = ""
-            withUnsafePointer(to: &self) { id = "\($0)"}
-            return id
-        }
-    }
-
-    var exists: Bool {
-        mutating get {
-            return existanceStorage[address] ?? false
+    // FIXME: Default for 0.11 to maintain compatibility. Remove for 0.12
+    public var exists: Bool {
+        get {
+            return true
         }
         set {
-            existanceStorage[address] = newValue
+            print("Exists not stored")
         }
     }
 }

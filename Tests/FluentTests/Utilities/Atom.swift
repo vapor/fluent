@@ -4,6 +4,7 @@ struct Atom: Entity {
     var id: Node?
     var name: String
     var groupId: Node?
+    var exists: Bool = false
 
     init(name: String, id: Node? = nil) {
         self.id = id
