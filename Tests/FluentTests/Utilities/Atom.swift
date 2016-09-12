@@ -1,6 +1,6 @@
 import Fluent
 
-final class Atom: Entity {
+struct Atom: Entity {
     var id: Node?
     var name: String
     var groupId: Node?
@@ -20,7 +20,7 @@ final class Atom: Entity {
         return try Node(node: [
             "id": id,
             "name": name,
-            "group": try group().get()
+            "group_id": groupId
         ])
     }
 
@@ -49,5 +49,17 @@ final class Atom: Entity {
     }
     static func revert(_ database: Fluent.Database) throws {
         try database.delete(entity)
+    }
+
+    func onCreate() {
+        print("Atom create.")
+    }
+
+    func onUpdate() {
+        print("Atom update.")
+    }
+
+    func onDelete() {
+        print("Atom delete.")
     }
 }

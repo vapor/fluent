@@ -129,7 +129,11 @@ extension QueryRepresentable {
     public func first() throws -> T? {
         let query = try makeQuery()
         query.limit = Limit(count: 1)
-        return try query.run().first
+
+        var m = try query.run().first
+        m?.exists = true
+
+        return m
     }
 
     /**
@@ -138,7 +142,14 @@ extension QueryRepresentable {
     */
     public func all() throws -> [T] {
         let query = try makeQuery()
-        return try query.run()
+
+        let m = try query.run()
+        m.forEach { m in
+            var m = m
+            m.exists = true
+        }
+
+        return m
     }
 
     //MARK: Create
@@ -166,16 +177,19 @@ extension QueryRepresentable {
         let query = try makeQuery()
         let data = try model.makeNode()
 
-        if let id = model.id {
+        if let id = model.id, model.exists {
             let _ = try filter(
                 query.database.driver.idKey,
                 .equals,
                 id
             )
             try modify(data)
+            model.onUpdate()
         } else {
             model.id = try query.create(data)
+            model.onCreate()
         }
+        model.exists = true
     }
 
     //MARK: Delete
@@ -214,6 +228,11 @@ extension QueryRepresentable {
         query.filters.append(filter)
 
         try query.run()
+
+        model.onDelete()
+
+        var model = model
+        model.exists = false
     }
 
     //MARK: Update
@@ -227,14 +246,6 @@ extension QueryRepresentable {
 
         query.action = .modify
         query.data = serialized
-
-        // FIXME: There should be a flag to know if this existed to prevent overwriting existing id
-        let idKey = query.database.driver.idKey
-        serialized?[idKey].flatMap { id in
-            let entity = T.self
-            let idFilter = Filter(entity, .compare(idKey, .equals, id))
-            query.filters.append(idFilter)
-        }
 
         try query.run()
     }

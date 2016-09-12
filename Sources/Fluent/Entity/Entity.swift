@@ -17,9 +17,15 @@ public protocol Entity: Preparation, NodeConvertible {
         `find(:_)`.
     */
     var id: Node? { get set }
+
+    func onCreate()
+    func onUpdate()
+    func onDelete()
 }
 
 //MARK: Defaults
+
+var existanceStorage: [String: Bool] = [:]
 
 extension Entity {
     /**
@@ -33,6 +39,30 @@ extension Entity {
     public static var name: String {
         return String(describing: self).lowercased()
     }
+
+    private var address: String {
+        mutating get {
+            var id = ""
+            withUnsafePointer(to: &self) { id = "\($0)"}
+            return id
+        }
+    }
+
+    var exists: Bool {
+        mutating get {
+            return existanceStorage[address] ?? false
+        }
+        set {
+            existanceStorage[address] = newValue
+        }
+    }
+}
+
+
+extension Entity {
+    public func onCreate() {}
+    public func onUpdate() {}
+    public func onDelete() {}
 }
 
 //MARK: CRUD
