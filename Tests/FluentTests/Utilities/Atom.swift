@@ -1,12 +1,12 @@
 import Fluent
 
-final class Atom: Entity {
+struct Atom: Entity {
     var id: Node?
     var name: String
     var groupId: Node?
 
-    init(name: String) {
-        id = nil
+    init(name: String, id: Node? = nil) {
+        self.id = id
         self.name = name
     }
 
@@ -20,7 +20,7 @@ final class Atom: Entity {
         return try Node(node: [
             "id": id,
             "name": name,
-            "group": try group().get()
+            "group_id": groupId
         ])
     }
 
@@ -49,5 +49,31 @@ final class Atom: Entity {
     }
     static func revert(_ database: Fluent.Database) throws {
         try database.delete(entity)
+    }
+
+    // MARK: Callbacks
+
+    func willCreate() {
+        print("Atom will create.")
+    }
+
+    func didCreate() {
+        print("Atom did create.")
+    }
+
+    func willUpdate() {
+        print("Atom will update.")
+    }
+
+    func didUpdate() {
+        print("Atom did update.")
+    }
+
+    func willDelete() {
+        print("Atom will delete.")
+    }
+
+    func didDelete() {
+        print("Atom did delete.")
     }
 }

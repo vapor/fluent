@@ -17,9 +17,41 @@ public protocol Entity: Preparation, NodeConvertible {
         `find(:_)`.
     */
     var id: Node? { get set }
+
+    /**
+        Called before the entity will be created.
+    */
+    func willCreate()
+
+    /**
+        Called after the entity has been created.
+    */
+    func didCreate()
+
+    /**
+        Called before the entity will be updated.
+    */
+    func willUpdate()
+
+    /**
+        Called after the entity has been updated.
+    */
+    func didUpdate()
+
+    /**
+        Called before the entity will be deleted.
+    */
+    func willDelete()
+
+    /**
+        Called after the entity has been deleted.
+    */
+    func didDelete()
 }
 
 //MARK: Defaults
+
+var existanceStorage: [String: Bool] = [:]
 
 extension Entity {
     /**
@@ -33,6 +65,33 @@ extension Entity {
     public static var name: String {
         return String(describing: self).lowercased()
     }
+
+    private var address: String {
+        mutating get {
+            var id = ""
+            withUnsafePointer(to: &self) { id = "\($0)"}
+            return id
+        }
+    }
+
+    var exists: Bool {
+        mutating get {
+            return existanceStorage[address] ?? false
+        }
+        set {
+            existanceStorage[address] = newValue
+        }
+    }
+}
+
+
+extension Entity {
+    public func willCreate() {}
+    public func didCreate() {}
+    public func willUpdate() {}
+    public func didUpdate() {}
+    public func willDelete() {}
+    public func didDelete() {}
 }
 
 //MARK: CRUD
