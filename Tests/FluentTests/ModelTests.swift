@@ -3,7 +3,7 @@ import XCTest
 
 class ModelTests: XCTestCase {
     static let allTests = [
-        ("testManualPreparation", testManualPreparation),
+        ("testExamples", testExamples),
     ]
 
     var lqd: LastQueryDriver!
@@ -14,7 +14,7 @@ class ModelTests: XCTestCase {
         db = Database(lqd)
     }
 
-    func testManualPreparation() throws {
+    func testExamples() throws {
         Atom.database = db
         var atom = Atom(name: "test")
 
