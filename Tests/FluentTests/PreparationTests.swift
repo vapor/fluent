@@ -113,7 +113,7 @@ final class TestModel: Entity {
         age = try node.extract("age")
     }
 
-    func makeNode() throws -> Node {
+    func makeNode(context: Context = EmptyNode) throws -> Node {
         return try Node(node: [
             "id": id,
             "name": name,

@@ -5,18 +5,18 @@ final class DummyModel: Entity {
         return "dummy_models"
     }
 
-    var id: Node?
+    static func prepare(_ database: Database) throws {}
+    static func revert(_ database: Database) throws {}
 
-    func makeNode() -> Node {
-        return .null
-    }
+    var id: Node?
 
     init(node: Node, in context: Context) throws {
 
     }
 
-    static func prepare(_ database: Database) throws {}
-    static func revert(_ database: Database) throws {}
+    func makeNode(context: Context) -> Node {
+        return .null
+    }
 }
 
 class DummyDriver: Driver {

@@ -17,7 +17,7 @@ struct Atom: Entity {
         groupId = try node.extract("group_id")
     }
 
-    func makeNode() throws -> Node {
+    func makeNode(context: Context = EmptyNode) throws -> Node {
         return try Node(node: [
             "id": id,
             "name": name,
