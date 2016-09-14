@@ -33,7 +33,7 @@ final class User: Entity {
             "id": id,
             "name": name,
             "email": email
-            ])
+        ])
     }
 }
 
