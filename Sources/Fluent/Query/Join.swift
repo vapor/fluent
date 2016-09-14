@@ -75,7 +75,7 @@ public final class Pivot<
         }
     }
 
-    public func makeNode() throws -> Node {
+    public func makeNode(context: Context = EmptyNode) throws -> Node {
         return try Node(node: [
             "id": id,
             "\(type(of: self).left.name)_id": leftId,

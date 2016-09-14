@@ -13,7 +13,7 @@ final class Migration: Entity {
         name = try node.extract("name")
     }
 
-    func makeNode() throws -> Node {
+    func makeNode(context: Context = EmptyNode) throws -> Node {
         return try Node(node: [
             "id": id,
             "name": name
