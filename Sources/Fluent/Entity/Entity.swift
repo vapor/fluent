@@ -74,7 +74,7 @@ extension Entity {
         return String(describing: self).lowercased()
     }
 
-    // FIXME: Default for 0.11 to maintain compatibility. Remove for 0.12
+    // FIXME: Remove in 2.0. Also, make exists optional.
     public var exists: Bool {
         get {
             let type = type(of: self)
