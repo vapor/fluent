@@ -1,5 +1,6 @@
 final class Migration: Entity {
     static var entity = "fluent"
+    var exists: Bool = false
 
     var id: Node?
     var name: String

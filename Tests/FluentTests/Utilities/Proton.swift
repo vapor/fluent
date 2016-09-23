@@ -2,6 +2,7 @@ import Fluent
 
 final class Proton: Entity {
     var id: Node?
+    var exists: Bool = false
     init(node: Node, in context: Context) throws {}
 
     func makeNode(context: Context = EmptyNode) -> Node { return .null }

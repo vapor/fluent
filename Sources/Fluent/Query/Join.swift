@@ -23,6 +23,8 @@ public final class Pivot<
     First: Entity,
     Second: Entity
 >: Entity {
+    public var exists: Bool = false
+    
     public static var entity: String {
         return "\(left.name)_\(right.name)"
     }
