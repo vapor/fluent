@@ -75,6 +75,7 @@ extension Entity {
     }
 
     // FIXME: Remove in 2.0. Also, make exists optional.
+    @available(*, deprecated: 1.0, message: "This 'exists' property is not stored. Add `var exists: Bool = false` to the model. This default implementation will be removed in a future update.")
     public var exists: Bool {
         get {
             let type = type(of: self)
