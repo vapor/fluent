@@ -77,10 +77,13 @@ extension Entity {
     // FIXME: Default for 0.11 to maintain compatibility. Remove for 0.12
     public var exists: Bool {
         get {
+            let type = type(of: self)
+            print("[DEPRECATED] No 'exists' property is stored on '\(type)'. Add `var exists: Bool = false` to this model. The default implementation will be removed in a future update.")
             return true
         }
         set {
-            print("Exists not stored")
+            let type = type(of: self)
+            print("[DEPRECATED] No 'exists' property is stored on '\(type)'. Add `var exists: Bool = false` to this model. The default implementation will be removed in a future update.")
         }
     }
 }

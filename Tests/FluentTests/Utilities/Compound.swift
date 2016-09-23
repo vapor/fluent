@@ -3,6 +3,7 @@ import Fluent
 final class Compound: Entity {
     var id: Node?
     var name: String
+    var exists: Bool = false
 
     init(node: Node, in context: Context) throws {
         id = try node.extract("id")

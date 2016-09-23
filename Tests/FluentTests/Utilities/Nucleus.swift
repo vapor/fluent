@@ -1,6 +1,7 @@
 import Fluent
 
 final class Nucleus: Entity {
+    var exists: Bool = false
     static var entity = "nuclei"
     var id: Node?
     init(node: Node, in context: Context) throws { }
