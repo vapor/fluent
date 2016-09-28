@@ -45,13 +45,10 @@ public final class Pivot<
         }
     }
 
-    public var idKey: String {
-        return Pivot.database?.driver.idKey
-    }
-
     public var id: Node?
     public var leftId: Node?
     public var rightId: Node?
+    public var idKey: String?
 
     public init(_ first: Entity, _ second: Entity) {
         if First.self == type(of: self).left {
@@ -64,8 +61,10 @@ public final class Pivot<
     }
 
     public init(node: Node, in context: Context) throws {
+        
         id = try node.extract("id")
-
+        idKey = try First.query().idKey
+        
         let firstKey = "\(First.name)_\(idKey)"
         let secondKey = "\(Second.name)_\(idKey)"
 
@@ -79,6 +78,7 @@ public final class Pivot<
     }
 
     public func makeNode(context: Context = EmptyNode) throws -> Node {
+        
         return try Node(node: [
             "\(idKey)": id,
             "\(type(of: self).left.name)\(idKey)": leftId,
