@@ -45,6 +45,10 @@ public final class Pivot<
         }
     }
 
+    public var idKey: String {
+        return Pivot.database!.driver.idKey
+    }
+
     public var id: Node?
     public var leftId: Node?
     public var rightId: Node?
@@ -60,13 +64,11 @@ public final class Pivot<
     }
 
     public init(node: Node, in context: Context) throws {
+        print(node)
         id = try node.extract("id")
 
-        let firstQ = try First.query()
-        let secondQ = try Second.query()
-
-        let firstKey = "\(First.name)_\(firstQ.idKey)"
-        let secondKey = "\(Second.name)_\(secondQ.idKey)"
+        let firstKey = "\(First.name)_\(idKey)"
+        let secondKey = "\(Second.name)_\(idKey)"
 
         if First.self == type(of: self).left {
             leftId = try node.extract(firstKey)
@@ -79,17 +81,17 @@ public final class Pivot<
 
     public func makeNode(context: Context = EmptyNode) throws -> Node {
         return try Node(node: [
-            "id": id,
-            "\(type(of: self).left.name)_id": leftId,
-            "\(type(of: self).right.name)_id": rightId,
+            "\(idKey)": id,
+            "\(type(of: self).left.name)\(idKey)": leftId,
+            "\(type(of: self).right.name)\(idKey)": rightId,
         ])
     }
 
     public static func prepare(_ database: Database) throws {
         try database.create(entity) { builder in
             builder.id()
-            builder.int("\(left.name)_id")
-            builder.int("\(right.name)_id")
+            builder.int("\(left.name)\(database.driver.idKey)")
+            builder.int("\(right.name)\(database.driver.idKey)")
         }
     }
 
