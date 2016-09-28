@@ -46,7 +46,7 @@ public final class Pivot<
     }
 
     public var idKey: String {
-        return Pivot.database!.driver.idKey
+        return Pivot.database?.driver.idKey
     }
 
     public var id: Node?
