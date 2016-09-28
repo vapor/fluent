@@ -64,7 +64,6 @@ public final class Pivot<
     }
 
     public init(node: Node, in context: Context) throws {
-        print(node)
         id = try node.extract("id")
 
         let firstKey = "\(First.name)_\(idKey)"
