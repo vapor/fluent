@@ -81,16 +81,16 @@ public final class Pivot<
         
         return try Node(node: [
             "\(idKey)": id,
-            "\(type(of: self).left.name)\(idKey)": leftId,
-            "\(type(of: self).right.name)\(idKey)": rightId,
+            "\(type(of: self).left.name)_\(idKey)": leftId,
+            "\(type(of: self).right.name)_\(idKey)": rightId,
         ])
     }
 
     public static func prepare(_ database: Database) throws {
         try database.create(entity) { builder in
             builder.id()
-            builder.int("\(left.name)\(database.driver.idKey)")
-            builder.int("\(right.name)\(database.driver.idKey)")
+            builder.int("\(left.name)_\(database.driver.idKey)")
+            builder.int("\(right.name)_\(database.driver.idKey)")
         }
     }
 
