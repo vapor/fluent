@@ -4,18 +4,18 @@
 */
 public struct Limit {
     /**
-        The maximum number of 
+        The maximum number of
         results to be returned.
     */
-    var count: Int
-    
+    public var count: Int
+
     /**
-        The number of entries to offset the 
+        The number of entries to offset the
         query by.
     */
-    var offset: Int
-    
-    init(count: Int, offset: Int = 0) {
+    public var offset: Int
+
+    public init(count: Int, offset: Int = 0) {
         self.count = count
         self.offset = offset
     }
