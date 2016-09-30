@@ -118,8 +118,7 @@ open class GeneralSQLSerializer: SQLSerializer {
     open func sql(limit: Limit) -> String {
         var statement: [String] = []
 
-        statement += "LIMIT"
-        statement += "\(limit.offset), \(limit.count)"
+        statement += "LIMIT \(limit.count) OFFSET \(limit.offset)"
 
         return statement.joined(separator: " ")
     }
