@@ -363,6 +363,8 @@ open class GeneralSQLSerializer: SQLSerializer {
             return "BOOL"
         case .data:
             return "BLOB"
+        case .datetime:
+            return "DATETIME"
         }
     }
 

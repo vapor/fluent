@@ -15,6 +15,7 @@ extension Schema {
             case double
             case bool
             case data
+            case datetime
         }
 
         public init(name: String, type: DataType, optional: Bool = false) {
