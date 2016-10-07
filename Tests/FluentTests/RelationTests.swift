@@ -5,6 +5,8 @@ class RelationTests: XCTestCase {
     static let allTests = [
         ("testHasMany", testHasMany),
         ("testBelongsToMany", testBelongsToMany),
+        ("testCustomForeignKey", testCustomForeignKey),
+        ("testPivotDatabase", testPivotDatabase),
     ]
 
     var database: Database!
@@ -50,5 +52,11 @@ class RelationTests: XCTestCase {
         } catch {
             print(error)
         }
+    }
+    
+    func testPivotDatabase() throws {
+        Pivot<Atom, Nucleus>.database = database
+        XCTAssertTrue(Pivot<Atom, Nucleus>.database === database)
+        XCTAssertTrue(Pivot<Nucleus, Atom>.database === database)
     }
 }
