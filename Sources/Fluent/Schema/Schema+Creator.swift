@@ -56,9 +56,27 @@ extension Schema {
             fields += Field(name: name, type: .data, optional: optional)
         }
 
+        public func timestamp(
+            _ name: String,
+            optional: Bool = false
+            ) {
+            fields += Field(name: name, type: .timestamp, optional: optional)
+        }
+        
+        
+        public func datetime(
+            _ name: String,
+            optional: Bool = false
+            ) {
+            fields += Field(name: name, type: .datetime, optional: optional)
+        }
+
         public var schema: Schema {
             return .create(entity: entity, create: fields)
         }
+        
+        
+
 
         // MARK: Relations
 
