@@ -9,6 +9,12 @@ extension SQL {
                 orders: query.sorts,
                 limit: query.limit
             )
+        case .count:
+            self = .count(
+                table: query.entity,
+                filters: query.filters,
+                joins: query.unions
+            )
         case .create:
             self = .insert(
                 table: query.entity,
