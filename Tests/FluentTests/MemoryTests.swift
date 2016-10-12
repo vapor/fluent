@@ -90,7 +90,7 @@ class MemoryTests: XCTestCase {
     }
     
     func testCount() throws {
-        let (driver, database) = makeTestModels()
+        let (_, database) = makeTestModels()
         
         var new1 = User(id: nil, name: "Vapor", email: "test1@email.com")
         var new2 = User(id: nil, name: "Vapor", email: "test2@email.com")

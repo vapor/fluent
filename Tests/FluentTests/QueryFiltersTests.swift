@@ -64,6 +64,19 @@ class QueryFiltersTests: XCTestCase {
         XCTAssert(comparison == .hasPrefix, "Position should be start")
         XCTAssert(value.string == "Vap", "Value should be Vap")
     }
+    
+    func testCountQuery() throws {
+        let query = try DummyModel.query().filter("id", 5)
+        
+        do {
+            let numberOfResults = try query.count()
+            XCTAssertEqual(numberOfResults, 0)
+        } catch {
+            XCTFail("Count should not have failed")
+        }
+        
+        XCTAssert(query.action == .count)
+    }
 
     func testDeleteQuery() throws {
         let query = try DummyModel.query().filter("id", 5)
