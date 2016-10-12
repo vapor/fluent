@@ -8,6 +8,10 @@ class SQLSerializerTests: XCTestCase {
         ("testOffsetSelect", testOffsetSelect),
         ("testFilterCompareSelect", testFilterCompareSelect),
         ("testFilterLikeSelect", testFilterLikeSelect),
+        ("testBasicCount", testBasicCount),
+        ("testRegularCount", testRegularCount),
+        ("testFilterCompareCount", testFilterCompareCount),
+        ("testFilterLikeCount", testFilterLikeCount),
         ("testFilterCompareUpdate", testFilterCompareUpdate),
         ("testFilterCompareDelete", testFilterCompareDelete),
         ("testFilterGroup", testFilterGroup)
