@@ -43,8 +43,9 @@ open class GeneralSQLSerializer: SQLSerializer {
             var statement: [String] = []
             var values: [Node] = []
 
-            statement += "SELECT * FROM"
-            statement += sql(table)
+            let tableSQL = sql(table)
+            statement += "SELECT \(tableSQL).* FROM"
+            statement += tableSQL
 
             if !unions.isEmpty {
                 statement += sql(unions)
@@ -62,6 +63,27 @@ open class GeneralSQLSerializer: SQLSerializer {
 
             if let limit = limit {
                 statement += sql(limit: limit)
+            }
+
+            return (
+                sql(statement),
+                values
+            )
+        case .count(let table, let filters, let unions):
+            var statement: [String] = []
+            var values: [Node] = []
+
+            statement += "SELECT COUNT(*) FROM"
+            statement += sql(table)
+
+            if !unions.isEmpty {
+                statement += sql(unions)
+            }
+
+            if !filters.isEmpty {
+                let (filtersClause, filtersValues) = sql(filters)
+                statement += filtersClause
+                values += filtersValues
             }
 
             return (

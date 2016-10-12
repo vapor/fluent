@@ -88,4 +88,23 @@ class MemoryTests: XCTestCase {
             return u1.name < u2.name
         }))
     }
+    
+    func testCount() throws {
+        let (_, database) = makeTestModels()
+        
+        var new1 = User(id: nil, name: "Vapor", email: "test1@email.com")
+        var new2 = User(id: nil, name: "Vapor", email: "test2@email.com")
+        let store = Query<User>(database)
+        try store.save(&new1)
+        try store.save(&new2)
+
+        let count1 = try Query<User>(database).filter("name", "Vapor").count()
+        XCTAssertEqual(count1, 2)
+        
+        let count2 = try Query<User>(database).filter("email", "test1@email.com").count()
+        XCTAssertEqual(count2, 1)
+        
+        let count3 = try Query<User>(database).filter("name", "Test").count()
+        XCTAssertEqual(count3, 0)
+    }
 }
