@@ -10,7 +10,12 @@ class SQLSerializerTests: XCTestCase {
         ("testFilterLikeSelect", testFilterLikeSelect),
         ("testFilterCompareUpdate", testFilterCompareUpdate),
         ("testFilterCompareDelete", testFilterCompareDelete),
-        ("testFilterGroup", testFilterGroup)
+        ("testFilterGroup", testFilterGroup),
+        ("testSort", testSort),
+        ("testSortMultiple", testSortMultiple),
+        ("testJoinSelect", testJoinSelect),
+        ("testJoinDelete", testJoinDelete),
+        ("testJoinUpdate", testJoinUpdate),
     ]
 
     func testBasicSelect() {
@@ -64,7 +69,7 @@ class SQLSerializerTests: XCTestCase {
     func testFilterCompareUpdate() {
         let filter = Filter(User.self, .compare("name", .equals, "duck"))
 
-        let update = SQL.update(table: "friends", filters: [filter], data: ["not it": true])
+        let update = SQL.update(table: "friends", filters: [filter], joins: [], data: ["not it": true])
         let (statement, values) = serialize(update)
         XCTAssertEqual(statement, "UPDATE `friends` SET `not it` = ? WHERE `users`.`name` = ?")
         XCTAssertEqual(values.first?.bool, true)
@@ -75,7 +80,7 @@ class SQLSerializerTests: XCTestCase {
     func testFilterCompareDelete() {
         let filter = Filter(User.self, .compare("name", .greaterThan, .string("duck")))
 
-        let delete = SQL.delete(table: "friends", filters: [filter], limit: nil)
+        let delete = SQL.delete(table: "friends", filters: [filter], joins: [], orders: [], limit: nil)
         let (statement, values) = serialize(delete)
 
         XCTAssertEqual(statement, "DELETE FROM `friends` WHERE `users`.`name` > ?")
@@ -114,6 +119,41 @@ class SQLSerializerTests: XCTestCase {
         let (statement, values) = serialize(select)
         XCTAssertEqual(statement, "SELECT * FROM `users` WHERE `users`.`age` > ? ORDER BY `users`.`name` ASC, `users`.`email` DESC")
         XCTAssertEqual(values.count, 1)
+    }
+    
+    func testJoinSelect() throws {
+        let filter = Filter(Atom.self, .compare("name", .equals, "test"))
+        let union = Union(local: Atom.self, foreign: Group.self, idKey: "id", localKey: "groupId", foreignKey: "id")
+        let sql = SQL.select(table: "atoms", filters: [filter], joins: [union], orders: [], limit: Limit(count: 5))
+        let (statement, values) = serialize(sql)
+
+        XCTAssertEqual(statement, "SELECT * FROM `atoms` JOIN `groups` ON `atoms`.`groupId` = `groups`.`id` WHERE `atoms`.`name` = ? LIMIT 0, 5")
+        XCTAssertEqual(values.first?.string, "test")
+        XCTAssertEqual(values.count, 1)
+    }
+    
+    func testJoinDelete() throws {
+        let filter = Filter(Atom.self, .compare("name", .equals, "test"))
+        let name = Sort(Atom.self, "name", .ascending)
+        let union = Union(local: Atom.self, foreign: Group.self, idKey: "id", localKey: "groupId", foreignKey: "id")
+        let sql = SQL.delete(table: "atoms", filters: [filter], joins: [union], orders: [name], limit: Limit(count: 5))
+        let (statement, values) = serialize(sql)
+        
+        XCTAssertEqual(statement, "DELETE FROM `atoms` WHERE EXISTS ( SELECT `atoms`.* FROM `atoms` JOIN `groups` ON `atoms`.`groupId` = `groups`.`id` WHERE `atoms`.`name` = ? ORDER BY `atoms`.`name` ASC LIMIT 0, 5 )")
+        XCTAssertEqual(values.first?.string, "test")
+        XCTAssertEqual(values.count, 1)
+    }
+    
+    func testJoinUpdate() throws {
+        let filter = Filter(Atom.self, .compare("name", .equals, "test"))
+        let union = Union(local: Atom.self, foreign: Group.self, idKey: "id", localKey: "groupId", foreignKey: "id")
+        let sql = SQL.update(table: "atoms", filters: [filter], joins: [union], data: ["name": "test2"])
+        let (statement, values) = serialize(sql)
+        
+        XCTAssertEqual(statement, "UPDATE `atoms` SET `name` = ? WHERE EXISTS ( SELECT `atoms`.* FROM `atoms` JOIN `groups` ON `atoms`.`groupId` = `groups`.`id` WHERE `atoms`.`name` = ? )")
+        XCTAssertEqual(values.first?.string, "test2")
+        XCTAssertEqual(values.last?.string, "test")
+        XCTAssertEqual(values.count, 2)
     }
 }
 

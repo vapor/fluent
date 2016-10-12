@@ -68,45 +68,77 @@ open class GeneralSQLSerializer: SQLSerializer {
                 sql(statement),
                 values
             )
-        case .delete(let table, let filters, let limit):
+        case .delete(let table, let filters, let unions, let orders, let limit):
             var statement: [String] = []
             var values: [Node] = []
 
+            let tableSQL = sql(table)
             statement += "DELETE FROM"
-            statement += sql(table)
+            statement += tableSQL
+            
+            if !unions.isEmpty {
+                statement += "WHERE EXISTS ("
+                
+                statement += "SELECT \(tableSQL).* FROM"
+                statement += tableSQL
+                
+                statement += sql(unions)
+            }
 
             if !filters.isEmpty {
                 let (filtersClause, filtersValues) = sql(filters)
                 statement += filtersClause
                 values += filtersValues
             }
+            
+            if !orders.isEmpty {
+                statement += sql(orders)
+            }
 
             if let limit = limit {
                 statement += sql(limit: limit)
+            }
+            
+            if !unions.isEmpty {
+                statement += ")"
             }
 
             return (
                 sql(statement),
                 values
             )
-        case .update(let table, let filters, let data):
+        case .update(let table, let filters, let unions, let data):
             var statement: [String] = []
 
             var values: [Node] = []
 
+            let tableSQL = sql(table)
             statement += "UPDATE"
-            statement += sql(table)
+            statement += tableSQL
             statement += "SET"
-
+            
             if let data = data, case .object(let obj) = data {
                 let (dataClause, dataValues) = sql(update: obj)
                 statement += dataClause
                 values += dataValues
             }
-
-            let (filterclause, filterValues) = sql(filters)
+            
+            if !unions.isEmpty {
+                statement += "WHERE EXISTS ("
+                
+                statement += "SELECT \(tableSQL).* FROM"
+                statement += tableSQL
+                
+                statement += sql(unions)
+            }
+            
+            let (filterclause, filterValues) = self.sql(filters)
             statement += filterclause
             values += filterValues
+            
+            if !unions.isEmpty {
+                statement += ")"
+            }
 
             return (
                 sql(statement),
