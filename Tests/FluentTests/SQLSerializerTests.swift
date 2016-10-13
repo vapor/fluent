@@ -17,7 +17,7 @@ class SQLSerializerTests: XCTestCase {
         let sql = SQL.select(table: "users", filters: [], joins: [], orders: [], limit: nil)
         let (statement, values) = serialize(sql)
 
-        XCTAssertEqual(statement, "SELECT * FROM `users`")
+        XCTAssertEqual(statement, "SELECT `users`.* FROM `users`")
         XCTAssert(values.isEmpty)
     }
 
@@ -26,7 +26,7 @@ class SQLSerializerTests: XCTestCase {
         let sql = SQL.select(table: "users", filters: [filter], joins: [], orders: [], limit: Limit(count: 5))
         let (statement, values) = serialize(sql)
 
-        XCTAssertEqual(statement, "SELECT * FROM `users` WHERE `users`.`age` >= ? LIMIT 0, 5")
+        XCTAssertEqual(statement, "SELECT `users`.* FROM `users` WHERE `users`.`age` >= ? LIMIT 0, 5")
         XCTAssertEqual(values.first?.int, 21)
         XCTAssertEqual(values.count, 1)
     }
@@ -36,7 +36,7 @@ class SQLSerializerTests: XCTestCase {
         let sql = SQL.select(table: "users", filters: [filter], joins: [], orders: [], limit: Limit(count: 5, offset: 15))
         let (statement, _) = serialize(sql)
         
-        XCTAssertEqual(statement, "SELECT * FROM `users` WHERE `users`.`age` >= ? LIMIT 15, 5")
+        XCTAssertEqual(statement, "SELECT `users`.* FROM `users` WHERE `users`.`age` >= ? LIMIT 15, 5")
     }
 
     func testFilterCompareSelect() {
@@ -45,7 +45,7 @@ class SQLSerializerTests: XCTestCase {
         let select = SQL.select(table: "friends", filters: [filter], joins: [], orders: [], limit: nil)
         let (statement, values) = serialize(select)
 
-        XCTAssertEqual(statement, "SELECT * FROM `friends` WHERE `users`.`name` != ?")
+        XCTAssertEqual(statement, "SELECT `friends`.* FROM `friends` WHERE `users`.`name` != ?")
         XCTAssertEqual(values.first?.string, "duck")
         XCTAssertEqual(values.count, 1)
     }
@@ -56,7 +56,7 @@ class SQLSerializerTests: XCTestCase {
         let select = SQL.select(table: "friends", filters: [filter], joins: [], orders: [], limit: nil)
         let (statement, values) = serialize(select)
 
-        XCTAssertEqual(statement, "SELECT * FROM `friends` WHERE `users`.`name` LIKE ?")
+        XCTAssertEqual(statement, "SELECT `friends`.* FROM `friends` WHERE `users`.`name` LIKE ?")
         XCTAssertEqual(values.first?.string, "duc%")
         XCTAssertEqual(values.count, 1)
     }
@@ -93,7 +93,7 @@ class SQLSerializerTests: XCTestCase {
         let select = SQL.select(table: "users", filters: [one, group, four], joins: [], orders: [], limit: nil)
         let (statement, values) = serialize(select)
 
-        XCTAssertEqual(statement, "SELECT * FROM `users` WHERE `users`.`1` = ? AND (`users`.`2` = ? OR `users`.`3` = ?) AND `users`.`4` = ?")
+        XCTAssertEqual(statement, "SELECT `users`.* FROM `users` WHERE `users`.`1` = ? AND (`users`.`2` = ? OR `users`.`3` = ?) AND `users`.`4` = ?")
         XCTAssertEqual(values.count, 4)
     }
 
@@ -102,7 +102,7 @@ class SQLSerializerTests: XCTestCase {
         let name = Sort(User.self, "name", .ascending)
         let select = SQL.select(table: "users", filters: [adult], joins: [], orders: [name], limit: nil)
         let (statement, values) = serialize(select)
-        XCTAssertEqual(statement, "SELECT * FROM `users` WHERE `users`.`age` > ? ORDER BY `users`.`name` ASC")
+        XCTAssertEqual(statement, "SELECT `users`.* FROM `users` WHERE `users`.`age` > ? ORDER BY `users`.`name` ASC")
         XCTAssertEqual(values.count, 1)
     }
 
@@ -112,7 +112,7 @@ class SQLSerializerTests: XCTestCase {
         let email = Sort(User.self, "email", .descending)
         let select = SQL.select(table: "users", filters: [adult], joins: [], orders: [name, email], limit: nil)
         let (statement, values) = serialize(select)
-        XCTAssertEqual(statement, "SELECT * FROM `users` WHERE `users`.`age` > ? ORDER BY `users`.`name` ASC, `users`.`email` DESC")
+        XCTAssertEqual(statement, "SELECT `users`.* FROM `users` WHERE `users`.`age` > ? ORDER BY `users`.`name` ASC, `users`.`email` DESC")
         XCTAssertEqual(values.count, 1)
     }
 }
