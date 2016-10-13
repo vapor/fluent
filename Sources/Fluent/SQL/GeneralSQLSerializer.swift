@@ -43,9 +43,8 @@ open class GeneralSQLSerializer: SQLSerializer {
             var statement: [String] = []
             var values: [Node] = []
 
-            let tableSQL = sql(table)
-            statement += "SELECT \(tableSQL).* FROM"
-            statement += tableSQL
+            statement += "SELECT * FROM"
+            statement += sql(table)
 
             if !unions.isEmpty {
                 statement += sql(unions)
