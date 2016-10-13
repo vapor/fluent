@@ -11,6 +11,11 @@ extension Database {
         do {
             // check to see if this preparation has already run
             if let _ = try Migration.query().filter("name", preparation.name).first() {
+                
+                // set the current database on involved Models
+                if let model = preparation as? Entity.Type {
+                    model.database = self
+                }
                 return true
             }
         } catch {
