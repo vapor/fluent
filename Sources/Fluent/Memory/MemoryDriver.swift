@@ -31,10 +31,6 @@ public final class MemoryDriver: Driver {
             let results = group.fetch(query.filters, query.sorts)
 
             return Node.array(results)
-        case .count:
-            let count = group.fetch(query.filters, query.sorts).count
-            
-            return Node.number(.int(count))
         case .modify:
             guard let data = query.data else {
                 throw Error.dataRequired
