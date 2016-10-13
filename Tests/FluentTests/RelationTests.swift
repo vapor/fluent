@@ -7,9 +7,11 @@ class RelationTests: XCTestCase {
         ("testBelongsToMany", testBelongsToMany),
     ]
 
+    var memory: MemoryDriver!
     var database: Database!
     override func setUp() {
-        database = Database(MemoryDriver())
+        memory = MemoryDriver()
+        database = Database(memory)
     }
 
     func testHasMany() throws {
@@ -25,11 +27,27 @@ class RelationTests: XCTestCase {
     }
 
     func testBelongsToMany() throws {
-        let hydrogen = try Atom(node: [
-            "id": 42,
+        Atom.database = database
+        Compound.database = database
+        Pivot<Atom, Compound>.database = database
+
+        var hydrogen = try Atom(node: [
             "name": "Hydrogen",
             "group_id": 1337
         ])
+        try hydrogen.save()
+        hydrogen.id = 42
+        try hydrogen.save()
+
+        var water = try Compound(node: [
+            "name": "Water"
+        ])
+        try water.save()
+        water.id = 1337
+        try water.save()
+
+        var pivot = Pivot<Atom, Compound>(hydrogen, water)
+        try pivot.save()
 
         _ = try hydrogen.compounds().all()
     }
