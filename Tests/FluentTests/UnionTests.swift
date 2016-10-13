@@ -84,7 +84,7 @@ class UnionTests: XCTestCase {
         if let sql = lqd.lastQuery {
             let serializer = GeneralSQLSerializer(sql: sql)
             let (statement, values) = serializer.serialize()
-            XCTAssertEqual(statement, "SELECT * FROM `atoms` JOIN `compounds` ON `atoms`.`#local_key` = `compounds`.`#foreign_key`")
+            XCTAssertEqual(statement, "SELECT `atoms`.* FROM `atoms` JOIN `compounds` ON `atoms`.`#local_key` = `compounds`.`#foreign_key`")
             XCTAssertEqual(values.count, 0)
         } else {
             XCTFail("No last query.")
@@ -106,7 +106,7 @@ class UnionTests: XCTestCase {
         if let sql = lqd.lastQuery {
             let serializer = GeneralSQLSerializer(sql: sql)
             let (statement, values) = serializer.serialize()
-            XCTAssertEqual(statement, "SELECT * FROM `atoms` JOIN `compounds` ON `atoms`.`#local_key` = `compounds`.`#foreign_key` WHERE `atoms`.`protons` > ? AND `compounds`.`atoms` < ?")
+            XCTAssertEqual(statement, "SELECT `atoms`.* FROM `atoms` JOIN `compounds` ON `atoms`.`#local_key` = `compounds`.`#foreign_key` WHERE `atoms`.`protons` > ? AND `compounds`.`atoms` < ?")
 
             if values.count == 2 {
                 XCTAssertEqual(values[0].int, 5)
@@ -135,7 +135,7 @@ class UnionTests: XCTestCase {
             let (statement, values) = serializer.serialize()
             XCTAssertEqual(
                 statement,
-                "SELECT * FROM `compounds` JOIN `atom_compound` ON `compounds`.`\(lqd.idKey)` = `atom_compound`.`compound_\(lqd.idKey)` WHERE `atom_compound`.`atom_\(lqd.idKey)` = ?"
+                "SELECT `compounds`.* FROM `compounds` JOIN `atom_compound` ON `compounds`.`\(lqd.idKey)` = `atom_compound`.`compound_\(lqd.idKey)` WHERE `atom_compound`.`atom_\(lqd.idKey)` = ?"
             )
             XCTAssertEqual(values.count, 1)
             XCTAssertEqual(values.first?.int, 42)
