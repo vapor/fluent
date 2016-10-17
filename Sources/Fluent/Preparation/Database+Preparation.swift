@@ -11,6 +11,11 @@ extension Database {
         do {
             // check to see if this preparation has already run
             if let _ = try Migration.query().filter("name", preparation.name).first() {
+                // already prepared, set entity db
+                if let model = preparation as? Entity.Type {
+                    model.database = self
+                }
+
                 return true
             }
         } catch {
@@ -25,17 +30,17 @@ extension Database {
     public func prepare(_ preparation: Preparation.Type) throws {
         Migration.database = self
 
-        // set the current database on involved Models
-        if let model = preparation as? Entity.Type {
-            model.database = self
-        }
-
-
         if try hasPrepared(preparation) {
             throw PreparationError.alreadyPrepared
         }
 
         try preparation.prepare(self)
+
+        if let model = preparation as? Entity.Type {
+            // preparation successful, set entity db
+            model.database = self
+        }
+
 
         // record that this preparation has run
         var migration = Migration(name: preparation.name)

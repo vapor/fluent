@@ -69,27 +69,6 @@ open class GeneralSQLSerializer: SQLSerializer {
                 sql(statement),
                 values
             )
-        case .count(let table, let filters, let unions):
-            var statement: [String] = []
-            var values: [Node] = []
-
-            statement += "SELECT COUNT(*) FROM"
-            statement += sql(table)
-
-            if !unions.isEmpty {
-                statement += sql(unions)
-            }
-
-            if !filters.isEmpty {
-                let (filtersClause, filtersValues) = sql(filters)
-                statement += filtersClause
-                values += filtersValues
-            }
-
-            return (
-                sql(statement),
-                values
-            )
         case .delete(let table, let filters, let unions, let orders, let limit):
             var statement: [String] = []
             var values: [Node] = []

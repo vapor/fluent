@@ -5,7 +5,6 @@
 */
 public enum Action {
     case fetch
-    case count
     case delete
     case create
     case modify
