@@ -151,6 +151,15 @@ extension QueryRepresentable {
 
         return m
     }
+    
+    /**
+     Returns the number of results for the query.
+     */
+    public func count() throws -> Int {
+        let query = try makeQuery()
+        query.action = .count
+        return try query.raw().int ?? 0
+    }
 
     //MARK: Create
 
