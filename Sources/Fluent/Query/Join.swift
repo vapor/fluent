@@ -29,6 +29,10 @@ public final class Pivot<
         return "\(left.name)_\(right.name)"
     }
 
+    public static var name: String {
+        return entity
+    }
+
     public static var left: Entity.Type {
         if First.entity < Second.entity {
             return First.self

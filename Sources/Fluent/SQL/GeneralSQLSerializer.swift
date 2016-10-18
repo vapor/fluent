@@ -211,23 +211,32 @@ open class GeneralSQLSerializer: SQLSerializer {
 
         switch filter.method {
         case .compare(let key, let comparison, let value):
-            statement += "\(sql(filter.entity.entity)).\(sql(key))"
-            statement += sql(comparison)
-            statement += "?"
-
-            /**
-                `.like` comparison operator requires additional
-                processing of `value`
-             */
-            switch comparison {
-            case .hasPrefix:
-                values += sql(hasPrefix: value)
-            case .hasSuffix:
-                values += sql(hasSuffix: value)
-            case .contains:
-                values += sql(contains: value)
-            default:
-                values += value
+            // `.null` needs special handling in the case of `.equals` or `.notEquals`.
+            if comparison == .equals && value == .null {
+                statement += "\(sql(filter.entity.entity)).\(sql(key)) IS NULL"
+            }
+            else if comparison == .notEquals && value == .null {
+                statement += "\(sql(filter.entity.entity)).\(sql(key)) IS NOT NULL"
+            }
+            else {
+                statement += "\(sql(filter.entity.entity)).\(sql(key))"
+                statement += sql(comparison)
+                statement += "?"
+    
+                /**
+                    `.like` comparison operator requires additional
+                    processing of `value`
+                 */
+                switch comparison {
+                case .hasPrefix:
+                    values += sql(hasPrefix: value)
+                case .hasSuffix:
+                    values += sql(hasSuffix: value)
+                case .contains:
+                    values += sql(contains: value)
+                default:
+                    values += value
+                }
             }
         case .subset(let key, let scope, let subValues):
             statement += "\(sql(filter.entity.entity)).\(sql(key))"

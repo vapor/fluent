@@ -12,6 +12,15 @@ public protocol Entity: Preparation, NodeConvertible {
     static var entity: String { get }
 
     /**
+        The name to use for internal storage.
+
+        This should be left as the default 
+        implementation except for special cases
+        like pivots.
+    */
+    static var name: String { get }
+
+    /**
         The entity's primary identifier.
         This is the same value used for
         `find(:_)`.
