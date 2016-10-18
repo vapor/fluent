@@ -8,9 +8,13 @@ class SQLSerializerTests: XCTestCase {
         ("testOffsetSelect", testOffsetSelect),
         ("testFilterCompareSelect", testFilterCompareSelect),
         ("testFilterLikeSelect", testFilterLikeSelect),
+        ("testFilterEqualsNullSelect", testFilterEqualsNullSelect),
+        ("testFilterNotEqualsNullSelect", testFilterNotEqualsNullSelect),
         ("testFilterCompareUpdate", testFilterCompareUpdate),
         ("testFilterCompareDelete", testFilterCompareDelete),
-        ("testFilterGroup", testFilterGroup)
+        ("testFilterGroup", testFilterGroup),
+        ("testSort", testSort),
+        ("testSortMultiple", testSortMultiple),
     ]
 
     func testBasicSelect() {
@@ -59,6 +63,26 @@ class SQLSerializerTests: XCTestCase {
         XCTAssertEqual(statement, "SELECT `friends`.* FROM `friends` WHERE `users`.`name` LIKE ?")
         XCTAssertEqual(values.first?.string, "duc%")
         XCTAssertEqual(values.count, 1)
+    }
+    
+    func testFilterEqualsNullSelect() {
+        let filter = Filter(User.self, .compare("name", .equals, Node.null))
+        
+        let select = SQL.select(table: "friends", filters: [filter], joins: [], orders: [], limit: nil)
+        let (statement, values) = serialize(select)
+
+        XCTAssertEqual(statement, "SELECT `friends`.* FROM `friends` WHERE `users`.`name` IS NULL")
+        XCTAssertEqual(values.count, 0)
+    }
+    
+    func testFilterNotEqualsNullSelect() {
+        let filter = Filter(User.self, .compare("name", .notEquals, Node.null))
+        
+        let select = SQL.select(table: "friends", filters: [filter], joins: [], orders: [], limit: nil)
+        let (statement, values) = serialize(select)
+
+        XCTAssertEqual(statement, "SELECT `friends`.* FROM `friends` WHERE `users`.`name` IS NOT NULL")
+        XCTAssertEqual(values.count, 0)
     }
 
     func testFilterCompareUpdate() {
