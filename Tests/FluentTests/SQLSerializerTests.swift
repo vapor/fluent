@@ -161,7 +161,7 @@ class SQLSerializerTests: XCTestCase {
         let sql = SQL.delete(table: "atoms", filters: [filter], joins: [union], orders: [name], limit: Limit(count: 5))
         let (statement, values) = serialize(sql)
         
-        XCTAssertEqual(statement, "DELETE FROM `atoms` WHERE EXISTS ( SELECT `atoms`.* FROM `atoms` JOIN `groups` ON `atoms`.`groupId` = `groups`.`id` WHERE `atoms`.`name` = ? ORDER BY `atoms`.`name` ASC LIMIT 0, 5 )")
+        XCTAssertEqual(statement, "DELETE FROM `atoms` WHERE `atoms`.`name` = ? AND EXISTS ( SELECT `groups`.* FROM `groups` WHERE `groups`.`id` = `atoms`.`groupId` ORDER BY `atoms`.`name` ASC LIMIT 0, 5 )")
         XCTAssertEqual(values.first?.string, "test")
         XCTAssertEqual(values.count, 1)
     }
@@ -172,7 +172,7 @@ class SQLSerializerTests: XCTestCase {
         let sql = SQL.update(table: "atoms", filters: [filter], joins: [union], data: ["name": "test2"])
         let (statement, values) = serialize(sql)
         
-        XCTAssertEqual(statement, "UPDATE `atoms` SET `name` = ? WHERE EXISTS ( SELECT `atoms`.* FROM `atoms` JOIN `groups` ON `atoms`.`groupId` = `groups`.`id` WHERE `atoms`.`name` = ? )")
+        XCTAssertEqual(statement, "UPDATE `atoms` SET `name` = ? WHERE `atoms`.`name` = ? AND EXISTS ( SELECT `groups`.* FROM `groups` WHERE `groups`.`id` = `atoms`.`groupId` )")
         XCTAssertEqual(values.first?.string, "test2")
         XCTAssertEqual(values.last?.string, "test")
         XCTAssertEqual(values.count, 2)
