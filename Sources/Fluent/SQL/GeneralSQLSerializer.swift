@@ -78,8 +78,8 @@ open class GeneralSQLSerializer: SQLSerializer {
             statement += tableSQL
             
             // When performing a join, use WHERE EXISTS with the first join
-            if let firstJoin = unions.first {
-                let (whereExistsStatement, whereExistsValues) = serializeWhereExists(firstJoin: firstJoin, joins: Array(unions.dropFirst()), filters: filters, orders: orders, limit: limit)
+            if !unions.isEmpty {
+                let (whereExistsStatement, whereExistsValues) = serializeWhereExists(entity: table, joins: unions, filters: filters, orders: orders, limit: limit)
                 
                 statement += whereExistsStatement
                 values += whereExistsValues
@@ -125,8 +125,8 @@ open class GeneralSQLSerializer: SQLSerializer {
             }
             
             // When performing a join, use WHERE EXISTS with the first join
-            if let firstJoin = unions.first {
-                let (whereExistsStatement, whereExistsValues) = serializeWhereExists(firstJoin: firstJoin, joins: Array(unions.dropFirst()), filters: filters)
+            if !unions.isEmpty {
+                let (whereExistsStatement, whereExistsValues) = serializeWhereExists(entity: table, joins: unions, filters: filters)
                 
                 statement += whereExistsStatement
                 values += whereExistsValues
@@ -499,14 +499,13 @@ open class GeneralSQLSerializer: SQLSerializer {
         return "`\(string)`"
     }
     
-    open func serializeWhereExists(firstJoin: Union, joins: [Union] = [], filters: [Filter] = [], orders: [Sort] = [], limit: Limit? = nil) -> (String, [Node]) {
+    open func serializeWhereExists(entity: String, joins: [Union], filters: [Filter] = [], orders: [Sort] = [], limit: Limit? = nil) -> (String, [Node]) {
         var statement: [String] = []
         var values: [Node] = []
         
-        // Before performing the WHERE EXISTS, filter out all the filters for the current entity
-        let localFilters = filters.filter { $0.entity.entity == firstJoin.local.entity }
+        // Add all the filters on the local entity first, then start the EXISTS query
+        let localFilters = filters.filter { $0.entity.entity == entity }
         if !localFilters.isEmpty {
-            // Add the filters, before the EXISTS clause
             let (filterclause, filterValues) = self.sql(localFilters)
             statement += filterclause
             values += filterValues
@@ -514,26 +513,26 @@ open class GeneralSQLSerializer: SQLSerializer {
             statement += "AND EXISTS ("
         }
         else {
-            // If there are now filters, directly perform WHERE EXISTS
             statement += "WHERE EXISTS ("
         }
         
-        // Perform the normal select query as WHERE EXISTS
-        let tableSQL = sql(firstJoin.foreign.entity)
-        statement += "SELECT \(tableSQL).* FROM"
-        statement += tableSQL
-
-        if !joins.isEmpty {
-            statement += sql(joins)
-        }
+        statement += "SELECT * FROM"
         
+        // Add all joins as FROM in the EXISTS query
+        statement += joins
+            .map { sql($0.foreign.entity) }
+            .joined(separator: ", ")
+        
+        // Add all joins as `WHERE foreign.id = local.id`
         statement += "WHERE"
-        statement += "\(sql(firstJoin.foreign.entity)).\(sql(firstJoin.foreignKey))"
-        statement += "="
-        statement += "\(sql(firstJoin.local.entity)).\(sql(firstJoin.localKey))"
+        statement += joins
+            .map { join in
+                return "\(sql(join.foreign.entity)).\(sql(join.foreignKey)) = \(sql(join.local.entity)).\(sql(join.localKey))"
+            }
+            .joined(separator: " AND ")
 
-        // Only add the filters which are not on the current table
-        let joinFilters = filters.filter { $0.entity != firstJoin.local }
+        // Add remaining filters to EXISTS query
+        let joinFilters = filters.filter { $0.entity.entity != entity }
         if !joinFilters.isEmpty {
             statement += "AND"
             
@@ -550,6 +549,7 @@ open class GeneralSQLSerializer: SQLSerializer {
             statement += sql(limit: limit)
         }
         
+        // End EXISTS query
         statement += ")"
         
         return (

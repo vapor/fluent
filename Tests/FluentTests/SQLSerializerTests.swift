@@ -18,6 +18,7 @@ class SQLSerializerTests: XCTestCase {
         ("testJoinSelect", testJoinSelect),
         ("testJoinDelete", testJoinDelete),
         ("testJoinUpdate", testJoinUpdate),
+        ("testMultipleJoinUpdate", testMultipleJoinUpdate),
     ]
 
     func testBasicSelect() {
@@ -161,7 +162,7 @@ class SQLSerializerTests: XCTestCase {
         let sql = SQL.delete(table: "atoms", filters: [filter], joins: [union], orders: [name], limit: Limit(count: 5))
         let (statement, values) = serialize(sql)
         
-        XCTAssertEqual(statement, "DELETE FROM `atoms` WHERE `atoms`.`name` = ? AND EXISTS ( SELECT `groups`.* FROM `groups` WHERE `groups`.`id` = `atoms`.`groupId` ORDER BY `atoms`.`name` ASC LIMIT 0, 5 )")
+        XCTAssertEqual(statement, "DELETE FROM `atoms` WHERE `atoms`.`name` = ? AND EXISTS ( SELECT * FROM `groups` WHERE `groups`.`id` = `atoms`.`groupId` ORDER BY `atoms`.`name` ASC LIMIT 0, 5 )")
         XCTAssertEqual(values.first?.string, "test")
         XCTAssertEqual(values.count, 1)
     }
@@ -172,7 +173,20 @@ class SQLSerializerTests: XCTestCase {
         let sql = SQL.update(table: "atoms", filters: [filter], joins: [union], data: ["name": "test2"])
         let (statement, values) = serialize(sql)
         
-        XCTAssertEqual(statement, "UPDATE `atoms` SET `name` = ? WHERE `atoms`.`name` = ? AND EXISTS ( SELECT `groups`.* FROM `groups` WHERE `groups`.`id` = `atoms`.`groupId` )")
+        XCTAssertEqual(statement, "UPDATE `atoms` SET `name` = ? WHERE `atoms`.`name` = ? AND EXISTS ( SELECT * FROM `groups` WHERE `groups`.`id` = `atoms`.`groupId` )")
+        XCTAssertEqual(values.first?.string, "test2")
+        XCTAssertEqual(values.last?.string, "test")
+        XCTAssertEqual(values.count, 2)
+    }
+    
+    func testMultipleJoinUpdate() throws {
+        let filter = Filter(Atom.self, .compare("name", .equals, "test"))
+        let union1 = Union(local: Atom.self, foreign: Group.self, idKey: "id", localKey: "groupId", foreignKey: "id")
+        let union2 = Union(local: Atom.self, foreign: Nucleus.self, idKey: "id", localKey: "nucleusId", foreignKey: "id")
+        let sql = SQL.update(table: "atoms", filters: [filter], joins: [union1, union2], data: ["name": "test2"])
+        let (statement, values) = serialize(sql)
+        
+        XCTAssertEqual(statement, "UPDATE `atoms` SET `name` = ? WHERE `atoms`.`name` = ? AND EXISTS ( SELECT * FROM `groups`, `nuclei` WHERE `groups`.`id` = `atoms`.`groupId` AND `nuclei`.`id` = `atoms`.`nucleusId` )")
         XCTAssertEqual(values.first?.string, "test2")
         XCTAssertEqual(values.last?.string, "test")
         XCTAssertEqual(values.count, 2)
