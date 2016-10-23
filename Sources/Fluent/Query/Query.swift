@@ -10,6 +10,10 @@ public class Query<T: Entity>: QueryRepresentable {
         on the data. Defaults to `.fetch`
     */
     public var action: Action
+    
+    public var fields: [String]
+    
+    public var relationFields: [(table: String, fields: [String])]
 
     /**
         An array of filters to apply
@@ -65,6 +69,8 @@ public class Query<T: Entity>: QueryRepresentable {
     public init(_ database: Database) {
         filters = []
         action = .fetch
+        fields = []
+        relationFields = []
         self.database = database
         unions = []
         sorts = []
@@ -90,7 +96,6 @@ public class Query<T: Entity>: QueryRepresentable {
         Runs the query using Raw then converts
         the results to an array of models.
     */
-    @discardableResult
     public func run() throws -> [T] {
         var models: [T] = []
 
@@ -101,10 +106,68 @@ public class Query<T: Entity>: QueryRepresentable {
                     if case .object(let dict) = result {
                         model.id = dict[database.driver.idKey]
                     }
+                    model.exists = true
                     models.append(model)
                 } catch {
                     print("Could not initialize \(T.self), skipping: \(error)")
                 }
+            }
+        } else {
+            print("Unsupported Node type, only array is supported.")
+        }
+
+        return models
+    }
+    
+    public func run<Relation: Entity>(including relation: Relation.Type) throws -> [(T, Relation)] {
+        var models: [(T, Relation)] = []
+
+        if case .array(let array) = try raw() {
+            for result in array {
+                guard let object = result.nodeObject else {
+                    print("Unsupported row Node type, only object is supported.")
+                    continue
+                }
+                
+                var model: T
+                var relationModel: Relation
+                
+                do {
+                    model = try T(node: result)
+                } catch {
+                    print("Could not initialize \(T.self), skipping: \(error)")
+                    continue
+                }
+                
+                // Filter out only the relation fields
+                let relationFieldPrefix = "\(Relation.entity)_"
+                let relationFieldPrefixLength = relationFieldPrefix.distance(from: relationFieldPrefix.startIndex, to: relationFieldPrefix.endIndex)
+                var relationFields: [String:Node] = [:]
+                for (key, value) in object {
+                    guard key.hasPrefix(relationFieldPrefix) else {
+                        continue
+                    }
+                    let relationKey = key.replacingCharacters(in: key.startIndex..<key.index(key.startIndex, offsetBy: relationFieldPrefixLength), with: "")
+                    relationFields[relationKey] = value
+                }
+                let relationResult = Node.object(relationFields)
+                
+                do {
+                    relationModel = try Relation(node: relationResult)
+                } catch {
+                    print("Could not initialize \(Relation.self), skipping: \(error)")
+                    continue
+                }
+                
+                let idKey = database.driver.idKey
+                model.id = result[idKey]
+                relationModel.id = relationResult[idKey]
+                
+                model.exists = true
+                relationModel.exists = true
+                
+                models.append((model, relationModel))
+                
             }
         } else {
             print("Unsupported Node type, only array is supported.")
@@ -129,11 +192,21 @@ extension QueryRepresentable {
     public func first() throws -> T? {
         let query = try makeQuery()
         query.limit = Limit(count: 1)
+        
+        query.fields = T.fields(for: query.database)
 
-        var m = try query.run().first
-        m?.exists = true
-
-        return m
+        return try query.run().first
+    }
+    
+    public func first<Relation: Entity>(including relation: Relation.Type) throws -> (T, Relation)? {
+        let query = try makeQuery()
+        query.limit = Limit(count: 1)
+        
+        query.fields = T.fields(for: query.database)
+        let relationFields = Relation.fields(for: query.database)
+        query.relationFields = [(table: Relation.entity, fields: relationFields)]
+        
+        return try query.run(including: relation).first
     }
 
     /**
@@ -142,14 +215,18 @@ extension QueryRepresentable {
     */
     public func all() throws -> [T] {
         let query = try makeQuery()
-
-        let m = try query.run()
-        m.forEach { m in
-            var m = m
-            m.exists = true
-        }
-
-        return m
+        query.fields = T.fields(for: query.database)
+        return try query.run()
+    }
+    
+    public func all<Relation: Entity>(including relation: Relation.Type) throws -> [(T, Relation)] {
+        let query = try makeQuery()
+        
+        query.fields = T.fields(for: query.database)
+        let relationFields = Relation.fields(for: query.database)
+        query.relationFields = [(table: Relation.entity, fields: relationFields)]
+        
+        return try query.run(including: relation)
     }
 
     //MARK: Create
@@ -198,14 +275,14 @@ extension QueryRepresentable {
     public func delete() throws {
         let query = try makeQuery()
         query.action = .delete
-        try query.run()
+        try query.raw()
     }
 
     /**
         Attempts to delete the supplied entity
         if its identifier is set.
     */
-    public func delete(_ model: T) throws {
+    public func delete(_ model: inout T) throws {
         guard let id = model.id else {
             return
         }
@@ -225,10 +302,10 @@ extension QueryRepresentable {
         query.filters.append(filter)
 
         model.willDelete()
-        try query.run()
+        try query.raw()
         model.didDelete()
 
-        var model = model
+        model.id = nil
         model.exists = false
     }
 
@@ -248,7 +325,7 @@ extension QueryRepresentable {
         if let id = serialized?[idKey] {
             _ = try filter(idKey, id)
         }
-        try query.run()
+        try query.raw()
     }
 }
 

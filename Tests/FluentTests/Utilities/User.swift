@@ -23,6 +23,14 @@ final class User: Entity {
         self.name = name
         self.email = email
     }
+    
+    static func fields(for database: Database) -> [String] {
+        return [
+            "id",
+            "name",
+            "email",
+        ]
+    }
 
     init(node: Node, in context: Context) throws {
         id = try node.extract("id")

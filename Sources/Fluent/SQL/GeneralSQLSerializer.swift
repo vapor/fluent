@@ -39,13 +39,25 @@ open class GeneralSQLSerializer: SQLSerializer {
                 sql(statement),
                 values
             )
-        case .select(let table, let filters, let unions, let orders, let limit):
+        case .select(let table, let fields, let relations, let filters, let unions, let orders, let limit):
             var statement: [String] = []
             var values: [Node] = []
 
-            let tableSQL = sql(table)
-            statement += "SELECT \(tableSQL).* FROM"
-            statement += tableSQL
+            statement += "SELECT"
+            
+            var selectStatement = sql(table: table, fields: fields)
+            for relation in relations {
+                guard !relation.fields.isEmpty else {
+                    continue
+                }
+                
+                selectStatement += ", "
+                selectStatement += sql(table: relation.table, fields: relation.fields, fieldPrefix: "\(relation.table)_")
+            }
+            statement += selectStatement
+            
+            statement += "FROM"
+            statement += sql(table)
 
             if !unions.isEmpty {
                 statement += sql(unions)
@@ -459,6 +471,22 @@ open class GeneralSQLSerializer: SQLSerializer {
 
     open func sql(_ string: String) -> String {
         return "`\(string)`"
+    }
+    
+    open func sql(table: String, fields: [String], fieldPrefix: String? = nil) -> String {
+        let tableSQL = sql(table)
+        guard !fields.isEmpty else {
+            return "\(tableSQL).*"
+        }
+        
+        return fields
+            .map { field in
+                if let prefix = fieldPrefix {
+                    return "\(tableSQL).\(sql(field)) AS \(sql(prefix+field))"
+                }
+                return "\(tableSQL).\(sql(field))"
+            }
+            .joined(separator: ", ")
     }
 }
 

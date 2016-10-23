@@ -32,6 +32,15 @@ public final class Pivot<
     public static var name: String {
         return entity
     }
+    
+    public static func fields(for database: Database) -> [String] {
+        let idKey = database.driver.idKey
+        return [
+            idKey,
+            "\(left.name)_\(idKey)",
+            "\(right.name)_\(idKey)",
+        ]
+    }
 
     public static var left: Entity.Type {
         if First.entity < Second.entity {

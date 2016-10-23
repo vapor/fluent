@@ -7,6 +7,9 @@ class UnionTests: XCTestCase {
         ("testCustom", testCustom),
         ("testSQL", testSQL),
         ("testSQLFilters", testSQLFilters),
+        ("testBelongsToMany", testBelongsToMany),
+        ("testRelationFields", testRelationFields),
+        ("testRelationFields", testRetrieveRelation),
     ]
 
     var lqd: LastQueryDriver!
@@ -23,8 +26,10 @@ class UnionTests: XCTestCase {
 
         if let sql = lqd.lastQuery {
             switch sql {
-            case .select(let table, let filters, let joins, let orders, let limit):
+            case .select(let table, let fields, let relations, let filters, let joins, let orders, let limit):
                 XCTAssertEqual(table, "atoms")
+                XCTAssertEqual(fields.count, 0)
+                XCTAssertEqual(relations.count, 0)
                 XCTAssertEqual(filters.count, 0)
                 XCTAssertEqual(orders.count, 0)
                 XCTAssertEqual(joins.count, 1)
@@ -53,8 +58,10 @@ class UnionTests: XCTestCase {
 
         if let sql = lqd.lastQuery {
             switch sql {
-            case .select(let table, let filters, let joins, let orders, let limit):
+            case .select(let table, let fields, let relations, let filters, let joins, let orders, let limit):
                 XCTAssertEqual(table, "atoms")
+                XCTAssertEqual(fields.count, 0)
+                XCTAssertEqual(relations.count, 0)
                 XCTAssertEqual(filters.count, 0)
                 XCTAssertEqual(orders.count, 0)
                 XCTAssertEqual(joins.count, 1)
@@ -135,10 +142,53 @@ class UnionTests: XCTestCase {
             let (statement, values) = serializer.serialize()
             XCTAssertEqual(
                 statement,
-                "SELECT `compounds`.* FROM `compounds` JOIN `atom_compound` ON `compounds`.`\(lqd.idKey)` = `atom_compound`.`compound_\(lqd.idKey)` WHERE `atom_compound`.`atom_\(lqd.idKey)` = ?"
+                "SELECT `compounds`.`id`, `compounds`.`name` FROM `compounds` JOIN `atom_compound` ON `compounds`.`\(lqd.idKey)` = `atom_compound`.`compound_\(lqd.idKey)` WHERE `atom_compound`.`atom_\(lqd.idKey)` = ?"
             )
             XCTAssertEqual(values.count, 1)
             XCTAssertEqual(values.first?.int, 42)
+        }
+    }
+    
+    func testRelationFields() throws {
+        let localKey = "#local_key"
+        let foreignKey = "#foreign_key"
+
+        let query = try Query<Atom>(db).union(Compound.self, localKey: localKey, foreignKey: foreignKey)
+        query.fields = Atom.fields(for: db)
+        query.relationFields = [(Compound.entity, Compound.fields(for: db))]
+        try lqd.query(query)
+
+        if let sql = lqd.lastQuery {
+            let serializer = GeneralSQLSerializer(sql: sql)
+            let (statement, values) = serializer.serialize()
+            XCTAssertEqual(statement, "SELECT `atoms`.`id`, `atoms`.`name`, `atoms`.`group_id`, `compounds`.`id` AS `compounds_id`, `compounds`.`name` AS `compounds_name` FROM `atoms` JOIN `compounds` ON `atoms`.`#local_key` = `compounds`.`#foreign_key`")
+            XCTAssertEqual(values.count, 0)
+        } else {
+            XCTFail("No last query.")
+        }
+    }
+    
+    func testRetrieveRelation() throws {
+        Atom.database = db
+        Compound.database = db
+        
+        let localKey = "#local_key"
+        let foreignKey = "#foreign_key"
+
+        do {
+            _ = try Atom.query()
+                .union(Compound.self, localKey: localKey, foreignKey: foreignKey)
+                .all(including: Compound.self)
+        }
+
+        if let sql = lqd.lastQuery {
+            let serializer = GeneralSQLSerializer(sql: sql)
+            let (statement, values) = serializer.serialize()
+            XCTAssertEqual(
+                statement,
+                "SELECT `atoms`.`id`, `atoms`.`name`, `atoms`.`group_id`, `compounds`.`id` AS `compounds_id`, `compounds`.`name` AS `compounds_name` FROM `atoms` JOIN `compounds` ON `atoms`.`#local_key` = `compounds`.`#foreign_key`"
+            )
+            XCTAssertEqual(values.count, 0)
         }
     }
 }

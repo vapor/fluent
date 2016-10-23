@@ -8,6 +8,10 @@ final class Migration: Entity {
     init(name: String) {
         self.name = name
     }
+    
+    static func fields(for database: Database) -> [String] {
+        return ["id", "name"]
+    }
 
     init(node: Node, in context: Context) throws {
         id = try node.extract("id")

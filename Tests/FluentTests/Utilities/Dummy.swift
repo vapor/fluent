@@ -10,6 +10,10 @@ final class DummyModel: Entity {
     static func revert(_ database: Database) throws {}
 
     var id: Node?
+    
+    static func fields(for database: Database) -> [String] {
+        return []
+    }
 
     init(node: Node, in context: Context) throws {
 
