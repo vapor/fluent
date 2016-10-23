@@ -7,6 +7,8 @@ class RelationTests: XCTestCase {
         ("testBelongsToMany", testBelongsToMany),
         ("testCustomForeignKey", testCustomForeignKey),
         ("testPivotDatabase", testPivotDatabase),
+        ("testRetrieveRelationFirst", testRetrieveRelationFirst),
+        ("testRetrieveRelationAll", testRetrieveRelationAll),
     ]
 
     var memory: MemoryDriver!
@@ -76,5 +78,17 @@ class RelationTests: XCTestCase {
         Pivot<Atom, Nucleus>.database = database
         XCTAssertTrue(Pivot<Atom, Nucleus>.database === database)
         XCTAssertTrue(Pivot<Nucleus, Atom>.database === database)
+    }
+    
+    func testRetrieveRelationFirst() throws {
+        _ = try Atom.query()
+            .union(Group.self)
+            .first(including: Group.self)
+    }
+    
+    func testRetrieveRelationAll() throws {
+        _ = try Atom.query()
+            .union(Group.self)
+            .all(including: Group.self)
     }
 }
