@@ -1,7 +1,7 @@
 extension Schema {
     /**
         Creates a Schema.
-     
+
         Cannot modify or delete fields.
     */
     public class Creator {
@@ -54,6 +54,13 @@ extension Schema {
             optional: Bool = false
         ) {
             fields += Field(name: name, type: .data, optional: optional)
+        }
+
+        public func json(
+            _ name: String,
+            optional: Bool = false
+        ) {
+            fields += Field(name: name, type: .json, optional: optional)
         }
 
         public var schema: Schema {
