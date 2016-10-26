@@ -1,12 +1,11 @@
 import XCTest
 @testable import Fluent
+import FluentTester
 
 class MemoryTests: XCTestCase {
-    static var allTests : [(String, (MemoryTests) -> () throws -> Void)] {
-        return [
-            ("testSave", testSave)
-        ]
-    }
+    static var allTests = [
+        ("testSave", testSave)
+    ]
 
     func makeTestModels() -> (MemoryDriver, Database) {
         let driver = MemoryDriver()
@@ -87,5 +86,12 @@ class MemoryTests: XCTestCase {
         XCTAssertEqual(sorted, unsorted.sorted(by: { u1, u2 in
             return u1.name < u2.name
         }))
+    }
+
+    func testSuite() throws {
+        let (_, database) = makeTestModels()
+        let tester = Tester(database: database)
+
+        tester.testAll()
     }
 }
