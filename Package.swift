@@ -4,7 +4,7 @@ let package = Package(
     name: "Fluent",
     targets: [
         Target(name: "Fluent"),
-        Target(name: "FluentTester")
+        Target(name: "FluentTester", dependencies: ["Fluent"])
     ],
     dependencies: [
         // Data structure for converting between multiple representations
