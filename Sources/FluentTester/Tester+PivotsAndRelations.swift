@@ -1,5 +1,4 @@
 import Fluent
-import XCTest
 
 extension Tester {
     public func testPivotsAndRelations() throws {
@@ -37,16 +36,16 @@ extension Tester {
         try carbonSugar.save()
 
         let hydrogenCompounds = try hydrogen.compounds().all()
-        testEquals(hydrogenCompounds, [water, sugar])
+        try testEquals(hydrogenCompounds, [water, sugar])
         let carbonCompounds = try carbon.compounds().all()
-        testEquals(carbonCompounds, [sugar])
+        try testEquals(carbonCompounds, [sugar])
         let oxygenCompounds = try oxygen.compounds().all()
-        testEquals(oxygenCompounds, [water, sugar])
+        try testEquals(oxygenCompounds, [water, sugar])
 
         let sugarAtoms = try sugar.atoms().all()
-        testEquals(sugarAtoms, [carbon, oxygen, hydrogen])
+        try testEquals(sugarAtoms, [carbon, oxygen, hydrogen])
         let waterAtoms = try water.atoms().all()
-        testEquals(waterAtoms, [oxygen, hydrogen])
+        try testEquals(waterAtoms, [oxygen, hydrogen])
 
         try Atom.revert(database)
         try Compound.revert(database)

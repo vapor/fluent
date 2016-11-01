@@ -30,10 +30,7 @@ class ModelTests: XCTestCase {
         atom.name = "bob"
         try atom.save()
 
-        let (sql2, _) = GeneralSQLSerializer(sql: lqd.lastQuery!).serialize()
-        print(sql2)
-
-        print(atom.id)
+        let (_, _) = GeneralSQLSerializer(sql: lqd.lastQuery!).serialize()
 
         try atom.delete()
     }

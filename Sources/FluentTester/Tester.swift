@@ -1,5 +1,4 @@
 import Fluent
-import XCTest
 
 public final class Tester {
     public let database: Database
@@ -12,8 +11,8 @@ public final class Tester {
         self.database = database
     }
 
-    public func testAll() {
-        test(testInsertAndFind, "Insert and find")
-        test(testPivotsAndRelations, "Pivots and relations")
+    public func testAll() throws {
+        try test(testInsertAndFind, "Insert and find")
+        try test(testPivotsAndRelations, "Pivots and relations")
     }
 }

@@ -1,5 +1,4 @@
 import Fluent
-import XCTest
 
 extension Tester {
     public func testInsertAndFind() throws {
@@ -8,23 +7,37 @@ extension Tester {
 
         var hydrogen = Atom(id: nil, name: "Hydrogen", protons: 1, weight: 1.007)
 
-        XCTAssertEqual(hydrogen.exists, false)
+        guard hydrogen.exists == false else {
+            throw Error.failed("Exists should be false since not yet saved.")
+        }
         try hydrogen.save()
-        XCTAssertEqual(hydrogen.exists, true)
+        guard hydrogen.exists == true else {
+            throw Error.failed("Exists should be true since just saved.")
+        }
 
         guard let id = hydrogen.id else {
-            XCTFail("ID not set on Atom after save.")
-            return
+            throw Error.failed("ID not set on Atom after save.")
         }
 
         guard let found = try Atom.find(id) else {
             throw Error.failed("Could not find Atom by id.")
         }
 
-        XCTAssertEqual(hydrogen.id, found.id)
-        XCTAssertEqual(hydrogen.name, found.name)
-        XCTAssertEqual(hydrogen.protons, found.protons)
-        XCTAssertEqual(hydrogen.weight, found.weight)
+        guard hydrogen.id == found.id else {
+            throw Error.failed("ID retrieved different than what was saved.")
+        }
+        
+        guard hydrogen.name == found.name else {
+            throw Error.failed("ID retrieved different than what was saved.")
+        }
+        
+        guard hydrogen.protons == found.protons else {
+            throw Error.failed("ID retrieved different than what was saved.")
+        }
+        
+        guard hydrogen.weight == found.weight else {
+            throw Error.failed("ID retrieved different than what was saved.")
+        }
         
         try Atom.revert(database)
     }
