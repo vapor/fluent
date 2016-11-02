@@ -10,6 +10,14 @@ struct Atom: Entity {
         self.id = id
         self.name = name
     }
+    
+    static func fields(for database: Database) -> [String] {
+        return [
+            "id",
+            "name",
+            "group_id",
+        ]
+    }
 
     init(node: Node, in context: Context) throws {
         id = try node.extract("id")

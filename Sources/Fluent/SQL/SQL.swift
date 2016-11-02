@@ -11,7 +11,7 @@ public enum SQL {
     }
     
     case insert(table: String, data: Node?)
-    case select(table: String, filters: [Filter], joins: [Union], orders: [Sort], limit: Limit?)
+    case select(table: String, fields: [String], relationFields: [(table: String, fields: [String])], filters: [Filter], joins: [Union], orders: [Sort], limit: Limit?)
     case update(table: String, filters: [Filter], data: Node?)
     case delete(table: String, filters: [Filter], limit: Limit?)
     case table(action: TableAction, table: String)

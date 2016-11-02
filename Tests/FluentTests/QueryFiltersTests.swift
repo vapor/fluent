@@ -6,6 +6,7 @@ class QueryFiltersTests: XCTestCase {
         ("testBasalQuery", testBasalQuery),
         ("testBasicQuery", testBasicQuery),
         ("testLikeQuery", testLikeQuery),
+        ("testDeleteQuery", testDeleteQuery),
     ]
 
     override func setUp() {
@@ -76,5 +77,4 @@ class QueryFiltersTests: XCTestCase {
 
         XCTAssert(query.action == .delete)
     }
-
 }

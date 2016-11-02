@@ -4,6 +4,8 @@ extension SQL {
         case .fetch:
             self = .select(
                 table: query.entity,
+                fields: query.fields,
+                relationFields: query.relationFields,
                 filters: query.filters,
                 joins: query.unions,
                 orders: query.sorts,

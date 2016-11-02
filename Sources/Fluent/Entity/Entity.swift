@@ -19,6 +19,20 @@ public protocol Entity: Preparation, NodeConvertible {
         like pivots.
     */
     static var name: String { get }
+    
+    
+    /**
+        Retrieves a list of all table field names for this entity.
+     
+        This array will be used when retrieving relations together
+        in one query.
+     
+        - parameter database: The database for which to retrieve
+        the field names.
+     
+        - returns: The list of all table field names.
+    */
+    static func fields(for database: Database) -> [String]
 
     /**
         The entity's primary identifier.
@@ -123,8 +137,8 @@ extension Entity {
         Deletes the entity from the data
         store if the `id` property is set.
     */
-    public func delete() throws {
-        try Self.query().delete(self)
+    public mutating func delete() throws {
+        try Self.query().delete(&self)
     }
 
     /**
