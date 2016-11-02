@@ -39,9 +39,9 @@ extension MemoryDriver {
             return modified
         }
 
-        init() {
-            increment = 0
-            data = []
+        init(data: [Node] = [], increment: Int = 0) {
+            self.data = data
+            self.increment = increment
         }
     }
 }
