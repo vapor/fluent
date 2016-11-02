@@ -28,15 +28,15 @@ extension Tester {
         }
         
         guard hydrogen.name == found.name else {
-            throw Error.failed("ID retrieved different than what was saved.")
+            throw Error.failed("Name retrieved different than what was saved.")
         }
         
         guard hydrogen.protons == found.protons else {
-            throw Error.failed("ID retrieved different than what was saved.")
+            throw Error.failed("Protons retrieved different than what was saved.")
         }
         
         guard hydrogen.weight == found.weight else {
-            throw Error.failed("ID retrieved different than what was saved.")
+            throw Error.failed("Weight retrieved different than what was saved.")
         }
         
         try Atom.revert(database)
