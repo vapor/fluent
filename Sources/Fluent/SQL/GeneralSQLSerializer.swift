@@ -190,7 +190,7 @@ open class GeneralSQLSerializer: SQLSerializer {
                 statement += "\(sql(filter.entity.entity)).\(sql(key))"
                 statement += sql(comparison)
                 statement += "?"
-    
+
                 /**
                     `.like` comparison operator requires additional
                     processing of `value`
@@ -372,6 +372,8 @@ open class GeneralSQLSerializer: SQLSerializer {
         case .bool:
             return "BOOL"
         case .data:
+            return "BLOB"
+        case .json:
             return "BLOB"
         }
     }

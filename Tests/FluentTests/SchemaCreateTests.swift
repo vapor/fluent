@@ -12,13 +12,14 @@ class SchemaCreateTests: XCTestCase {
         builder.int("id")
         builder.string("name")
         builder.string("email", length: 256)
+        builder.json("profile")
 
         let sql = builder.schema.sql
         let serializer = GeneralSQLSerializer(sql: sql)
 
         let (statement, values) = serializer.serialize()
 
-        XCTAssertEqual(statement, "CREATE TABLE `users` (`id` INTEGER NOT NULL, `name` STRING NOT NULL, `email` STRING NOT NULL)")
+        XCTAssertEqual(statement, "CREATE TABLE `users` (`id` INTEGER NOT NULL, `name` STRING NOT NULL, `email` STRING NOT NULL, `profile` BLOB NOT NULL)")
         XCTAssertEqual(values.count, 0)
     }
 

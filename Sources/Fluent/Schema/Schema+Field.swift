@@ -15,6 +15,7 @@ extension Schema {
             case double
             case bool
             case data
+            case json
         }
 
         public init(name: String, type: DataType, optional: Bool = false) {
