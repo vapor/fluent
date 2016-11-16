@@ -351,8 +351,17 @@ open class GeneralSQLSerializer: SQLSerializer {
 
         clause += sql(column.name)
         clause += sql(column.type)
+        
         if !column.optional {
             clause += "NOT NULL"
+        }
+        
+        if column.unique {
+            clause += "UNIQUE"
+        }
+        
+        if let d = column.default?.string {
+            clause += "DEFAULT \(d)"
         }
 
         return clause.joined(separator: " ")
@@ -373,8 +382,8 @@ open class GeneralSQLSerializer: SQLSerializer {
             return "BOOL"
         case .data:
             return "BLOB"
-        case .json:
-            return "BLOB"
+        case .custom(let type):
+            return type
         }
     }
 
