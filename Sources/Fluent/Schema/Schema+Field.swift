@@ -33,5 +33,29 @@ extension Schema {
             self.unique = unique
             self.default = `default`
         }
+        
+        public init(
+            name: String,
+            type: DataType,
+            optional: Bool = false,
+            unique: Bool = false,
+            default: NodeRepresentable? = nil
+        ) {
+            let node: Node?
+            
+            if let d = `default` {
+                node = try? d.makeNode()
+            } else {
+                node = nil
+            }
+            
+            self.init(
+                name: name,
+                type: type,
+                optional: optional,
+                unique: unique,
+                default: node
+            )
+        }
     }
 }

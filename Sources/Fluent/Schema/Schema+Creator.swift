@@ -12,12 +12,12 @@ extension Schema {
             self.entity = entity
             fields = []
         }
-
+        
         public func id(
             _ name: String = "id",
             optional: Bool = false,
             unique: Bool = false,
-            default: Node? = nil
+            default: NodeRepresentable? = nil
         ) {
             fields += Field(
                 name: name,
@@ -32,7 +32,7 @@ extension Schema {
             _ name: String,
             optional: Bool = false,
             unique: Bool = false,
-            default: Node? = nil
+            default: NodeRepresentable? = nil
         ) {
             fields += Field(
                 name: name, 
@@ -48,7 +48,7 @@ extension Schema {
             length: Int? = nil,
             optional: Bool = false,
             unique: Bool = false,
-            default: Node? = nil
+            default: NodeRepresentable? = nil
         ) {
             fields += Field(
                 name: name,
@@ -63,7 +63,7 @@ extension Schema {
             _ name: String,
             optional: Bool = false,
             unique: Bool = false,
-            default: Node? = nil
+            default: NodeRepresentable? = nil
         ) {
             fields += Field(
                 name: name,
@@ -78,7 +78,7 @@ extension Schema {
             _ name: String,
             optional: Bool = false,
             unique: Bool = false,
-            default: Node? = nil
+            default: NodeRepresentable? = nil
         ) {
             fields += Field(
                 name: name,
@@ -93,7 +93,7 @@ extension Schema {
             _ name: String,
             optional: Bool = false,
             unique: Bool = false,
-            default: Node? = nil
+            default: NodeRepresentable? = nil
         ) {
             fields += Field(
                 name: name,
@@ -109,7 +109,7 @@ extension Schema {
             type: String,
             optional: Bool = false,
             unique: Bool = false,
-            default: Node? = nil
+            default: NodeRepresentable? = nil
         ) {
             fields += Field(
                 name: name,
@@ -128,9 +128,17 @@ extension Schema {
 
         public func parent<E: Entity>(
             _ entity: E.Type = E.self,
-            optional: Bool = false
+            optional: Bool = false,
+            unique: Bool = false,
+            default: NodeRepresentable? = nil
         ) {
-            fields += Field(name: "\(entity.name)_id", type: .int, optional: optional)
+            fields += Field(
+                name: "\(entity.name)_id",
+                type: .int,
+                optional: optional,
+                unique: unique,
+                default: `default`
+            )
         }
     }
 }
