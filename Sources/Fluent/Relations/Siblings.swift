@@ -1,5 +1,6 @@
 public final class Siblings<T: Entity> {
     fileprivate let _query: Query<T>
+    fileprivate let _left: Entity.Type
 
     public let localKey: String
     public let foreignKey: String
@@ -16,6 +17,8 @@ public final class Siblings<T: Entity> {
 
         self.localKey = localKey
         self.foreignKey = foreignKey
+        
+        self._left = E.self
 
         let pivot = Pivot<E, T>.self
 

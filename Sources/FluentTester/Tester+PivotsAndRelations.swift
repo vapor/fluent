@@ -5,6 +5,12 @@ extension Tester {
         try Atom.prepare(database)
         try Compound.prepare(database)
         try Pivot<Atom, Compound>.prepare(database)
+        
+        defer {
+            try? Atom.revert(database)
+            try? Compound.revert(database)
+            try? Pivot<Atom, Compound>.revert(database)
+        }
 
         Atom.database = database
         Compound.database = database
@@ -46,9 +52,5 @@ extension Tester {
         try testEquals(sugarAtoms, [carbon, oxygen, hydrogen])
         let waterAtoms = try water.atoms().all()
         try testEquals(waterAtoms, [oxygen, hydrogen])
-
-        try Atom.revert(database)
-        try Compound.revert(database)
-        try Pivot<Atom, Compound>.revert(database)
     }
 }
