@@ -324,8 +324,7 @@ open class GeneralSQLSerializer: SQLSerializer {
                 subclause += "DROP " + sql(name)
             }
 
-            clause += sql(list: subclause)
-
+            clause += subclause.joined(separator: ", ")
 
             return sql(clause)
         case .create(let columns):
