@@ -365,6 +365,8 @@ open class GeneralSQLSerializer: SQLSerializer {
             return "INTEGER PRIMARY KEY"
         case .int:
             return "INTEGER"
+        case .bigInt:
+            return "BIGINT"
         case .string(_):
             return "STRING"
         case .double:
