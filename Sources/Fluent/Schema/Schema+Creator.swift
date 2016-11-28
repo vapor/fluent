@@ -26,6 +26,13 @@ extension Schema {
         ) {
             fields += Field(name: name, type: .int, optional: optional)
         }
+        
+        public func bigInt(
+            _ name: String,
+            optional: Bool = false
+        ) {
+            fields += Field(name: name, type: .bigInt, optional: optional)
+        }
 
         public func string(
             _ name: String,
