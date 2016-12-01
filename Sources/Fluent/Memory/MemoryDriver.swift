@@ -15,11 +15,6 @@ public final class MemoryDriver: Driver {
     public func query<T: Entity>(_ query: Query<T>) throws -> Node {
         var group = prepare(group: query.entity)
 
-
-        if let union = query.unions.first {
-            group = prepare(union: union)
-        }
-
         switch query.action {
         case .create:
             guard let data = query.data else {
@@ -30,9 +25,12 @@ public final class MemoryDriver: Driver {
             return Node.number(.int(i))
         case .delete:
             group.delete(query.filters)
-
-            return .null
+            return Node.array([])
         case .fetch:
+            if let union = query.unions.first {
+                group = prepare(union: union)
+            }
+            
             let results = group.fetch(query.filters, query.sorts)
 
             return Node.array(results)
@@ -48,6 +46,11 @@ public final class MemoryDriver: Driver {
     
     public func schema(_ schema: Schema) throws {
         // no schema changes necessary
+        switch schema {
+        case .delete(let entity):
+            store.removeValue(forKey: entity)
+        default: break
+        }
     }
     
     @discardableResult

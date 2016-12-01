@@ -12,14 +12,14 @@ class SchemaCreateTests: XCTestCase {
         builder.int("id")
         builder.string("name")
         builder.string("email", length: 256)
-        builder.json("profile")
+        builder.custom("profile", type: "JSON")
 
         let sql = builder.schema.sql
         let serializer = GeneralSQLSerializer(sql: sql)
 
         let (statement, values) = serializer.serialize()
 
-        XCTAssertEqual(statement, "CREATE TABLE `users` (`id` INTEGER NOT NULL, `name` STRING NOT NULL, `email` STRING NOT NULL, `profile` BLOB NOT NULL)")
+        XCTAssertEqual(statement, "CREATE TABLE `users` (`id` INTEGER NOT NULL, `name` STRING NOT NULL, `email` STRING NOT NULL, `profile` JSON NOT NULL)")
         XCTAssertEqual(values.count, 0)
     }
 
@@ -36,7 +36,7 @@ class SchemaCreateTests: XCTestCase {
 
         let (statement, values) = serializer.serialize()
 
-        XCTAssertEqual(statement, "ALTER TABLE `users` (ADD `id` INTEGER NOT NULL, ADD `name` STRING NOT NULL, ADD `email` STRING NOT NULL, DROP `age`)")
+        XCTAssertEqual(statement, "ALTER TABLE `users` ADD `id` INTEGER NOT NULL, ADD `name` STRING NOT NULL, ADD `email` STRING NOT NULL, DROP `age`")
         XCTAssertEqual(values.count, 0)
     }
 

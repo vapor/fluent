@@ -3,6 +3,9 @@ import Fluent
 extension Tester {
     public func testInsertAndFind() throws {
         try Atom.prepare(database)
+        defer {
+            try? Atom.revert(database)
+        }
         Atom.database = database
 
         var hydrogen = Atom(id: nil, name: "Hydrogen", protons: 1, weight: 1.007)
@@ -11,6 +14,7 @@ extension Tester {
             throw Error.failed("Exists should be false since not yet saved.")
         }
         try hydrogen.save()
+        
         guard hydrogen.exists == true else {
             throw Error.failed("Exists should be true since just saved.")
         }
@@ -39,6 +43,5 @@ extension Tester {
             throw Error.failed("Weight retrieved different than what was saved.")
         }
         
-        try Atom.revert(database)
     }
 }

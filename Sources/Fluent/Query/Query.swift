@@ -197,6 +197,11 @@ extension QueryRepresentable {
     */
     public func delete() throws {
         let query = try makeQuery()
+        
+        guard query.unions.count == 0 else {
+            throw QueryError.notSupported("Cannot perform delete on queries that contain unions. Delete the entities directly instead.")
+        }
+        
         query.action = .delete
         try query.run()
     }
@@ -250,6 +255,10 @@ extension QueryRepresentable {
         }
         try query.run()
     }
+}
+
+public enum QueryError: Error {
+    case notSupported(String)
 }
 
 public protocol QueryRepresentable {

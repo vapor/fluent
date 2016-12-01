@@ -21,7 +21,7 @@ class MemoryBenchmarkTests: XCTestCase {
         do {
             try tester.testAll()
         } catch {
-            XCTFail(error.localizedDescription)
+            XCTFail("\(error)")
         }
     }
 }
