@@ -17,8 +17,13 @@ class RelationTests: XCTestCase {
     }
 
     func testHasMany() throws {
+        Atom.database = database
+        Proton.database = database
+        Nucleus.database = database
+        Group.database = database
+        
         let hydrogen = try Atom(node: [
-            "id": 42,
+            "atom_id": 42,
             "name": "Hydrogen",
             "group_id": 1337
         ])

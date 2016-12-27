@@ -30,9 +30,9 @@ class UnionTests: XCTestCase {
                 XCTAssertEqual(joins.count, 1)
                 if let join = joins.first {
                     XCTAssert(join.local == Atom.self)
-                    XCTAssertEqual(join.localKey, "compound_\(lqd.idKey)")
+                    XCTAssertEqual(join.localKey, "compound_\(Atom.idKey!)")
                     XCTAssert(join.foreign == Compound.self)
-                    XCTAssertEqual(join.foreignKey, lqd.idKey)
+                    XCTAssertEqual(join.foreignKey, Atom.idKey)
                 }
                 XCTAssert(limit == nil)
             default:
@@ -135,7 +135,7 @@ class UnionTests: XCTestCase {
             let (statement, values) = serializer.serialize()
             XCTAssertEqual(
                 statement,
-                "SELECT `compounds`.* FROM `compounds` JOIN `atom_compound` ON `compounds`.`\(lqd.idKey)` = `atom_compound`.`compound_\(lqd.idKey)` WHERE `atom_compound`.`atom_\(lqd.idKey)` = ?"
+                "SELECT `compounds`.* FROM `compounds` JOIN `atom_compound` ON `compounds`.`\(lqd.idKey)` = `atom_compound`.`compound_\(lqd.idKey)` WHERE `atom_compound`.`atom_\(Atom.idKey!)` = ?"
             )
             XCTAssertEqual(values.count, 1)
             XCTAssertEqual(values.first?.int, 42)
