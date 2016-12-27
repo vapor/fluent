@@ -1,6 +1,11 @@
 import Fluent
 
 struct Atom: Entity {
+    
+    static var idKey: String? {
+        return "atom_id"
+    }
+    
     var id: Node?
     var name: String
     var groupId: Node?
@@ -12,14 +17,14 @@ struct Atom: Entity {
     }
 
     init(node: Node, in context: Context) throws {
-        id = try node.extract("id")
+        id = try node.extract("atom_id")
         name = try node.extract("name")
         groupId = try node.extract("group_id")
     }
 
     func makeNode(context: Context = EmptyNode) throws -> Node {
         return try Node(node: [
-            "id": id,
+            "atom_id": id,
             "name": name,
             "group_id": groupId
         ])
@@ -43,7 +48,7 @@ struct Atom: Entity {
 
     static func prepare(_ database: Fluent.Database) throws {
         try database.create(entity) { builder in
-            builder.id()
+            builder.id(idKey ?? "id")
             builder.string("name")
             builder.int("group_id")
         }

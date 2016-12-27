@@ -16,7 +16,7 @@ extension Children: QueryRepresentable {
 
         let query = try T.query()
 
-        let foreignId = foreignKey ?? "\(type(of: parent).name)_\(query.idKey)"
+        let foreignId = foreignKey ?? "\(type(of: parent).name)_\(T.idKey ?? query.idKey)"
         return try T.query().filter(foreignId, ident)
     }
 }
