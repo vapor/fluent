@@ -72,7 +72,7 @@ public class Query<T: Entity>: QueryRepresentable {
     }
 
     var idKey: String {
-        return T.idKey ?? database.driver.idKey
+        return database.driver.idKey
     }
 
     fileprivate let _context: DatabaseContext
@@ -101,7 +101,7 @@ public class Query<T: Entity>: QueryRepresentable {
                 do {
                     var model = try T(node: result, in: _context)
                     if case .object(let dict) = result {
-                        model.id = dict[idKey]
+                        model.id = dict[T.idKey ?? idKey]
                     }
                     models.append(model)
                 } catch {

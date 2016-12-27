@@ -13,7 +13,7 @@ public final class Siblings<T: Entity> {
         let query = try T.query()
 
         let localKey = localKey ?? T.idKey ?? query.idKey
-        let foreignKey = foreignKey ?? "\(T.name)_\(query.idKey)"
+        let foreignKey = foreignKey ?? "\(T.name)_\(T.idKey ?? query.idKey)"
 
         self.localKey = localKey
         self.foreignKey = foreignKey

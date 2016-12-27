@@ -30,7 +30,7 @@ class UnionTests: XCTestCase {
                 XCTAssertEqual(joins.count, 1)
                 if let join = joins.first {
                     XCTAssert(join.local == Atom.self)
-                    XCTAssertEqual(join.localKey, "compound_\(Atom.idKey!)")
+                    XCTAssertEqual(join.localKey, "compound_\(lqd.idKey)")
                     XCTAssert(join.foreign == Compound.self)
                     XCTAssertEqual(join.foreignKey, Atom.idKey)
                 }
