@@ -91,6 +91,47 @@ class MemoryTests: XCTestCase {
         let resultsThree = try Query<User>(database).filter("name", "updated").all()
         XCTAssertEqual(resultsThree.count, 100)
     }
+    
+    func testModifyWithCustomId() throws {
+        let (_, database) = makeTestModels()
+        
+        for _ in 0 ..< 100 {
+            var new = CustomId(id: nil, label: "Vapor")
+            try Query<CustomId>(database).save(&new)
+        }
+        
+        let results = try Query<CustomId>(database).filter("label", "Vapor").all()
+        XCTAssertEqual(results.count, 100)
+        
+        try Query<CustomId>(database).modify(Node.object(["label" : "updated"]))
+        
+        let resultsTwo = try Query<CustomId>(database).filter("label", "Vapor").all()
+        XCTAssertEqual(resultsTwo.count, 0)
+        
+        let resultsThree = try Query<CustomId>(database).filter("label", "updated").all()
+        XCTAssertEqual(resultsThree.count, 100)
+    }
+    
+    func testModifyByIdWithCustomId() throws {
+        let (_, database) = makeTestModels()
+        
+        var new: CustomId = CustomId(id: nil, label: "Vapor")
+        for _ in 0 ..< 100 {
+            new = CustomId(id: nil, label: "Vapor")
+            try Query<CustomId>(database).save(&new)
+        }
+        
+        let results = try Query<CustomId>(database).filter("label", "Vapor").all()
+        XCTAssertEqual(results.count, 100)
+        
+        try Query<CustomId>(database).modify(Node.object(["custom_id": new.id!, "label" : "updated"]))
+        
+        let resultsTwo = try Query<CustomId>(database).filter("label", "Vapor").all()
+        XCTAssertEqual(resultsTwo.count, 99)
+        
+        let resultsThree = try Query<CustomId>(database).filter("label", "updated").all()
+        XCTAssertEqual(resultsThree.count, 1)
+    }
 
     func testSort() throws {
         let (_, database) = makeTestModels()
