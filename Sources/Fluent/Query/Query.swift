@@ -280,7 +280,7 @@ extension QueryRepresentable {
         query.action = .modify
         query.data = serialized
 
-        let idKey = query.idKey
+        let idKey = T.idKey ?? query.idKey
         if let id = serialized?[idKey] {
             _ = try filter(idKey, id)
         }
