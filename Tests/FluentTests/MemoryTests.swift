@@ -61,7 +61,19 @@ class MemoryTests: XCTestCase {
         try Query<User>(database).filter("id", .greaterThan, 50).delete()
         XCTAssertEqual(driver.store["users"]?.data.count, 50)
     }
-
+    
+    func testDeleteWithCustomId() throws {
+        let (driver, database) = makeTestModels()
+        
+        var new = CustomId(id: nil, label: "Test")
+        let store = Query<CustomId>(database)
+        try store.save(&new)
+        
+        XCTAssertEqual(driver.store["customids"]?.data.count, 1)
+        try store.delete(new)
+        XCTAssertEqual(driver.store["customids"]?.data.count, 0)
+    }
+    
     func testModify() throws {
         let (_, database) = makeTestModels()
 

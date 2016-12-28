@@ -252,7 +252,7 @@ extension QueryRepresentable {
         let filter = Filter(
             T.self,
             .compare(
-                query.idKey,
+                T.idKey ?? query.idKey,
                 .equals,
                 id
             )
