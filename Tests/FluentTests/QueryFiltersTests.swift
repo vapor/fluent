@@ -5,6 +5,7 @@ class QueryFiltersTests: XCTestCase {
     static var allTests = [
         ("testBasalQuery", testBasalQuery),
         ("testBasicQuery", testBasicQuery),
+        ("testIsNullQuery", testIsNullQuery),
         ("testLikeQuery", testLikeQuery),
     ]
 
