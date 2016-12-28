@@ -179,12 +179,13 @@ open class GeneralSQLSerializer: SQLSerializer {
 
         switch filter.method {
         case .nullability(let key, let nullability):
-            // `.null` needs special handling in the case of `.equals` or `.notEquals`.
-            if nullability == .isNull {
-                statement += "\(sql(filter.entity.entity)).\(sql(key)) IS NULL"
-            }
-            else if nullability == .isNotNull {
-                statement += "\(sql(filter.entity.entity)).\(sql(key)) IS NOT NULL"
+            statement += "\(sql(filter.entity.entity)).\(sql(key)) IS "
+            
+            switch(nullability) {
+            case .isNull:
+                statement += "NULL"
+            case .isNotNull:
+                statement += "NOT NULL"
             }
         case .compare(let key, let comparison, let value):
             // `.null` needs special handling in the case of `.equals` or `.notEquals`.
