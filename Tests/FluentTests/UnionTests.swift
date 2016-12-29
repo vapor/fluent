@@ -32,7 +32,7 @@ class UnionTests: XCTestCase {
                     XCTAssert(join.local == Atom.self)
                     XCTAssertEqual(join.localKey, "compound_\(lqd.idKey)")
                     XCTAssert(join.foreign == Compound.self)
-                    XCTAssertEqual(join.foreignKey, Atom.idKey)
+                    XCTAssertEqual(join.foreignKey, lqd.idKey)
                 }
                 XCTAssert(limit == nil)
             default:
