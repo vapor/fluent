@@ -15,7 +15,7 @@ public struct Union {
         self.local = local
         self.foreign = foreign
         self.localKey = localKey ?? "\(foreign.name)_\(foreign.idKey ?? idKey)"
-        self.foreignKey = foreignKey ?? local.idKey ?? idKey
+        self.foreignKey = foreignKey ?? foreign.idKey ?? idKey
     }
 }
 
