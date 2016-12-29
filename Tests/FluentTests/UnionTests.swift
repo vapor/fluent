@@ -6,6 +6,7 @@ class UnionTests: XCTestCase {
         ("testBasic", testBasic),
         ("testCustom", testCustom),
         ("testSQL", testSQL),
+        ("testSQLCustomId", testSQLCustomId),
         ("testSQLFilters", testSQLFilters),
     ]
 
@@ -85,6 +86,21 @@ class UnionTests: XCTestCase {
             let serializer = GeneralSQLSerializer(sql: sql)
             let (statement, values) = serializer.serialize()
             XCTAssertEqual(statement, "SELECT `atoms`.* FROM `atoms` JOIN `compounds` ON `atoms`.`#local_key` = `compounds`.`#foreign_key`")
+            XCTAssertEqual(values.count, 0)
+        } else {
+            XCTFail("No last query.")
+        }
+    }
+    
+    func testSQLCustomId() throws {
+        let query = try Query<User>(db).union(CustomId.self)
+        try lqd.query(query)
+        
+        
+        if let sql = lqd.lastQuery {
+            let serializer = GeneralSQLSerializer(sql: sql)
+            let (statement, values) = serializer.serialize()
+            XCTAssertEqual(statement, "SELECT `users`.* FROM `users` JOIN `customids` ON `users`.`customid_custom_id` = `customids`.`custom_id`")
             XCTAssertEqual(values.count, 0)
         } else {
             XCTFail("No last query.")
