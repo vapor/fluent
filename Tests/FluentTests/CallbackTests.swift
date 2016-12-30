@@ -6,10 +6,8 @@ class CallbacksTests: XCTestCase {
     /// Dummy Model implementation for testing.
     final class DummyModel: Entity {
         var exists: Bool = false
-        static var entity: String {
-            return "dummy_models"
-        }
-        var wasModified: Bool = false
+        var wasModifiedOnCreate: Bool = false
+        var wasModifiedOnUpdate: Bool = false
 
         static func prepare(_ database: Database) throws {}
         static func revert(_ database: Database) throws {}
@@ -29,12 +27,17 @@ class CallbacksTests: XCTestCase {
         }
         
         func willCreate() {
-            wasModified = true
+            wasModifiedOnCreate = true
+        }
+        
+        func willUpdate() {
+            wasModifiedOnUpdate = true
         }
     }
 
     static let allTests = [
-        ("testCallbacksCanMutateProperties", testCallbacksCanMutateProperties)
+        ("testCreateCallbacksCanMutateProperties", testCreateCallbacksCanMutateProperties),
+        ("testUpdateCallbacksCanMutateProperties", testUpdateCallbacksCanMutateProperties)
     ]
 
     override func setUp() {
@@ -44,15 +47,23 @@ class CallbacksTests: XCTestCase {
 
     var database: Database!
 
-    func testCallbacksCanMutateProperties() {
-        do {
-            var result = DummyModel()
-            XCTAssertFalse(result.wasModified, "Result should not have been modified yet")
-            
-            try result.save()
-            XCTAssertTrue(result.wasModified, "Result should have been modified by now")
-        } catch {
-            XCTFail("Save should not have failed")
-        }
+    func testCreateCallbacksCanMutateProperties() {
+        var result = DummyModel()
+        XCTAssertFalse(result.wasModifiedOnCreate, "Result should not have been modified yet")
+        
+        try? result.save()
+        XCTAssertTrue(result.wasModifiedOnCreate, "Result should have been modified by now")
+    }
+    
+    func testUpdateCallbacksCanMutateProperties() {
+        var result = DummyModel()
+        XCTAssertFalse(result.wasModifiedOnUpdate, "Result should not have been modified yet")
+        
+        try? result.save()
+        XCTAssertFalse(result.wasModifiedOnUpdate, "Result should not have been modified yet")
+        
+        // Save the object once more to trigger the update callback
+        try? result.save()
+        XCTAssertTrue(result.wasModifiedOnUpdate, "Result should have been modified by now")
     }
 }
