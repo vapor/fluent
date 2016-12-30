@@ -4,6 +4,9 @@ import XCTest
 class SchemaCreateTests: XCTestCase {
     static let allTests = [
         ("testCreate", testCreate),
+        ("testStringDefault", testStringDefault),
+        ("testModify", testModify),
+        ("testDelete", testDelete),
     ]
 
     func testCreate() throws {
