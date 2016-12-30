@@ -22,6 +22,20 @@ class SchemaCreateTests: XCTestCase {
         XCTAssertEqual(statement, "CREATE TABLE `users` (`id` INTEGER NOT NULL, `name` STRING NOT NULL, `email` STRING NOT NULL, `profile` JSON NOT NULL)")
         XCTAssertEqual(values.count, 0)
     }
+    
+    func testStringDefault() throws {
+        let builder = Schema.Creator("table")
+        
+        builder.string("string", default: "default")
+        
+        let sql = builder.schema.sql
+        let serializer = GeneralSQLSerializer(sql: sql)
+        
+        let (statement, values) = serializer.serialize()
+        
+        XCTAssertEqual(statement, "CREATE TABLE `table` (`string` STRING NOT NULL DEFAULT 'default')")
+        XCTAssertEqual(values.count, 0)
+    }
 
     func testModify() throws {
         let builder = Schema.Modifier("users")
