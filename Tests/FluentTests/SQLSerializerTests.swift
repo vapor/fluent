@@ -8,6 +8,10 @@ class SQLSerializerTests: XCTestCase {
         ("testOffsetSelect", testOffsetSelect),
         ("testFilterCompareSelect", testFilterCompareSelect),
         ("testFilterLikeSelect", testFilterLikeSelect),
+        ("testBasicCount", testBasicCount),
+        ("testRegularCount", testRegularCount),
+        ("testFilterCompareCount", testFilterCompareCount),
+        ("testFilterLikeCount", testFilterLikeCount),
         ("testFilterEqualsNullSelect", testFilterEqualsNullSelect),
         ("testFilterNotEqualsNullSelect", testFilterNotEqualsNullSelect),
         ("testFilterCompareUpdate", testFilterCompareUpdate),
@@ -65,6 +69,47 @@ class SQLSerializerTests: XCTestCase {
         XCTAssertEqual(values.count, 1)
     }
     
+
+    func testBasicCount() {
+        let sql = SQL.count(table: "users", filters: [], joins: [])
+        let (statement, values) = serialize(sql)
+
+        XCTAssertEqual(statement, "SELECT COUNT(*) FROM `users`")
+        XCTAssert(values.isEmpty)
+    }
+
+    func testRegularCount() {
+        let filter = Filter(User.self, .compare("age", .greaterThanOrEquals, 21))
+        let sql = SQL.count(table: "users", filters: [filter], joins: [])
+        let (statement, values) = serialize(sql)
+
+        XCTAssertEqual(statement, "SELECT COUNT(*) FROM `users` WHERE `users`.`age` >= ?")
+        XCTAssertEqual(values.first?.int, 21)
+        XCTAssertEqual(values.count, 1)
+    }
+
+    func testFilterCompareCount() {
+        let filter = Filter(User.self, .compare("name", .notEquals, "duck"))
+
+        let select = SQL.count(table: "friends", filters: [filter], joins: [])
+        let (statement, values) = serialize(select)
+
+        XCTAssertEqual(statement, "SELECT COUNT(*) FROM `friends` WHERE `users`.`name` != ?")
+        XCTAssertEqual(values.first?.string, "duck")
+        XCTAssertEqual(values.count, 1)
+    }
+
+    func testFilterLikeCount() {
+        let filter = Filter(User.self, .compare("name", .hasPrefix, "duc"))
+
+        let select = SQL.count(table: "friends", filters: [filter], joins: [])
+        let (statement, values) = serialize(select)
+
+        XCTAssertEqual(statement, "SELECT COUNT(*) FROM `friends` WHERE `users`.`name` LIKE ?")
+        XCTAssertEqual(values.first?.string, "duc%")
+        XCTAssertEqual(values.count, 1)
+    }
+
     func testFilterEqualsNullSelect() {
         let filter = Filter(User.self, .compare("name", .equals, Node.null))
         
