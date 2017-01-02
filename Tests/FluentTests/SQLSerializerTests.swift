@@ -108,6 +108,7 @@ class SQLSerializerTests: XCTestCase {
         XCTAssertEqual(statement, "SELECT COUNT(*) FROM `friends` WHERE `users`.`name` LIKE ?")
         XCTAssertEqual(values.first?.string, "duc%")
         XCTAssertEqual(values.count, 1)
+    }
 
     func testFilterEqualsNullSelect() {
         let filter = Filter(User.self, .compare("name", .equals, Node.null))
