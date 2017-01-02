@@ -358,9 +358,22 @@ open class GeneralSQLSerializer: SQLSerializer {
         if column.unique {
             clause += "UNIQUE"
         }
-        
-        if let d = column.default?.string {
-            clause += "DEFAULT '\(d)'"
+
+        if let d = column.default {
+            let dc: String
+
+            switch d {
+            case .number(let n):
+                dc = "'" + n.description + "'"
+            case .null:
+                dc = "NULL"
+            case .bool(let b):
+                dc = b ? "TRUE" : "FALSE"
+            default:
+                dc = "'" + (d.string ?? "") + "'"
+            }
+
+            clause += "DEFAULT \(dc)"
         }
 
         return clause.joined(separator: " ")
