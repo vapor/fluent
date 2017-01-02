@@ -381,7 +381,7 @@ open class GeneralSQLSerializer: SQLSerializer {
         }
         
         if let d = column.default?.string {
-            clause += "DEFAULT \(d)"
+            clause += "DEFAULT '\(d)'"
         }
 
         return clause.joined(separator: " ")
