@@ -20,3 +20,16 @@ public struct Limit {
         self.offset = offset
     }
 }
+
+extension QueryRepresentable {
+
+    /**
+        Limits the count of results returned
+        by the `Query`.
+    */
+    public func limit(_ count: Int) throws -> Query<T> {
+        let query = try makeQuery()
+        query.limit = Limit(count: count)
+        return query
+    }
+}

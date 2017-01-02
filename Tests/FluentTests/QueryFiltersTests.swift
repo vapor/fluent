@@ -77,4 +77,9 @@ class QueryFiltersTests: XCTestCase {
         XCTAssert(query.action == .delete)
     }
 
+    func testLimitQuery() throws {
+        let query = try DummyModel.query().limit(5)
+        XCTAssertEqual(query.limit?.count, 5)
+    }
+
 }
