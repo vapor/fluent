@@ -13,7 +13,7 @@ public final class MemoryDriver: Driver {
     
     @discardableResult
     public func query<T: Entity>(_ query: Query<T>) throws -> Node {
-        let group = prepare(group: query.entity)
+        var group = prepare(group: query.entity)
 
         switch query.action {
         case .create:
@@ -25,9 +25,12 @@ public final class MemoryDriver: Driver {
             return Node.number(.int(i))
         case .delete:
             group.delete(query.filters)
-
-            return .null
+            return Node.array([])
         case .fetch:
+            if let union = query.unions.first {
+                group = prepare(union: union)
+            }
+            
             let results = group.fetch(query.filters, query.sorts)
 
             return Node.array(results)
@@ -46,7 +49,12 @@ public final class MemoryDriver: Driver {
     }
     
     public func schema(_ schema: Schema) throws {
-        throw Error.unsupported
+        // no schema changes necessary
+        switch schema {
+        case .delete(let entity):
+            store.removeValue(forKey: entity)
+        default: break
+        }
     }
     
     @discardableResult
@@ -62,5 +70,39 @@ public final class MemoryDriver: Driver {
         let group = Group()
         store[name] = group
         return group
+    }
+
+    func prepare(union: Union) -> Group {
+        // create unioned table from two groups
+        let local = prepare(group: union.local.entity)
+        let foreign = prepare(group: union.foreign.entity)
+
+        var unioned: [Node] = []
+
+        // iterate over and merge table data
+        // into one group
+        for l in local.data {
+            for f in foreign.data {
+                if l[union.localKey] == f[union.foreignKey] {
+                    var lf: [String: Node] = [:]
+
+                    if let of = f.nodeObject {
+                        for (key, val) in of {
+                            lf[key] = val
+                        }
+                    }
+
+                    if let ol = l.nodeObject {
+                        for (key, val) in ol {
+                            lf[key] = val
+                        }
+                    }
+
+                    unioned.append(Node.object(lf))
+                }
+            }
+        }
+
+        return Group(data: unioned)
     }
 }

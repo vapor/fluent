@@ -130,10 +130,10 @@ extension QueryRepresentable {
         let query = try makeQuery()
         query.limit = Limit(count: 1)
 
-        var m = try query.run().first
-        m?.exists = true
+        var model = try query.run().first
+        model?.exists = true
 
-        return m
+        return model
     }
 
     /**
@@ -143,13 +143,13 @@ extension QueryRepresentable {
     public func all() throws -> [T] {
         let query = try makeQuery()
 
-        let m = try query.run()
-        m.forEach { m in
-            var m = m
-            m.exists = true
+        let models = try query.run()
+        models.forEach { model in
+            var model = model
+            model.exists = true
         }
 
-        return m
+        return models
     }
     
     /**
@@ -206,6 +206,11 @@ extension QueryRepresentable {
     */
     public func delete() throws {
         let query = try makeQuery()
+        
+        guard query.unions.count == 0 else {
+            throw QueryError.notSupported("Cannot perform delete on queries that contain unions. Delete the entities directly instead.")
+        }
+        
         query.action = .delete
         try query.run()
     }
@@ -259,6 +264,10 @@ extension QueryRepresentable {
         }
         try query.run()
     }
+}
+
+public enum QueryError: Error {
+    case notSupported(String)
 }
 
 public protocol QueryRepresentable {

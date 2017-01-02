@@ -2,16 +2,14 @@ import XCTest
 @testable import Fluent
 
 class MemoryTests: XCTestCase {
-    static var allTests : [(String, (MemoryTests) -> () throws -> Void)] {
-        return [
-            ("testSave", testSave),
-            ("testFetch", testFetch),
-            ("testDelete", testDelete),
-            ("testModify", testModify),
-            ("testSort", testSort),
-            ("testCount", testCount),
-        ]
-    }
+    static var allTests = [
+        ("testSave", testSave),
+        ("testFetch", testFetch),
+        ("testDelete", testDelete),
+        ("testModify", testModify),
+        ("testSort", testSort),
+        ("testCount", testCount),
+    ]
 
     func makeTestModels() -> (MemoryDriver, Database) {
         let driver = MemoryDriver()
