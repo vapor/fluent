@@ -74,7 +74,7 @@ class SQLSerializerTests: XCTestCase {
         let sql = SQL.count(table: "users", filters: [], joins: [])
         let (statement, values) = serialize(sql)
 
-        XCTAssertEqual(statement, "SELECT COUNT(*) FROM `users`")
+        XCTAssertEqual(statement, "SELECT COUNT(*) as _fluent_count FROM `users`")
         XCTAssert(values.isEmpty)
     }
 
@@ -83,7 +83,7 @@ class SQLSerializerTests: XCTestCase {
         let sql = SQL.count(table: "users", filters: [filter], joins: [])
         let (statement, values) = serialize(sql)
 
-        XCTAssertEqual(statement, "SELECT COUNT(*) FROM `users` WHERE `users`.`age` >= ?")
+        XCTAssertEqual(statement, "SELECT COUNT(*) as _fluent_count FROM `users` WHERE `users`.`age` >= ?")
         XCTAssertEqual(values.first?.int, 21)
         XCTAssertEqual(values.count, 1)
     }
@@ -94,7 +94,7 @@ class SQLSerializerTests: XCTestCase {
         let select = SQL.count(table: "friends", filters: [filter], joins: [])
         let (statement, values) = serialize(select)
 
-        XCTAssertEqual(statement, "SELECT COUNT(*) FROM `friends` WHERE `users`.`name` != ?")
+        XCTAssertEqual(statement, "SELECT COUNT(*) as _fluent_count FROM `friends` WHERE `users`.`name` != ?")
         XCTAssertEqual(values.first?.string, "duck")
         XCTAssertEqual(values.count, 1)
     }
@@ -105,7 +105,7 @@ class SQLSerializerTests: XCTestCase {
         let select = SQL.count(table: "friends", filters: [filter], joins: [])
         let (statement, values) = serialize(select)
 
-        XCTAssertEqual(statement, "SELECT COUNT(*) FROM `friends` WHERE `users`.`name` LIKE ?")
+        XCTAssertEqual(statement, "SELECT COUNT(*) as _fluent_count FROM `friends` WHERE `users`.`name` LIKE ?")
         XCTAssertEqual(values.first?.string, "duc%")
         XCTAssertEqual(values.count, 1)
     }

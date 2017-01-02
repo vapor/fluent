@@ -161,7 +161,13 @@ extension QueryRepresentable {
 
         let raw = try query.raw()
 
-        guard let count = raw[0, "_fluent_count"]?.int else {
+        let count: Int
+
+        if let c = raw.int {
+            count = c
+        } else if let c = raw[0, "_fluent_count"]?.int {
+            count = c
+        } else {
             throw QueryError.notSupported("Count not supported.")
         }
 
