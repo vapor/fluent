@@ -158,7 +158,14 @@ extension QueryRepresentable {
     public func count() throws -> Int {
         let query = try makeQuery()
         query.action = .count
-        return try query.raw().int ?? 0
+
+        let raw = try query.raw()
+
+        guard let count = raw[0, "_fluent_count"]?.int else {
+            throw QueryError.notSupported("Count not supported.")
+        }
+
+        return count
     }
 
     //MARK: Create
