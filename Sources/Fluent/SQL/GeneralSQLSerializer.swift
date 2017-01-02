@@ -73,7 +73,7 @@ open class GeneralSQLSerializer: SQLSerializer {
             var statement: [String] = []
             var values: [Node] = []
 
-            statement += "SELECT COUNT(*) FROM"
+            statement += "SELECT COUNT(*) as _fluent_count FROM"
             statement += sql(table)
 
             if !unions.isEmpty {

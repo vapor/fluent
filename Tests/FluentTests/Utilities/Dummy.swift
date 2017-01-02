@@ -30,6 +30,10 @@ class DummyDriver: Driver {
     }
 
     func query<T: Entity>(_ query: Query<T>) throws -> Node {
+        if query.action == .count {
+            return 0
+        }
+        
         return .array([])
     }
 
