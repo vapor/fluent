@@ -38,6 +38,11 @@ public protocol Entity: Preparation, NodeConvertible {
     var exists: Bool { get set }
 
     /**
+        Called to check weither we should create the entity or not.
+     */
+    func shouldCreate() -> Bool
+    
+    /**
         Called before the entity will be created.
     */
     func willCreate()
@@ -46,6 +51,11 @@ public protocol Entity: Preparation, NodeConvertible {
         Called after the entity has been created.
     */
     func didCreate()
+    
+    /**
+     Called to check weither we should update the entity or not.
+     */
+    func shouldUpdate() -> Bool
 
     /**
         Called before the entity will be updated.
@@ -57,6 +67,11 @@ public protocol Entity: Preparation, NodeConvertible {
     */
     func didUpdate()
 
+    /**
+     Called to check weither we should delete the entity or not.
+     */
+    func shouldDelete() -> Bool
+    
     /**
         Called before the entity will be deleted.
     */
@@ -100,10 +115,13 @@ extension Entity {
 
 
 extension Entity {
+    public func shouldCreate() -> Bool { return true }
     public func willCreate() {}
     public func didCreate() {}
+    public func shouldUpdate() -> Bool { return true }
     public func willUpdate() {}
     public func didUpdate() {}
+    public func shouldDelete() -> Bool { return true }
     public func willDelete() {}
     public func didDelete() {}
 }

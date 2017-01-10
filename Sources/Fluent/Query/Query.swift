@@ -199,10 +199,12 @@ extension QueryRepresentable {
         let query = try makeQuery()
         
         if let _ = model.id, model.exists {
+            guard model.shouldUpdate() else { return }
             model.willUpdate()
             try modify(model.makeNode())
             model.didUpdate()
         } else {
+            guard model.shouldCreate() else { return }
             model.willCreate()
             model.id = try query.create(model.makeNode())
             model.didCreate()
@@ -232,7 +234,7 @@ extension QueryRepresentable {
         if its identifier is set.
     */
     public func delete(_ model: T) throws {
-        guard let id = model.id else {
+        guard let id = model.id, model.shouldDelete() else {
             return
         }
         let query = try makeQuery()
