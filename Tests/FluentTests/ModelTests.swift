@@ -19,12 +19,7 @@ class ModelTests: XCTestCase {
         var atom = Atom(name: "test", id: 5)
 
         XCTAssertFalse(atom.exists, "Model shouldn't exist yet.")
-
-        atom.shouldCreateObject = false
-        try! atom.save()
-        XCTAssertFalse(atom.exists, "Model shouldn't be created.")
         
-        atom.shouldCreateObject = true
         try! atom.save()
 
         XCTAssertTrue(atom.exists, "Model should exist after saving.")
@@ -34,8 +29,6 @@ class ModelTests: XCTestCase {
 
         atom.name = "bob"
         try atom.save()
-        
-        
         let (_, _) = GeneralSQLSerializer(sql: lqd.lastQuery!).serialize()
 
         try atom.delete()

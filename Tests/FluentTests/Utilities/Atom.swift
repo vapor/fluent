@@ -5,9 +5,6 @@ struct Atom: Entity {
     var name: String
     var groupId: Node?
     var exists: Bool = false
-    var shouldDeleteObject = true
-    var shouldCreateObject = true
-    var shouldUpdateObject = true
     
     init(name: String, id: Node? = nil) {
         self.id = id
@@ -56,20 +53,12 @@ struct Atom: Entity {
     }
 
     // MARK: Callbacks
-    func shouldCreate() -> Bool {
-        return shouldCreateObject
-    }
-    
     func willCreate() {
         print("Atom will create.")
     }
 
     func didCreate() {
         print("Atom did create.")
-    }
-
-    func shouldUpdate() -> Bool {
-        return shouldUpdateObject
     }
     
     func willUpdate() {
@@ -80,10 +69,6 @@ struct Atom: Entity {
         print("Atom did update.")
     }
 
-    func shouldDelete() -> Bool {
-        return shouldDeleteObject
-    }
-    
     func willDelete() {
         print("Atom will delete.")
     }
