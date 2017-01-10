@@ -40,32 +40,32 @@ public protocol Entity: Preparation, NodeConvertible {
     /**
         Called before the entity will be created.
     */
-    func willCreate()
+    func willCreate() throws
 
     /**
         Called after the entity has been created.
     */
-    func didCreate()
+    func didCreate() throws
 
     /**
         Called before the entity will be updated.
     */
-    func willUpdate()
+    func willUpdate() throws
 
     /**
         Called after the entity has been updated.
     */
-    func didUpdate()
+    func didUpdate() throws
 
     /**
         Called before the entity will be deleted.
     */
-    func willDelete()
+    func willDelete() throws
 
     /**
         Called after the entity has been deleted.
     */
-    func didDelete()
+    func didDelete() throws
 }
 
 // MARK: Defaults
@@ -100,12 +100,12 @@ extension Entity {
 
 
 extension Entity {
-    public func willCreate() {}
-    public func didCreate() {}
-    public func willUpdate() {}
-    public func didUpdate() {}
-    public func willDelete() {}
-    public func didDelete() {}
+    public func willCreate() throws {}
+    public func didCreate() throws {}
+    public func willUpdate() throws {}
+    public func didUpdate() throws {}
+    public func willDelete() throws {}
+    public func didDelete() throws {}
 }
 
 //MARK: CRUD

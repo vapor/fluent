@@ -54,27 +54,27 @@ struct Atom: Entity {
 
     // MARK: Callbacks
 
-    func willCreate() {
+    func willCreate() throws {
         print("Atom will create.")
     }
 
-    func didCreate() {
+    func didCreate() throws {
         print("Atom did create.")
     }
 
-    func willUpdate() {
+    func willUpdate() throws {
         print("Atom will update.")
     }
 
-    func didUpdate() {
+    func didUpdate() throws {
         print("Atom did update.")
     }
 
-    func willDelete() {
+    func willDelete() throws {
         print("Atom will delete.")
     }
 
-    func didDelete() {
+    func didDelete() throws {
         print("Atom did delete.")
     }
 }

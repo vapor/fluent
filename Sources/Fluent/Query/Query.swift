@@ -200,13 +200,13 @@ extension QueryRepresentable {
         let data = try model.makeNode()
 
         if let _ = model.id, model.exists {
-            model.willUpdate()
+            try model.willUpdate()
             try modify(data)
-            model.didUpdate()
+            try model.didUpdate()
         } else {
-            model.willCreate()
+            try model.willCreate()
             model.id = try query.create(data)
-            model.didCreate()
+            try model.didCreate()
         }
         model.exists = true
     }
@@ -251,9 +251,9 @@ extension QueryRepresentable {
 
         query.filters.append(filter)
 
-        model.willDelete()
+        try model.willDelete()
         try query.run()
-        model.didDelete()
+        try model.didDelete()
 
         var model = model
         model.exists = false
