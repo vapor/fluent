@@ -197,15 +197,14 @@ extension QueryRepresentable {
     */
     public func save(_ model: inout T) throws {
         let query = try makeQuery()
-        let data = try model.makeNode()
-
+        
         if let _ = model.id, model.exists {
             model.willUpdate()
-            try modify(data)
+            try modify(model.makeNode())
             model.didUpdate()
         } else {
             model.willCreate()
-            model.id = try query.create(data)
+            model.id = try query.create(model.makeNode())
             model.didCreate()
         }
         model.exists = true
