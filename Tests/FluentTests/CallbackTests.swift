@@ -53,9 +53,9 @@ class CallbacksTests: XCTestCase {
     static let allTests = [
         ("testCreateCallbacksCanMutateProperties", testCreateCallbacksCanMutateProperties),
         ("testUpdateCallbacksCanMutateProperties", testUpdateCallbacksCanMutateProperties),
-        ("testCheckCreate", testCheckCreate),
-        ("testCheckUpdate", testCheckUpdate),
-        ("testCheckDelete", testCheckDelete),
+        ("testCreateCheck", testCreateCheck),
+        ("testUpdateCheck", testUpdateCheck),
+        ("testDeleteCheck", testDeleteCheck),
     ]
 
     override func setUp() {
