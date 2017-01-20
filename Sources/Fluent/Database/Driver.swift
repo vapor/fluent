@@ -47,12 +47,12 @@ extension Driver {
 // MARK: Deprecated
 
 enum DriverError: Error {
-    case unimplemented(String)
+    case connectionsNotSupported(String)
 }
 
 extension Driver {
     public func makeConnection() throws -> Connection {
-        throw DriverError.unimplemented("Please update your database driver package to one that is compatible with Fluent 1.4.")
+        throw DriverError.connectionsNotSupported("Please update your database driver package to be compatible with Fluent 1.4.")
     }
 }
 
