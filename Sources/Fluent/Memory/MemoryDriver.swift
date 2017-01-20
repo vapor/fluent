@@ -11,16 +11,75 @@ public final class MemoryDriver: Driver {
         store = [:]
     }
     
+    public func makeConnection() throws -> Connection {
+        return MemoryConnection(driver: self)
+    }
+    
+    func prepare(group name: String) -> Group {
+        if let group = store[name] {
+            return group
+        }
+        
+        let group = Group()
+        store[name] = group
+        return group
+    }
+    
+    func prepare(union: Union) -> Group {
+        // create unioned table from two groups
+        let local = prepare(group: union.local.entity)
+        let foreign = prepare(group: union.foreign.entity)
+        
+        var unioned: [Node] = []
+        
+        // iterate over and merge table data
+        // into one group
+        for l in local.data {
+            for f in foreign.data {
+                if l[union.localKey] == f[union.foreignKey] {
+                    var lf: [String: Node] = [:]
+                    
+                    if let of = f.nodeObject {
+                        for (key, val) in of {
+                            lf[key] = val
+                        }
+                    }
+                    
+                    if let ol = l.nodeObject {
+                        for (key, val) in ol {
+                            lf[key] = val
+                        }
+                    }
+                    
+                    unioned.append(Node.object(lf))
+                }
+            }
+        }
+        
+        return Group(data: unioned)
+    }
+}
+
+public final class MemoryConnection: Connection {
+    public var closed: Bool
+
+    public let driver: MemoryDriver
+    
+    public init(driver: MemoryDriver) {
+        self.driver = driver
+        closed = false
+    }
+    
     @discardableResult
     public func query<T: Entity>(_ query: Query<T>) throws -> Node {
-        var group = prepare(group: query.entity)
+        var group = driver.prepare(group: query.entity)
 
         switch query.action {
         case .create:
             guard let data = query.data else {
-                throw Error.dataRequired
+                throw MemoryDriver.Error.dataRequired
             }
-            let i = group.create(data, idKey: idKey)
+            let i = group.create(data, idKey: driver.idKey)
 
             return Node.number(.int(i))
         case .delete:
@@ -28,7 +87,7 @@ public final class MemoryDriver: Driver {
             return Node.array([])
         case .fetch:
             if let union = query.unions.first {
-                group = prepare(union: union)
+                group = driver.prepare(union: union)
             }
             
             let results = group.fetch(query.filters, query.sorts)
@@ -40,7 +99,7 @@ public final class MemoryDriver: Driver {
             return Node.number(.int(count))
         case .modify:
             guard let data = query.data else {
-                throw Error.dataRequired
+                throw MemoryDriver.Error.dataRequired
             }
             let results = group.modify(data, filters: query.filters)
 
@@ -52,57 +111,13 @@ public final class MemoryDriver: Driver {
         // no schema changes necessary
         switch schema {
         case .delete(let entity):
-            store.removeValue(forKey: entity)
+            driver.store.removeValue(forKey: entity)
         default: break
         }
     }
     
     @discardableResult
     public func raw(_ raw: String, _ values: [Node]) throws -> Node {
-        throw Error.unsupported
-    }
-
-    func prepare(group name: String) -> Group {
-        if let group = store[name] {
-            return group
-        }
-
-        let group = Group()
-        store[name] = group
-        return group
-    }
-
-    func prepare(union: Union) -> Group {
-        // create unioned table from two groups
-        let local = prepare(group: union.local.entity)
-        let foreign = prepare(group: union.foreign.entity)
-
-        var unioned: [Node] = []
-
-        // iterate over and merge table data
-        // into one group
-        for l in local.data {
-            for f in foreign.data {
-                if l[union.localKey] == f[union.foreignKey] {
-                    var lf: [String: Node] = [:]
-
-                    if let of = f.nodeObject {
-                        for (key, val) in of {
-                            lf[key] = val
-                        }
-                    }
-
-                    if let ol = l.nodeObject {
-                        for (key, val) in ol {
-                            lf[key] = val
-                        }
-                    }
-
-                    unioned.append(Node.object(lf))
-                }
-            }
-        }
-
-        return Group(data: unioned)
+        throw MemoryDriver.Error.unsupported
     }
 }

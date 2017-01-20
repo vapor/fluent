@@ -1,5 +1,6 @@
 import XCTest
 @testable import Fluent
+import Dispatch
 
 class MemoryTests: XCTestCase {
     static var allTests = [
@@ -24,6 +25,7 @@ class MemoryTests: XCTestCase {
         var user = User(id: nil, name: "Vapor", email: "test@email.com")
         let query = Query<User>(database)
         try query.save(&user)
+        
         XCTAssertEqual(user.id?.int, 1)
         XCTAssertEqual(driver.store["users"]?.data.count, 1)
     }

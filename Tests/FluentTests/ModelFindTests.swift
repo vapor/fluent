@@ -34,22 +34,36 @@ class ModelFindTests: XCTestCase {
         enum Error: Swift.Error {
             case broken
         }
-
+        
+        func makeConnection() throws -> Connection {
+            return DummyConnection(driver: self)
+        }
+    }
+    
+    class DummyConnection: Connection {
+        public var closed: Bool = false
+        
+        var driver: DummyDriver
+        
+        init(driver: DummyDriver) {
+            self.driver = driver
+        }
+        
         func query<T: Entity>(_ query: Query<T>) throws -> Node {
             if
                 let filter = query.filters.first,
                 case .compare(let key, let comparison, let value) = filter.method,
                 query.action == .fetch &&
                     query.filters.count == 1 &&
-                    key == idKey &&
+                    key == driver.idKey &&
                     comparison == .equals
             {
                 if value.int == 42 {
                     return .array([
-                        .object([idKey: 42])
+                        .object([driver.idKey: 42])
                     ])
                 } else if value.int == 500 {
-                    throw Error.broken
+                    throw DummyDriver.Error.broken
                 }
             }
             
