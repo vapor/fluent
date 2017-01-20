@@ -128,6 +128,7 @@ extension QueryRepresentable {
     */
     public func first() throws -> T? {
         let query = try makeQuery()
+        query.action = .fetch
         query.limit = Limit(count: 1)
 
         var model = try query.run().first
@@ -142,6 +143,8 @@ extension QueryRepresentable {
     */
     public func all() throws -> [T] {
         let query = try makeQuery()
+        
+        query.action = .fetch
 
         let models = try query.run()
         models.forEach { model in
