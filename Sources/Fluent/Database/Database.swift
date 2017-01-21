@@ -16,7 +16,7 @@ public class Database: Executor {
     public init(_ driver: Driver) {
         threadConnectionPool = ThreadConnectionPool(
             makeConnection: driver.makeConnection,
-            maxConnections: 5
+            maxConnections: 128 // some number larger than the max threads
         )
         self.driver = driver
     }
