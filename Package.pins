@@ -1,0 +1,30 @@
+{
+  "autoPin": true,
+  "pins": [
+    {
+      "package": "Core",
+      "reason": null,
+      "repositoryURL": "https://github.com/vapor/core.git",
+      "version": "1.0.0"
+    },
+    {
+      "package": "Node",
+      "reason": null,
+      "repositoryURL": "https://github.com/vapor/node.git",
+      "version": "1.0.1"
+    },
+    {
+      "package": "PathIndexable",
+      "reason": null,
+      "repositoryURL": "https://github.com/vapor/path-indexable.git",
+      "version": "1.0.0"
+    },
+    {
+      "package": "Polymorphic",
+      "reason": null,
+      "repositoryURL": "https://github.com/vapor/polymorphic.git",
+      "version": "1.0.1"
+    }
+  ],
+  "version": 1
+}
