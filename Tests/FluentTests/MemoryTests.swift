@@ -9,6 +9,11 @@ class MemoryTests: XCTestCase {
         ("testModify", testModify),
         ("testSort", testSort),
         ("testCount", testCount),
+        ("testFetchWithLimit", testFetchWithLimit),
+        ("testFetchWithLimitAndOffset", testFetchWithLimitAndOffset),
+        ("testFetchWithLimitWithSizeGreaterThatContents", testFetchWithLimitWithSizeGreaterThatContents),
+        ("testFetchWithLimitWithOffsetGreaterThanContents", testFetchWithLimitWithOffsetGreaterThanContents),
+        ("testFetchWithLimitWithOffsetAndSizeGreaterThanContents", testFetchWithLimitWithOffsetAndSizeGreaterThanContents),
     ]
 
     func makeTestModels() -> (MemoryDriver, Database) {
@@ -109,5 +114,93 @@ class MemoryTests: XCTestCase {
         
         let count3 = try Query<User>(database).filter("name", "Test").count()
         XCTAssertEqual(count3, 0)
+    }
+    
+    func testFetchWithLimit() throws {
+        let (driver, database) = makeTestModels()
+        
+        var new = User(id: nil, name: "Vapor", email: "test@email.com")
+        var new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
+        let store = Query<User>(database)
+        try store.save(&new)
+        try store.save(&new2)
+        
+        let fetched = try Query<User>(database).limit(1).all()
+        XCTAssertEqual(fetched.count, 1)
+        XCTAssertEqual(driver.store["users"]?.data.count, 2)
+    }
+    
+    func testFetchWithLimitAndOffset() throws {
+        let (driver, database) = makeTestModels()
+        
+        var new = User(id: nil, name: "Vapor", email: "test@email.com")
+        var new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
+        var new3 = User(id: nil, name: "Vapor3", email: "test3@email.com")
+        let store = Query<User>(database)
+        try store.save(&new)
+        try store.save(&new2)
+        try store.save(&new3)
+        
+        let limit = Limit(count: 1, offset: 1)
+        let query = Query<User>(database)
+        query.limit = limit
+        
+        let fetched = try query.all()
+        XCTAssertEqual(fetched.count, 1)
+        XCTAssertEqual(driver.store["users"]?.data.count, 3)
+    }
+    
+    func testFetchWithLimitWithSizeGreaterThatContents() throws {
+        let (driver, database) = makeTestModels()
+        
+        var new = User(id: nil, name: "Vapor", email: "test@email.com")
+        var new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
+        let store = Query<User>(database)
+        try store.save(&new)
+        try store.save(&new2)
+        
+        let fetched = try Query<User>(database).limit(10).all()
+        XCTAssertEqual(fetched.count, 2)
+        XCTAssertEqual(driver.store["users"]?.data.count, 2)
+    }
+    
+    func testFetchWithLimitWithOffsetGreaterThanContents() throws {
+        let (driver, database) = makeTestModels()
+        
+        var new = User(id: nil, name: "Vapor", email: "test@email.com")
+        var new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
+        var new3 = User(id: nil, name: "Vapor3", email: "test3@email.com")
+        let store = Query<User>(database)
+        try store.save(&new)
+        try store.save(&new2)
+        try store.save(&new3)
+        
+        let limit = Limit(count: 1, offset: 5)
+        let query = Query<User>(database)
+        query.limit = limit
+        
+        let fetched = try query.all()
+        XCTAssertEqual(fetched.count, 0)
+        XCTAssertEqual(driver.store["users"]?.data.count, 3)
+    }
+    
+    func testFetchWithLimitWithOffsetAndSizeGreaterThanContents() throws {
+        let (driver, database) = makeTestModels()
+        
+        var new = User(id: nil, name: "Vapor", email: "test@email.com")
+        var new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
+        var new3 = User(id: nil, name: "Vapor3", email: "test3@email.com")
+        let store = Query<User>(database)
+        try store.save(&new)
+        try store.save(&new2)
+        try store.save(&new3)
+        
+        let limit = Limit(count: 10, offset: 5)
+        let query = Query<User>(database)
+        query.limit = limit
+        
+        let fetched = try query.all()
+        XCTAssertEqual(fetched.count, 0)
+        XCTAssertEqual(driver.store["users"]?.data.count, 3)
     }
 }
