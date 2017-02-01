@@ -127,6 +127,7 @@ class MemoryTests: XCTestCase {
         
         let fetched = try Query<User>(database).limit(1).all()
         XCTAssertEqual(fetched.count, 1)
+        XCTAssertEqual(fetched.first?.id, new.id)
         XCTAssertEqual(driver.store["users"]?.data.count, 2)
     }
     
@@ -147,6 +148,7 @@ class MemoryTests: XCTestCase {
         
         let fetched = try query.all()
         XCTAssertEqual(fetched.count, 1)
+        XCTAssertEqual(fetched.first?.id, new2.id)
         XCTAssertEqual(driver.store["users"]?.data.count, 3)
     }
     
@@ -163,7 +165,7 @@ class MemoryTests: XCTestCase {
         XCTAssertEqual(fetched.count, 2)
         XCTAssertEqual(driver.store["users"]?.data.count, 2)
     }
-    
+
     func testFetchWithLimitWithOffsetGreaterThanContents() throws {
         let (driver, database) = makeTestModels()
         
@@ -183,7 +185,7 @@ class MemoryTests: XCTestCase {
         XCTAssertEqual(fetched.count, 0)
         XCTAssertEqual(driver.store["users"]?.data.count, 3)
     }
-    
+
     func testFetchWithLimitWithOffsetAndSizeGreaterThanContents() throws {
         let (driver, database) = makeTestModels()
         
