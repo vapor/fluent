@@ -205,4 +205,38 @@ class MemoryTests: XCTestCase {
         XCTAssertEqual(fetched.count, 0)
         XCTAssertEqual(driver.store["users"]?.data.count, 3)
     }
+    
+    func testFetchWithLimitWithOffsetInMiddleAndCountGreaterThanRemainingContents() throws {
+        let (driver, database) = makeTestModels()
+        
+        var new = User(id: nil, name: "Vapor", email: "test@email.com")
+        var new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
+        var new3 = User(id: nil, name: "Vapor3", email: "test3@email.com")
+        var new4 = User(id: nil, name: "Vapor4", email: "test4@email.com")
+        var new5 = User(id: nil, name: "Vapor5", email: "test5@email.com")
+        var new6 = User(id: nil, name: "Vapor6", email: "test6@email.com")
+        var new7 = User(id: nil, name: "Vapor7", email: "test7@email.com")
+        var new8 = User(id: nil, name: "Vapor8", email: "test8@email.com")
+        var new9 = User(id: nil, name: "Vapor9", email: "test9@email.com")
+        
+        let store = Query<User>(database)
+        try store.save(&new)
+        try store.save(&new2)
+        try store.save(&new3)
+        try store.save(&new4)
+        try store.save(&new5)
+        try store.save(&new6)
+        try store.save(&new7)
+        try store.save(&new8)
+        try store.save(&new9)
+        
+        let limit = Limit(count: 10, offset: 5)
+        let query = Query<User>(database)
+        query.limit = limit
+        
+        let fetched = try query.all()
+        XCTAssertEqual(fetched.count, 4)
+        XCTAssertEqual(driver.store["users"]?.data.count, 9)
+
+    }
 }
