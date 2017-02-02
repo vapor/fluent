@@ -31,7 +31,7 @@ public final class MemoryDriver: Driver {
                 group = prepare(union: union)
             }
             
-            let results = group.fetch(query.filters, query.sorts)
+            let results = group.fetch(query.filters, query.sorts, query.limit)
 
             return Node.array(results)
         case .count:
