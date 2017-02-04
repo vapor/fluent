@@ -403,8 +403,18 @@ open class GeneralSQLSerializer: SQLSerializer {
 
     open func sql(_ type: Schema.Field.DataType) -> String {
         switch type {
-        case .id:
-            return "INTEGER PRIMARY KEY"
+        case .id(let type):
+            let keyType = type ?? Schema.Field.KeyType.int
+            switch keyType {
+            case .int:
+                return "INTEGER PRIMARY KEY"
+                
+            case .string(_):
+                return "STRING PRIMARY KEY"
+                
+            case .custom(let type):
+                return "\(type) PRIMARY KEY"
+            }
         case .int:
             return "INTEGER"
         case .string(_):
