@@ -22,7 +22,7 @@ extension Schema {
         ) {
             fields += Field(
                 name: name,
-                type: .id(type: type),
+                type: .id(keyType: type),
                 optional: optional,
                 unique: unique,
                 default: `default`
@@ -135,7 +135,7 @@ extension Schema {
         ) {
             fields += Field(
                 name: "\(entity.name)_id",
-                type: E.idType?.dataType ?? .int,
+                type: E.idType?.fieldType ?? .int,
                 optional: optional,
                 unique: unique,
                 default: `default`
@@ -154,12 +154,12 @@ extension Schema {
             let rightName = "\(right.name)\(suffix)"
             
             fields += Field(name: leftName,
-                            type: leftKeyType.dataType,
+                            type: leftKeyType.fieldType,
                             optional: false,
                             unique: false)
             
             fields += Field(name: rightName,
-                            type: rightKeyType.dataType,
+                            type: rightKeyType.fieldType,
                             optional: false,
                             unique: false)
         }

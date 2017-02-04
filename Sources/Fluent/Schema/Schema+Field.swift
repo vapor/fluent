@@ -11,7 +11,7 @@ extension Schema {
         public var `default`: Node?
 
         public enum DataType {
-            case id(type: KeyType?)
+            case id(keyType: KeyType?)
             case int
             case string(length: Int?)
             case double
@@ -25,7 +25,7 @@ extension Schema {
             case string(length: Int?)
             case custom(type: String)
             
-            var dataType: DataType {
+            var fieldType: DataType {
                 switch self {
                 case .int:
                     return .int
