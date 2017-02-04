@@ -26,6 +26,8 @@ public protocol Entity: Preparation, NodeConvertible {
         `find(:_)`.
     */
     var id: Node? { get set }
+    
+    static var idType: Schema.Field.KeyType? { get }
 
     /**
         Whether or not entity was retrieved from database.
@@ -81,6 +83,10 @@ extension Entity {
 
     public static var name: String {
         return String(describing: self).lowercased()
+    }
+    
+    public static var idType: Schema.Field.KeyType? {
+        return nil
     }
 
     // FIXME: Remove in 2.0. Also, make exists optional.
