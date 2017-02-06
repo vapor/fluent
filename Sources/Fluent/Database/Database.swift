@@ -17,6 +17,7 @@ public class Database {
     */
     public init(_ driver: Driver) {
         self.driver = driver
+        _context = DatabaseContext(self)
     }
 
     /**
@@ -31,4 +32,8 @@ public class Database {
         The default database for all `Model` types.
     */
     public static var `default`: Database?
+
+    // cached context
+    internal weak var _context: DatabaseContext?
 }
+

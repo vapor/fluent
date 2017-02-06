@@ -1,6 +1,6 @@
 @_exported import Node
 
-public struct DatabaseContext: Context {
+public final class DatabaseContext: Context {
     public let database: Database
 
     public init(_ database: Database) {
