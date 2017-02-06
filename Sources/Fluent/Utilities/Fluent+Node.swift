@@ -1,5 +1,9 @@
 @_exported import Node
 
-public struct FluentContext: Context {
-    public init() {}
+public struct DatabaseContext: Context {
+    public let database: Database
+
+    public init(_ database: Database) {
+        self.database = database
+    }
 }

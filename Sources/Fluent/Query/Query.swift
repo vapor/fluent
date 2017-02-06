@@ -97,7 +97,8 @@ public class Query<T: Entity>: QueryRepresentable {
         if case .array(let array) = try raw() {
             for result in array {
                 do {
-                    var model = try T(node: result)
+                    let context = DatabaseContext(database)
+                    var model = try T(node: result, in: context)
                     if case .object(let dict) = result {
                         model.id = dict[database.driver.idKey]
                     }
@@ -201,7 +202,7 @@ extension QueryRepresentable {
     public func save(_ model: inout T) throws {
         let query = try makeQuery()
 
-        let context = FluentContext()
+        let context = DatabaseContext(query.database)
         
         if let _ = model.id, model.exists {
             model.willUpdate()
