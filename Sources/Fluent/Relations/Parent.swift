@@ -25,7 +25,7 @@ extension Entity {
     public func parent<T: Entity>(
         _ foreignId: Node?,
         _ foreignKey: String? = nil,
-        _ child: T.Type = T.self
+        _ parentType: T.Type = T.self
     ) throws -> Parent<T> {
         guard let ident = foreignId else {
             throw RelationError.noIdentifier
