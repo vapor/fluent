@@ -200,14 +200,18 @@ extension QueryRepresentable {
     */
     public func save(_ model: inout T) throws {
         let query = try makeQuery()
+
+        let context = FluentContext()
         
         if let _ = model.id, model.exists {
             model.willUpdate()
-            try modify(model.makeNode())
+            let node = try model.makeNode(context: context)
+            try modify(node)
             model.didUpdate()
         } else {
             model.willCreate()
-            model.id = try query.create(model.makeNode())
+            let node = try model.makeNode(context: context)
+            model.id = try query.create(node)
             model.didCreate()
         }
         model.exists = true
