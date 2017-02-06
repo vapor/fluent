@@ -68,12 +68,14 @@ public class Query<T: Entity>: QueryRepresentable {
         self.database = database
         unions = []
         sorts = []
+        _context = DatabaseContext(database)
     }
 
     var idKey: String {
         return database.driver.idKey
     }
 
+    fileprivate let _context: DatabaseContext
 
     /**
         Runs the query given its properties
@@ -97,7 +99,7 @@ public class Query<T: Entity>: QueryRepresentable {
         if case .array(let array) = try raw() {
             for result in array {
                 do {
-                    var model = try T(node: result)
+                    var model = try T(node: result, in: _context)
                     if case .object(let dict) = result {
                         model.id = dict[database.driver.idKey]
                     }
@@ -200,14 +202,16 @@ extension QueryRepresentable {
     */
     public func save(_ model: inout T) throws {
         let query = try makeQuery()
-        
+
         if let _ = model.id, model.exists {
             model.willUpdate()
-            try modify(model.makeNode())
+            let node = try model.makeNode(context: query._context)
+            try modify(node)
             model.didUpdate()
         } else {
             model.willCreate()
-            model.id = try query.create(model.makeNode())
+            let node = try model.makeNode(context: query._context)
+            model.id = try query.create(node)
             model.didCreate()
         }
         model.exists = true
