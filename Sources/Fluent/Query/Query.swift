@@ -211,7 +211,10 @@ extension QueryRepresentable {
         } else {
             model.willCreate()
             let node = try model.makeNode(context: query._context)
-            model.id = try query.create(node)
+            let id = try query.create(node)
+            if id != nil, id != .null, id != 0 {
+                model.id = id
+            }
             model.didCreate()
         }
         model.exists = true
