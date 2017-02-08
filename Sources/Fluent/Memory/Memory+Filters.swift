@@ -55,6 +55,13 @@ extension Node {
 
     func passes(_ filter: Filter) -> Bool {
         switch filter.method {
+        case .nullability(let key, let nullability):
+            switch(nullability) {
+            case .isNull:
+                return self[key] == nil
+            case .isNotNull:
+                return self[key] != nil
+            }
         case .compare(let key, let comparison, let val):
             switch comparison {
             case .equals:

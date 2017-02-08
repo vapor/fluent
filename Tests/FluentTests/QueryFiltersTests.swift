@@ -5,6 +5,7 @@ class QueryFiltersTests: XCTestCase {
     static var allTests = [
         ("testBasalQuery", testBasalQuery),
         ("testBasicQuery", testBasicQuery),
+        ("testIsNullQuery", testIsNullQuery),
         ("testLikeQuery", testLikeQuery),
         ("testCountQuery", testCountQuery),
         ("testDeleteQuery", testDeleteQuery),
@@ -43,6 +44,23 @@ class QueryFiltersTests: XCTestCase {
         XCTAssert(key == "name", "Key should be name")
         XCTAssert(comparison == .equals, "Comparison should be equals")
         XCTAssert(value.string == "Vapor", "Value should be vapor")
+    }
+    
+    func testIsNullQuery() throws {
+        let query = try DummyModel.query().filter("name", .isNull)
+        
+        guard let filter = query.filters.first, query.filters.count == 1 else {
+            XCTFail("Should be one filter")
+            return
+        }
+        
+        guard case .nullability(let key, let null) = filter.method else {
+            XCTFail("Should be nullability filter")
+            return
+        }
+        
+        XCTAssert(key == "name", "Key should be name")
+        XCTAssert(null == .isNull, "Nullability check should be 'is null'")
     }
 
     func testLikeQuery() throws {

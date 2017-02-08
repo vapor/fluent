@@ -46,6 +46,24 @@ class SQLSerializerTests: XCTestCase {
         
         XCTAssertEqual(statement, "SELECT `users`.* FROM `users` WHERE `users`.`age` >= ? LIMIT 15, 5")
     }
+    
+    func testFilterIsNullSelect() {
+        let filter = Filter(User.self, .nullability("name", .isNull))
+        
+        let select = SQL.select(table: "friends", filters: [filter], joins: [], orders: [], limit: nil)
+        let (statement, _) = serialize(select)
+        
+        XCTAssertEqual(statement, "SELECT `friends`.* FROM `friends` WHERE `users`.`name` IS NULL")
+    }
+    
+    func testFilterIsNotNullSelect() {
+        let filter = Filter(User.self, .nullability("name", .isNotNull))
+        
+        let select = SQL.select(table: "friends", filters: [filter], joins: [], orders: [], limit: nil)
+        let (statement, _) = serialize(select)
+        
+        XCTAssertEqual(statement, "SELECT `friends`.* FROM `friends` WHERE `users`.`name` IS NOT NULL")
+    }
 
     func testFilterCompareSelect() {
         let filter = Filter(User.self, .compare("name", .notEquals, "duck"))

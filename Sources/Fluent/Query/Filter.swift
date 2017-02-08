@@ -8,11 +8,16 @@ public struct Filter {
     public enum Relation {
         case and, or
     }
+    
+    public enum Nullability {
+        case isNull, isNotNull
+    }
 
     public enum Method {
         case compare(String, Comparison, Node)
         case subset(String, Scope, [Node])
         case group(Relation, [Filter])
+        case nullability(String, Nullability)
     }
 
     public init(_ entity: Entity.Type, _ method: Method) {
@@ -34,6 +39,8 @@ extension Filter: CustomStringConvertible {
             return "(\(entity)) \(field) \(scope) \(valueDescriptions)"
         case .group(let relation, let filters):
             return filters.map { $0.description }.joined(separator: "\(relation)")
+        case .nullability(let field, let nullability):
+            return "(\(entity)) \(field) \(nullability)"
         }
     }
 }
@@ -61,6 +68,17 @@ extension QueryRepresentable {
         ) throws -> Query<Self.T> {
         let query = try makeQuery()
         let filter = Filter(T.self, .subset(field, scope, try set.map({ try $0.makeNode() })))
+        query.filters.append(filter)
+        return query
+    }
+    
+    @discardableResult
+    public func filter(
+        _ field: String,
+        _ nullability: Filter.Nullability
+        ) throws -> Query<Self.T> {
+        let query = try makeQuery()
+        let filter = Filter(T.self, .nullability(field, nullability))
         query.filters.append(filter)
         return query
     }
