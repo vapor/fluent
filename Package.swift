@@ -8,7 +8,7 @@ let package = Package(
     ],
     dependencies: [
         // Data structure for converting between multiple representations
-        .Package(url: "https://github.com/vapor/node.git", majorVersion: 1),
+        .Package(url: "https://github.com/vapor/node.git", Version(0,0,0)),
 
         // Core Components
         .Package(url: "https://github.com/vapor/core.git", majorVersion: 1),
