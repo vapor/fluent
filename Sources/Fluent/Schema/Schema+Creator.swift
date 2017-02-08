@@ -131,7 +131,10 @@ extension Schema {
             unique: Bool = false,
             default: NodeRepresentable? = nil
             ) {
-            parent(customId: "\(entity.name)_id", optional: optional, unique: unique, default: `default`)
+            parent(customId: "\(entity.name)_id", 
+                   optional: optional, 
+                   unique: unique, 
+                   default: `default`)
         }
 
         public func parent(
