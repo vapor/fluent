@@ -130,7 +130,7 @@ extension Schema {
             optional: Bool = false,
             unique: Bool = false,
             default: NodeRepresentable? = nil
-            ) {
+        ) {
             parent(
                 idKey: "\(entity.name)_id", 
                 optional: optional, 
