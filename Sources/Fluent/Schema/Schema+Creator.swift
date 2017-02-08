@@ -127,13 +127,14 @@ extension Schema {
         // MARK: Relations
 
         public func parent<E: Entity>(
-            _ entity: E.Type = E.self,
+            _ name: String? = nil,
+            entity: E.Type = E.self,
             optional: Bool = false,
             unique: Bool = false,
             default: NodeRepresentable? = nil
         ) {
             fields += Field(
-                name: "\(entity.name)_id",
+                name: name == nil ? "\(entity.name)_id" : name!,
                 type: .int,
                 optional: optional,
                 unique: unique,
