@@ -131,20 +131,20 @@ extension Schema {
             unique: Bool = false,
             default: NodeRepresentable? = nil
             ) {
-            parent(customId: "\(entity.name)_id", 
+            parent(idKey: "\(entity.name)_id", 
                    optional: optional, 
                    unique: unique, 
                    default: `default`)
         }
 
         public func parent(
-            customId: String,
+            idKey: String,
             optional: Bool = false,
             unique: Bool = false,
             default: NodeRepresentable? = nil
         ) {
             fields += Field(
-                name: customId,
+                name: idKey,
                 type: .int,
                 optional: optional,
                 unique: unique,
