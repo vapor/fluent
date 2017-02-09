@@ -7,36 +7,48 @@ import Core
  
     Uses a Driver to make new connections.
 */
-final class ThreadConnectionPool {
-    typealias ConnectionFactory = () throws -> Connection
-
-    enum Error: Swift.Error {
+public final class ThreadConnectionPool {
+    public enum Error: Swift.Error {
         case lockFailure
         case maxConnectionsReached(max: Int)
         // to allow extensibility w/o breaking apis
         case open(Swift.Error)
     }
 
-    static var threadId: pthread_t {
+    public typealias ConnectionFactory = () throws -> Connection
+
+    private static var threadId: pthread_t {
         // must run every time, do not assign
         return pthread_self()
     }
 
-    let maxConnections: Int
+    /**
+        The maximum amount of connections permitted in the pool
+    */
+    public var maxConnections: Int
 
-    private let lock: NSLock
+    /**
+        When the maximum amount of connections has been reached and all connections
+        are in use at time of request, how long should the system wait
+        until it gives up and throws an error.
+     
+        default is 10 seconds.
+    */
+    public var connectionPendingTimeoutSeconds: Int = 10
+
+    private let connectionsLock: NSLock
     private let connectionFactory: ConnectionFactory
 
     private var connections: [pthread_t: Connection]
 
-    init(makeConnection: @escaping ConnectionFactory, maxConnections: Int) {
-        self.connectionFactory = makeConnection
+    public init(connectionFactory: @escaping ConnectionFactory, maxConnections: Int) {
+        self.connectionFactory = connectionFactory
         self.maxConnections = maxConnections
         connections = [:]
-        lock = NSLock()
+        connectionsLock = NSLock()
     }
     
-    func connection() throws -> Connection {
+    internal func connection() throws -> Connection {
         guard let existing = connections[ThreadConnectionPool.threadId] else { return try makeNewConnection() }
         return existing
     }
@@ -44,17 +56,28 @@ final class ThreadConnectionPool {
     private func makeNewConnection() throws -> Connection {
         var connection: Connection?
 
-        try lock.locked {
+        try connectionsLock.locked {
             // Attempt to make space if possible
             if connections.keys.count >= maxConnections { clearClosedConnections() }
+            // If space hasn't been created, attempt to wait for space
+            if connections.keys.count >= maxConnections { waitForSpace() }
             // the maximum number of connections has been created, even after attempting to clear out closed connections
-            guard connections.keys.count < maxConnections else { throw Error.maxConnectionsReached(max: maxConnections) }
+            if connections.keys.count >= maxConnections { throw Error.maxConnectionsReached(max: maxConnections) }
             connection = try connectionFactory()
         }
 
         guard let c = connection else { throw Error.lockFailure }
         connections[ThreadConnectionPool.threadId] = c
         return c
+    }
+
+    private func waitForSpace() {
+        var waited = 0
+        while waited < connectionPendingTimeoutSeconds, connections.keys.count >= maxConnections {
+            sleep(1)
+            clearClosedConnections()
+            waited += 1
+        }
     }
 
     private func clearClosedConnections() {
