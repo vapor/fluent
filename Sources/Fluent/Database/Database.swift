@@ -32,3 +32,4 @@ public class Database {
     */
     public static var `default`: Database?
 }
+

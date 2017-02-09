@@ -115,15 +115,28 @@ extension Schema {
         }
 
         // MARK: Relations
-
         public func parent<E: Entity>(
             _ entity: E.Type = E.self,
             optional: Bool = false,
             unique: Bool = false,
             default: NodeRepresentable? = nil
         ) {
+            parent(
+                idKey: "\(entity.name)_id", 
+                optional: optional, 
+                unique: unique, 
+                default: `default`
+            )
+        }
+
+        public func parent(
+            idKey: String,
+            optional: Bool = false,
+            unique: Bool = false,
+            default: NodeRepresentable? = nil
+        ) {
             fields += Field(
-                name: "\(entity.name)_id",
+                name: idKey,
                 type: E.idType.fieldType,
                 optional: optional,
                 unique: unique,

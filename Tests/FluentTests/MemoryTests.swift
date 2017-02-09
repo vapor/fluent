@@ -14,6 +14,7 @@ class MemoryTests: XCTestCase {
         ("testFetchWithLimitWithSizeGreaterThatContents", testFetchWithLimitWithSizeGreaterThatContents),
         ("testFetchWithLimitWithOffsetGreaterThanContents", testFetchWithLimitWithOffsetGreaterThanContents),
         ("testFetchWithLimitWithOffsetAndSizeGreaterThanContents", testFetchWithLimitWithOffsetAndSizeGreaterThanContents),
+        ("testFetchWithLimitWithOffsetInMiddleAndCountGreaterThanRemainingContents", testFetchWithLimitWithOffsetInMiddleAndCountGreaterThanRemainingContents),
     ]
 
     func makeTestModels() -> (MemoryDriver, Database) {
