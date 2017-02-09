@@ -74,15 +74,18 @@ public final class ThreadConnectionPool {
     }
     
     internal func connection() throws -> Connection {
-        // MUST capture threadID OUTSIDE of lock to ensure appropriate thread id is received
-        let threadId = ThreadConnectionPool.threadId
-
-        var connection: Connection?
-        connectionsLock.locked {
-            connection = connections[threadId]
-        }
-
-        guard let existing = connection else { return try makeNewConnection() }
+        /**
+            Because we might wait inside of the makeNewConnection function, 
+            do NOT attempt to wrap this within connectionLock or it may
+            be blocked from other threads
+         
+            In the makeConnection call, there will be a threadsafe check to prevent
+            creating duplicates.
+         
+            It shouldn't happen that two calls come on same thread anyways, but
+            in the interest of 'just in case'
+        */
+        guard let existing = connections[ThreadConnectionPool.threadId] else { return try makeNewConnection() }
         return existing
     }
 
@@ -92,6 +95,17 @@ public final class ThreadConnectionPool {
 
         var connection: Connection?
         try connectionsLock.locked {
+            /**
+                Just in case our first attempt to access failed in a non thread safe manner
+                to prevent duplicates, we do a quick check here.
+             
+                Likely redundant, but beneficial for safety.
+            */
+            if let existing = connections[threadId] {
+                connection = existing
+                return
+            }
+
             // Attempt to make space if possible
             if connections.keys.count >= maxConnections { clearClosedConnections() }
             // If space hasn't been created, attempt to wait for space
