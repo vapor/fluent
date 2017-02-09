@@ -122,7 +122,8 @@ extension Schema {
             default: NodeRepresentable? = nil
         ) {
             parent(
-                idKey: "\(entity.name)_id", 
+                idKey: "\(entity.name)_id",
+                type: E.idType,
                 optional: optional, 
                 unique: unique, 
                 default: `default`
@@ -131,13 +132,14 @@ extension Schema {
 
         public func parent(
             idKey: String,
+            type: Schema.Field.KeyType,
             optional: Bool = false,
             unique: Bool = false,
             default: NodeRepresentable? = nil
         ) {
             fields += Field(
                 name: idKey,
-                type: E.idType.fieldType,
+                type: type.fieldType,
                 optional: optional,
                 unique: unique,
                 default: `default`
