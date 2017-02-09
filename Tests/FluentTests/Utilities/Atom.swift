@@ -2,7 +2,7 @@ import Fluent
 
 struct Atom: Entity {
     
-    static var idKey: String? {
+    static var idKey: String {
         return "atom_id"
     }
     

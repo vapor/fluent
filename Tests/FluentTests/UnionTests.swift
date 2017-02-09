@@ -16,6 +16,10 @@ class UnionTests: XCTestCase {
     override func setUp() {
         lqd = LastQueryDriver()
         db = Database(lqd)
+        
+        Atom.database = db
+        Compound.database = db
+        CustomId.database = db
     }
 
     func testBasic() throws {
@@ -136,9 +140,6 @@ class UnionTests: XCTestCase {
     }
 
     func testBelongsToMany() throws {
-        Atom.database = db
-        Compound.database = db
-
         var atom = Atom(name: "Hydrogen")
         atom.id = Node(42)
 
@@ -151,7 +152,7 @@ class UnionTests: XCTestCase {
             let (statement, values) = serializer.serialize()
             XCTAssertEqual(
                 statement,
-                "SELECT `compounds`.* FROM `compounds` JOIN `atom_compound` ON `compounds`.`\(lqd.idKey)` = `atom_compound`.`compound_\(lqd.idKey)` WHERE `atom_compound`.`atom_\(Atom.idKey!)` = ?"
+                "SELECT `compounds`.* FROM `compounds` JOIN `atom_compound` ON `compounds`.`\(lqd.idKey)` = `atom_compound`.`compound_\(lqd.idKey)` WHERE `atom_compound`.`atom_\(Atom.idKey)` = ?"
             )
             XCTAssertEqual(values.count, 1)
             XCTAssertEqual(values.first?.int, 42)

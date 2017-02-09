@@ -14,8 +14,8 @@ public struct Union {
     ) {
         self.local = local
         self.foreign = foreign
-        self.localKey = localKey ?? "\(foreign.name)_\(foreign.idKey ?? idKey)"
-        self.foreignKey = foreignKey ?? foreign.idKey ?? idKey
+        self.localKey = localKey ?? "\(foreign.name)_\(foreign.idKey)"
+        self.foreignKey = foreignKey ?? foreign.idKey
     }
 }
 
@@ -64,11 +64,11 @@ public final class Pivot<
     }
 
     public init(node: Node, in context: Context) throws {
-        let idKey = try First.query().idKey
+        let idKey = First.idKey
         id = try node.extract(idKey)
         
-        let firstKey = "\(First.name)_\(First.idKey ?? idKey)"
-        let secondKey = "\(Second.name)_\(Second.idKey ?? idKey)"
+        let firstKey = "\(First.name)_\(First.idKey)"
+        let secondKey = "\(Second.name)_\(Second.idKey)"
 
         if First.self == type(of: self).left {
             leftId = try node.extract(firstKey)
@@ -80,19 +80,18 @@ public final class Pivot<
     }
 
     public func makeNode(context: Context = EmptyNode) throws -> Node {
-        let idKey = try First.query().idKey
         return try Node(node: [
-            "\(idKey)": id,
-            "\(type(of: self).left.name)_\(type(of: self).left.idKey ?? idKey)": leftId,
-            "\(type(of: self).right.name)_\(type(of: self).right.idKey ?? idKey)": rightId,
+            "\(type(of: self).idKey)": id,
+            "\(type(of: self).left.name)_\(type(of: self).left.idKey)": leftId,
+            "\(type(of: self).right.name)_\(type(of: self).right.idKey)": rightId,
         ])
     }
 
     public static func prepare(_ database: Database) throws {
         try database.create(entity) { builder in
             builder.id()
-            builder.int("\(left.name)_\(left.idKey ?? database.driver.idKey)")
-            builder.int("\(right.name)_\(right.idKey ?? database.driver.idKey)")
+            builder.int("\(left.name)_\(left.idKey)")
+            builder.int("\(right.name)_\(right.idKey)")
         }
     }
 

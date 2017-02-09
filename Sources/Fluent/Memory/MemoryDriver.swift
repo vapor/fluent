@@ -79,7 +79,7 @@ public final class MemoryConnection: Connection {
             guard let data = query.data else {
                 throw MemoryDriver.Error.dataRequired
             }
-            let i = group.create(data, idKey: T.idKey ?? driver.idKey)
+            let i = group.create(data, idKey: T.idKey)
 
             return Node.number(.int(i))
         case .delete:

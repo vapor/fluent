@@ -30,6 +30,8 @@ class MemoryTests: XCTestCase {
     
     func testSave() throws {
         let (driver, database) = makeTestModels()
+        
+        User.database = database
 
         var user = User(id: nil, name: "Vapor", email: "test@email.com")
         let query = Query<User>(database)
@@ -41,6 +43,8 @@ class MemoryTests: XCTestCase {
 
     func testFetch() throws {
         let (driver, database) = makeTestModels()
+        
+        User.database = database
 
         var new = User(id: nil, name: "Vapor", email: "test@email.com")
         let store = Query<User>(database)
@@ -53,6 +57,8 @@ class MemoryTests: XCTestCase {
 
     func testDelete() throws {
         let (driver, database) = makeTestModels()
+        
+        User.database = database
 
         for _ in 0 ..< 100 {
             var new = User(id: nil, name: "Vapor", email: "test@email.com")
@@ -68,6 +74,8 @@ class MemoryTests: XCTestCase {
     func testDeleteWithCustomId() throws {
         let (driver, database) = makeTestModels()
         
+        CustomId.database = database
+        
         var new = CustomId(id: nil, label: "Test")
         let store = Query<CustomId>(database)
         try store.save(&new)
@@ -79,6 +87,8 @@ class MemoryTests: XCTestCase {
     
     func testModify() throws {
         let (_, database) = makeTestModels()
+        
+        User.database = database
 
         for _ in 0 ..< 100 {
             var new = User(id: nil, name: "Vapor", email: "test@email.com")
@@ -100,6 +110,8 @@ class MemoryTests: XCTestCase {
     func testModifyWithCustomId() throws {
         let (_, database) = makeTestModels()
         
+        CustomId.database = database
+        
         for _ in 0 ..< 100 {
             var new = CustomId(id: nil, label: "Vapor")
             try Query<CustomId>(database).save(&new)
@@ -119,6 +131,8 @@ class MemoryTests: XCTestCase {
     
     func testModifyByIdWithCustomId() throws {
         let (_, database) = makeTestModels()
+        
+        CustomId.database = database
         
         var new: CustomId = CustomId(id: nil, label: "Vapor")
         for _ in 0 ..< 100 {
@@ -141,6 +155,8 @@ class MemoryTests: XCTestCase {
     func testSort() throws {
         let (_, database) = makeTestModels()
         let fruits = ["Apple", "Orange", "Strawberry", "Mango"]
+        
+        User.database = database
 
         for _ in 0 ..< 100 {
             let fruit = fruits.random
