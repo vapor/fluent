@@ -57,18 +57,17 @@ public final class ThreadConnectionPool {
     */
     public var connectionPendingTimeoutSeconds: Int = 10
 
-    private let connectionsLock: NSLock
-    private let connectionFactory: ConnectionFactory
-
     private var connections: [pthread_t: Connection]
+    private let connectionsLock: NSLock
+    private let makeConnection: ConnectionFactory
 
     /**
         Initializes a thread pool with a connectionFactory intended to construct
         new connections when appropriate and an Integer defining the maximum 
         number of connections the pool is allowed to make
     */
-    public init(connectionFactory: @escaping ConnectionFactory, maxConnections: Int) {
-        self.connectionFactory = connectionFactory
+    public init(makeConnection: @escaping ConnectionFactory, maxConnections: Int) {
+        self.makeConnection = makeConnection
         self.maxConnections = maxConnections
         connections = [:]
         connectionsLock = NSLock()
@@ -99,7 +98,7 @@ public final class ThreadConnectionPool {
             if connections.keys.count >= maxConnections { waitForSpace() }
             // the maximum number of connections has been created, even after attempting to clear out closed connections
             if connections.keys.count >= maxConnections { throw Error.maxConnectionsReached(max: maxConnections) }
-            let c = try connectionFactory()
+            let c = try makeConnection()
             connections[threadId] = c
             connection = c
         }
