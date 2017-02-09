@@ -124,7 +124,7 @@ final class TestModel: Entity {
 
     static func prepare(_ database: Database) throws {
         try database.create(entity) { builder in
-            builder.id()
+            builder.id(for: self)
             builder.string("name")
             builder.int("age")
         }

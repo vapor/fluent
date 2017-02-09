@@ -27,7 +27,7 @@ public protocol Entity: Preparation, NodeConvertible {
     */
     var id: Node? { get set }
     
-    static var idType: Schema.Field.KeyType? { get }
+    static var idType: Schema.Field.KeyType { get }
 
     /**
         Whether or not entity was retrieved from database.
@@ -85,8 +85,8 @@ extension Entity {
         return String(describing: self).lowercased()
     }
     
-    public static var idType: Schema.Field.KeyType? {
-        return nil
+    public static var idType: Schema.Field.KeyType {
+        return database?.driver.idType ?? .int
     }
 
     // FIXME: Remove in 2.0. Also, make exists optional.

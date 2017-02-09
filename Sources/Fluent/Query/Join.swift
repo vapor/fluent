@@ -90,7 +90,7 @@ public final class Pivot<
 
     public static func prepare(_ database: Database) throws {
         try database.create(entity) { builder in
-            builder.id()
+            builder.id(for: self)
             builder.pivotKeys(left: left, right: right, suffix: "_\(database.driver.idKey)")
         }
     }

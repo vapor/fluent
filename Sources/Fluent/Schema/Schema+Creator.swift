@@ -13,20 +13,9 @@ extension Schema {
             fields = []
         }
         
-        public func id(
-            _ name: String = "id",
-            type: Field.KeyType? = nil,
-            optional: Bool = false,
-            unique: Bool = false,
-            default: NodeRepresentable? = nil
-        ) {
-            fields += Field(
-                name: name,
-                type: .id(keyType: type),
-                optional: optional,
-                unique: unique,
-                default: `default`
-            )
+        public func id(for entityType: Entity.Type, name: String = "id")
+        {
+            fields += Field(name: name, type: .id(keyType: entityType.idType))
         }
 
         public func int(
@@ -135,7 +124,7 @@ extension Schema {
         ) {
             fields += Field(
                 name: "\(entity.name)_id",
-                type: E.idType?.fieldType ?? .int,
+                type: E.idType.fieldType,
                 optional: optional,
                 unique: unique,
                 default: `default`
@@ -147,8 +136,8 @@ extension Schema {
             right: Entity.Type,
             suffix: String
         ) {
-            let leftKeyType = left.idType ?? Schema.Field.KeyType.int
-            let rightKeyType = right.idType ?? Schema.Field.KeyType.int
+            let leftKeyType = left.idType
+            let rightKeyType = right.idType
             
             let leftName = "\(left.name)\(suffix)"
             let rightName = "\(right.name)\(suffix)"

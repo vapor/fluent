@@ -408,8 +408,8 @@ open class GeneralSQLSerializer: SQLSerializer {
             case .int:
                 return "INTEGER PRIMARY KEY"
                 
-            case .string(_):
-                return "STRING PRIMARY KEY"
+            case .string(let length):
+                return "VARCHAR(\(length ?? 128)) PRIMARY KEY"
                 
             case .custom(let type):
                 return "\(type) PRIMARY KEY"

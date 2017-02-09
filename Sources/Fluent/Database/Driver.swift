@@ -14,6 +14,14 @@ public protocol Driver {
         by identifier methods are used.
     */
     var idKey: String { get }
+    
+    /**
+        The default type for values stored against the identifier key.
+     
+        The `idType` will be accessed by those Entity implementations
+        which do not themselves implement `Entity.idType`.
+    */
+    var idType: Schema.Field.KeyType { get }
 
     /**
         Executes a `Query` from and
@@ -45,5 +53,9 @@ extension Driver {
     public func raw(_ raw: String, _ values: [NodeRepresentable] = []) throws -> Node {
         let nodes = try values.map { try $0.makeNode() }
         return try self.raw(raw, nodes)
+    }
+    
+    public var idType: Schema.Field.KeyType {
+        return .int
     }
 }
