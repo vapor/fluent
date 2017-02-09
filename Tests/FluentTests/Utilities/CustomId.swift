@@ -3,7 +3,7 @@ import Fluent
 struct CustomId: Entity {
     var exists: Bool = false
     
-    static var idKey: String? {
+    static var idKey: String {
         return "custom_id"
     }
     
