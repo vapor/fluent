@@ -26,74 +26,24 @@ class SchemaCreateTests: XCTestCase {
         XCTAssertEqual(values.count, 0)
     }
     
-    private struct StringlyIdentifiedThing: Entity {
-        
-        var id:Node? = nil
-        
-        // for structs, it appears the name mangled version makes it through to SQL serializer otherwise.
-        static var name = "StringlyIdentifiedThings"
-        
-        init(node: Node, in context: Context) throws {
-            id = try node.extract("id")
-        }
-        
-        func makeNode(context: Context = EmptyNode) throws -> Node {
-            return try Node(node: ["id": id])
-        }
-        
-        static var idType: Schema.Field.KeyType { return .string(length: 10) }
-        
-        static func prepare(_ database: Database) throws {
-            preconditionFailure("This type exists purely to drive a specific schema creation test.")
-        }
-        
-        static func revert(_ database: Database) throws {
-            preconditionFailure("This type exists purely to drive a specific schema creation test.")
-        }
-    }
     
-    func testStringlyIdentifiedEntity() throws {
-        let builder = Schema.Creator(StringlyIdentifiedThing.name)
+    func testStringIdentifiedEntity() throws {
+        let builder = Schema.Creator(StringIdentifiedThing.entity)
         
-        builder.id(for: StringlyIdentifiedThing.self)
+        builder.id(for: StringIdentifiedThing.self)
         
         let sql = builder.schema.sql
         let serializer = GeneralSQLSerializer(sql: sql)
         
         let (statement, values) = serializer.serialize()
         
-        XCTAssertEqual(statement, "CREATE TABLE `StringlyIdentifiedThings` (`id` VARCHAR(10) PRIMARY KEY NOT NULL)")
+        XCTAssertEqual(statement, "CREATE TABLE `stringidentifiedthings` (`id` VARCHAR(10) PRIMARY KEY NOT NULL)")
         XCTAssertEqual(values.count, 0)
     }
-    
-    private struct CustomIdentifiedThing: Entity {
-        
-        var id:Node? = nil
-        
-        // for structs, it appears the name mangled version makes it through to SQL serializer otherwise.
-        static var name = "CustomIdentifiedThings"
-        
-        init(node: Node, in context: Context) throws {
-            id = try node.extract("id")
-        }
-        
-        func makeNode(context: Context = EmptyNode) throws -> Node {
-            return try Node(node: ["id": id])
-        }
-        
-        static var idType: Schema.Field.KeyType { return .custom(type: "INTEGER") }
-        
-        static func prepare(_ database: Database) throws {
-            preconditionFailure("This type exists purely to drive a specific schema creation test.")
-        }
-        
-        static func revert(_ database: Database) throws {
-            preconditionFailure("This type exists purely to drive a specific schema creation test.")
-        }
-    }
+ 
     
     func testCustomIdentifiedEntity() throws {
-        let builder = Schema.Creator(CustomIdentifiedThing.name)
+        let builder = Schema.Creator(CustomIdentifiedThing.entity)
         
         builder.id(for: CustomIdentifiedThing.self)
         
@@ -102,7 +52,7 @@ class SchemaCreateTests: XCTestCase {
         
         let (statement, values) = serializer.serialize()
         
-        XCTAssertEqual(statement, "CREATE TABLE `CustomIdentifiedThings` (`id` INTEGER PRIMARY KEY NOT NULL)")
+        XCTAssertEqual(statement, "CREATE TABLE `customidentifiedthings` (`id` INTEGER PRIMARY KEY NOT NULL)")
         XCTAssertEqual(values.count, 0)
     }
     
