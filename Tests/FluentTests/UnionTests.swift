@@ -6,7 +6,7 @@ class UnionTests: XCTestCase {
         ("testBasic", testBasic),
         ("testCustom", testCustom),
         ("testSQL", testSQL),
-        ("testSQLCustomId", testSQLCustomId),
+        ("testSQLCustomIdKey", testSQLCustomIdKey),
         ("testSQLFilters", testSQLFilters),
     ]
 
@@ -19,7 +19,7 @@ class UnionTests: XCTestCase {
         
         Atom.database = db
         Compound.database = db
-        CustomId.database = db
+        CustomIdKey.database = db
     }
 
     func testBasic() throws {
@@ -96,8 +96,8 @@ class UnionTests: XCTestCase {
         }
     }
     
-    func testSQLCustomId() throws {
-        let query = try Query<User>(db).union(CustomId.self)
+    func testSQLCustomIdKey() throws {
+        let query = try Query<User>(db).union(CustomIdKey.self)
         try lqd.query(query)
         
         

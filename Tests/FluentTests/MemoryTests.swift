@@ -6,10 +6,10 @@ class MemoryTests: XCTestCase {
         ("testSave", testSave),
         ("testFetch", testFetch),
         ("testDelete", testDelete),
-        ("testDeleteWithCustomId", testDeleteWithCustomId),
+        ("testDeleteWithCustomIdKey", testDeleteWithCustomIdKey),
         ("testModify", testModify),
-        ("testModifyWithCustomId", testModifyWithCustomId),
-        ("testModifyByIdWithCustomId", testModifyByIdWithCustomId),
+        ("testModifyWithCustomIdKey", testModifyWithCustomIdKey),
+        ("testModifyByIdWithCustomIdKey", testModifyByIdWithCustomIdKey),
         ("testSort", testSort),
         ("testCount", testCount),
         ("testFetchWithLimit", testFetchWithLimit),
@@ -69,13 +69,13 @@ class MemoryTests: XCTestCase {
         XCTAssertEqual(driver.store["users"]?.data.count, 50)
     }
     
-    func testDeleteWithCustomId() throws {
+    func testDeleteWithCustomIdKey() throws {
         let (driver, database) = makeTestModels()
         
-        CustomId.database = database
+        CustomIdKey.database = database
         
-        var new = CustomId(id: nil, label: "Test")
-        let store = Query<CustomId>(database)
+        var new = CustomIdKey(id: nil, label: "Test")
+        let store = Query<CustomIdKey>(database)
         try store.save(&new)
         
         XCTAssertEqual(driver.store["customids"]?.data.count, 1)
@@ -105,48 +105,48 @@ class MemoryTests: XCTestCase {
         XCTAssertEqual(resultsThree.count, 100)
     }
     
-    func testModifyWithCustomId() throws {
+    func testModifyWithCustomIdKey() throws {
         let (_, database) = makeTestModels()
         
-        CustomId.database = database
+        CustomIdKey.database = database
         
         for _ in 0 ..< 100 {
-            var new = CustomId(id: nil, label: "Vapor")
-            try Query<CustomId>(database).save(&new)
+            var new = CustomIdKey(id: nil, label: "Vapor")
+            try Query<CustomIdKey>(database).save(&new)
         }
         
-        let results = try Query<CustomId>(database).filter("label", "Vapor").all()
+        let results = try Query<CustomIdKey>(database).filter("label", "Vapor").all()
         XCTAssertEqual(results.count, 100)
         
-        try Query<CustomId>(database).modify(Node.object(["label" : "updated"]))
+        try Query<CustomIdKey>(database).modify(Node.object(["label" : "updated"]))
         
-        let resultsTwo = try Query<CustomId>(database).filter("label", "Vapor").all()
+        let resultsTwo = try Query<CustomIdKey>(database).filter("label", "Vapor").all()
         XCTAssertEqual(resultsTwo.count, 0)
         
-        let resultsThree = try Query<CustomId>(database).filter("label", "updated").all()
+        let resultsThree = try Query<CustomIdKey>(database).filter("label", "updated").all()
         XCTAssertEqual(resultsThree.count, 100)
     }
     
-    func testModifyByIdWithCustomId() throws {
+    func testModifyByIdWithCustomIdKey() throws {
         let (_, database) = makeTestModels()
         
-        CustomId.database = database
+        CustomIdKey.database = database
         
-        var new: CustomId = CustomId(id: nil, label: "Vapor")
+        var new: CustomIdKey = CustomIdKey(id: nil, label: "Vapor")
         for _ in 0 ..< 100 {
-            new = CustomId(id: nil, label: "Vapor")
-            try Query<CustomId>(database).save(&new)
+            new = CustomIdKey(id: nil, label: "Vapor")
+            try Query<CustomIdKey>(database).save(&new)
         }
         
-        let results = try Query<CustomId>(database).filter("label", "Vapor").all()
+        let results = try Query<CustomIdKey>(database).filter("label", "Vapor").all()
         XCTAssertEqual(results.count, 100)
         
-        try Query<CustomId>(database).modify(Node.object(["custom_id": new.id!, "label" : "updated"]))
+        try Query<CustomIdKey>(database).modify(Node.object(["custom_id": new.id!, "label" : "updated"]))
         
-        let resultsTwo = try Query<CustomId>(database).filter("label", "Vapor").all()
+        let resultsTwo = try Query<CustomIdKey>(database).filter("label", "Vapor").all()
         XCTAssertEqual(resultsTwo.count, 99)
         
-        let resultsThree = try Query<CustomId>(database).filter("label", "updated").all()
+        let resultsThree = try Query<CustomIdKey>(database).filter("label", "updated").all()
         XCTAssertEqual(resultsThree.count, 1)
     }
 
