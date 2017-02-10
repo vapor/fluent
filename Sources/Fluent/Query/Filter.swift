@@ -13,6 +13,7 @@ public struct Filter {
         case compare(String, Comparison, Node)
         case subset(String, Scope, [Node])
         case group(Relation, [Filter])
+        case raw(command: String, values: [Node])
     }
 
     public init(_ entity: Entity.Type, _ method: Method) {
@@ -34,6 +35,8 @@ extension Filter: CustomStringConvertible {
             return "(\(entity)) \(field) \(scope) \(valueDescriptions)"
         case .group(let relation, let filters):
             return filters.map { $0.description }.joined(separator: "\(relation)")
+        case .raw(command: let query, values: let values):
+            return "\(query) \(values)"
         }
     }
 }
@@ -127,5 +130,17 @@ extension QueryRepresentable {
         contains value: NodeRepresentable
     ) throws -> Query<Self.T> {
         return try filter(T.self, field, .contains, value)
+    }
+}
+
+extension QueryRepresentable {
+    @discardableResult
+    public func raw(command: String, values: [NodeRepresentable] = []) throws -> Query<Self.T> {
+        let query = try makeQuery()
+
+        let values = try values.map { try $0.makeNode() }
+        let filter = Filter(T.self, .raw(command: command, values: values))
+        query.filters.append(filter)
+        return query
     }
 }
