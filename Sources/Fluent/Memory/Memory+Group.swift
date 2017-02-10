@@ -33,7 +33,7 @@ extension MemoryDriver {
                         return []
                     }
                     
-                    if count > dataToReturn.count {
+                    if count >= dataToReturn.count {
                         count = dataToReturn.count - 1
                     }
                     

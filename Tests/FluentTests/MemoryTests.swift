@@ -240,6 +240,27 @@ class MemoryTests: XCTestCase {
         let fetched = try query.all()
         XCTAssertEqual(fetched.count, 4)
         XCTAssertEqual(driver.store["users"]?.data.count, 9)
-
+    }
+    
+    func testFetchDoesNotThrowWithDataOf3LimitOffset2LimitCount2_BUG() throws {
+        let (driver, database) = makeTestModels()
+        
+        var new = User(id: nil, name: "Vapor", email: "test@email.com")
+        var new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
+        var new3 = User(id: nil, name: "Vapor3", email: "test3@email.com")
+        
+        let store = Query<User>(database)
+        try store.save(&new)
+        try store.save(&new2)
+        try store.save(&new3)
+        
+        let limit = Limit(count: 2, offset: 2)
+        let query = Query<User>(database)
+        query.limit = limit
+        
+        let fetched = try query.all()
+        XCTAssertEqual(fetched.count, 1)
+        XCTAssertEqual(fetched.first?.name, "Vapor3")
+        XCTAssertEqual(driver.store["users"]?.data.count, 3)
     }
 }
