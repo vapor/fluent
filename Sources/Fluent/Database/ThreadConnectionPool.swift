@@ -29,7 +29,7 @@ public final class ThreadConnectionPool {
             used, but should be accounted for by end user if they are handling the 
             error
         */
-        case open(Swift.Error)
+        case unspecified(Swift.Error)
     }
 
     /**
