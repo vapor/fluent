@@ -1,6 +1,6 @@
 import Fluent
 
-struct CustomId: Entity {
+struct CustomIdKey: Entity {
     var exists: Bool = false
     
     static var idKey: String {
@@ -9,7 +9,7 @@ struct CustomId: Entity {
     
     static func prepare(_ database: Fluent.Database) throws {
         try database.create(entity) { builder in
-            builder.id("custom_id")
+            builder.id(idKey)
             builder.string("label")
         }
     }
@@ -26,13 +26,13 @@ struct CustomId: Entity {
     }
     
     init(node: Node, in context: Context) throws {
-        id = try node.extract("custom_id")
+        id = try node.extract(type(of: self).idKey)
         label = try node.extract("label")
     }
     
     func makeNode(context: Context = EmptyNode) throws -> Node {
         return try Node(node: [
-            "custom_id": id,
+            type(of: self).idKey: id,
             "label": label,
         ])
     }
