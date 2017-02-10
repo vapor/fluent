@@ -236,6 +236,9 @@ open class GeneralSQLSerializer: SQLSerializer {
             let (clause, subvals) = sql(filters, relation: relation)
             statement += "(\(clause))"
             values += subvals
+        case .raw(command: let command, values: let subvalues):
+            statement += command
+            values += subvalues
         }
 
         return (

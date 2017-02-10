@@ -4,7 +4,7 @@
     It is responsible for interfacing
     with the data store powering Fluent.
 */
-public protocol Driver {
+public protocol Driver: Executor {
     /**
         The string value for the 
         default identifier key.
@@ -24,38 +24,47 @@ public protocol Driver {
     var idType: Schema.Field.KeyType { get }
 
     /**
-        Executes a `Query` from and
-        returns an array of results fetched,
-        created, or updated by the action.
+        Creates a connection for executing 
+        queries. This method is used to 
+        automatically create a connection
+        if any Executor methods are called on 
+        the Driver.
     */
-    @discardableResult
-    func query<T: Entity>(_ query: Query<T>) throws -> Node
-
-    /**
-        Creates the `Schema` indicated
-        by the `Builder`.
-    */
-    func schema(_ schema: Schema) throws
-
-    /**
-        Drivers that support raw querying
-        accept string queries and parameterized values.
-
-        This allows Fluent extensions to be written that
-        can support custom querying behavior.
-    */
-    @discardableResult
-    func raw(_ raw: String, _ values: [Node]) throws -> Node
+    func makeConnection() throws -> Connection
 }
+
+// MARK: Executor
 
 extension Driver {
     @discardableResult
-    public func raw(_ raw: String, _ values: [NodeRepresentable] = []) throws -> Node {
-        let nodes = try values.map { try $0.makeNode() }
-        return try self.raw(raw, nodes)
+    public func query<T: Entity>(_ query: Query<T>) throws -> Node {
+        return try makeConnection().query(query)
+    }
+    
+    public func schema(_ schema: Schema) throws {
+        return try makeConnection().schema(schema)
+    }
+    
+    @discardableResult
+    public func raw(_ raw: String, _ values: [Node]) throws -> Node {
+        return try makeConnection().raw(raw, values)
+    }
+}
+
+
+// MARK: Deprecated
+
+enum DriverError: Error {
+    case connectionsNotSupported(String)
+}
+
+extension Driver {
+    public func makeConnection() throws -> Connection {
+        throw DriverError.connectionsNotSupported("Please update your database driver package to be compatible with Fluent 1.4.")
     }
     
     public var idType: Schema.Field.KeyType {
         return .int
     }
 }
+

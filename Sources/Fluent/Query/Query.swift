@@ -85,7 +85,7 @@ public class Query<T: Entity>: QueryRepresentable {
     */
     @discardableResult
     public func raw() throws -> Node {
-        return try database.driver.query(self)
+        return try database.query(self)
     }
 
     /**
