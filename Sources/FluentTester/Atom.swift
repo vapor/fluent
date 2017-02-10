@@ -2,7 +2,7 @@ import Fluent
 
 public final class Atom: Entity {
     
-    public static var idKey: String? {
+    public static var idKey: String {
         return "atom_id"
     }
     
@@ -22,7 +22,7 @@ public final class Atom: Entity {
     }
 
     public init(node: Node, in context: Context) throws {
-        id = try node.extract("atom_id")
+        id = try node.extract(type(of: self).idKey)
         name = try node.extract("name")
         protons = try node.extract("protons")
         weight = try node.extract("weight")
@@ -30,7 +30,7 @@ public final class Atom: Entity {
 
     public func makeNode(context: Context) throws -> Node {
         return try Node(node: [
-            "atom_id": id,
+            type(of: self).idKey: id,
             "name": name,
             "protons": protons,
             "weight": weight
@@ -43,7 +43,7 @@ public final class Atom: Entity {
 
     public static func prepare(_ database: Database) throws {
         try database.create(entity) { atoms in
-            atoms.id(idKey ?? "id")
+            atoms.id(idKey)
             atoms.string("name")
             atoms.int("protons")
             atoms.double("weight")

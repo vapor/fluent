@@ -29,7 +29,7 @@ public protocol Entity: Preparation, NodeConvertible {
         instead.
      */
     static var idKey: String { get }
-
+    
     /**
         The entity's primary identifier.
         This is the same value used for
