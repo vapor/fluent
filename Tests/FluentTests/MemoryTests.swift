@@ -78,9 +78,9 @@ class MemoryTests: XCTestCase {
         let store = Query<CustomIdKey>(database)
         try store.save(&new)
         
-        XCTAssertEqual(driver.store["customids"]?.data.count, 1)
+        XCTAssertEqual(driver.store["customidkeys"]?.data.count, 1)
         try store.delete(new)
-        XCTAssertEqual(driver.store["customids"]?.data.count, 0)
+        XCTAssertEqual(driver.store["customidkeys"]?.data.count, 0)
     }
     
     func testModify() throws {

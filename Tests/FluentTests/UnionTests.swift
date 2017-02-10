@@ -104,7 +104,7 @@ class UnionTests: XCTestCase {
         if let sql = lqd.lastQuery {
             let serializer = GeneralSQLSerializer(sql: sql)
             let (statement, values) = serializer.serialize()
-            XCTAssertEqual(statement, "SELECT `users`.* FROM `users` JOIN `customids` ON `users`.`customid_custom_id` = `customids`.`custom_id`")
+            XCTAssertEqual(statement, "SELECT `users`.* FROM `users` JOIN `customidkeys` ON `users`.`customidkey_custom_id` = `customidkeys`.`custom_id`")
             XCTAssertEqual(values.count, 0)
         } else {
             XCTFail("No last query.")
