@@ -6,7 +6,7 @@ extension Database {
     public func modify(_ entity: String, closure: (Schema.Modifier) throws -> ()) throws {
         let modifier = Schema.Modifier(entity)
         try closure(modifier)
-        _ = try driver.schema(modifier.schema)
+        _ = try schema(modifier.schema)
     }
 
     /**
@@ -16,7 +16,7 @@ extension Database {
     public func create(_ entity: String, closure: (Schema.Creator) throws -> ()) throws {
         let creator = Schema.Creator(entity)
         try closure(creator)
-        _ = try driver.schema(creator.schema)
+        _ = try schema(creator.schema)
     }
 
     /**
@@ -25,6 +25,6 @@ extension Database {
     */
     public func delete(_ entity: String) throws {
         let schema = Schema.delete(entity: entity)
-        _ = try driver.schema(schema)
+        _ = try self.schema(schema)
     }
 }

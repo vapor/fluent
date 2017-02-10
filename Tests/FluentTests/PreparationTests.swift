@@ -153,16 +153,31 @@ class TestPreparation: Preparation {
 class TestSchemaDriver: Driver {
     var idKey: String = "id"
 
-    @discardableResult
-    func query<T: Entity>(_ query: Query<T>) throws -> Node { return .null }
-
     var testClosure: (Schema) -> ()
     init(testClosure: @escaping (Schema) -> ()) {
         self.testClosure = testClosure
     }
+    
+    func makeConnection() throws -> Connection {
+        return TestSchemaConnection(driver: self)
+    }
+}
+
+struct TestSchemaConnection: Connection {
+    public var closed: Bool = false
+    
+    var driver: TestSchemaDriver
+    
+    init(driver: TestSchemaDriver) {
+        self.driver = driver
+    }
+    
+    @discardableResult
+    func query<T: Entity>(_ query: Query<T>) throws -> Node { return .null }
+
 
     func schema(_ schema: Schema) throws {
-        testClosure(schema)
+        driver.testClosure(schema)
     }
 
 
