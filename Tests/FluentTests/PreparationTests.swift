@@ -56,6 +56,40 @@ class PreparationTests: XCTestCase {
             XCTFail("Preparation failed: \(error)")
         }
     }
+    
+    func testStringIdentifiedModelPreparation() {
+        let driver = TestSchemaDriver { schema in
+            guard case .create(let entity, let fields) = schema else {
+                XCTFail("Invalid schema")
+                return
+            }
+            
+            XCTAssertEqual(entity, "stringidentifiedthings")
+            
+            guard fields.count == 1 else {
+                XCTFail("Invalid field count")
+                return
+            }
+            
+            guard case .id(let keyType?) = fields[0].type else {
+                XCTFail("Invalid first field \(fields[0])")
+                return
+            }
+            
+            guard case .string(let length) = keyType, length == 10 else {
+                XCTFail("Invalid key type \(keyType) for id")
+                return
+            }
+        }
+        
+        let database = Database(driver)
+        
+        do {
+            try database.prepare(StringIdentifiedThing.self)
+        } catch {
+            XCTFail("Preparation failed: \(error)")
+        }
+    }
 
     func testModelPreparation() {
         let driver = TestSchemaDriver { schema in
