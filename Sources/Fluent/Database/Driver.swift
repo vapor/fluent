@@ -20,6 +20,14 @@ public protocol Driver: Executor {
     var idKey: String { get }
     
     /**
+        The default type for values stored against the identifier key.
+     
+        The `idType` will be accessed by those Entity implementations
+        which do not themselves implement `Entity.idType`.
+    */
+    var idType: Schema.Field.KeyType { get }
+
+    /**
         Creates a connection for executing 
         queries. This method is used to 
         automatically create a connection
@@ -57,6 +65,10 @@ enum DriverError: Error {
 extension Driver {
     public func makeConnection() throws -> Connection {
         throw DriverError.connectionsNotSupported("Please update your database driver package to be compatible with Fluent 1.4.")
+    }
+    
+    public var idType: Schema.Field.KeyType {
+        return .int
     }
 }
 

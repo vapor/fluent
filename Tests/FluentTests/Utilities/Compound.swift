@@ -19,7 +19,7 @@ final class Compound: Entity {
 
     static func prepare(_ database: Fluent.Database) throws {
         try database.create(entity) { builder in
-            builder.id(idKey)
+            builder.id(for: self)
             builder.string("name")
         }
     }
