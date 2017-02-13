@@ -17,7 +17,7 @@ public final class Parent<T: Entity> {
 extension Parent: QueryRepresentable {
     public func makeQuery() throws -> Query<T> {
         let query = try T.query()
-        return try query.filter(foreignKey ?? query.idKey, parentId)
+        return try query.filter(foreignKey ?? T.idKey, parentId)
     }
 }
 

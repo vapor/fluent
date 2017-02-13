@@ -12,6 +12,10 @@ public protocol Driver: Executor {
         The `idKey` will be used when
         `Model.find(_:)` or other find
         by identifier methods are used.
+     
+        This value is overriden by
+        entities that implement the
+        `Entity.idKey` static property.
     */
     var idKey: String { get }
     

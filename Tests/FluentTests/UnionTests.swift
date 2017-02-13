@@ -6,6 +6,7 @@ class UnionTests: XCTestCase {
         ("testBasic", testBasic),
         ("testCustom", testCustom),
         ("testSQL", testSQL),
+        ("testSQLCustomIdKey", testSQLCustomIdKey),
         ("testSQLFilters", testSQLFilters),
     ]
 
@@ -15,6 +16,10 @@ class UnionTests: XCTestCase {
     override func setUp() {
         lqd = LastQueryDriver()
         db = Database(lqd)
+        
+        Atom.database = db
+        Compound.database = db
+        CustomIdKey.database = db
     }
 
     func testBasic() throws {
@@ -90,6 +95,21 @@ class UnionTests: XCTestCase {
             XCTFail("No last query.")
         }
     }
+    
+    func testSQLCustomIdKey() throws {
+        let query = try Query<User>(db).union(CustomIdKey.self)
+        try lqd.query(query)
+        
+        
+        if let sql = lqd.lastQuery {
+            let serializer = GeneralSQLSerializer(sql: sql)
+            let (statement, values) = serializer.serialize()
+            XCTAssertEqual(statement, "SELECT `users`.* FROM `users` JOIN `customidkeys` ON `users`.`customidkey_custom_id` = `customidkeys`.`custom_id`")
+            XCTAssertEqual(values.count, 0)
+        } else {
+            XCTFail("No last query.")
+        }
+    }
 
     func testSQLFilters() throws {
         let localKey = "#local_key"
@@ -120,9 +140,6 @@ class UnionTests: XCTestCase {
     }
 
     func testBelongsToMany() throws {
-        Atom.database = db
-        Compound.database = db
-
         var atom = Atom(name: "Hydrogen")
         atom.id = Node(42)
 
@@ -135,7 +152,7 @@ class UnionTests: XCTestCase {
             let (statement, values) = serializer.serialize()
             XCTAssertEqual(
                 statement,
-                "SELECT `compounds`.* FROM `compounds` JOIN `atom_compound` ON `compounds`.`\(lqd.idKey)` = `atom_compound`.`compound_\(lqd.idKey)` WHERE `atom_compound`.`atom_\(lqd.idKey)` = ?"
+                "SELECT `compounds`.* FROM `compounds` JOIN `atom_compound` ON `compounds`.`\(lqd.idKey)` = `atom_compound`.`compound_\(lqd.idKey)` WHERE `atom_compound`.`atom_\(Atom.idKey)` = ?"
             )
             XCTAssertEqual(values.count, 1)
             XCTAssertEqual(values.first?.int, 42)
