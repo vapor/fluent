@@ -26,7 +26,7 @@ struct LastQueryConnection: Connection {
         let sql = query.sql
         driver.lastQuery = sql
         print("[LQD] \(sql)")
-        return Node.object([driver.idKey: 5])
+        return Node.object([T.idKey: 5])
     }
 
     func schema(_ schema: Schema) throws {

@@ -19,7 +19,17 @@ public protocol Entity: Preparation, NodeConvertible {
         like pivots.
     */
     static var name: String { get }
-
+    
+    /**
+        The name of the column that corresponds
+        to this entity's key.
+     
+        The default return is 'database.driver.idKey',
+        and if no database is set, 'id' is returned,
+        instead.
+     */
+    static var idKey: String { get }
+    
     /**
         The entity's primary identifier.
         This is the same value used for
@@ -87,6 +97,9 @@ extension Entity {
     
     public static var idType: Schema.Field.KeyType {
         return database?.driver.idType ?? .int
+
+    public static var idKey: String {
+        return database?.driver.idKey ?? "id"
     }
 
     // FIXME: Remove in 2.0. Also, make exists optional.
@@ -144,11 +157,8 @@ extension Entity {
         Finds the entity with the given `id`.
     */
     public static func find(_ id: NodeRepresentable) throws -> Self? {
-        guard let idKey = database?.driver.idKey else {
-            return nil
-        }
-
-        return try Self.query().filter(idKey, .equals, id).first()
+        guard let _ = database else { return nil }
+        return try Self.query().filter(Self.idKey, .equals, id).first()
     }
 
     /**

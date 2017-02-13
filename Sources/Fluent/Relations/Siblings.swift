@@ -12,8 +12,8 @@ public final class Siblings<T: Entity> {
 
         let query = try T.query()
 
-        let localKey = localKey ?? query.idKey
-        let foreignKey = foreignKey ?? "\(T.name)_\(query.idKey)"
+        let localKey = localKey ?? T.idKey 
+        let foreignKey = foreignKey ?? "\(T.name)_\(T.idKey)"
 
         self.localKey = localKey
         self.foreignKey = foreignKey
@@ -28,7 +28,7 @@ public final class Siblings<T: Entity> {
             foreignKey: foreignKey
         )
 
-        try query.filter(pivot, "\(E.name)_\(query.idKey)", ident)
+        try query.filter(pivot, "\(E.name)_\(E.idKey)", ident)
 
         _query = query
     }

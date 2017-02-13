@@ -14,8 +14,8 @@ public struct Union {
     ) {
         self.local = local
         self.foreign = foreign
-        self.localKey = localKey ?? "\(foreign.name)_\(idKey)"
-        self.foreignKey = foreignKey ?? idKey
+        self.localKey = localKey ?? "\(foreign.name)_\(foreign.idKey)"
+        self.foreignKey = foreignKey ?? foreign.idKey
     }
 }
 
@@ -64,11 +64,11 @@ public final class Pivot<
     }
 
     public init(node: Node, in context: Context) throws {
-        let idKey = try First.query().idKey
+        let idKey = First.idKey
         id = try node.extract(idKey)
         
-        let firstKey = "\(First.name)_\(idKey)"
-        let secondKey = "\(Second.name)_\(idKey)"
+        let firstKey = "\(First.name)_\(First.idKey)"
+        let secondKey = "\(Second.name)_\(Second.idKey)"
 
         if First.self == type(of: self).left {
             leftId = try node.extract(firstKey)
@@ -80,11 +80,10 @@ public final class Pivot<
     }
 
     public func makeNode(context: Context = EmptyNode) throws -> Node {
-        let idKey = try First.query().idKey
         return try Node(node: [
-            "\(idKey)": id,
-            "\(type(of: self).left.name)_\(idKey)": leftId,
-            "\(type(of: self).right.name)_\(idKey)": rightId,
+            "\(type(of: self).idKey)": id,
+            "\(type(of: self).left.name)_\(type(of: self).left.idKey)": leftId,
+            "\(type(of: self).right.name)_\(type(of: self).right.idKey)": rightId,
         ])
     }
 
@@ -110,7 +109,7 @@ extension QueryRepresentable {
         let union = Union(
             local: T.self,
             foreign: sibling,
-            idKey: query.database.driver.idKey,
+            idKey: query.idKey,
             localKey: nil,
             foreignKey: nil
         )
@@ -129,7 +128,7 @@ extension QueryRepresentable {
         let union = Union(
             local: T.self,
             foreign: sibling,
-            idKey: query.database.driver.idKey,
+            idKey: query.idKey,
             localKey: nil,
             foreignKey: foreignKey
         )
@@ -148,7 +147,7 @@ extension QueryRepresentable {
         let union = Union(
             local: T.self,
             foreign: sibling,
-            idKey: query.database.driver.idKey,
+            idKey: query.idKey,
             localKey: localKey,
             foreignKey: nil
         )
@@ -168,7 +167,7 @@ extension QueryRepresentable {
         let union = Union(
             local: T.self,
             foreign: sibling,
-            idKey: query.database.driver.idKey,
+            idKey: query.idKey,
             localKey: localKey,
             foreignKey: foreignKey
         )
