@@ -36,7 +36,7 @@ class RelationTests: XCTestCase {
     func testBelongsToMany() throws {
         Atom.database = database
         Compound.database = database
-        BasicPivot<Atom, Compound>.database = database
+        Pivot<Atom, Compound>.database = database
 
         var hydrogen = try Atom(node: [
             "name": "Hydrogen",
@@ -53,7 +53,7 @@ class RelationTests: XCTestCase {
         water.id = 1337
         try water.save()
 
-        var pivot = BasicPivot<Atom, Compound>(hydrogen, water)
+        var pivot = Pivot<Atom, Compound>(hydrogen, water)
         try pivot.save()
 
         _ = try hydrogen.compounds().all()
@@ -78,8 +78,8 @@ class RelationTests: XCTestCase {
     }
     
     func testPivotDatabase() throws {
-        BasicPivot<Atom, Nucleus>.database = database
-        XCTAssertTrue(BasicPivot<Atom, Nucleus>.database === database)
-        // XCTAssertTrue(BasicPivot<Nucleus, Atom>.database === database)
+        Pivot<Atom, Nucleus>.database = database
+        XCTAssertTrue(Pivot<Atom, Nucleus>.database === database)
+        XCTAssertTrue(Pivot<Nucleus, Atom>.database === database)
     }
 }

@@ -24,7 +24,7 @@ extension Siblings: QueryRepresentable {
     public func makeQuery() throws -> Query<Foreign> {
         let query = try Foreign.query()
 
-        let pivot = BasicPivot<Local, Foreign>.self
+        let pivot = Pivot<Local, Foreign>.self
 
         try query.union(
             pivot,

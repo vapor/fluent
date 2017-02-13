@@ -1,4 +1,4 @@
-/// A pivot between three many-to-many
+/// A double pivot between three many-to-many
 /// database entities.
 ///
 /// For example: users > users+teams < teams
@@ -9,10 +9,13 @@
 ///
 ///
 /// let permissions = users.permissions(for: team)
-public protocol TriplePivot {
-    associatedtype Left: Entity
-    associatedtype Middle: Entity
-    associatedtype Right: Entity
+public protocol DoublePivotProtocol {
+    associatedtype LeftPivot: PivotProtocol
+    associatedtype RightPivot: PivotProtocol
+
+    typealias Left = LeftPivot.Left
+    typealias Middle = LeftPivot.Right
+    typealias Right = RightPivot.Right
 
     /// Returns true if the three entities
     /// are related by the pivot.

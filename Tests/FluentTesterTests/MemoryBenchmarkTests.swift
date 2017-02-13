@@ -1,6 +1,6 @@
 import XCTest
 @testable import Fluent
-import FluentTester
+@testable import FluentTester
 
 class MemoryBenchmarkTests: XCTestCase {
     static var allTests = [

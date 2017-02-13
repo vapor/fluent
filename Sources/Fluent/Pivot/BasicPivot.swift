@@ -1,11 +1,9 @@
-public final class BasicPivot<
+public final class Pivot<
     L: Entity,
     R: Entity
->: Pivot, Entity {
+>: PivotProtocol, Entity {
     public typealias Left = L
     public typealias Right = R
-
-    public var exists: Bool = false
 
     public static var entity: String {
         if Left.name < Right.name {
@@ -54,4 +52,74 @@ public final class BasicPivot<
     public static func revert(_ database: Database) throws {
         try database.delete(entity)
     }
+}
+
+// MARK: Double Pivot
+
+extension Pivot where L: PivotProtocol {
+    public static func related(
+        left: Left.Left,
+        middle: Left.Right,
+        right: Right
+    ) throws -> Bool {
+        let (leftId, middleId, rightId) = try assertIdsExist(left, middle, right)
+
+        let result = try Left
+            .query()
+            .union(
+                self,
+                localKey: Left.idKey,
+                foreignKey: Left.foreignIdKey
+            )
+            .filter(Left.self, Left.Left.foreignIdKey, leftId)
+            .filter(Left.self, Left.Right.foreignIdKey, middleId)
+            .filter(self, Right.foreignIdKey, rightId)
+            .first()
+
+        return result != nil
+    }
+}
+
+extension Pivot where R: PivotProtocol {
+    public static func related(
+        left: Left,
+        middle: Right.Left,
+        right: Right.Right
+    ) throws -> Bool {
+        let (leftId, middleId, rightId) = try assertIdsExist(left, middle, right)
+
+        let result = try Right
+            .query()
+            .union(
+                self,
+                localKey: Right.idKey,
+                foreignKey: Right.foreignIdKey
+            )
+            .filter(self, Left.foreignIdKey, leftId)
+            .filter(Right.self, Right.Left.foreignIdKey, middleId)
+            .filter(Right.self, Right.Right.foreignIdKey, rightId)
+            .first()
+
+        return result != nil
+    }
+}
+
+private func assertIdsExist(
+    _ left: Entity,
+    _ middle: Entity,
+    _ right: Entity
+) throws -> (Node, Node, Node) {
+    guard let leftId = left.id else {
+        throw PivotError.leftIdRequired
+    }
+
+    guard let middleId = middle.id else {
+        throw PivotError.middleIdRequired
+    }
+
+    guard let rightId = right.id else {
+        throw PivotError.rightIdRequired
+    }
+
+    return (leftId, middleId, rightId)
 }

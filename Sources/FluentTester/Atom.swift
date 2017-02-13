@@ -1,10 +1,6 @@
 import Fluent
 
 public final class Atom: Entity {
-    public static var idKey: String {
-        return "atom_id"
-    }
-    
     public var id: Node?
 
     public var name: String

@@ -4,7 +4,7 @@
 /// For example: users > users+teams < teams
 ///
 /// let teams = users.teams()
-public protocol Pivot {
+public protocol PivotProtocol {
     associatedtype Left: Entity
     associatedtype Right: Entity
 
@@ -21,11 +21,12 @@ public protocol Pivot {
 
 public enum PivotError: Error {
     case leftIdRequired
+    case middleIdRequired
     case rightIdRequired
     case unspecified(Error)
 }
 
-extension BasicPivot {
+extension PivotProtocol where Self: Entity {
     public static func related(_ left: Left, _ right: Right) throws -> Bool {
         let (leftId, rightId) = try assertIdsExist(left, right)
 
@@ -41,7 +42,8 @@ extension BasicPivot {
     public static func attach(_ left: Left, _ right: Right) throws {
         _ = try assertIdsExist(left, right)
 
-        var pivot = BasicPivot(left, right)
+        var pivot = Pivot<Left, Right>(left, right)
+        print(try pivot.makeNode())
         try pivot.save()
     }
 

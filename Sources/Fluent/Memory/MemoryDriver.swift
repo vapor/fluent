@@ -31,6 +31,10 @@ public final class MemoryDriver: Driver {
         let foreign = prepare(group: union.foreign.entity)
         
         var unioned: [Node] = []
+
+        dump(union)
+        dump(local)
+        dump(foreign)
         
         // iterate over and merge table data
         // into one group
