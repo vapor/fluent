@@ -36,6 +36,8 @@ public protocol Entity: Preparation, NodeConvertible {
         `find(:_)`.
     */
     var id: Node? { get set }
+    
+    static var idType: Schema.Field.KeyType { get }
 
     /**
         Whether or not entity was retrieved from database.
@@ -93,6 +95,9 @@ extension Entity {
         return String(describing: self).lowercased()
     }
     
+    public static var idType: Schema.Field.KeyType {
+        return database?.driver.idType ?? .int
+
     public static var idKey: String {
         return database?.driver.idKey ?? "id"
     }

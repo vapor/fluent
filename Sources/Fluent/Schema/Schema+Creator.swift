@@ -13,19 +13,9 @@ extension Schema {
             fields = []
         }
         
-        public func id(
-            _ name: String = "id",
-            optional: Bool = false,
-            unique: Bool = false,
-            default: NodeRepresentable? = nil
-        ) {
-            fields += Field(
-                name: name,
-                type: .id,
-                optional: optional,
-                unique: unique,
-                default: `default`
-            )
+        public func id(for entityType: Entity.Type, name: String = "id")
+        {
+            fields += Field(name: name, type: .id(keyType: entityType.idType))
         }
 
         public func int(
@@ -132,7 +122,8 @@ extension Schema {
             default: NodeRepresentable? = nil
         ) {
             parent(
-                idKey: "\(entity.name)_id", 
+                idKey: "\(entity.name)_id",
+                type: E.idType,
                 optional: optional, 
                 unique: unique, 
                 default: `default`
@@ -141,19 +132,41 @@ extension Schema {
 
         public func parent(
             idKey: String,
+            type: Schema.Field.KeyType,
             optional: Bool = false,
             unique: Bool = false,
             default: NodeRepresentable? = nil
         ) {
             fields += Field(
                 name: idKey,
-                type: .int,
+                type: type.fieldType,
                 optional: optional,
                 unique: unique,
                 default: `default`
             )
         }
-
+        
+        public func pivotKeys(
+            left: Entity.Type,
+            right: Entity.Type,
+            suffix: String
+        ) {
+            let leftKeyType = left.idType
+            let rightKeyType = right.idType
+            
+            let leftName = "\(left.name)\(suffix)"
+            let rightName = "\(right.name)\(suffix)"
+            
+            fields += Field(name: leftName,
+                            type: leftKeyType.fieldType,
+                            optional: false,
+                            unique: false)
+            
+            fields += Field(name: rightName,
+                            type: rightKeyType.fieldType,
+                            optional: false,
+                            unique: false)
+        }
     }
 }
 
