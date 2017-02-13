@@ -152,10 +152,7 @@ extension Entity {
         Finds the entity with the given `id`.
     */
     public static func find(_ id: NodeRepresentable) throws -> Self? {
-        if(database == nil) {
-            return nil
-        }
-        
+        guard let _ = database else { return nil }
         return try Self.query().filter(Self.idKey, .equals, id).first()
     }
 
