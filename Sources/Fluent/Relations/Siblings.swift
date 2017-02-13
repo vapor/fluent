@@ -1,52 +1,52 @@
 public final class Siblings<
-    From: Entity, To: Entity
+    Local: Entity, Foreign: Entity
 > {
-    let fromId: Node
-    let toIdKey: String
-    let toForeignIdKey: String
+    let id: Node
+    let localKey: String
+    let foreignKey: String
 
     public init(
-        from entity: From,
-        toIdKey: String = To.idKey,
-        toForeignIdKey: String = To.foreignIdKey
+        _ entity: Local,
+        localKey: String = Foreign.foreignIdKey,
+        foreignKey: String = Foreign.idKey
     ) throws {
-        guard let id = entity.id else {
+        guard let ident = entity.id else {
             throw RelationError.noIdentifier
         }
 
-        fromId = id
-        self.toIdKey = toIdKey
-        self.toForeignIdKey = toForeignIdKey
+        id = ident
+        self.localKey = localKey
+        self.foreignKey = foreignKey
     }
 }
 
 extension Siblings: QueryRepresentable {
-    public func makeQuery() throws -> Query<To> {
-        let query = try To.query()
+    public func makeQuery() throws -> Query<Foreign> {
+        let query = try Foreign.query()
 
-        let pivot = BasicPivot<From, To>.self
+        let pivot = BasicPivot<Local, Foreign>.self
 
         try query.union(
             pivot,
-            localKey: toIdKey,
-            foreignKey: toForeignIdKey
+            localKey: foreignKey,
+            foreignKey: localKey
         )
 
-        try query.filter(pivot, From.foreignIdKey, fromId)
+        try query.filter(pivot, Local.foreignIdKey, id)
 
         return query
     }
 }
 
 extension Entity {
-    public func siblings<To: Entity>(
-        _ idKey: String = To.idKey,
-        _ foreignIdKey: String = To.foreignIdKey
-    ) throws -> Siblings<Self, To> {
+    public func siblings<Foreign: Entity>(
+        localKey: String = Foreign.foreignIdKey,
+        foreignKey: String = Foreign.idKey
+    ) throws -> Siblings<Self, Foreign> {
         return try Siblings(
-            from: self,
-            toIdKey: idKey,
-            toForeignIdKey: foreignIdKey
+            self,
+            localKey: localKey,
+            foreignKey: foreignKey
         )
     }
 }
