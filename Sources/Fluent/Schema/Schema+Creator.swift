@@ -1,9 +1,6 @@
 extension Schema {
-    /**
-        Creates a Schema.
-
-        Cannot modify or delete fields.
-    */
+    /// Creates schema.
+    /// Cannot delete or modify fields.
     public class Creator {
         public let entity: String
         public var fields: [Field]
@@ -12,10 +9,19 @@ extension Schema {
             self.entity = entity
             fields = []
         }
-        
-        public func id(for entityType: Entity.Type, name: String = "id")
-        {
-            fields += Field(name: name, type: .id(keyType: entityType.idType))
+
+        public func id<E: Entity>(for entityType: E.Type) {
+            fields += Field(
+                name: E.idKey,
+                type: .id(type: E.idType)
+            )
+        }
+
+        public func foreignId<E: Entity>(for entityType: E.Type) {
+            fields += Field(
+                name: E.foreignIdKey,
+                type: .id(type: E.idType)
+            )
         }
 
         public func int(
@@ -122,8 +128,8 @@ extension Schema {
             default: NodeRepresentable? = nil
         ) {
             parent(
-                idKey: "\(entity.name)_id",
-                type: E.idType,
+                idKey: E.idKey,
+                idType: E.idType,
                 optional: optional, 
                 unique: unique, 
                 default: `default`
@@ -132,26 +138,18 @@ extension Schema {
 
         public func parent(
             idKey: String,
-            type: Schema.Field.KeyType,
+            idType: IdentifierType,
             optional: Bool = false,
             unique: Bool = false,
             default: NodeRepresentable? = nil
         ) {
             fields += Field(
                 name: idKey,
-                type: type.fieldType,
+                type: .id(type: idType),
                 optional: optional,
                 unique: unique,
                 default: `default`
             )
-        }
-        
-        public func pivotKeys(
-            left: Entity.Type,
-            right: Entity.Type
-        ) {
-            id(for: left, name: left.foreignIdKey)
-            id(for: right, name: right.foreignIdKey)
         }
     }
 }

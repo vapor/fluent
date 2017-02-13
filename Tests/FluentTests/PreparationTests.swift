@@ -71,12 +71,12 @@ class PreparationTests: XCTestCase {
                 return
             }
             
-            guard case .id(let keyType?) = fields[0].type else {
+            guard case .id(let keyType) = fields[0].type else {
                 XCTFail("Invalid first field \(fields[0])")
                 return
             }
             
-            guard case .string(let length) = keyType, length == 10 else {
+            guard case .custom(let length) = keyType, length == "STRING(10)" else {
                 XCTFail("Invalid key type \(keyType) for id")
                 return
             }
@@ -185,6 +185,7 @@ class TestPreparation: Preparation {
 }
 
 class TestSchemaDriver: Driver {
+    var idType: IdentifierType = .int
     var idKey: String = "id"
 
     var testClosure: (Schema) -> ()

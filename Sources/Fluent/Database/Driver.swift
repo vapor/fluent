@@ -25,7 +25,7 @@ public protocol Driver: Executor {
         The `idType` will be accessed by those Entity implementations
         which do not themselves implement `Entity.idType`.
     */
-    var idType: Schema.Field.KeyType { get }
+    var idType: IdentifierType { get }
 
     /**
         Creates a connection for executing 
@@ -54,21 +54,3 @@ extension Driver {
         return try makeConnection().raw(raw, values)
     }
 }
-
-
-// MARK: Deprecated
-
-enum DriverError: Error {
-    case connectionsNotSupported(String)
-}
-
-extension Driver {
-    public func makeConnection() throws -> Connection {
-        throw DriverError.connectionsNotSupported("Please update your database driver package to be compatible with Fluent 1.4.")
-    }
-    
-    public var idType: Schema.Field.KeyType {
-        return .int
-    }
-}
-

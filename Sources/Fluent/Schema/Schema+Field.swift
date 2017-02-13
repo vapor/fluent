@@ -11,30 +11,13 @@ extension Schema {
         public var `default`: Node?
 
         public enum DataType {
-            case id(keyType: KeyType?)
+            case id(type: IdentifierType)
             case int
             case string(length: Int?)
             case double
             case bool
             case data
             case custom(type: String)
-        }
-        
-        public enum KeyType {
-            case int
-            case string(length: Int?)
-            case custom(type: String)
-            
-            var fieldType: DataType {
-                switch self {
-                case .int:
-                    return .int
-                case .string(let length):
-                    return .string(length: length)
-                case .custom(let type):
-                    return .custom(type: type)
-                }
-            }
         }
 
         public init(

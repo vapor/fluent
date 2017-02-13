@@ -406,17 +406,17 @@ open class GeneralSQLSerializer: SQLSerializer {
 
     open func sql(_ type: Schema.Field.DataType) -> String {
         switch type {
-        case .id(let keyType):
-            switch keyType ?? Schema.Field.KeyType.int {
+        case .id(let type):
+            let typeString: String
+            switch type {
             case .int:
-                return "INTEGER PRIMARY KEY"
-                
-            case .string(let length):
-                return "VARCHAR(\(length ?? 128)) PRIMARY KEY"
-                
-            case .custom(let type):
-                return "\(type) PRIMARY KEY"
+                typeString = "INTEGER"
+            case .uuid:
+                typeString = "STRING"
+            case .custom(let dataType):
+                typeString = dataType
             }
+            return typeString  + " PRIMARY KEY"
         case .int:
             return "INTEGER"
         case .string(_):
@@ -455,7 +455,7 @@ open class GeneralSQLSerializer: SQLSerializer {
         )
     }
 
-    open func sql(_ joins: [Union]) -> String {
+    open func sql(_ joins: [Join]) -> String {
         var clause: [String] = []
 
         for join in joins {
@@ -465,15 +465,15 @@ open class GeneralSQLSerializer: SQLSerializer {
         return sql(clause)
     }
 
-    open func sql(_ join: Union) -> String {
+    open func sql(_ join: Join) -> String {
         var clause: [String] = []
 
         clause += "JOIN"
         clause += sql(join.foreign.entity)
         clause += "ON"
-        clause += "\(sql(join.local.entity)).\(sql(join.localKey))"
+        clause += "\(sql(join.local.entity)).\(sql(join.foreignKey))"
         clause += "="
-        clause += "\(sql(join.foreign.entity)).\(sql(join.foreignKey))"
+        clause += "\(sql(join.foreign.entity)).\(sql(join.localKey))"
 
         return sql(clause)
     }

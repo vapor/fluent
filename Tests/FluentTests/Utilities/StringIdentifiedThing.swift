@@ -23,7 +23,7 @@ struct StringIdentifiedThing: Entity {
         return try Node(node: ["id": id])
     }
     
-    static var idType: Schema.Field.KeyType { return .string(length: 10) }
+    static var idType: IdentifierType { return .custom("STRING(10)") }
     
     static func prepare(_ database: Database) throws {
         try database.create(entity) { creator throws in

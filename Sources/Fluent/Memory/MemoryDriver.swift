@@ -5,6 +5,9 @@ public final class MemoryDriver: Driver {
     }
 
     public var idKey: String = "id"
+
+    public var idType: IdentifierType = .int
+
     var store: [String: Group]
 
     public init() {
@@ -25,22 +28,18 @@ public final class MemoryDriver: Driver {
         return group
     }
     
-    func prepare(union: Union) -> Group {
+    func prepare(union: Join) -> Group {
         // create unioned table from two groups
         let local = prepare(group: union.local.entity)
         let foreign = prepare(group: union.foreign.entity)
         
         var unioned: [Node] = []
-
-        dump(union)
-        dump(local)
-        dump(foreign)
         
         // iterate over and merge table data
         // into one group
         for l in local.data {
             for f in foreign.data {
-                if l[union.localKey] == f[union.foreignKey] {
+                if l[union.foreignKey] == f[union.localKey] {
                     var lf: [String: Node] = [:]
                     
                     if let of = f.nodeObject {
@@ -90,7 +89,7 @@ public final class MemoryConnection: Connection {
             group.delete(query.filters)
             return Node.array([])
         case .fetch:
-            if let union = query.unions.first {
+            if let union = query.joins.first {
                 group = driver.prepare(union: union)
             }
             

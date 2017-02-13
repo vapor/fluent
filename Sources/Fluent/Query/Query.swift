@@ -44,11 +44,11 @@ public class Query<T: Entity>: QueryRepresentable {
     }
 
     /**
-        An array of unions, or other entities
+        An array of joins: other entities
         that will be queried during this query's
         execution.
     */
-    public var unions: [Union]
+    public var joins: [Join]
 
     //MARK: Internal
 
@@ -66,7 +66,7 @@ public class Query<T: Entity>: QueryRepresentable {
         filters = []
         action = .fetch
         self.database = database
-        unions = []
+        joins = []
         sorts = []
         _context = DatabaseContext(database)
     }
@@ -204,18 +204,18 @@ extension QueryRepresentable {
         let query = try makeQuery()
 
         if let _ = model.id, model.exists {
-            model.willUpdate()
+            try model.willUpdate()
             let node = try model.makeNode(context: query._context)
             try modify(node)
-            model.didUpdate()
+            try model.didUpdate()
         } else {
-            model.willCreate()
+            try model.willCreate()
             let node = try model.makeNode(context: query._context)
             let id = try query.create(node)
             if id != nil, id != .null, id != 0 {
                 model.id = id
             }
-            model.didCreate()
+            try model.didCreate()
         }
         model.exists = true
     }
@@ -229,8 +229,8 @@ extension QueryRepresentable {
     public func delete() throws {
         let query = try makeQuery()
         
-        guard query.unions.count == 0 else {
-            throw QueryError.notSupported("Cannot perform delete on queries that contain unions. Delete the entities directly instead.")
+        guard query.joins.count == 0 else {
+            throw QueryError.notSupported("Cannot perform delete on queries that contain joins. Delete the entities directly instead.")
         }
         
         query.action = .delete
@@ -260,9 +260,9 @@ extension QueryRepresentable {
 
         query.filters.append(filter)
 
-        model.willDelete()
+        try model.willDelete()
         try query.run()
-        model.didDelete()
+        try model.didDelete()
 
         var model = model
         model.exists = false

@@ -5,10 +5,7 @@ import Foundation
     stored and retrieved from the `Database`.
 */
 public protocol Entity: Preparation, NodeConvertible {
-    /**
-        The collection or table name
-        for this entity.
-    */
+    /// The collection or table name for this entity.
     static var entity: String { get }
 
     /**
@@ -41,48 +38,30 @@ public protocol Entity: Preparation, NodeConvertible {
         `find(:_)`.
     */
     var id: Node? { get set }
-    
-    static var idType: Schema.Field.KeyType { get }
 
-    /**
-        Whether or not entity was retrieved from database.
-        
-        This value shouldn't be interacted w/ external users 
-        w/o explicit knowledge.
-     
-        General implementation should just be `var exists = false`
-    */
+    /// The type of identifier this model uses.
+    /// ex: INT, UUID, etc
+    static var idType: IdentifierType { get }
+
+    /// Called before the entity will be created.
+    func willCreate() throws
+
+    /// Called after the entity has been created.
+    func didCreate() throws
+
+    /// Called before the entity will be updated.
+    func willUpdate() throws
+
+    /// Called after the entity has been updated.
+    func didUpdate() throws
+
+    /// Called before the entity will be deleted.
+    func willDelete() throws
+
+    /// Called after the entity has been deleted.
+    func didDelete() throws
+
     var exists: Bool { get set }
-
-    /**
-        Called before the entity will be created.
-    */
-    func willCreate()
-
-    /**
-        Called after the entity has been created.
-    */
-    func didCreate()
-
-    /**
-        Called before the entity will be updated.
-    */
-    func willUpdate()
-
-    /**
-        Called after the entity has been updated.
-    */
-    func didUpdate()
-
-    /**
-        Called before the entity will be deleted.
-    */
-    func willDelete()
-
-    /**
-        Called after the entity has been deleted.
-    */
-    func didDelete()
 }
 
 // MARK: Defaults
@@ -100,8 +79,8 @@ extension Entity {
         return String(describing: self).lowercased()
     }
     
-    public static var idType: Schema.Field.KeyType {
-        return database?.driver.idType ?? .int
+    public static var idType: IdentifierType {
+        return database?.driver.idType ?? .uuid
     }
 
     public static var idKey: String {
@@ -110,20 +89,6 @@ extension Entity {
 
     public static var foreignIdKey: String {
         return "\(name)_\(idKey)"
-    }
-
-    // FIXME: Remove in 2.0. Also, make exists optional.
-    @available(*, deprecated: 1.0, message: "This 'exists' property is not stored. Add `var exists: Bool = false` to the model. This default implementation will be removed in a future update.")
-    public var exists: Bool {
-        get {
-            let type = type(of: self)
-            print("[DEPRECATED] No 'exists' property is stored on '\(type)'. Add `var exists: Bool = false` to this model. The default implementation will be removed in a future update.")
-            return true
-        }
-        set {
-            let type = type(of: self)
-            print("[DEPRECATED] No 'exists' property is stored on '\(type)'. Add `var exists: Bool = false` to this model. The default implementation will be removed in a future update.")
-        }
     }
 }
 
@@ -140,10 +105,8 @@ extension Entity {
 //MARK: CRUD
 
 extension Entity {
-    /**
-        Persists the entity into the 
-        data store and sets the `id` property.
-    */
+    /// Persists the entity into the
+    /// data store and sets the `id` property.
     public mutating func save() throws {
         try Self.query().save(&self)
     }
@@ -204,5 +167,13 @@ extension Entity {
         set {
             Database.map[Self.name] = newValue
         }
+    }
+}
+
+extension Entity {
+    public var exists: Bool {
+        // TODO: Implement me
+        get { return false }
+        set { }
     }
 }

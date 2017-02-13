@@ -11,8 +11,9 @@ import Fluent
 
 struct CustomIdentifiedThing: Entity {
     
-    var id:Node? = nil
+    var id: Node? = nil
     var exists: Bool = false
+    var idKey = "#id"
     
     init(node: Node, in context: Context) throws {
         id = try node.extract("id")
@@ -22,7 +23,7 @@ struct CustomIdentifiedThing: Entity {
         return try Node(node: ["id": id])
     }
     
-    static var idType: Schema.Field.KeyType { return .custom(type: "INTEGER") }
+    static var idType: IdentifierType { return .custom("INTEGER") }
     
     static func prepare(_ database: Database) throws {
         try database.create(entity) { creator throws in

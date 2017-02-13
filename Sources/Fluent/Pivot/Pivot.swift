@@ -1,70 +1,57 @@
-/// A pivot between two many-to-many
-/// database entities.
-///
-/// For example: users > users+teams < teams
-///
-/// let teams = users.teams()
-public protocol PivotProtocol {
-    associatedtype Left: Entity
-    associatedtype Right: Entity
+public final class Pivot<
+    L: Entity,
+    R: Entity
+>: PivotProtocol, Entity {
+    public typealias Left = L
+    public typealias Right = R
 
-    /// Returns true if the two entities 
-    /// are related by the pivot.
-    static func related(_: Left, _: Right) throws -> Bool
+    public var exists = false
 
-    /// Attaches the two entities, relating them.
-    static func attach(_: Left, _: Right) throws
-
-    /// Detaches the three related entities.
-    static func detach(_: Left, _: Right) throws
-}
-
-public enum PivotError: Error {
-    case leftIdRequired
-    case middleIdRequired
-    case rightIdRequired
-    case unspecified(Error)
-}
-
-extension PivotProtocol where Self: Entity {
-    public static func related(_ left: Left, _ right: Right) throws -> Bool {
-        let (leftId, rightId) = try assertIdsExist(left, right)
-
-        let results = try query()
-            .filter(type(of: left).foreignIdKey, leftId)
-            .filter(type(of: right).foreignIdKey, rightId)
-            .first()
-
-        return results != nil
-    }
-
-
-    public static func attach(_ left: Left, _ right: Right) throws {
-        _ = try assertIdsExist(left, right)
-
-        var pivot = Pivot<Left, Right>(left, right)
-        print(try pivot.makeNode())
-        try pivot.save()
-    }
-
-    public static func detach(_ left: Left, _ right: Right) throws {
-        let (leftId, rightId) = try assertIdsExist(left, right)
-
-        try query()
-            .filter(Left.foreignIdKey, leftId)
-            .filter(Right.foreignIdKey, rightId)
-            .delete()
-    }
-
-    private static func assertIdsExist(_ left: Left, _ right: Right) throws -> (Node, Node) {
-        guard let leftId = left.id else {
-            throw PivotError.leftIdRequired
+    public static var entity: String {
+        if Left.name < Right.name {
+            return "\(Left.name)_\(Right.name)"
+        } else {
+            return "\(Right.name)_\(Left.name)"
         }
+    }
 
-        guard let rightId = right.id else {
-            throw PivotError.rightIdRequired
+    public static var name: String {
+        return entity
+    }
+
+    public var id: Node?
+    public var leftId: Node?
+    public var rightId: Node?
+
+    public init(_ left: Entity, _ right: Entity) {
+        leftId = left.id
+        rightId = right.id
+    }
+
+    public init(node: Node, in context: Context) throws {
+        id = try node.extract(type(of: self).idKey)
+
+        leftId = try node.extract(Left.foreignIdKey)
+        rightId = try node.extract(Right.foreignIdKey)
+    }
+
+    public func makeNode(context: Context) throws -> Node {
+        return try Node(node: [
+            type(of: self).idKey: id,
+            Left.foreignIdKey: leftId,
+            Right.foreignIdKey: rightId,
+        ])
+    }
+
+    public static func prepare(_ database: Database) throws {
+        try database.create(entity) { builder in
+            builder.id(for: self)
+            builder.foreignId(for: Left.self)
+            builder.foreignId(for: Right.self)
         }
+    }
 
-        return (leftId, rightId)
+    public static func revert(_ database: Database) throws {
+        try database.delete(entity)
     }
 }

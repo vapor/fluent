@@ -1,6 +1,7 @@
 import Fluent
 
 class LastQueryDriver: Driver {
+    var idType: IdentifierType = .int
     var idKey: String = "#id"
 
     var lastQuery: SQL?
