@@ -20,8 +20,7 @@ public final class MemoryDriver: Driver {
             guard let data = query.data else {
                 throw Error.dataRequired
             }
-            let i = group.create(data, idKey: idKey)
-
+            let i = group.create(data, idKey: T.idKey)
             return Node.number(.int(i))
         case .delete:
             group.delete(query.filters)

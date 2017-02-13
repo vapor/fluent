@@ -12,7 +12,7 @@ class LastQueryDriver: Driver {
         let sql = query.sql
         lastQuery = sql
         print("[LQD] \(sql)")
-        return Node.object([idKey: 5])
+        return Node.object([T.idKey: 5])
     }
 
     func schema(_ schema: Schema) throws {

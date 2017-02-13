@@ -6,7 +6,10 @@ class MemoryTests: XCTestCase {
         ("testSave", testSave),
         ("testFetch", testFetch),
         ("testDelete", testDelete),
+        ("testDeleteWithCustomIdKey", testDeleteWithCustomIdKey),
         ("testModify", testModify),
+        ("testModifyWithCustomIdKey", testModifyWithCustomIdKey),
+        ("testModifyByIdWithCustomIdKey", testModifyByIdWithCustomIdKey),
         ("testSort", testSort),
         ("testCount", testCount),
         ("testFetchWithLimit", testFetchWithLimit),
@@ -26,6 +29,8 @@ class MemoryTests: XCTestCase {
     
     func testSave() throws {
         let (driver, database) = makeTestModels()
+        
+        User.database = database
 
         var user = User(id: nil, name: "Vapor", email: "test@email.com")
         let query = Query<User>(database)
@@ -36,6 +41,8 @@ class MemoryTests: XCTestCase {
 
     func testFetch() throws {
         let (driver, database) = makeTestModels()
+        
+        User.database = database
 
         var new = User(id: nil, name: "Vapor", email: "test@email.com")
         let store = Query<User>(database)
@@ -48,6 +55,8 @@ class MemoryTests: XCTestCase {
 
     func testDelete() throws {
         let (driver, database) = makeTestModels()
+        
+        User.database = database
 
         for _ in 0 ..< 100 {
             var new = User(id: nil, name: "Vapor", email: "test@email.com")
@@ -59,9 +68,25 @@ class MemoryTests: XCTestCase {
         try Query<User>(database).filter("id", .greaterThan, 50).delete()
         XCTAssertEqual(driver.store["users"]?.data.count, 50)
     }
-
+    
+    func testDeleteWithCustomIdKey() throws {
+        let (driver, database) = makeTestModels()
+        
+        CustomIdKey.database = database
+        
+        var new = CustomIdKey(id: nil, label: "Test")
+        let store = Query<CustomIdKey>(database)
+        try store.save(&new)
+        
+        XCTAssertEqual(driver.store["customidkeys"]?.data.count, 1)
+        try store.delete(new)
+        XCTAssertEqual(driver.store["customidkeys"]?.data.count, 0)
+    }
+    
     func testModify() throws {
         let (_, database) = makeTestModels()
+        
+        User.database = database
 
         for _ in 0 ..< 100 {
             var new = User(id: nil, name: "Vapor", email: "test@email.com")
@@ -79,10 +104,57 @@ class MemoryTests: XCTestCase {
         let resultsThree = try Query<User>(database).filter("name", "updated").all()
         XCTAssertEqual(resultsThree.count, 100)
     }
+    
+    func testModifyWithCustomIdKey() throws {
+        let (_, database) = makeTestModels()
+        
+        CustomIdKey.database = database
+        
+        for _ in 0 ..< 100 {
+            var new = CustomIdKey(id: nil, label: "Vapor")
+            try Query<CustomIdKey>(database).save(&new)
+        }
+        
+        let results = try Query<CustomIdKey>(database).filter("label", "Vapor").all()
+        XCTAssertEqual(results.count, 100)
+        
+        try Query<CustomIdKey>(database).modify(Node.object(["label" : "updated"]))
+        
+        let resultsTwo = try Query<CustomIdKey>(database).filter("label", "Vapor").all()
+        XCTAssertEqual(resultsTwo.count, 0)
+        
+        let resultsThree = try Query<CustomIdKey>(database).filter("label", "updated").all()
+        XCTAssertEqual(resultsThree.count, 100)
+    }
+    
+    func testModifyByIdWithCustomIdKey() throws {
+        let (_, database) = makeTestModels()
+        
+        CustomIdKey.database = database
+        
+        var new: CustomIdKey = CustomIdKey(id: nil, label: "Vapor")
+        for _ in 0 ..< 100 {
+            new = CustomIdKey(id: nil, label: "Vapor")
+            try Query<CustomIdKey>(database).save(&new)
+        }
+        
+        let results = try Query<CustomIdKey>(database).filter("label", "Vapor").all()
+        XCTAssertEqual(results.count, 100)
+        
+        try Query<CustomIdKey>(database).modify(Node.object(["custom_id": new.id!, "label" : "updated"]))
+        
+        let resultsTwo = try Query<CustomIdKey>(database).filter("label", "Vapor").all()
+        XCTAssertEqual(resultsTwo.count, 99)
+        
+        let resultsThree = try Query<CustomIdKey>(database).filter("label", "updated").all()
+        XCTAssertEqual(resultsThree.count, 1)
+    }
 
     func testSort() throws {
         let (_, database) = makeTestModels()
         let fruits = ["Apple", "Orange", "Strawberry", "Mango"]
+        
+        User.database = database
 
         for _ in 0 ..< 100 {
             let fruit = fruits.random
@@ -238,6 +310,27 @@ class MemoryTests: XCTestCase {
         let fetched = try query.all()
         XCTAssertEqual(fetched.count, 4)
         XCTAssertEqual(driver.store["users"]?.data.count, 9)
-
+    }
+    
+    func testFetchDoesNotThrowWithDataOf3LimitOffset2LimitCount2_BUG() throws {
+        let (driver, database) = makeTestModels()
+        
+        var new = User(id: nil, name: "Vapor", email: "test@email.com")
+        var new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
+        var new3 = User(id: nil, name: "Vapor3", email: "test3@email.com")
+        
+        let store = Query<User>(database)
+        try store.save(&new)
+        try store.save(&new2)
+        try store.save(&new3)
+        
+        let limit = Limit(count: 2, offset: 2)
+        let query = Query<User>(database)
+        query.limit = limit
+        
+        let fetched = try query.all()
+        XCTAssertEqual(fetched.count, 1)
+        XCTAssertEqual(fetched.first?.name, "Vapor3")
+        XCTAssertEqual(driver.store["users"]?.data.count, 3)
     }
 }
