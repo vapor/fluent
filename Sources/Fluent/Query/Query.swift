@@ -101,7 +101,7 @@ public class Query<T: Entity>: QueryRepresentable {
                 do {
                     var model = try T(node: result, in: _context)
                     if case .object(let dict) = result {
-                        model.id = dict[database.driver.idKey]
+                        model.id = dict[T.idKey]
                     }
                     models.append(model)
                 } catch {
@@ -252,7 +252,7 @@ extension QueryRepresentable {
         let filter = Filter(
             T.self,
             .compare(
-                query.database.driver.idKey,
+                T.idKey,
                 .equals,
                 id
             )
@@ -280,7 +280,7 @@ extension QueryRepresentable {
         query.action = .modify
         query.data = serialized
 
-        let idKey = query.database.driver.idKey
+        let idKey = T.idKey
         if let id = serialized?[idKey] {
             _ = try filter(idKey, id)
         }

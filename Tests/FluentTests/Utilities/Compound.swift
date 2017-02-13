@@ -6,7 +6,7 @@ final class Compound: Entity {
     var exists: Bool = false
 
     init(node: Node, in context: Context) throws {
-        id = try node.extract("id")
+        id = try node.extract(type(of: self).idKey)
         name = try node.extract("name")
     }
 
@@ -19,7 +19,7 @@ final class Compound: Entity {
 
     static func prepare(_ database: Fluent.Database) throws {
         try database.create(entity) { builder in
-            builder.id()
+            builder.id(idKey)
             builder.string("name")
         }
     }
