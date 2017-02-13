@@ -29,6 +29,11 @@ public protocol Entity: Preparation, NodeConvertible {
         instead.
      */
     static var idKey: String { get }
+
+    /// The name of the column that corresponds
+    /// to this entity's key when referenced
+    /// from other tables or collections.
+    static var foreignIdKey: String { get }
     
     /**
         The entity's primary identifier.
@@ -97,9 +102,14 @@ extension Entity {
     
     public static var idType: Schema.Field.KeyType {
         return database?.driver.idType ?? .int
+    }
 
     public static var idKey: String {
         return database?.driver.idKey ?? "id"
+    }
+
+    public static var foreignIdKey: String {
+        return "\(name)_\(idKey)"
     }
 
     // FIXME: Remove in 2.0. Also, make exists optional.

@@ -4,17 +4,17 @@ extension Tester {
     public func testPivotsAndRelations() throws {
         try Atom.prepare(database)
         try Compound.prepare(database)
-        try Pivot<Atom, Compound>.prepare(database)
+        try BasicPivot<Atom, Compound>.prepare(database)
         
         defer {
             try? Atom.revert(database)
             try? Compound.revert(database)
-            try? Pivot<Atom, Compound>.revert(database)
+            try? BasicPivot<Atom, Compound>.revert(database)
         }
 
         Atom.database = database
         Compound.database = database
-        Pivot<Atom, Compound>.database = database
+        BasicPivot<Atom, Compound>.database = database
 
         var hydrogen = Atom(id: nil, name: "Hydrogen", protons: 1, weight: 1.007)
         try hydrogen.save()
@@ -27,19 +27,14 @@ extension Tester {
 
         var water = Compound(id: nil, name: "Water")
         try water.save()
-        var hydrogenWater = Pivot<Atom, Compound>(hydrogen, water)
-        try hydrogenWater.save()
-        var oxygenWater = Pivot<Atom, Compound>(oxygen, water)
-        try oxygenWater.save()
+        try BasicPivot<Atom, Compound>.attach(hydrogen, water)
+        try BasicPivot<Atom, Compound>.attach(oxygen, water)
 
         var sugar = Compound(id: nil, name: "Sugar")
         try sugar.save()
-        var hydrogenSugar = Pivot<Atom, Compound>(hydrogen, sugar)
-        try hydrogenSugar.save()
-        var oxygenSugar = Pivot<Atom, Compound>(oxygen, sugar)
-        try oxygenSugar.save()
-        var carbonSugar = Pivot<Atom, Compound>(carbon, sugar)
-        try carbonSugar.save()
+        try BasicPivot<Atom, Compound>.attach(hydrogen, sugar)
+        try BasicPivot<Atom, Compound>.attach(oxygen, sugar)
+        try BasicPivot<Atom, Compound>.attach(carbon, sugar)
 
         let hydrogenCompounds = try hydrogen.compounds().all()
         try testEquals(hydrogenCompounds, [water, sugar])

@@ -1,7 +1,6 @@
 import Fluent
 
 public final class Atom: Entity {
-    
     public static var idKey: String {
         return "atom_id"
     }
@@ -37,7 +36,7 @@ public final class Atom: Entity {
         ])
     }
 
-    public func compounds() throws -> Siblings<Compound> {
+    public func compounds() throws -> Siblings<Atom, Compound> {
         return try siblings()
     }
 

@@ -1,11 +1,6 @@
 import Fluent
 
-struct Atom: Entity {
-    
-    static var idKey: String {
-        return "atom_id"
-    }
-    
+struct Atom: Entity {    
     var id: Node?
     var name: String
     var groupId: Node?
@@ -30,7 +25,7 @@ struct Atom: Entity {
         ])
     }
 
-    func compounds() throws -> Siblings<Compound> {
+    func compounds() throws -> Siblings<Atom, Compound> {
         return try siblings()
     }
 

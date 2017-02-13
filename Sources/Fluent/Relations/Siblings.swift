@@ -1,47 +1,52 @@
-public final class Siblings<T: Entity> {
-    fileprivate let _query: Query<T>
-    fileprivate let _left: Entity.Type
+public final class Siblings<
+    From: Entity, To: Entity
+> {
+    let fromId: Node
+    let toIdKey: String
+    let toForeignIdKey: String
 
-    public let localKey: String
-    public let foreignKey: String
-
-    public init<E: Entity>(entity: E, localKey: String?, foreignKey: String?) throws {
-        guard let ident = entity.id else {
+    public init(
+        from entity: From,
+        toIdKey: String = To.idKey,
+        toForeignIdKey: String = To.foreignIdKey
+    ) throws {
+        guard let id = entity.id else {
             throw RelationError.noIdentifier
         }
 
-        let query = try T.query()
-
-        let localKey = localKey ?? T.idKey 
-        let foreignKey = foreignKey ?? "\(T.name)_\(T.idKey)"
-
-        self.localKey = localKey
-        self.foreignKey = foreignKey
-        
-        self._left = E.self
-
-        let pivot = Pivot<E, T>.self
-
-        try query.union(
-            pivot,
-            localKey: localKey,
-            foreignKey: foreignKey
-        )
-
-        try query.filter(pivot, "\(E.name)_\(E.idKey)", ident)
-
-        _query = query
+        fromId = id
+        self.toIdKey = toIdKey
+        self.toForeignIdKey = toForeignIdKey
     }
 }
 
 extension Siblings: QueryRepresentable {
-    public func makeQuery() -> Query<T> {
-        return _query
+    public func makeQuery() throws -> Query<To> {
+        let query = try To.query()
+
+        let pivot = BasicPivot<From, To>.self
+
+        try query.union(
+            pivot,
+            localKey: toIdKey,
+            foreignKey: toForeignIdKey
+        )
+
+        try query.filter(pivot, From.foreignIdKey, fromId)
+
+        return query
     }
 }
 
 extension Entity {
-    public func siblings<T: Entity>(_ localKey: String? = nil, _ foreignKey: String? = nil) throws -> Siblings<T> {
-        return try Siblings(entity: self, localKey: localKey, foreignKey: foreignKey)
+    public func siblings<To: Entity>(
+        _ idKey: String = To.idKey,
+        _ foreignIdKey: String = To.foreignIdKey
+    ) throws -> Siblings<Self, To> {
+        return try Siblings(
+            from: self,
+            toIdKey: idKey,
+            toForeignIdKey: foreignIdKey
+        )
     }
 }

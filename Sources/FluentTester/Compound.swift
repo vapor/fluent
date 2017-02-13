@@ -22,7 +22,7 @@ public final class Compound: Entity {
         ])
     }
 
-    public func atoms() throws -> Siblings<Atom> {
+    public func atoms() throws -> Siblings<Compound, Atom> {
         return try siblings()
     }
 

@@ -14,7 +14,7 @@ extension Children: QueryRepresentable {
             throw RelationError.noIdentifier
         }
         
-        let foreignId = foreignKey ?? "\(T.name)_\(T.idKey)"
+        let foreignId = foreignKey ?? T.foreignIdKey
         return try T.query().filter(foreignId, ident)
     }
 }

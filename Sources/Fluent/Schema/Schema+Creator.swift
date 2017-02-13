@@ -148,24 +148,10 @@ extension Schema {
         
         public func pivotKeys(
             left: Entity.Type,
-            right: Entity.Type,
-            suffix: String
+            right: Entity.Type
         ) {
-            let leftKeyType = left.idType
-            let rightKeyType = right.idType
-            
-            let leftName = "\(left.name)\(suffix)"
-            let rightName = "\(right.name)\(suffix)"
-            
-            fields += Field(name: leftName,
-                            type: leftKeyType.fieldType,
-                            optional: false,
-                            unique: false)
-            
-            fields += Field(name: rightName,
-                            type: rightKeyType.fieldType,
-                            optional: false,
-                            unique: false)
+            id(for: left, name: left.foreignIdKey)
+            id(for: right, name: right.foreignIdKey)
         }
     }
 }
