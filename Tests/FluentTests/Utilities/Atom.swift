@@ -10,7 +10,7 @@ struct Atom: Entity {
     var name: String
     var groupId: Node?
     var exists: Bool = false
-
+    
     init(name: String, id: Node? = nil) {
         self.id = id
         self.name = name
@@ -58,7 +58,6 @@ struct Atom: Entity {
     }
 
     // MARK: Callbacks
-
     func willCreate() {
         print("Atom will create.")
     }
@@ -66,7 +65,7 @@ struct Atom: Entity {
     func didCreate() {
         print("Atom did create.")
     }
-
+    
     func willUpdate() {
         print("Atom will update.")
     }

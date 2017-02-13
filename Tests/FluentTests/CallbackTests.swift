@@ -8,6 +8,9 @@ class CallbacksTests: XCTestCase {
         var exists: Bool = false
         var wasModifiedOnCreate: Bool = false
         var wasModifiedOnUpdate: Bool = false
+        var shouldCreateModel: Bool = true
+        var shouldUpdateModel: Bool = true
+        var shouldDeleteModel: Bool = true
 
         static func prepare(_ database: Database) throws {}
         static func revert(_ database: Database) throws {}
@@ -26,6 +29,18 @@ class CallbacksTests: XCTestCase {
             return .null
         }
         
+        func shouldCreate() -> Bool {
+            return shouldCreateModel
+        }
+        
+        func shouldUpdate() -> Bool {
+            return shouldUpdateModel
+        }
+        
+        func shouldDelete() -> Bool {
+            return shouldDeleteModel
+        }
+        
         func willCreate() {
             wasModifiedOnCreate = true
         }
@@ -37,7 +52,10 @@ class CallbacksTests: XCTestCase {
 
     static let allTests = [
         ("testCreateCallbacksCanMutateProperties", testCreateCallbacksCanMutateProperties),
-        ("testUpdateCallbacksCanMutateProperties", testUpdateCallbacksCanMutateProperties)
+        ("testUpdateCallbacksCanMutateProperties", testUpdateCallbacksCanMutateProperties),
+        ("testCreateCheck", testCreateCheck),
+        ("testUpdateCheck", testUpdateCheck),
+        ("testDeleteCheck", testDeleteCheck),
     ]
 
     override func setUp() {
@@ -65,5 +83,42 @@ class CallbacksTests: XCTestCase {
         // Save the object once more to trigger the update callback
         try? result.save()
         XCTAssertTrue(result.wasModifiedOnUpdate, "Result should have been modified by now")
+    }
+    
+    func testCreateCheck () {
+        var result = DummyModel()
+        result.shouldCreateModel = false
+        try? result.save()
+        XCTAssertFalse(result.exists, "The model should not have been created")
+        
+        result.shouldCreateModel = true
+        try? result.save()
+        XCTAssertTrue(result.exists, "The model should have been created")
+    }
+    
+    func testUpdateCheck() {
+        var result = DummyModel()
+        try? result.save() //Creates the object
+        
+        result.shouldUpdateModel = false
+        try? result.save()
+        XCTAssertFalse(result.wasModifiedOnUpdate, "Result should not have been modified yet")
+
+        result.shouldUpdateModel = true
+        try? result.save()
+        XCTAssertTrue(result.wasModifiedOnUpdate, "Result should have been modified now")
+    }
+    
+    func testDeleteCheck() {
+        var result = DummyModel()
+        try? result.save() //Creates the object
+        
+        result.shouldDeleteModel = false
+        try? result.delete()
+        XCTAssertTrue(result.exists, "Result should still exist.")
+        
+        result.shouldDeleteModel = true
+        try? result.delete()
+        XCTAssertFalse(result.exists, "Result should not exist by now.")
     }
 }
