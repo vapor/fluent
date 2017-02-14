@@ -1,8 +1,6 @@
 extension Schema {
-    /**
-        Various types of fields
-        that can be used in a Schema.
-    */
+    /// Various types of fields
+    /// that can be used in a Schema.
     public struct Field {
         public var name: String
         public var type: DataType

@@ -1,36 +1,38 @@
-public final class Parent<T: Entity> {
-    public var child: Entity
-    public var parentId: Node
-    public var foreignKey: String?
+/// Represents a one-to-many relationship
+/// from a child entity to its parent.
+/// ex: child entities have a "parent_id"
+public final class Parent<
+    Child: Relatable, Parent: Entity
+> {
+    public let child: Child
+    public let parentId: Node
 
     public func get() throws -> T? {
         return try first()
     }
 
-    public init(child: Entity, parentId: Node, foreignKey: String?) {
+    public init(
+        child: Child,
+        parentId: Node,
+        parentType: Parent.Type = Parent.self
+    ) {
         self.child = child
         self.parentId = parentId
-        self.foreignKey = foreignKey
     }
 }
 
 extension Parent: QueryRepresentable {
-    public func makeQuery() throws -> Query<T> {
-        let query = try T.query()
-        return try query.filter(foreignKey ?? T.idKey, parentId)
+    public func makeQuery() throws -> Query<Parent> {
+        let query = try Parent.query()
+        return try query.filter(Parent.idKey, parentId)
     }
 }
 
 extension Entity {
-    public func parent<T: Entity>(
-        _ foreignId: Node?,
-        _ foreignKey: String? = nil,
-        _ parentType: T.Type = T.self
-    ) throws -> Parent<T> {
-        guard let ident = foreignId else {
-            throw RelationError.noIdentifier
-        }
-
-        return Parent(child: self, parentId: ident, foreignKey: foreignKey)
+    public func parent<P: Entity>(
+        id parentId: Node,
+        type parentType: P.Type = P.self
+    ) throws -> Parent<Self, P> {
+        return Parent(child: self, parentId: parentId)
     }
 }

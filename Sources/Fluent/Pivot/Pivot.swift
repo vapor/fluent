@@ -1,11 +1,14 @@
+/// A basic Pivot using two entities:
+/// left and right.
+/// The pivot itself conforms to entity
+/// and can be used like any other Fluent model
+/// in preparations, querying, etc.
 public final class Pivot<
-    L: Entity,
-    R: Entity
+    L: Relatable,
+    R: Relatable
 >: PivotProtocol, Entity {
     public typealias Left = L
     public typealias Right = R
-
-    public var exists = false
 
     public static var entity: String {
         if Left.name < Right.name {
@@ -22,6 +25,7 @@ public final class Pivot<
     public var id: Node?
     public var leftId: Node?
     public var rightId: Node?
+    public var exists = false
 
     public init(_ left: Entity, _ right: Entity) {
         leftId = left.id

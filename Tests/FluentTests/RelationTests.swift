@@ -69,7 +69,7 @@ class RelationTests: XCTestCase {
         Nucleus.database = database
 
         do {
-            let query = try hydrogen.children("nookleus_id", Nucleus.self).makeQuery()
+            let query = try hydrogen.children(Nucleus.self).makeQuery()
             let (sql, _) = GeneralSQLSerializer(sql: query.sql).serialize()
             print(sql)
         } catch {

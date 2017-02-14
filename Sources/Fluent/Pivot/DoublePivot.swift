@@ -1,8 +1,14 @@
 /// Double pivots
-///
 /// A pivot in which either the 
 /// left or right Entity is another pivot
-extension PivotProtocol where Left: PivotProtocol, Self: Entity {
+extension PivotProtocol
+    where
+        Left: PivotProtocol & Entity,
+        Self: Entity,
+        Left.Left: Entity,
+        Left.Right: Entity,
+        Right: Entity
+{
     /// Returns true if the three entities
     /// are related by the pivot.
     public static func related(
@@ -24,7 +30,14 @@ extension PivotProtocol where Left: PivotProtocol, Self: Entity {
     }
 }
 
-extension PivotProtocol where Right: PivotProtocol, Self: Entity {
+extension PivotProtocol
+    where
+        Right: PivotProtocol & Entity,
+        Self: Entity,
+        Left: Entity,
+        Right.Left: Entity,
+        Right.Right: Entity
+{
     /// Returns true if the three entities
     /// are related by the pivot.
     public static func related(
@@ -54,15 +67,15 @@ private func assertIdsExist(
     _ right: Entity
 ) throws -> (Node, Node, Node) {
     guard let leftId = left.id else {
-        throw PivotError.leftIdRequired
+        throw PivotError.idRequired(left)
     }
 
     guard let middleId = middle.id else {
-        throw PivotError.middleIdRequired
+        throw PivotError.idRequired(middle)
     }
 
     guard let rightId = right.id else {
-        throw PivotError.rightIdRequired
+        throw PivotError.idRequired(right)
     }
     
     return (leftId, middleId, rightId)

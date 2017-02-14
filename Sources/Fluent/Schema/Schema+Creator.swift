@@ -10,14 +10,14 @@ extension Schema {
             fields = []
         }
 
-        public func id<E: Entity>(for entityType: E.Type) {
+        public func id<E: Relatable>(for entityType: E.Type) {
             fields += Field(
                 name: E.idKey,
                 type: .id(type: E.idType)
             )
         }
 
-        public func foreignId<E: Entity>(for entityType: E.Type) {
+        public func foreignId<E: Relatable>(for entityType: E.Type) {
             fields += Field(
                 name: E.foreignIdKey,
                 type: .id(type: E.idType)

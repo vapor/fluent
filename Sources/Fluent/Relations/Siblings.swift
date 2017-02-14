@@ -1,27 +1,21 @@
-/// Represents a many to many relationship
+/// Represents a many-to-many relationship
 /// through a Pivot table from the Local 
 /// entity to the Foreign entity.
 public final class Siblings<
-    Local: Entity, Foreign: Entity
+    Local: Relatable, Foreign: Entity
 > {
-    /// The id of the Local entity.
-    ///
     /// This will be used to filter the 
     /// collection of foreign entities related
     /// to the local entity type.
-    let id: Node
+    let localId: Node
 
     /// Create a new Siblings relationsip using 
     /// a Local and Foreign entity.
     public init(
-        _ entity: Local,
-        _ foreign: Foreign.Type = Foreign.self
+        localId: Node,
+        foreign: Foreign.Type = Foreign.self
     ) throws {
-        guard let id = entity.id else {
-            throw RelationError.noIdentifier
-        }
-
-        self.id = id
+        self.localId = localId
     }
 }
 
@@ -33,9 +27,15 @@ extension Siblings: QueryRepresentable {
 
         let pivot = Pivot<Local, Foreign>.self
         try query.join(pivot)
-        try query.filter(pivot, Local.foreignIdKey, id)
+        try query.filter(pivot, Local.foreignIdKey, localId)
 
         return query
+    }
+}
+
+extension Siblings {
+    public func pivot() -> Pivot<Local, Foreign>.Type {
+        return Pivot<Local, Foreign>.self
     }
 }
 
@@ -45,6 +45,9 @@ extension Entity {
     public func siblings<Foreign: Entity>(
         _ foreign: Foreign.Type = Foreign.self
     ) throws -> Siblings<Self, Foreign> {
-        return try Siblings(self)
+        guard let localId = id else {
+            throw EntityError.idRequired(self)
+        }
+        return try Siblings(localId: localId)
     }
 }

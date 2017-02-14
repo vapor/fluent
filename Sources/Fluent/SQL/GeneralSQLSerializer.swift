@@ -1,8 +1,6 @@
-/**
-    A generic SQL serializer.
-    This class can be subclassed by
-    specific SQL serializers.
-*/
+/// A generic SQL serializer.
+/// This class can be subclassed by
+/// specific SQL serializers.
 open class GeneralSQLSerializer: SQLSerializer {
     public let sql: SQL
 

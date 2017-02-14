@@ -1,8 +1,6 @@
-/**
-    Represents a SQL query that 
-    can act as an intermediary between
-    Fluent data structures and serializers.
-*/
+/// Represents a SQL query that
+/// can act as an intermediary between
+/// Fluent data structures and serializers.
 public enum SQL {
     public enum TableAction {
         case create(columns: [Schema.Field])
