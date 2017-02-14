@@ -13,7 +13,7 @@ import Fluent
 struct StringIdentifiedThing: Entity {
     static var idKey = "#id"
     var id: Node? = nil
-    var exists: Bool = false
+    let storage = Storage()
     
     init(node: Node, in context: Context) throws {
         id = try node.extract("id")

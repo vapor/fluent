@@ -76,6 +76,8 @@ class ModelTests: XCTestCase {
 
     func testUUIDGeneration() throws {
         final class UUIDModel: Entity {
+            let storage = Storage()
+            
             var id: Node?
             init() {}
             init(node: Node, in context: Context) throws {

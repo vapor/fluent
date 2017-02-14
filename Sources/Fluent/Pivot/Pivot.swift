@@ -25,7 +25,7 @@ public final class Pivot<
     public var id: Node?
     public var leftId: Node
     public var rightId: Node
-    public var exists = false
+    public let storage = Storage()
 
     public init(_ left: Left, _ right: Right) throws {
         guard left.exists else {

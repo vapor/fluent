@@ -1,5 +1,5 @@
 import XCTest
-import Fluent
+@testable import Fluent
 
 class PivotTests: XCTestCase {
     var lqd: LastQueryDriver!
@@ -16,7 +16,7 @@ class PivotTests: XCTestCase {
         atom.id = 42
         atom.exists = true
 
-        let compound = Compound(name: "Water")
+        var compound = Compound(name: "Water")
         compound.id = 1337
         compound.exists = true
 

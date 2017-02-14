@@ -5,7 +5,7 @@ class CallbacksTests: XCTestCase {
 
     /// Dummy Model implementation for testing.
     final class DummyModel: Entity {
-        var exists: Bool = false
+        let storage = Storage()
         var wasModifiedOnCreate: Bool = false
         var wasModifiedOnUpdate: Bool = false
 

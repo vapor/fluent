@@ -1,9 +1,37 @@
+public final class Storage {
+    public init() {}
+
+    // doing id next, there's some other issues cuz that one needs to be publicly settable
+    //    private var id: Node?
+    fileprivate var exists: Bool = false
+}
+
+public protocol Storable {
+    var storage: Storage { get }
+}
+
+extension Storable {
+    /// Whether or not entity was retrieved from database.
+    ///
+    /// This value shouldn't be interacted w/ external users
+    /// w/o explicit knowledge.
+    ///
+    /// General implementation should just be `let storage = Storage()`
+    public internal(set) var exists: Bool {
+        get {
+            return storage.exists
+        }
+        set {
+            storage.exists = newValue
+        }
+    }
+}
+
 /// Represents an entity that can be
 /// stored and retrieved from the `Database`.
-public protocol Entity: Preparation, NodeConvertible {
+public protocol Entity: Preparation, NodeConvertible, Storable {
     // DELETE ME
     var id: Node? { get set }
-    var exists: Bool { get set }
 
     /// The plural relational name of this model.
     /// Used as the collection or table name.
@@ -95,15 +123,6 @@ extension Entity {
             throw EntityError.noDatabase(self)
         }
         return Query(db)
-    }
-}
-
-// MARK: Deprecated
-extension Entity {
-    public var exists: Bool {
-        // TODO: Implement me
-        get { return false }
-        set { }
     }
 }
 

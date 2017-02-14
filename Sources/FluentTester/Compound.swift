@@ -3,7 +3,7 @@ import Fluent
 public final class Compound: Entity {
     public var id: Node?
     public var name: String
-    public var exists = false
+    public let storage = Storage()
 
     public init(id: Node?, name: String) {
         self.id = id

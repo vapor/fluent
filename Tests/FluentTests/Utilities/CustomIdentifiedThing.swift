@@ -12,7 +12,7 @@ import Fluent
 struct CustomIdentifiedThing: Entity {
     
     var id: Node? = nil
-    var exists: Bool = false
+    let storage = Storage()
     var idKey = "#id"
     
     init(node: Node, in context: Context) throws {

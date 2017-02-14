@@ -9,7 +9,7 @@ final class Student: Entity {
     var donor: Bool
     var meta: Node
     
-    var exists = false
+    let storage = Storage()
     
     init(name: String, age: Int, ssn: String, donor: Bool, meta: Node) {
         self.name = name

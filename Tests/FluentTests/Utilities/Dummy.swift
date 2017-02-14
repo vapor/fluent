@@ -1,7 +1,7 @@
 import Fluent
 
 final class DummyModel: Entity {
-    var exists: Bool = false
+    let storage = Storage()
     static var entity: String {
         return "dummy_models"
     }
