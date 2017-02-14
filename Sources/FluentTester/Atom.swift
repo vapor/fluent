@@ -1,8 +1,6 @@
 import Fluent
 
 public final class Atom: Entity {
-    public var id: Node?
-
     public var name: String
     public var protons: Int
     public var weight: Double
@@ -10,17 +8,19 @@ public final class Atom: Entity {
     public let storage = Storage()
 
     public init(id: Node?, name: String, protons: Int, weight: Double) {
-        self.id = id
         self.name = name
         self.protons = protons
         self.weight = weight
+
+        self.set(id: id)
     }
 
     public init(node: Node, in context: Context) throws {
-        id = try node.extract(type(of: self).idKey)
         name = try node.extract("name")
         protons = try node.extract("protons")
         weight = try node.extract("weight")
+
+        set(id: node)
     }
 
     public func makeNode(context: Context) throws -> Node {

@@ -78,7 +78,6 @@ class ModelTests: XCTestCase {
         final class UUIDModel: Entity {
             let storage = Storage()
             
-            var id: Node?
             init() {}
             init(node: Node, in context: Context) throws {
                 id = try node.extract("id")

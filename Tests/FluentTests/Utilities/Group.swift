@@ -1,7 +1,6 @@
 import Fluent
 
 final class Group: Entity {
-    var id: Node?
     let storage = Storage()
     init(node: Node, in context: Context) throws {}
 

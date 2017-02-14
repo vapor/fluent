@@ -14,20 +14,19 @@ final class User: Entity {
         try database.delete(entity)
     }
 
-    var id: Fluent.Node?
     var name: String
     var email: String
 
     init(id: Node?, name: String, email: String) {
-        self.id = id
         self.name = name
         self.email = email
+        self.id = id
     }
 
     init(node: Node, in context: Context) throws {
-        id = try node.extract(type(of: self).idKey)
         name = try node.extract("name")
         email = try node.extract("email")
+        id = try node.extract(type(of: self).idKey)
     }
 
     func makeNode(context: Context = EmptyNode) throws -> Node {

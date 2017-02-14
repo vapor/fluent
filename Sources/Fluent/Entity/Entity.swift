@@ -1,13 +1,11 @@
 public final class Storage {
     public init() {}
 
-    // doing id next, there's some other issues cuz that one needs to be publicly settable
-    //    private var id: Node?
     fileprivate var exists: Bool = false
     fileprivate var id: Node? = nil
 }
 
-public protocol Storable {
+public protocol Storable: class {
     var storage: Storage { get }
 }
 
@@ -39,15 +37,15 @@ extension Storable {
     }
 }
 
-extension Entity {
-    public func set(id node: Node?) {
-        self.storage.id = node?[Self.idKey] ?? node
+extension Node {
+    public func extractId<E: Entity>(for type: E.Type) -> Node? {
+        return self[E.idKey]
     }
 }
 
 /// Represents an entity that can be
 /// stored and retrieved from the `Database`.
-public protocol Entity: Preparation, NodeConvertible, Storable {
+public protocol Entity: class, Preparation, NodeConvertible, Storable {
 
     /// The plural relational name of this model.
     /// Used as the collection or table name.
@@ -112,8 +110,8 @@ extension Entity {
 extension Entity {
     /// Persists the entity into the
     /// data store and sets the `id` property.
-    public mutating func save() throws {
-        try Self.query().save(&self)
+    public func save() throws {
+        try Self.query().save(self)
     }
 
     /// Deletes the entity from the data

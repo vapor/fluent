@@ -137,15 +137,14 @@ class PreparationTests: XCTestCase {
 // MARK: Utilities
 
 final class TestModel: Entity {
-    var id: Node?
     var name: String
     var age: Int
     let storage = Storage()
 
     init(node: Node, in context: Context) throws {
-        id = try node.extract("id")
         name = try node.extract("name")
         age = try node.extract("age")
+        id = try node.extract("id")
     }
 
     func makeNode(context: Context = EmptyNode) throws -> Node {

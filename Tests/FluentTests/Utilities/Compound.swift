@@ -1,7 +1,6 @@
 import Fluent
 
 final class Compound: Entity {
-    var id: Node?
     var name: String
     let storage = Storage()
 
@@ -10,8 +9,8 @@ final class Compound: Entity {
     }
 
     init(node: Node, in context: Context) throws {
-        id = try node.extract(type(of: self).idKey)
         name = try node.extract("name")
+        id = try node.extract(type(of: self).idKey)
     }
 
     func makeNode(context: Context = EmptyNode) throws -> Node {

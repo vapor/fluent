@@ -33,9 +33,9 @@ class MemoryTests: XCTestCase {
         
         User.database = database
 
-        var user = User(id: nil, name: "Vapor", email: "test@email.com")
+        let user = User(id: nil, name: "Vapor", email: "test@email.com")
         let query = Query<User>(database)
-        try query.save(&user)
+        try query.save(user)
         
         XCTAssertEqual(user.id?.int, 1)
         XCTAssertEqual(driver.store["users"]?.data.count, 1)
@@ -46,9 +46,9 @@ class MemoryTests: XCTestCase {
         
         User.database = database
 
-        var new = User(id: nil, name: "Vapor", email: "test@email.com")
+        let new = User(id: nil, name: "Vapor", email: "test@email.com")
         let store = Query<User>(database)
-        try store.save(&new)
+        try store.save(new)
 
         let fetched = try Query<User>(database).filter("name", "Vapor").first()
         XCTAssertEqual(new.id, fetched?.id)
@@ -61,9 +61,9 @@ class MemoryTests: XCTestCase {
         User.database = database
 
         for _ in 0 ..< 100 {
-            var new = User(id: nil, name: "Vapor", email: "test@email.com")
+            let new = User(id: nil, name: "Vapor", email: "test@email.com")
             let store = Query<User>(database)
-            try store.save(&new)
+            try store.save(new)
         }
 
         XCTAssertEqual(driver.store["users"]?.data.count, 100)
@@ -76,9 +76,9 @@ class MemoryTests: XCTestCase {
         
         CustomIdKey.database = database
         
-        var new = CustomIdKey(id: nil, label: "Test")
+        let new = CustomIdKey(id: nil, label: "Test")
         let store = Query<CustomIdKey>(database)
-        try store.save(&new)
+        try store.save(new)
         
         XCTAssertEqual(driver.store["customidkeys"]?.data.count, 1)
         try store.delete(new)
@@ -91,8 +91,8 @@ class MemoryTests: XCTestCase {
         User.database = database
 
         for _ in 0 ..< 100 {
-            var new = User(id: nil, name: "Vapor", email: "test@email.com")
-            try Query<User>(database).save(&new)
+            let new = User(id: nil, name: "Vapor", email: "test@email.com")
+            try Query<User>(database).save(new)
         }
 
         let results = try Query<User>(database).filter("name", "Vapor").all()
@@ -113,8 +113,8 @@ class MemoryTests: XCTestCase {
         CustomIdKey.database = database
         
         for _ in 0 ..< 100 {
-            var new = CustomIdKey(id: nil, label: "Vapor")
-            try Query<CustomIdKey>(database).save(&new)
+            let new = CustomIdKey(id: nil, label: "Vapor")
+            try Query<CustomIdKey>(database).save(new)
         }
         
         let results = try Query<CustomIdKey>(database).filter("label", "Vapor").all()
@@ -137,7 +137,7 @@ class MemoryTests: XCTestCase {
         var new: CustomIdKey = CustomIdKey(id: nil, label: "Vapor")
         for _ in 0 ..< 100 {
             new = CustomIdKey(id: nil, label: "Vapor")
-            try Query<CustomIdKey>(database).save(&new)
+            try Query<CustomIdKey>(database).save(new)
         }
         
         let results = try Query<CustomIdKey>(database).filter("label", "Vapor").all()
@@ -160,8 +160,8 @@ class MemoryTests: XCTestCase {
 
         for _ in 0 ..< 100 {
             let fruit = fruits.random
-            var new = User(id: nil, name: fruit, email: "\(fruit)@email.com")
-            try Query<User>(database).save(&new)
+            let new = User(id: nil, name: fruit, email: "\(fruit)@email.com")
+            try Query<User>(database).save(new)
         }
 
         let sorted = try Query<User>(database).sort("name", .ascending).all()
@@ -175,11 +175,11 @@ class MemoryTests: XCTestCase {
     func testCount() throws {
         let (_, database) = makeTestModels()
         
-        var new1 = User(id: nil, name: "Vapor", email: "test1@email.com")
-        var new2 = User(id: nil, name: "Vapor", email: "test2@email.com")
+        let new1 = User(id: nil, name: "Vapor", email: "test1@email.com")
+        let new2 = User(id: nil, name: "Vapor", email: "test2@email.com")
         let store = Query<User>(database)
-        try store.save(&new1)
-        try store.save(&new2)
+        try store.save(new1)
+        try store.save(new2)
 
         let count1 = try Query<User>(database).filter("name", "Vapor").count()
         XCTAssertEqual(count1, 2)
@@ -194,11 +194,11 @@ class MemoryTests: XCTestCase {
     func testFetchWithLimit() throws {
         let (driver, database) = makeTestModels()
         
-        var new = User(id: nil, name: "Vapor", email: "test@email.com")
-        var new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
+        let new = User(id: nil, name: "Vapor", email: "test@email.com")
+        let new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
         let store = Query<User>(database)
-        try store.save(&new)
-        try store.save(&new2)
+        try store.save(new)
+        try store.save(new2)
         
         let fetched = try Query<User>(database).limit(1).all()
         XCTAssertEqual(fetched.count, 1)
@@ -209,13 +209,13 @@ class MemoryTests: XCTestCase {
     func testFetchWithLimitAndOffset() throws {
         let (driver, database) = makeTestModels()
         
-        var new = User(id: nil, name: "Vapor", email: "test@email.com")
-        var new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
-        var new3 = User(id: nil, name: "Vapor3", email: "test3@email.com")
+        let new = User(id: nil, name: "Vapor", email: "test@email.com")
+        let new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
+        let new3 = User(id: nil, name: "Vapor3", email: "test3@email.com")
         let store = Query<User>(database)
-        try store.save(&new)
-        try store.save(&new2)
-        try store.save(&new3)
+        try store.save(new)
+        try store.save(new2)
+        try store.save(new3)
         
         let limit = Limit(count: 1, offset: 1)
         let query = Query<User>(database)
@@ -230,11 +230,11 @@ class MemoryTests: XCTestCase {
     func testFetchWithLimitWithSizeGreaterThatContents() throws {
         let (driver, database) = makeTestModels()
         
-        var new = User(id: nil, name: "Vapor", email: "test@email.com")
-        var new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
+        let new = User(id: nil, name: "Vapor", email: "test@email.com")
+        let new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
         let store = Query<User>(database)
-        try store.save(&new)
-        try store.save(&new2)
+        try store.save(new)
+        try store.save(new2)
         
         let fetched = try Query<User>(database).limit(10).all()
         XCTAssertEqual(fetched.count, 2)
@@ -244,13 +244,13 @@ class MemoryTests: XCTestCase {
     func testFetchWithLimitWithOffsetGreaterThanContents() throws {
         let (driver, database) = makeTestModels()
         
-        var new = User(id: nil, name: "Vapor", email: "test@email.com")
-        var new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
-        var new3 = User(id: nil, name: "Vapor3", email: "test3@email.com")
+        let new = User(id: nil, name: "Vapor", email: "test@email.com")
+        let new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
+        let new3 = User(id: nil, name: "Vapor3", email: "test3@email.com")
         let store = Query<User>(database)
-        try store.save(&new)
-        try store.save(&new2)
-        try store.save(&new3)
+        try store.save(new)
+        try store.save(new2)
+        try store.save(new3)
         
         let limit = Limit(count: 1, offset: 5)
         let query = Query<User>(database)
@@ -264,13 +264,13 @@ class MemoryTests: XCTestCase {
     func testFetchWithLimitWithOffsetAndSizeGreaterThanContents() throws {
         let (driver, database) = makeTestModels()
         
-        var new = User(id: nil, name: "Vapor", email: "test@email.com")
-        var new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
-        var new3 = User(id: nil, name: "Vapor3", email: "test3@email.com")
+        let new = User(id: nil, name: "Vapor", email: "test@email.com")
+        let new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
+        let new3 = User(id: nil, name: "Vapor3", email: "test3@email.com")
         let store = Query<User>(database)
-        try store.save(&new)
-        try store.save(&new2)
-        try store.save(&new3)
+        try store.save(new)
+        try store.save(new2)
+        try store.save(new3)
         
         let limit = Limit(count: 10, offset: 5)
         let query = Query<User>(database)
@@ -284,26 +284,26 @@ class MemoryTests: XCTestCase {
     func testFetchWithLimitWithOffsetInMiddleAndCountGreaterThanRemainingContents() throws {
         let (driver, database) = makeTestModels()
         
-        var new = User(id: nil, name: "Vapor", email: "test@email.com")
-        var new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
-        var new3 = User(id: nil, name: "Vapor3", email: "test3@email.com")
-        var new4 = User(id: nil, name: "Vapor4", email: "test4@email.com")
-        var new5 = User(id: nil, name: "Vapor5", email: "test5@email.com")
-        var new6 = User(id: nil, name: "Vapor6", email: "test6@email.com")
-        var new7 = User(id: nil, name: "Vapor7", email: "test7@email.com")
-        var new8 = User(id: nil, name: "Vapor8", email: "test8@email.com")
-        var new9 = User(id: nil, name: "Vapor9", email: "test9@email.com")
+        let new = User(id: nil, name: "Vapor", email: "test@email.com")
+        let new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
+        let new3 = User(id: nil, name: "Vapor3", email: "test3@email.com")
+        let new4 = User(id: nil, name: "Vapor4", email: "test4@email.com")
+        let new5 = User(id: nil, name: "Vapor5", email: "test5@email.com")
+        let new6 = User(id: nil, name: "Vapor6", email: "test6@email.com")
+        let new7 = User(id: nil, name: "Vapor7", email: "test7@email.com")
+        let new8 = User(id: nil, name: "Vapor8", email: "test8@email.com")
+        let new9 = User(id: nil, name: "Vapor9", email: "test9@email.com")
         
         let store = Query<User>(database)
-        try store.save(&new)
-        try store.save(&new2)
-        try store.save(&new3)
-        try store.save(&new4)
-        try store.save(&new5)
-        try store.save(&new6)
-        try store.save(&new7)
-        try store.save(&new8)
-        try store.save(&new9)
+        try store.save(new)
+        try store.save(new2)
+        try store.save(new3)
+        try store.save(new4)
+        try store.save(new5)
+        try store.save(new6)
+        try store.save(new7)
+        try store.save(new8)
+        try store.save(new9)
         
         let limit = Limit(count: 10, offset: 5)
         let query = Query<User>(database)
@@ -317,14 +317,14 @@ class MemoryTests: XCTestCase {
     func testFetchDoesNotThrowWithDataOf3LimitOffset2LimitCount2_BUG() throws {
         let (driver, database) = makeTestModels()
         
-        var new = User(id: nil, name: "Vapor", email: "test@email.com")
-        var new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
-        var new3 = User(id: nil, name: "Vapor3", email: "test3@email.com")
+        let new = User(id: nil, name: "Vapor", email: "test@email.com")
+        let new2 = User(id: nil, name: "Vapor2", email: "test2@email.com")
+        let new3 = User(id: nil, name: "Vapor3", email: "test3@email.com")
         
         let store = Query<User>(database)
-        try store.save(&new)
-        try store.save(&new2)
-        try store.save(&new3)
+        try store.save(new)
+        try store.save(new2)
+        try store.save(new3)
         
         let limit = Limit(count: 2, offset: 2)
         let query = Query<User>(database)

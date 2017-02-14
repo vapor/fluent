@@ -9,8 +9,6 @@ final class DummyModel: Entity {
     static func prepare(_ database: Database) throws {}
     static func revert(_ database: Database) throws {}
 
-    var id: Node?
-
     init(node: Node, in context: Context) throws {
 
     }

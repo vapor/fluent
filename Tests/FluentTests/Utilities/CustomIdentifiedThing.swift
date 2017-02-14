@@ -9,9 +9,7 @@
 import Foundation
 import Fluent
 
-struct CustomIdentifiedThing: Entity {
-    
-    var id: Node? = nil
+final class CustomIdentifiedThing: Entity {
     let storage = Storage()
     var idKey = "#id"
     

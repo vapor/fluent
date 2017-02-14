@@ -22,7 +22,6 @@ public final class Pivot<
         return entity
     }
 
-    public var id: Node?
     public var leftId: Node
     public var rightId: Node
     public let storage = Storage()
@@ -49,10 +48,10 @@ public final class Pivot<
     }
 
     public init(node: Node, in context: Context) throws {
-        id = try node.extract(type(of: self).idKey)
-
         leftId = try node.extract(Left.foreignIdKey)
         rightId = try node.extract(Right.foreignIdKey)
+
+        id = try node.extract(type(of: self).idKey)
     }
 
     public func makeNode(context: Context) throws -> Node {

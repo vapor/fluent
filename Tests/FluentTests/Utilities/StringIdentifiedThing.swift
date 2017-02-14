@@ -10,9 +10,8 @@ import Foundation
 
 import Fluent
 
-struct StringIdentifiedThing: Entity {
+final class StringIdentifiedThing: Entity {
     static var idKey = "#id"
-    var id: Node? = nil
     let storage = Storage()
     
     init(node: Node, in context: Context) throws {

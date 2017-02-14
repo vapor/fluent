@@ -1,8 +1,6 @@
 final class Migration: Entity {
     static var entity = "fluent"
     let storage = Storage()
-
-    var id: Node?
     var name: String
 
     init(name: String) {
@@ -10,8 +8,8 @@ final class Migration: Entity {
     }
 
     init(node: Node, in context: Context) throws {
-        id = try node.extract("id")
         name = try node.extract("name")
+        id = try node.extract("id")
     }
 
     func makeNode(context: Context = EmptyNode) throws -> Node {

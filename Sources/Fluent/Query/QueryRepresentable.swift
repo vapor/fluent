@@ -69,7 +69,7 @@ extension QueryRepresentable {
 
     /// Attempts to save a supplied entity
     /// and updates its identifier if successful.
-    public func save(_ model: inout T) throws {
+    public func save(_ model: T) throws {
         let query = try makeQuery()
 
         if let _ = model.id, model.exists {
