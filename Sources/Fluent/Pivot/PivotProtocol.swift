@@ -19,7 +19,7 @@ extension PivotProtocol
 {
     /// See PivotProtocol.related
     public static func related(_ left: Left, _ right: Right) throws -> Bool {
-        let (leftId, rightId) = try assertIdsExist(left, right)
+        let (leftId, rightId) = try assertSaved(left, right)
 
         let results = try query()
             .filter(type(of: left).foreignIdKey, leftId)
@@ -31,7 +31,7 @@ extension PivotProtocol
 
     /// See PivotProtocol.attach
     public static func attach(_ left: Left, _ right: Right) throws {
-        _ = try assertIdsExist(left, right)
+        _ = try assertSaved(left, right)
 
         var pivot = Pivot<Left, Right>(left, right)
         try pivot.save()
@@ -39,7 +39,7 @@ extension PivotProtocol
 
     /// See PivotProtocol.detach
     public static func detach(_ left: Left, _ right: Right) throws {
-        let (leftId, rightId) = try assertIdsExist(left, right)
+        let (leftId, rightId) = try assertSaved(left, right)
 
         try query()
             .filter(Left.foreignIdKey, leftId)
@@ -50,9 +50,17 @@ extension PivotProtocol
 
 // MARK: Convenience
 
-private func assertIdsExist(_ left: Entity, _ right: Entity) throws -> (Node, Node) {
+private func assertSaved(_ left: Entity, _ right: Entity) throws -> (Node, Node) {
+    guard left.exists else {
+        throw PivotError.existRequired(left)
+    }
+
     guard let leftId = left.id else {
         throw PivotError.idRequired(left)
+    }
+
+    guard right.exists else {
+        throw PivotError.existRequired(right)
     }
 
     guard let rightId = right.id else {

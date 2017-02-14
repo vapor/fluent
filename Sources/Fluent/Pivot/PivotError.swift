@@ -3,6 +3,7 @@
 /// check the relation on pivots.
 public enum PivotError: Error {
     case idRequired(Entity)
+    case existRequired(Entity)
     case unspecified(Error)
 }
 
@@ -13,6 +14,8 @@ extension PivotError: CustomStringConvertible {
         switch self {
         case .idRequired(let entity):
             reason = "Identifier required for \(entity)"
+        case .existRequired(let entity):
+            reason = "Entity must exist in the database. Try saving the entity first \(entity)"
         case .unspecified(let error):
             reason = "\(error)"
         }
