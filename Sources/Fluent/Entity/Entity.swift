@@ -27,8 +27,8 @@ public protocol Entity: Preparation, NodeConvertible {
      */
     static var idKey: String { get }
 
-    /// The name of the column that corresponds
-    /// to this entity's key when referenced
+    /// The name of the column that points
+    /// to this entity's id when referenced
     /// from other tables or collections.
     static var foreignIdKey: String { get }
     
