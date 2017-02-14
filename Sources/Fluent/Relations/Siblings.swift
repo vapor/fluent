@@ -11,39 +11,17 @@ public final class Siblings<
     /// to the local entity type.
     let id: Node
 
-    /// Foreign entity key that is foreign
-    /// to the entity it resides on
-    ///
-    /// This id is a pointer to "Local" keys
-    ///
-    /// ex: "foo_id"
-    let foreignKey: String
-
-    /// Foreign entity key that is local
-    /// to the entity it resides on
-    ///
-    /// "Foreign" keys point to this id.
-    ///
-    /// ex: "id"
-    let localKey: String
-
     /// Create a new Siblings relationsip using 
     /// a Local and Foreign entity.
-    ///
-    /// See Siblings.localKey and Siblings.foreignKey
-    /// for more information about how to use them.
     public init(
         _ entity: Local,
-        foreignKey: String = Foreign.foreignIdKey,
-        localKey: String = Foreign.idKey
+        _ foreign: Foreign.Type = Foreign.self
     ) throws {
-        guard let ident = entity.id else {
+        guard let id = entity.id else {
             throw RelationError.noIdentifier
         }
 
-        id = ident
-        self.foreignKey = foreignKey
-        self.localKey = localKey
+        self.id = id
     }
 }
 
@@ -54,13 +32,7 @@ extension Siblings: QueryRepresentable {
         let query = try Foreign.query()
 
         let pivot = Pivot<Local, Foreign>.self
-
-        try query.join(
-            pivot,
-            localKey: foreignKey,
-            foreignKey: localKey
-        )
-
+        try query.join(pivot)
         try query.filter(pivot, Local.foreignIdKey, id)
 
         return query
@@ -71,13 +43,8 @@ extension Entity {
     /// Creates a Siblings relation using the current
     /// entity as the Local entity in the relation.
     public func siblings<Foreign: Entity>(
-        foreignKey: String = Foreign.foreignIdKey,
-        localKey: String = Foreign.idKey
+        _ foreign: Foreign.Type = Foreign.self
     ) throws -> Siblings<Self, Foreign> {
-        return try Siblings(
-            self,
-            foreignKey: foreignKey,
-            localKey: localKey
-        )
+        return try Siblings(self)
     }
 }

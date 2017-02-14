@@ -471,9 +471,9 @@ open class GeneralSQLSerializer: SQLSerializer {
         clause += "JOIN"
         clause += sql(join.foreign.entity)
         clause += "ON"
-        clause += "\(sql(join.local.entity)).\(sql(join.foreignKey))"
+        clause += "\(sql(join.local.entity)).\(sql(join.local.idKey))"
         clause += "="
-        clause += "\(sql(join.foreign.entity)).\(sql(join.localKey))"
+        clause += "\(sql(join.foreign.entity)).\(sql(join.local.foreignIdKey))"
 
         return sql(clause)
     }

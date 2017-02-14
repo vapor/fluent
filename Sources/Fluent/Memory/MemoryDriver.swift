@@ -39,7 +39,7 @@ public final class MemoryDriver: Driver {
         // into one group
         for l in local.data {
             for f in foreign.data {
-                if l[union.foreignKey] == f[union.localKey] {
+                if l[union.local.idKey] == f[union.local.foreignIdKey] {
                     var lf: [String: Node] = [:]
                     
                     if let of = f.nodeObject {

@@ -12,65 +12,34 @@
 public struct Join {
     /// Entity that will be accepting
     /// the joined data
-    let local: Entity.Type
+    public let local: Relatable.Type
 
     /// Entity that will be joining
     /// the local data
-    let foreign: Entity.Type
+    public let foreign: Relatable.Type
 
-    /// Foreign entity key that is local
-    /// to the entity it resides on
-    ///
-    /// "Foreign" keys point to this id.
-    ///
-    /// ex: "id"
-    let localKey: String
-
-    /// Foreign entity key that is foreign
-    /// to the entity it resides on
-    ///
-    /// This id is a pointer to "Local" keys
-    ///
-    /// ex: "foo_id"
-    let foreignKey: String
-
-    /// Create a new Join using a Local and Foreign
-    /// entity.
-    /// 
-    /// See Join.localKey and Join.foreignKey
-    /// for more information about how to use them.
-    init<Local: Entity, Foreign: Entity>(
-        local: Local.Type,
-        foreign: Foreign.Type,
-        localKey: String = Foreign.idKey,
-        foreignKey: String = Foreign.foreignIdKey
-    ) {
+    /// Create a new Join
+    public init(local: Relatable.Type, foreign: Relatable.Type) {
         self.local = local
         self.foreign = foreign
-        self.localKey = localKey
-        self.foreignKey = foreignKey
     }
 }
 
 extension QueryRepresentable {
     /// Create and add a Join to this Query.
-    ///
     /// See Join for more information.
     @discardableResult
-    public func join<Foreign: Entity>(
-        _ foreign: Foreign.Type,
-        localKey: String = Foreign.idKey,
-        foreignKey: String = Foreign.foreignIdKey
+    public func join(
+        _ foreign: Relatable.Type,
+        local: Relatable.Type = T.self
     ) throws -> Query<Self.T> {
         let query = try makeQuery()
 
         let join = Join(
-            local: T.self,
-            foreign: foreign,
-            localKey: localKey,
-            foreignKey: foreignKey
+            local: local,
+            foreign: foreign
         )
-
+        
         query.joins.append(join)
 
         return query

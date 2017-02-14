@@ -14,11 +14,7 @@ extension PivotProtocol where Left: PivotProtocol, Self: Entity {
 
         let result = try Left
             .query()
-            .join(
-                self,
-                localKey: Left.foreignIdKey,
-                foreignKey: Left.idKey
-            )
+            .join(self)
             .filter(Left.self, Left.Left.foreignIdKey, leftId)
             .filter(Left.self, Left.Right.foreignIdKey, middleId)
             .filter(self, Right.foreignIdKey, rightId)
@@ -37,14 +33,10 @@ extension PivotProtocol where Right: PivotProtocol, Self: Entity {
         right: Right.Right
     ) throws -> Bool {
         let (leftId, middleId, rightId) = try assertIdsExist(left, middle, right)
-
+        
         let result = try Right
             .query()
-            .join(
-                self,
-                localKey: Right.foreignIdKey,
-                foreignKey: Right.idKey
-            )
+            .join(self)
             .filter(self, Left.foreignIdKey, leftId)
             .filter(Right.self, Right.Left.foreignIdKey, middleId)
             .filter(Right.self, Right.Right.foreignIdKey, rightId)

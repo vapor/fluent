@@ -23,6 +23,7 @@ public protocol Relatable {
     /// The name of the column that points
     /// to this entity's id when referenced
     /// from other tables or collections.
+    /// ex: "foo_id".
     static var foreignIdKey: String { get }
 }
 
