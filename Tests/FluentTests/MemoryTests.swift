@@ -67,7 +67,7 @@ class MemoryTests: XCTestCase {
         }
 
         XCTAssertEqual(driver.store["users"]?.data.count, 100)
-        try Query<User>(database).filter("id", .greaterThan, 50).delete()
+        try Query<User>(database).filter(User.idKey, .greaterThan, 50).delete()
         XCTAssertEqual(driver.store["users"]?.data.count, 50)
     }
     

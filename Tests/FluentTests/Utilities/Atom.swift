@@ -15,12 +15,12 @@ final class Atom: Entity {
         name = try node.extract("name")
         groupId = try node.extract("group_id")
 
-        id = try node.extract("id")
+        id = try node.extract(idKey)
     }
 
     func makeNode(context: Context = EmptyNode) throws -> Node {
         return try Node(node: [
-            type(of: self).idKey: id,
+            idKey: id,
             "name": name,
             "group_id": groupId
         ])

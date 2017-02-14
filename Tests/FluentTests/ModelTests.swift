@@ -16,7 +16,7 @@ class ModelTests: XCTestCase {
 
     func testExamples() throws {
         Atom.database = db
-        var atom = Atom(name: "test", id: 5)
+        let atom = Atom(name: "test", id: 5)
 
         XCTAssertFalse(atom.exists, "Model shouldn't exist yet.")
 
@@ -37,11 +37,11 @@ class ModelTests: XCTestCase {
     
     func testStringIdentifiedThings() throws {
         StringIdentifiedThing.database = db
-        var thing = try! StringIdentifiedThing(node: ["id": "derp"], in: EmptyNode)
+        let thing = try! StringIdentifiedThing(node: ["#id": "derp"], in: EmptyNode)
         
         try! thing.save()
         let saveQ = GeneralSQLSerializer(sql: lqd.lastQuery!).serialize()
-        XCTAssertEqual(saveQ.0, "INSERT INTO `stringidentifiedthings` (`id`) VALUES (?)")
+        XCTAssertEqual(saveQ.0, "INSERT INTO `stringidentifiedthings` (`#id`) VALUES (?)")
         XCTAssertEqual(saveQ.1, ["derp"])
         XCTAssertTrue(thing.exists)
         
@@ -55,11 +55,11 @@ class ModelTests: XCTestCase {
     func testCustomIdentifiedThings() throws {
         CustomIdentifiedThing.database = db
 
-        var thing = try! CustomIdentifiedThing(node: ["id": 123], in: EmptyNode)
+        var thing = try! CustomIdentifiedThing(node: ["#id": 123], in: EmptyNode)
 
         try! thing.save()
         let saveQ = GeneralSQLSerializer(sql: lqd.lastQuery!).serialize()
-        XCTAssertEqual(saveQ.0, "INSERT INTO `customidentifiedthings` (`id`) VALUES (?)")
+        XCTAssertEqual(saveQ.0, "INSERT INTO `customidentifiedthings` (`#id`) VALUES (?)")
         XCTAssertEqual(saveQ.1, [123])
         XCTAssertTrue(thing.exists)
 
@@ -80,10 +80,10 @@ class ModelTests: XCTestCase {
             
             init() {}
             init(node: Node, in context: Context) throws {
-                id = try node.extract("id")
+                id = try node.extract(idKey)
             }
             func makeNode(context: Context) throws -> Node {
-                return try Node(node: ["id": id])
+                return try Node(node: [idKey: id])
             }
             static func prepare(_ database: Database) throws {}
             static func revert(_ database: Database) throws {}

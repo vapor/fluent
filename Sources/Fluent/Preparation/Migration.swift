@@ -9,12 +9,12 @@ final class Migration: Entity {
 
     init(node: Node, in context: Context) throws {
         name = try node.extract("name")
-        id = try node.extract("id")
+        id = try node.extract(idKey)
     }
 
     func makeNode(context: Context = EmptyNode) throws -> Node {
         return try Node(node: [
-            "id": id,
+            idKey: id,
             "name": name
         ])
     }

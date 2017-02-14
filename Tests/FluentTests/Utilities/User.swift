@@ -31,7 +31,7 @@ final class User: Entity {
 
     func makeNode(context: Context = EmptyNode) throws -> Node {
         return try Node(node: [
-            type(of: self).idKey: id,
+            idKey: id,
             "name": name,
             "email": email
         ])

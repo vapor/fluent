@@ -11,14 +11,14 @@ import Fluent
 
 final class CustomIdentifiedThing: Entity {
     let storage = Storage()
-    var idKey = "#id"
+    static let idKey = "#id"
     
     init(node: Node, in context: Context) throws {
-        id = try node.extract("id")
+        id = try node.extract(idKey)
     }
     
     func makeNode(context: Context = EmptyNode) throws -> Node {
-        return try Node(node: ["id": id])
+        return try Node(node: [idKey: id])
     }
     
     static var idType: IdentifierType { return .custom("INTEGER") }

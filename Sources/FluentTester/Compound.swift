@@ -11,12 +11,12 @@ public final class Compound: Entity {
 
     public init(node: Node, in context: Context) throws {
         name = try node.extract("name")
-        id = try node.extract("id")
+        id = try node.extract(idKey)
     }
 
     public func makeNode(context: Context) throws -> Node {
         return try Node(node: [
-            "id": id,
+            idKey: id,
             "name": name
         ])
     }

@@ -56,7 +56,7 @@ public final class Pivot<
 
     public func makeNode(context: Context) throws -> Node {
         return try Node(node: [
-            type(of: self).idKey: id,
+            idKey: id,
             Left.foreignIdKey: leftId,
             Right.foreignIdKey: rightId,
         ])

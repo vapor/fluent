@@ -15,7 +15,7 @@ class SortTests: XCTestCase {
         let query = try Query<User>(database)
             .filter("age", .greaterThan, 17)
             .sort("name", .ascending)
-            .sort("id", .descending)
+            .sort(User.idKey, .descending)
 
         XCTAssertEqual(query.sorts.count, 2)
     }

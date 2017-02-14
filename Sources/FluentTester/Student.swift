@@ -24,12 +24,12 @@ final class Student: Entity {
         donor = try node.extract("donor")
         meta = try node.extract("meta")
 
-        id = try node.extract("id")
+        id = try node.extract(idKey)
     }
     
     func makeNode(context: Context) throws -> Node {
         return try Node(node: [
-            "id": id,
+            idKey: id,
             "name": name,
             "age": age,
             "ssn": ssn,

@@ -24,7 +24,7 @@ public final class Atom: Entity {
 
     public func makeNode(context: Context) throws -> Node {
         return try Node(node: [
-            type(of: self).idKey: id,
+            idKey: id,
             "name": name,
             "protons": protons,
             "weight": weight

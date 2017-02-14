@@ -15,7 +15,7 @@ final class Compound: Entity {
 
     func makeNode(context: Context = EmptyNode) throws -> Node {
         return try Node(node: [
-            "id": id,
+            idKey: id,
             "name": name
         ])
     }

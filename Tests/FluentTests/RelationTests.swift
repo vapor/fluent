@@ -23,7 +23,7 @@ class RelationTests: XCTestCase {
         Group.database = database
         
         let hydrogen = try Atom(node: [
-            "id": 42,
+            Atom.idKey: 42,
             "name": "Hydrogen",
             "group_id": 1337
         ])
@@ -61,7 +61,7 @@ class RelationTests: XCTestCase {
 
     func testCustomForeignKey() throws {
         let hydrogen = try Atom(node: [
-            "id": 42,
+            Atom.idKey: 42,
             "name": "Hydrogen",
             "group_id": 1337
         ])
