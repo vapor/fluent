@@ -26,7 +26,7 @@ final class CustomIdKey: Entity {
     
     init(node: Node, in context: Context) throws {
         label = try node.extract("label")
-        id = try node.extract(type(of: self).idKey)
+        id = try node.extract(idKey)
     }
     
     func makeNode(context: Context = EmptyNode) throws -> Node {

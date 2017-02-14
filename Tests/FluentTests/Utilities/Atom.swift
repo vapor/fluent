@@ -8,14 +8,14 @@ final class Atom: Entity {
     init(name: String, id: Node? = nil) {
         self.name = name
         self.groupId = 0
-        self.set(id: id)
+        self.id = id
     }
 
     init(node: Node, in context: Context) throws {
         name = try node.extract("name")
         groupId = try node.extract("group_id")
 
-        id(with: node)
+        id = try node.extract("id")
     }
 
     func makeNode(context: Context = EmptyNode) throws -> Node {

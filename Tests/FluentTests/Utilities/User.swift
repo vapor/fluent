@@ -26,7 +26,7 @@ final class User: Entity {
     init(node: Node, in context: Context) throws {
         name = try node.extract("name")
         email = try node.extract("email")
-        id = try node.extract(type(of: self).idKey)
+        id = try node.extract(idKey)
     }
 
     func makeNode(context: Context = EmptyNode) throws -> Node {

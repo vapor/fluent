@@ -51,7 +51,7 @@ public final class Pivot<
         leftId = try node.extract(Left.foreignIdKey)
         rightId = try node.extract(Right.foreignIdKey)
 
-        id = try node.extract(type(of: self).idKey)
+        id = try node.extract(idKey)
     }
 
     public func makeNode(context: Context) throws -> Node {

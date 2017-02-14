@@ -37,9 +37,9 @@ extension Storable {
     }
 }
 
-extension Node {
-    public func extractId<E: Entity>(for type: E.Type) -> Node? {
-        return self[E.idKey]
+extension Entity {
+    public var idKey: String {
+        return Self.idKey
     }
 }
 
