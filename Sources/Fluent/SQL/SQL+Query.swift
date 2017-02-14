@@ -24,7 +24,7 @@ extension SQL {
             self = .delete(
                 table: T.entity,
                 filters: query.filters,
-                joins: query.unions,
+                joins: query.joins,
                 orders: query.sorts,
                 limit: query.limit
             )
@@ -32,7 +32,7 @@ extension SQL {
             self = .update(
                 table: T.entity,
                 filters: query.filters,
-                joins: query.unions,
+                joins: query.joins,
                 data: query.data
             )
         }
