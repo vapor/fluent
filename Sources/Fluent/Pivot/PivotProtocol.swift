@@ -5,18 +5,24 @@
 ///
 /// let teams = users.teams()
 public protocol PivotProtocol {
-    associatedtype Left: Relatable
-    associatedtype Right: Relatable
+    associatedtype Left: Entity
+    associatedtype Right: Entity
+
+    /// Returns true if the two entities are related
+    static func related(_ left: Left, _ right: Right) throws -> Bool
+
+    /// Attaches the two entities
+    /// Entities must be saved before attempting attach.
+    static func attach(_ left: Left, _ right: Right) throws
+
+    /// Detaches the two entities.
+    /// Entities must be saved before attempting detach.
+    static func detach(_ left: Left, _ right: Right) throws
 }
 
 /// PivotProtocol methods that come
 /// pre-implemented if the Pivot conforms to Entity
-extension PivotProtocol
-    where
-        Self: Entity,
-        Left: Entity,
-        Right: Entity
-{
+extension PivotProtocol where Self: Entity {
     /// See PivotProtocol.related
     public static func related(_ left: Left, _ right: Right) throws -> Bool {
         let (leftId, rightId) = try assertSaved(left, right)
@@ -33,7 +39,7 @@ extension PivotProtocol
     public static func attach(_ left: Left, _ right: Right) throws {
         _ = try assertSaved(left, right)
 
-        var pivot = Pivot<Left, Right>(left, right)
+        var pivot = try Pivot<Left, Right>(left, right)
         try pivot.save()
     }
 

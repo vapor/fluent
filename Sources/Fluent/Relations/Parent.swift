@@ -2,11 +2,14 @@
 /// from a child entity to its parent.
 /// ex: child entities have a "parent_id"
 public final class Parent<
-    Child: Relatable, Parent: Entity
+    Child: Entity, Parent: Entity
 > {
     /// The parent entity id. This
     /// will be used to find the parent.
     public let parentId: Node
+
+    /// The child requesting its parent
+    public let child: Child
 
     /// Returns the parent.
     public func get() throws -> Parent? {
@@ -15,10 +18,11 @@ public final class Parent<
 
     /// Creates a new Parent relation.
     public init(
-        parentId: Node,
-        parentType: Parent.Type = Parent.self,
-        childType: Child.Type = Child.self
+        from child: Child,
+        to parentType: Parent.Type = Parent.self,
+        withId parentId: Node
     ) {
+        self.child = child
         self.parentId = parentId
     }
 }
@@ -35,6 +39,6 @@ extension Entity {
         id parentId: Node,
         type parentType: P.Type = P.self
     ) throws -> Parent<Self, P> {
-        return Parent(parentId: parentId)
+        return Parent(from: self, withId: parentId)
     }
 }

@@ -87,10 +87,10 @@ extension Tester {
         )
         try vapor.save()
 
-        var hydrogenWater = Pivot<Atom, Compound>(hydrogen, water)
+        var hydrogenWater = try Pivot<Atom, Compound>(hydrogen, water)
         try hydrogenWater.save()
 
-        var hwVapor = Pivot<Pivot<Atom, Compound>, Student>(hydrogenWater, vapor)
+        var hwVapor = try Pivot<Pivot<Atom, Compound>, Student>(hydrogenWater, vapor)
         try hwVapor.save()
 
         let pivot1 = Pivot<Student, Pivot<Atom, Compound>>.self

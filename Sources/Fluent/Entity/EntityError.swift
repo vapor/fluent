@@ -2,7 +2,6 @@
 /// working with entities.
 public enum EntityError: Error {
     case noDatabase(Entity.Type)
-    case idRequired(Entity)
     case unspecified(Error)
 }
 
@@ -13,8 +12,6 @@ extension EntityError: CustomStringConvertible {
         switch self {
         case .noDatabase(let type):
             reason = "No database set for entity \(type)"
-        case .idRequired(let entity):
-            reason = "Identifier required for entity \(entity)"
         case .unspecified(let error):
             reason = "\(error)"
         }

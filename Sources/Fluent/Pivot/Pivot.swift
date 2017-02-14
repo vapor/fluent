@@ -4,8 +4,8 @@
 /// and can be used like any other Fluent model
 /// in preparations, querying, etc.
 public final class Pivot<
-    L: Relatable,
-    R: Relatable
+    L: Entity,
+    R: Entity
 >: PivotProtocol, Entity {
     public typealias Left = L
     public typealias Right = R
@@ -23,13 +23,29 @@ public final class Pivot<
     }
 
     public var id: Node?
-    public var leftId: Node?
-    public var rightId: Node?
+    public var leftId: Node
+    public var rightId: Node
     public var exists = false
 
-    public init(_ left: Entity, _ right: Entity) {
-        leftId = left.id
-        rightId = right.id
+    public init(_ left: Left, _ right: Right) throws {
+        guard left.exists else {
+            throw PivotError.existRequired(left)
+        }
+
+        guard let leftId = left.id else {
+            throw PivotError.idRequired(left)
+        }
+
+        guard right.exists else {
+            throw PivotError.existRequired(right)
+        }
+
+        guard let rightId = right.id else {
+            throw PivotError.idRequired(right)
+        }
+
+        self.leftId = leftId
+        self.rightId = rightId
     }
 
     public init(node: Node, in context: Context) throws {

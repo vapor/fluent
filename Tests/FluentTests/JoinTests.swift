@@ -6,7 +6,6 @@ class JoinTests: XCTestCase {
         ("testBasic", testBasic),
         ("testCustom", testCustom),
         ("testSQL", testSQL),
-        ("testSQLCustomKeys", testSQLCustomKeys),
         ("testSQLFilters", testSQLFilters),
         ("testSiblings", testSiblings)
     ]
@@ -91,21 +90,6 @@ class JoinTests: XCTestCase {
         }
     }
 
-    func testSQLCustomKeys() throws {
-        let query = try Query<Atom>(db).join(TestForeign.self, local: TestLocal.self)
-        try lqd.query(query)
-
-
-        if let sql = lqd.lastQuery {
-            let serializer = GeneralSQLSerializer(sql: sql)
-            let (statement, values) = serializer.serialize()
-            XCTAssertEqual(statement, "SELECT `atoms`.* FROM `atoms` JOIN `foreign_entity` ON `local_entity`.`local_idKey` = `foreign_entity`.`local_foreignIdKey`")
-            XCTAssertEqual(values.count, 0)
-        } else {
-            XCTFail("No last query.")
-        }
-    }
-
     func testSQLFilters() throws {
         let query = try Query<Atom>(db)
             .join(Compound.self)
@@ -153,18 +137,4 @@ class JoinTests: XCTestCase {
             XCTAssertEqual(values.first?.int, 42)
         }
     }
-}
-
-private class TestForeign: Relatable {
-    static var name = "foreign_name"
-    static var entity = "foreign_entity"
-    static var idKey = "foreign_idKey"
-    static var foreignIdKey = "foreign_foreignIdKey"
-}
-
-private class TestLocal: Relatable {
-    static var name = "local_name"
-    static var entity = "local_entity"
-    static var idKey = "local_idKey"
-    static var foreignIdKey = "local_foreignIdKey"
 }

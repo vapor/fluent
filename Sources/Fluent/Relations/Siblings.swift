@@ -2,21 +2,20 @@
 /// through a Pivot table from the Local 
 /// entity to the Foreign entity.
 public final class Siblings<
-    Local: Relatable, Foreign: Entity
+    Local: Entity, Foreign: Entity
 > {
     /// This will be used to filter the 
     /// collection of foreign entities related
     /// to the local entity type.
-    let localId: Node
+    let local: Local
 
     /// Create a new Siblings relationsip using 
     /// a Local and Foreign entity.
     public init(
-        localId: Node,
-        localType: Local.Type = Local.self,
-        foreignType: Foreign.Type = Foreign.self
+        from local: Local,
+        to foreignType: Foreign.Type = Foreign.self
     ) throws {
-        self.localId = localId
+        self.local = local
     }
 }
 
@@ -24,6 +23,10 @@ extension Siblings: QueryRepresentable {
     /// Creates a Query from the Siblings relation.
     /// This includes a pivot, join, and filter.
     public func makeQuery() throws -> Query<Foreign> {
+        guard let localId = local.id else {
+            throw RelationError.idRequired(local)
+        }
+
         let query = try Foreign.query()
 
         let pivot = Pivot<Local, Foreign>.self
@@ -46,9 +49,6 @@ extension Entity {
     public func siblings<Foreign: Entity>(
         type foreignType: Foreign.Type = Foreign.self
     ) throws -> Siblings<Self, Foreign> {
-        guard let localId = id else {
-            throw EntityError.idRequired(self)
-        }
-        return try Siblings(localId: localId)
+        return try Siblings(from: self)
     }
 }

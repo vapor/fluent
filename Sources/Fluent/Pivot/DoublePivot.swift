@@ -1,14 +1,7 @@
 /// Double pivots
 /// A pivot in which either the 
 /// left or right Entity is another pivot
-extension PivotProtocol
-    where
-        Left: PivotProtocol & Entity,
-        Self: Entity,
-        Left.Left: Entity,
-        Left.Right: Entity,
-        Right: Entity
-{
+extension PivotProtocol where Left: PivotProtocol, Self: Entity {
     /// Returns true if the three entities
     /// are related by the pivot.
     public static func related(
@@ -30,14 +23,7 @@ extension PivotProtocol
     }
 }
 
-extension PivotProtocol
-    where
-        Right: PivotProtocol & Entity,
-        Self: Entity,
-        Left: Entity,
-        Right.Left: Entity,
-        Right.Right: Entity
-{
+extension PivotProtocol where Right: PivotProtocol, Self: Entity {
     /// Returns true if the three entities
     /// are related by the pivot.
     public static func related(

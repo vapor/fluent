@@ -12,14 +12,14 @@
 public struct Join {
     /// Entity that will be accepting
     /// the joined data
-    public let local: Relatable.Type
+    public let local: Entity.Type
 
     /// Entity that will be joining
     /// the local data
-    public let foreign: Relatable.Type
+    public let foreign: Entity.Type
 
     /// Create a new Join
-    public init(local: Relatable.Type, foreign: Relatable.Type) {
+    public init(local: Entity.Type, foreign: Entity.Type) {
         self.local = local
         self.foreign = foreign
     }
@@ -30,8 +30,8 @@ extension QueryRepresentable {
     /// See Join for more information.
     @discardableResult
     public func join(
-        _ foreign: Relatable.Type,
-        local: Relatable.Type = T.self
+        _ foreign: Entity.Type,
+        local: Entity.Type = T.self
     ) throws -> Query<Self.T> {
         let query = try makeQuery()
 

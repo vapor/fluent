@@ -1,13 +1,34 @@
 /// Represents an entity that can be
 /// stored and retrieved from the `Database`.
-public protocol Entity: Preparation, NodeConvertible, Relatable {
-    /// DELETE ME
-    var exists: Bool { get set }
+public protocol Entity: Preparation, NodeConvertible {
+    // DELETE ME
     var id: Node? { get set }
+    var exists: Bool { get set }
 
-    /// The type of identifier this model uses.
-    /// ex: INT, UUID, etc
+    /// The plural relational name of this model.
+    /// Used as the collection or table name.
+    static var entity: String { get }
+
+    /// The singular relational name of this model.
+    /// Also used for internal storage.
+    static var name: String { get }
+
+    /// The type of identifier used for both
+    /// the local and foreign id keys.
+    /// ex: uuid, integer, etc
     static var idType: IdentifierType { get }
+
+    /// The name of the column that corresponds
+    /// to this entity's identifying key.
+    /// The default is 'database.driver.idKey',
+    /// and then "id"
+    static var idKey: String { get }
+
+    /// The name of the column that points
+    /// to this entity's id when referenced
+    /// from other tables or collections.
+    /// ex: "foo_id".
+    static var foreignIdKey: String { get }
 
     /// Called before the entity will be created.
     /// Throwing will cancel the creation.
@@ -83,5 +104,53 @@ extension Entity {
         // TODO: Implement me
         get { return false }
         set { }
+    }
+}
+
+// MARK: Relatable
+
+extension Entity {
+    /// See Entity.entity
+    public static var entity: String {
+        return name + "s"
+    }
+
+    /// See Entity.name
+    public static var name: String {
+        return String(describing: self).lowercased()
+    }
+
+    /// See Entity.idType
+    public static var idType: IdentifierType {
+        return database?.driver.idType ?? .uuid
+    }
+
+    /// See Entity.idKey
+    public static var idKey: String {
+        return database?.driver.idKey ?? "id"
+    }
+
+    /// See Entity.foreignIdKey
+    public static var foreignIdKey: String {
+        return "\(name)_\(idKey)"
+    }
+}
+
+// MARK: Database
+
+extension Entity {
+    /// Fetches or sets the `Database` for this
+    /// relatable object from the static database map.
+    public static var database: Database? {
+        get {
+            if let db = Database.map[Self.name] {
+                return db
+            } else {
+                return Database.default
+            }
+        }
+        set {
+            Database.map[Self.name] = newValue
+        }
     }
 }

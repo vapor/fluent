@@ -53,7 +53,7 @@ class RelationTests: XCTestCase {
         water.id = 1337
         try water.save()
 
-        var pivot = Pivot<Atom, Compound>(hydrogen, water)
+        var pivot = try Pivot<Atom, Compound>(hydrogen, water)
         try pivot.save()
 
         _ = try hydrogen.compounds().all()
