@@ -5,6 +5,8 @@ public struct Union {
     let localKey: String
     let foreignKey: String
 
+    let storage = Storage()
+
     init(
         local: Entity.Type,
         foreign: Entity.Type,
@@ -23,7 +25,7 @@ public final class Pivot<
     First: Entity,
     Second: Entity
 >: Entity {
-    public var exists: Bool = false
+    public let storage = Storage()
     
     public static var entity: String {
         return "\(left.name)_\(right.name)"

@@ -2,7 +2,7 @@ import Fluent
 
 final class Group: Entity {
     var id: Node?
-    var exists: Bool = false
+    let storage = Storage()
     init(node: Node, in context: Context) throws {}
 
     func makeNode(context: Context = EmptyNode) -> Node { return .null }

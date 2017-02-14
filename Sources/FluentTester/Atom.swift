@@ -12,7 +12,7 @@ public final class Atom: Entity {
     public var protons: Int
     public var weight: Double
 
-    public var exists: Bool = false
+    public let storage = Storage()
 
     public init(id: Node?, name: String, protons: Int, weight: Double) {
         self.id = id

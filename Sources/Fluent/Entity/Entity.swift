@@ -1,10 +1,39 @@
 import Foundation
 
+public final class Storage {
+    public init() {}
+
+    // doing id next, there's some other issues cuz that one needs to be publicly settable
+    //    private var id: Node?
+    internal var exists: Bool = false
+}
+
+public protocol Storable {
+    var storage: Storage { get }
+}
+
+extension Entity {
+    /// Whether or not entity was retrieved from database.
+    ///
+    /// This value shouldn't be interacted w/ external users
+    /// w/o explicit knowledge.
+    ///
+    /// General implementation should just be `var exists = false`
+    public internal(set) var exists: Bool {
+        get {
+            return storage.exists
+        }
+        set {
+            storage.exists = newValue
+        }
+    }
+}
+
 /**
     Represents an entity that can be
     stored and retrieved from the `Database`.
 */
-public protocol Entity: Preparation, NodeConvertible {
+public protocol Entity: Preparation, NodeConvertible, Storable {
     /**
         The collection or table name
         for this entity.
@@ -36,16 +65,6 @@ public protocol Entity: Preparation, NodeConvertible {
         `find(:_)`.
     */
     var id: Node? { get set }
-
-    /**
-        Whether or not entity was retrieved from database.
-        
-        This value shouldn't be interacted w/ external users 
-        w/o explicit knowledge.
-     
-        General implementation should just be `var exists = false`
-    */
-    var exists: Bool { get set }
 
     /**
         Called before the entity will be created.
@@ -95,20 +114,6 @@ extension Entity {
     
     public static var idKey: String {
         return database?.driver.idKey ?? "id"
-    }
-
-    // FIXME: Remove in 2.0. Also, make exists optional.
-    @available(*, deprecated: 1.0, message: "This 'exists' property is not stored. Add `var exists: Bool = false` to the model. This default implementation will be removed in a future update.")
-    public var exists: Bool {
-        get {
-            let type = type(of: self)
-            print("[DEPRECATED] No 'exists' property is stored on '\(type)'. Add `var exists: Bool = false` to this model. The default implementation will be removed in a future update.")
-            return true
-        }
-        set {
-            let type = type(of: self)
-            print("[DEPRECATED] No 'exists' property is stored on '\(type)'. Add `var exists: Bool = false` to this model. The default implementation will be removed in a future update.")
-        }
     }
 }
 

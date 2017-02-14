@@ -1,7 +1,7 @@
 import Fluent
 
 final class User: Entity {
-    var exists: Bool = false
+    let storage = Storage()
     
     static func prepare(_ database: Fluent.Database) throws {
         try database.create(entity) { builder in

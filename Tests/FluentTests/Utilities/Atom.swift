@@ -9,7 +9,8 @@ struct Atom: Entity {
     var id: Node?
     var name: String
     var groupId: Node?
-    var exists: Bool = false
+
+    let storage = Storage()
 
     init(name: String, id: Node? = nil) {
         self.id = id
