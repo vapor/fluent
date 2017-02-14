@@ -7,7 +7,7 @@ public final class Parent<
     public let child: Child
     public let parentId: Node
 
-    public func get() throws -> T? {
+    public func get() throws -> Parent? {
         return try first()
     }
 
