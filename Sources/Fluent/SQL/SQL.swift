@@ -10,8 +10,8 @@ public enum SQL {
     
     case insert(table: String, data: Node?)
     case count(table: String, filters: [Filter], joins: [Join])
-    case select(table: String, filters: [Filter], joins: [Union], orders: [Sort], limit: Limit?)
-    case update(table: String, filters: [Filter], joins: [Union], data: Node?)
-    case delete(table: String, filters: [Filter], joins: [Union], orders: [Sort], limit: Limit?)
+    case select(table: String, filters: [Filter], joins: [Join], orders: [Sort], limit: Limit?)
+    case update(table: String, filters: [Filter], joins: [Join], data: Node?)
+    case delete(table: String, filters: [Filter], joins: [Join], orders: [Sort], limit: Limit?)
     case table(action: TableAction, table: String)
 }
