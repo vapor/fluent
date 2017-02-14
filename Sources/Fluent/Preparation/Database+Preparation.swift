@@ -49,7 +49,7 @@ extension Database {
 }
 
 extension Preparation {
-    public static var name: String {
+    fileprivate static var name: String {
         let type = "\(type(of: self))"
         return type.components(separatedBy: ".Type").first ?? type
     }

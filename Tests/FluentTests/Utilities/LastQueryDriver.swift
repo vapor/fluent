@@ -26,8 +26,9 @@ struct LastQueryConnection: Connection {
     func query<T: Entity>(_ query: Query<T>) throws -> Node {
         let sql = query.sql
         driver.lastQuery = sql
-        print("[LQD] \(sql)")
-        return Node.object([T.idKey: 5])
+        return Node.array([
+            Node.object([T.idKey: 5])
+        ])
     }
 
     func schema(_ schema: Schema) throws {

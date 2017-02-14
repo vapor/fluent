@@ -24,7 +24,6 @@ class QueryFiltersTests: XCTestCase {
         XCTAssert(query.filters.count == 0, "Filters should be empty")
         XCTAssert(query.data == nil, "Data should be empty")
         XCTAssert(query.limit == nil, "Limit should be empty")
-        XCTAssert(query.entity == DummyModel.entity, "Entity should match")
     }
 
     func testBasicQuery() throws {

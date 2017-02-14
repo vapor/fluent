@@ -11,8 +11,8 @@ import Foundation
 import Fluent
 
 struct StringIdentifiedThing: Entity {
-    
-    var id:Node? = nil
+    static var idKey = "#id"
+    var id: Node? = nil
     var exists: Bool = false
     
     init(node: Node, in context: Context) throws {

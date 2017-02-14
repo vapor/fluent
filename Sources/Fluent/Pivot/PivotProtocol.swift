@@ -15,7 +15,7 @@ public protocol PivotProtocol {
     /// Attaches the two entities, relating them.
     static func attach(_: Left, _: Right) throws
 
-    /// Detaches the three related entities.
+    /// Detaches the two related entities.
     static func detach(_: Left, _: Right) throws
 }
 

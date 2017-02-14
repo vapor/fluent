@@ -75,7 +75,7 @@ public final class MemoryConnection: Connection {
     
     @discardableResult
     public func query<T: Entity>(_ query: Query<T>) throws -> Node {
-        var group = driver.prepare(group: query.entity)
+        var group = driver.prepare(group: T.entity)
 
         switch query.action {
         case .create:

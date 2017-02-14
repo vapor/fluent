@@ -1,42 +1,8 @@
-import Foundation
-
-/**
-    Represents an entity that can be
-    stored and retrieved from the `Database`.
-*/
-public protocol Entity: Preparation, NodeConvertible {
-    /// The collection or table name for this entity.
-    static var entity: String { get }
-
-    /**
-        The name to use for internal storage.
-
-        This should be left as the default 
-        implementation except for special cases
-        like pivots.
-    */
-    static var name: String { get }
-    
-    /**
-        The name of the column that corresponds
-        to this entity's key.
-     
-        The default return is 'database.driver.idKey',
-        and if no database is set, 'id' is returned,
-        instead.
-     */
-    static var idKey: String { get }
-
-    /// The name of the column that points
-    /// to this entity's id when referenced
-    /// from other tables or collections.
-    static var foreignIdKey: String { get }
-    
-    /**
-        The entity's primary identifier.
-        This is the same value used for
-        `find(:_)`.
-    */
+/// Represents an entity that can be
+/// stored and retrieved from the `Database`.
+public protocol Entity: Preparation, NodeConvertible, Relatable {
+    /// DELETE ME
+    var exists: Bool { get set }
     var id: Node? { get set }
 
     /// The type of identifier this model uses.
@@ -44,54 +10,28 @@ public protocol Entity: Preparation, NodeConvertible {
     static var idType: IdentifierType { get }
 
     /// Called before the entity will be created.
+    /// Throwing will cancel the creation.
     func willCreate() throws
 
     /// Called after the entity has been created.
-    func didCreate() throws
+    func didCreate()
 
     /// Called before the entity will be updated.
+    /// Throwing will cancel the update.
     func willUpdate() throws
 
     /// Called after the entity has been updated.
-    func didUpdate() throws
+    func didUpdate()
 
     /// Called before the entity will be deleted.
+    /// Throwing will cancel the deletion.
     func willDelete() throws
 
     /// Called after the entity has been deleted.
-    func didDelete() throws
-
-    var exists: Bool { get set }
+    func didDelete()
 }
 
-// MARK: Defaults
-
-extension Entity {
-    /**
-        The default entity is the
-        lowercase model pluralized.
-    */
-    public static var entity: String {
-        return name + "s"
-    }
-
-    public static var name: String {
-        return String(describing: self).lowercased()
-    }
-    
-    public static var idType: IdentifierType {
-        return database?.driver.idType ?? .uuid
-    }
-
-    public static var idKey: String {
-        return database?.driver.idKey ?? "id"
-    }
-
-    public static var foreignIdKey: String {
-        return "\(name)_\(idKey)"
-    }
-}
-
+// MARK: Optional
 
 extension Entity {
     public func willCreate() {}
@@ -102,7 +42,7 @@ extension Entity {
     public func didDelete() {}
 }
 
-//MARK: CRUD
+// MARK: CRUD
 
 extension Entity {
     /// Persists the entity into the
@@ -111,65 +51,55 @@ extension Entity {
         try Self.query().save(&self)
     }
 
-    /**
-        Deletes the entity from the data
-        store if the `id` property is set.
-    */
+    /// Deletes the entity from the data
+    /// store if the `id` property is set.
     public func delete() throws {
         try Self.query().delete(self)
     }
 
-    /**
-        Returns all entities for this `Model`.
-    */
+    /// Returns all entities for this `Model`.
     public static func all() throws -> [Self] {
         return try Self.query().all()
     }
 
-    /**
-        Finds the entity with the given `id`.
-    */
+    /// Finds the entity with the given `id`.
     public static func find(_ id: NodeRepresentable) throws -> Self? {
         guard let _ = database else { return nil }
         return try Self.query().filter(Self.idKey, .equals, id).first()
     }
 
-    /**
-        Creates a `Query` instance for this `Model`.
-    */
+    //// Creates a `Query` instance for this `Model`.
     public static func query() throws -> Query<Self> {
         guard let db = database else {
-            throw EntityError.noDatabase
+            throw EntityError.noDatabase(self)
         }
         return Query(db)
     }
 }
 
+/// Errors that can be thrown when
+/// working with entities.
 public enum EntityError: Error {
-    case noDatabase
+    case noDatabase(Entity.Type)
+    case unspecified(Error)
 }
 
-//MARK: Database
+extension EntityError: CustomStringConvertible {
+    public var description: String {
+        let reason: String
 
-extension Entity {
-    /**
-        Fetches or sets the `Database` for this
-        `Model` from the static database map.
-    */
-    public static var database: Database? {
-        get {
-            if let db = Database.map[Self.name] {
-                return db
-            } else {
-                return Database.default
-            }
+        switch self {
+        case .noDatabase(let type):
+            reason = "No database on \(type)"
+        case .unspecified(let error):
+            reason = "\(error)"
         }
-        set {
-            Database.map[Self.name] = newValue
-        }
+
+        return "Database entity error: \(reason)"
     }
 }
 
+// MARK: Deprecated
 extension Entity {
     public var exists: Bool {
         // TODO: Implement me

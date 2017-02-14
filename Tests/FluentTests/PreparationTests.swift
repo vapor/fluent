@@ -51,7 +51,7 @@ class PreparationTests: XCTestCase {
         }
 
         do {
-            try database.prepare(TestPreparation.self)
+            try TestPreparation.prepare(database)
         } catch {
             XCTFail("Preparation failed: \(error)")
         }
@@ -85,7 +85,7 @@ class PreparationTests: XCTestCase {
         let database = Database(driver)
         
         do {
-            try database.prepare(StringIdentifiedThing.self)
+            try StringIdentifiedThing.prepare(database)
         } catch {
             XCTFail("Preparation failed: \(error)")
         }
@@ -127,7 +127,7 @@ class PreparationTests: XCTestCase {
         let database = Database(driver)
 
         do {
-            try database.prepare(TestModel.self)
+            try TestModel.prepare(database)
         } catch {
             XCTFail("Preparation failed: \(error)")
         }

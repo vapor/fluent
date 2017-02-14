@@ -14,6 +14,7 @@ extension Database {
         for the given entity.
     */
     public func create(_ entity: String, closure: (Schema.Creator) throws -> ()) throws {
+        print("BAR \(entity)")
         let creator = Schema.Creator(entity)
         try closure(creator)
         _ = try schema(creator.schema)

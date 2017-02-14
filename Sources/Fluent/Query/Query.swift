@@ -1,67 +1,32 @@
-/**
-    Represents an abstract database query.
-*/
-public class Query<T: Entity>: QueryRepresentable {
-
-    //MARK: Properties
-
-    /**
-        The type of action to perform
-        on the data. Defaults to `.fetch`
-    */
+/// Represents an abstract database query.
+public final class Query<T: Entity> {
+    /// The type of action to perform
+    /// on the data. Defaults to `.fetch`
     public var action: Action
 
-    /**
-        An array of filters to apply
-        during the query's action.
-    */
+    /// An array of filters to apply
+    ///during the query's action.
     public var filters: [Filter]
 
-    /**
-        Optional data to be used during
-        `.create` or `.updated` actions.
-    */
+    /// Optional data to be used during
+    ///`.create` or `.updated` actions.
     public var data: Node?
 
-    /**
-        Optionally limit the amount of
-        entities affected by the action.
-    */
+    /// Optionally limit the amount of
+    /// entities affected by the action.
     public var limit: Limit?
 
-    /**
-        An array of sorts that will
-        be applied to the results.
-    */
+    /// An array of sorts that will
+    /// be applied to the results.
     public var sorts: [Sort]
 
-    /**
-        The collection or table name upon
-        which the action should be performed.
-    */
-    public var entity: String {
-        return T.entity
-    }
-
-    /**
-        An array of joins: other entities
-        that will be queried during this query's
-        execution.
-    */
+    /// An array of joins: other entities
+    /// that will be queried during this query's
+    /// execution.
     public var joins: [Join]
 
-    //MARK: Internal
-
-    /**
-        The database to which the query
-        should be sent.
-    */
-    var database: Database
-
-    /**
-        Creates a new `Query` with the
-        `Model`'s database.
-    */
+    /// Creates a new `Query` with the
+    /// `Model`'s database.
     public init(_ database: Database) {
         filters = []
         action = .fetch
@@ -71,228 +36,53 @@ public class Query<T: Entity>: QueryRepresentable {
         _context = DatabaseContext(database)
     }
 
-    var idKey: String {
-        return database.driver.idKey
-    }
-
-    fileprivate let _context: DatabaseContext
-
-    /**
-        Runs the query given its properties
-        and current state.
-
-        Returns the Node from the driver.
-    */
+    /// Performs the Query returning the raw
+    /// Node data from the driver.
     @discardableResult
     public func raw() throws -> Node {
         return try database.query(self)
     }
 
-    /**
-        Runs the query using Raw then converts
-        the results to an array of models.
-    */
+    //MARK: Internal
+
+    /// The database to which the query
+    /// should be sent.
+    internal let database: Database
+
+    /// Cached DatabaseContext used for
+    /// node parsing and serialization.
+    internal let _context: DatabaseContext
+
+
+    /// Internal method for running the query
+    /// and casting to the Query's generic destination type.
     @discardableResult
-    public func run() throws -> [T] {
+    internal func run() throws -> [T] {
+        guard case .array(let array) = try raw() else {
+            throw QueryError.invalidDriverResponse("Array required.")
+        }
+
         var models: [T] = []
 
-        if case .array(let array) = try raw() {
-            for result in array {
-                do {
-                    var model = try T(node: result, in: _context)
-                    if case .object(let dict) = result {
-                        model.id = dict[T.idKey]
-                    }
-                    models.append(model)
-                } catch {
-                    print("Could not initialize \(T.self), skipping: \(error)")
+        for result in array {
+            do {
+                var model = try T(node: result, in: _context)
+                if case .object(let dict) = result {
+                    model.id = dict[T.idKey]
                 }
+                models.append(model)
+            } catch {
+                print("Could not initialize \(T.self), skipping: \(error)")
             }
-        } else {
-            print("Unsupported Node type, only array is supported.")
         }
 
         return models
     }
+}
 
-    /**
-        Conformance to `QueryRepresentable`
-    */
+extension Query: QueryRepresentable {
+    /// Conformance to `QueryRepresentable`
     public func makeQuery() -> Query<T> {
         return self
     }
-}
-
-extension QueryRepresentable {
-    /**
-        Returns the first entity retreived
-        by the query.
-    */
-    public func first() throws -> T? {
-        let query = try makeQuery()
-        query.action = .fetch
-        query.limit = Limit(count: 1)
-
-        var model = try query.run().first
-        model?.exists = true
-
-        return model
-    }
-
-    /**
-        Returns all entities retreived
-        by the query.
-    */
-    public func all() throws -> [T] {
-        let query = try makeQuery()
-        
-        query.action = .fetch
-
-        let models = try query.run()
-        models.forEach { model in
-            var model = model
-            model.exists = true
-        }
-
-        return models
-    }
-    
-    /**
-     Returns the number of results for the query.
-     */
-    public func count() throws -> Int {
-        let query = try makeQuery()
-        query.action = .count
-
-        let raw = try query.raw()
-
-        let count: Int
-
-        if let c = raw.int {
-            count = c
-        } else if let c = raw[0, "_fluent_count"]?.int {
-            count = c
-        } else {
-            throw QueryError.notSupported("Count not supported.")
-        }
-
-        return count
-    }
-
-    //MARK: Create
-
-    /**
-        Attempts the create action for the supplied
-        serialized data.
-
-        Returns the new entity's identifier.
-    */
-    public func create(_ serialized: Node?) throws -> Node {
-        let query = try makeQuery()
-
-        query.action = .create
-        query.data = serialized
-
-        return try query.raw()
-    }
-
-    /**
-        Attempts to save a supplied entity
-        and updates its identifier if successful.
-    */
-    public func save(_ model: inout T) throws {
-        let query = try makeQuery()
-
-        if let _ = model.id, model.exists {
-            try model.willUpdate()
-            let node = try model.makeNode(context: query._context)
-            try modify(node)
-            try model.didUpdate()
-        } else {
-            try model.willCreate()
-            let node = try model.makeNode(context: query._context)
-            let id = try query.create(node)
-            if id != nil, id != .null, id != 0 {
-                model.id = id
-            }
-            try model.didCreate()
-        }
-        model.exists = true
-    }
-
-    //MARK: Delete
-
-    /**
-        Attempts to delete all entities
-        in the model's collection.
-    */
-    public func delete() throws {
-        let query = try makeQuery()
-        
-        guard query.joins.count == 0 else {
-            throw QueryError.notSupported("Cannot perform delete on queries that contain joins. Delete the entities directly instead.")
-        }
-        
-        query.action = .delete
-        try query.run()
-    }
-
-    /**
-        Attempts to delete the supplied entity
-        if its identifier is set.
-    */
-    public func delete(_ model: T) throws {
-        guard let id = model.id else {
-            return
-        }
-        let query = try makeQuery()
-
-        query.action = .delete
-
-        let filter = Filter(
-            T.self,
-            .compare(
-                T.idKey,
-                .equals,
-                id
-            )
-        )
-
-        query.filters.append(filter)
-
-        try model.willDelete()
-        try query.run()
-        try model.didDelete()
-
-        var model = model
-        model.exists = false
-    }
-
-    //MARK: Update
-
-    /**
-        Attempts to modify model's collection with
-        the supplied serialized data.
-    */
-    public func modify(_ serialized: Node?) throws {
-        let query = try makeQuery()
-
-        query.action = .modify
-        query.data = serialized
-
-        let idKey = T.idKey
-        if let id = serialized?[idKey] {
-            _ = try filter(idKey, id)
-        }
-        try query.run()
-    }
-}
-
-public enum QueryError: Error {
-    case notSupported(String)
-}
-
-public protocol QueryRepresentable {
-    associatedtype T: Entity
-    func makeQuery() throws -> Query<T>
 }
