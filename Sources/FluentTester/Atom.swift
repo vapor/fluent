@@ -1,11 +1,6 @@
 import Fluent
 
 public final class Atom: Entity {
-    
-    public static var idKey: String {
-        return "atom_id"
-    }
-    
     public var id: Node?
 
     public var name: String
@@ -37,13 +32,13 @@ public final class Atom: Entity {
         ])
     }
 
-    public func compounds() throws -> Siblings<Compound> {
+    public func compounds() throws -> Siblings<Atom, Compound> {
         return try siblings()
     }
 
     public static func prepare(_ database: Database) throws {
         try database.create(entity) { atoms in
-            atoms.id(idKey)
+            atoms.id(for: self)
             atoms.string("name")
             atoms.int("protons")
             atoms.double("weight")

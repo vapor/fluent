@@ -23,7 +23,7 @@ class RelationTests: XCTestCase {
         Group.database = database
         
         let hydrogen = try Atom(node: [
-            "atom_id": 42,
+            "id": 42,
             "name": "Hydrogen",
             "group_id": 1337
         ])
@@ -53,7 +53,7 @@ class RelationTests: XCTestCase {
         water.id = 1337
         try water.save()
 
-        var pivot = Pivot<Atom, Compound>(hydrogen, water)
+        var pivot = try Pivot<Atom, Compound>(hydrogen, water)
         try pivot.save()
 
         _ = try hydrogen.compounds().all()
@@ -69,7 +69,7 @@ class RelationTests: XCTestCase {
         Nucleus.database = database
 
         do {
-            let query = try hydrogen.children("nookleus_id", Nucleus.self).makeQuery()
+            let query = try hydrogen.children(type: Nucleus.self).makeQuery()
             let (sql, _) = GeneralSQLSerializer(sql: query.sql).serialize()
             print(sql)
         } catch {

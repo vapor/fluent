@@ -27,6 +27,8 @@ class ModelFindTests: XCTestCase {
 
     /// Dummy Driver implementation for testing.
     class DummyDriver: Driver {
+        var idType: IdentifierType = .int
+        
         var idKey: String {
             return "foo"
         }

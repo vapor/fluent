@@ -1,8 +1,6 @@
 extension Schema {
-    /**
-        Various types of fields
-        that can be used in a Schema.
-    */
+    /// Various types of fields
+    /// that can be used in a Schema.
     public struct Field {
         public var name: String
         public var type: DataType
@@ -11,7 +9,7 @@ extension Schema {
         public var `default`: Node?
 
         public enum DataType {
-            case id
+            case id(type: IdentifierType)
             case int
             case string(length: Int?)
             case double

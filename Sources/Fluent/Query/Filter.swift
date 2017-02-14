@@ -1,9 +1,7 @@
-/**
-    Defines a `Filter` that can be 
-    added on fetch, delete, and update
-    operations to limit the set of 
-    data affected.
-*/
+/// Defines a `Filter` that can be
+/// added on fetch, delete, and update
+/// operations to limit the set of
+/// data affected.
 public struct Filter {
     public enum Relation {
         case and, or
@@ -79,13 +77,11 @@ extension QueryRepresentable {
 
     //MARK: Filter
 
-    /**
-        Adds a `.compare` filter to the query's
-        filters.
-
-        Used for filtering results based on how
-        a result's value compares to the supplied value.
-    */
+    /// Adds a `.compare` filter to the query's
+    /// filters.
+    ///
+    /// Used for filtering results based on how
+    /// a result's value compares to the supplied value.
     @discardableResult
     public func filter(
         _ field: String,
@@ -95,13 +91,11 @@ extension QueryRepresentable {
         return try makeQuery().filter(T.self, field, comparison, value)
     }
 
-    /**
-        Adds a `.subset` filter to the query's
-        filters.
-
-        Used for filtering results based on whether
-        a result's value is or is not in a set.
-    */
+    /// Adds a `.subset` filter to the query's
+    /// filters.
+    ///
+    /// Used for filtering results based on whether
+    /// a result's value is or is not in a set.
     @discardableResult
     public func filter(
         _ field: String,
@@ -112,9 +106,7 @@ extension QueryRepresentable {
     }
 
 
-    /**
-        Shortcut for creating a `.equals` filter.
-    */
+    /// Shortcut for creating a `.equals` filter.
     @discardableResult
     public func filter(
         _ field: String,
@@ -123,7 +115,7 @@ extension QueryRepresentable {
         return try makeQuery().filter(T.self, field, .equals, value)
     }
 
-
+    /// Shortcut for creating a `.contains` filter.
     @discardableResult
     public func filter(
         _ field: String,
@@ -134,6 +126,7 @@ extension QueryRepresentable {
 }
 
 extension QueryRepresentable {
+    /// Shortcut for creating a `.raw` filter.
     @discardableResult
     public func raw(command: String, values: [NodeRepresentable] = []) throws -> Query<Self.T> {
         let query = try makeQuery()

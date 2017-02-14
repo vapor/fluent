@@ -21,6 +21,8 @@ final class DummyModel: Entity {
 }
 
 class DummyDriver: Driver {
+    var idType: IdentifierType = .int
+
     var idKey: String {
         return "foo"
     }

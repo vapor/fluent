@@ -1,9 +1,6 @@
 extension Schema {
-    /**
-        Modifies a schema. A subclass of Creator.
-     
-        Can modify or delete fields.
-    */
+    /// Modifies a schema. A subclass of Creator.
+    /// Can modify or delete fields.
     public class Modifier: Creator {
         public var delete: [String]
 

@@ -1,13 +1,13 @@
 import XCTest
 @testable import Fluent
 
-class UnionTests: XCTestCase {
+class JoinTests: XCTestCase {
     static let allTests = [
         ("testBasic", testBasic),
         ("testCustom", testCustom),
         ("testSQL", testSQL),
-        ("testSQLCustomIdKey", testSQLCustomIdKey),
         ("testSQLFilters", testSQLFilters),
+        ("testSiblings", testSiblings)
     ]
 
     var lqd: LastQueryDriver!
@@ -23,7 +23,7 @@ class UnionTests: XCTestCase {
     }
 
     func testBasic() throws {
-        let query = try Query<Atom>(db).union(Compound.self)
+        let query = try Query<Atom>(db).join(Compound.self)
         try lqd.query(query)
 
         if let sql = lqd.lastQuery {
@@ -35,9 +35,9 @@ class UnionTests: XCTestCase {
                 XCTAssertEqual(joins.count, 1)
                 if let join = joins.first {
                     XCTAssert(join.local == Atom.self)
-                    XCTAssertEqual(join.localKey, "compound_\(lqd.idKey)")
+                    XCTAssertEqual(join.foreign.foreignIdKey, "compound_\(lqd.idKey)")
                     XCTAssert(join.foreign == Compound.self)
-                    XCTAssertEqual(join.foreignKey, lqd.idKey)
+                    XCTAssertEqual(join.foreign.idKey, lqd.idKey)
                 }
                 XCTAssert(limit == nil)
             default:
@@ -49,10 +49,7 @@ class UnionTests: XCTestCase {
     }
 
     func testCustom() throws {
-        let localKey = "#local_key"
-        let foreignKey = "#foreign_key"
-
-        let query = try Query<Atom>(db).union(Compound.self, localKey: localKey, foreignKey: foreignKey)
+        let query = try Query<Atom>(db).join(Compound.self)
         try lqd.query(query)
 
 
@@ -65,9 +62,9 @@ class UnionTests: XCTestCase {
                 XCTAssertEqual(joins.count, 1)
                 if let join = joins.first {
                     XCTAssert(join.local == Atom.self)
-                    XCTAssertEqual(join.localKey, localKey)
+                    XCTAssertEqual(join.foreign.idKey, Compound.idKey)
                     XCTAssert(join.foreign == Compound.self)
-                    XCTAssertEqual(join.foreignKey, foreignKey)
+                    XCTAssertEqual(join.foreign.foreignIdKey, Compound.foreignIdKey)
                 }
                 XCTAssert(limit == nil)
             default:
@@ -79,32 +76,14 @@ class UnionTests: XCTestCase {
     }
 
     func testSQL() throws {
-        let localKey = "#local_key"
-        let foreignKey = "#foreign_key"
-
-        let query = try Query<Atom>(db).union(Compound.self, localKey: localKey, foreignKey: foreignKey)
+        let query = try Query<Atom>(db).join(Compound.self)
         try lqd.query(query)
 
 
         if let sql = lqd.lastQuery {
             let serializer = GeneralSQLSerializer(sql: sql)
             let (statement, values) = serializer.serialize()
-            XCTAssertEqual(statement, "SELECT `atoms`.* FROM `atoms` JOIN `compounds` ON `atoms`.`#local_key` = `compounds`.`#foreign_key`")
-            XCTAssertEqual(values.count, 0)
-        } else {
-            XCTFail("No last query.")
-        }
-    }
-    
-    func testSQLCustomIdKey() throws {
-        let query = try Query<User>(db).union(CustomIdKey.self)
-        try lqd.query(query)
-        
-        
-        if let sql = lqd.lastQuery {
-            let serializer = GeneralSQLSerializer(sql: sql)
-            let (statement, values) = serializer.serialize()
-            XCTAssertEqual(statement, "SELECT `users`.* FROM `users` JOIN `customidkeys` ON `users`.`customidkey_custom_id` = `customidkeys`.`custom_id`")
+            XCTAssertEqual(statement, "SELECT `atoms`.* FROM `atoms` JOIN `compounds` ON `atoms`.`#id` = `compounds`.`atom_#id`")
             XCTAssertEqual(values.count, 0)
         } else {
             XCTFail("No last query.")
@@ -112,11 +91,8 @@ class UnionTests: XCTestCase {
     }
 
     func testSQLFilters() throws {
-        let localKey = "#local_key"
-        let foreignKey = "#foreign_key"
-
         let query = try Query<Atom>(db)
-            .union(Compound.self, localKey: localKey, foreignKey: foreignKey)
+            .join(Compound.self)
             .filter("protons", .greaterThan, 5)
             .filter(Compound.self, "atoms", .lessThan, 128)
 
@@ -126,8 +102,10 @@ class UnionTests: XCTestCase {
         if let sql = lqd.lastQuery {
             let serializer = GeneralSQLSerializer(sql: sql)
             let (statement, values) = serializer.serialize()
-            XCTAssertEqual(statement, "SELECT `atoms`.* FROM `atoms` JOIN `compounds` ON `atoms`.`#local_key` = `compounds`.`#foreign_key` WHERE `atoms`.`protons` > ? AND `compounds`.`atoms` < ?")
-
+            XCTAssertEqual(
+                statement,
+                "SELECT `atoms`.* FROM `atoms` JOIN `compounds` ON `atoms`.`#id` = `compounds`.`atom_#id` WHERE `atoms`.`protons` > ? AND `compounds`.`atoms` < ?"
+            )
             if values.count == 2 {
                 XCTAssertEqual(values[0].int, 5)
                 XCTAssertEqual(values[1].int, 128)
@@ -139,7 +117,8 @@ class UnionTests: XCTestCase {
         }
     }
 
-    func testBelongsToMany() throws {
+
+    func testSiblings() throws {
         var atom = Atom(name: "Hydrogen")
         atom.id = Node(42)
 
@@ -152,7 +131,7 @@ class UnionTests: XCTestCase {
             let (statement, values) = serializer.serialize()
             XCTAssertEqual(
                 statement,
-                "SELECT `compounds`.* FROM `compounds` JOIN `atom_compound` ON `compounds`.`\(lqd.idKey)` = `atom_compound`.`compound_\(lqd.idKey)` WHERE `atom_compound`.`atom_\(Atom.idKey)` = ?"
+                "SELECT `compounds`.* FROM `compounds` JOIN `atom_compound` ON `compounds`.`#id` = `atom_compound`.`compound_#id` WHERE `atom_compound`.`atom_#id` = ?"
             )
             XCTAssertEqual(values.count, 1)
             XCTAssertEqual(values.first?.int, 42)

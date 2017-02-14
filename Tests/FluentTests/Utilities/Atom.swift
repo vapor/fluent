@@ -1,19 +1,15 @@
 import Fluent
 
-struct Atom: Entity {
-    
-    static var idKey: String {
-        return "atom_id"
-    }
-    
+struct Atom: Entity {    
     var id: Node?
     var name: String
-    var groupId: Node?
+    var groupId: Node
     var exists: Bool = false
 
     init(name: String, id: Node? = nil) {
         self.id = id
         self.name = name
+        groupId = 0
     }
 
     init(node: Node, in context: Context) throws {
@@ -30,25 +26,25 @@ struct Atom: Entity {
         ])
     }
 
-    func compounds() throws -> Siblings<Compound> {
+    func compounds() throws -> Siblings<Atom, Compound> {
         return try siblings()
     }
 
-    func group() throws -> Parent<Group> {
-        return try parent(groupId, "parrrrent_id")
+    func group() throws -> Parent<Atom, Group> {
+        return try parent(id: groupId)
     }
 
-    func protons() throws -> Children<Proton> {
-        return children()
+    func protons() throws -> Children<Atom, Proton> {
+        return try children()
     }
 
     func nucleus() throws -> Nucleus? {
-        return try children("nookleus_id").first()
+        return try children().first()
     }
 
     static func prepare(_ database: Fluent.Database) throws {
         try database.create(entity) { builder in
-            builder.id(idKey)
+            builder.id(for: self)
             builder.string("name")
             builder.int("group_id")
         }

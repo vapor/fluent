@@ -22,13 +22,13 @@ public final class Compound: Entity {
         ])
     }
 
-    public func atoms() throws -> Siblings<Atom> {
+    public func atoms() throws -> Siblings<Compound, Atom> {
         return try siblings()
     }
 
     public static func prepare(_ database: Fluent.Database) throws {
         try database.create(entity) { builder in
-            builder.id()
+            builder.id(for: self)
             builder.string("name")
         }
     }

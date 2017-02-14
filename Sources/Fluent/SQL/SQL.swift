@@ -1,8 +1,6 @@
-/**
-    Represents a SQL query that 
-    can act as an intermediary between
-    Fluent data structures and serializers.
-*/
+/// Represents a SQL query that
+/// can act as an intermediary between
+/// Fluent data structures and serializers.
 public enum SQL {
     public enum TableAction {
         case create(columns: [Schema.Field])
@@ -11,8 +9,8 @@ public enum SQL {
     }
     
     case insert(table: String, data: Node?)
-    case select(table: String, filters: [Filter], joins: [Union], orders: [Sort], limit: Limit?)
-    case count(table: String, filters: [Filter], joins: [Union])
+    case select(table: String, filters: [Filter], joins: [Join], orders: [Sort], limit: Limit?)
+    case count(table: String, filters: [Filter], joins: [Join])
     case update(table: String, filters: [Filter], data: Node?)
     case delete(table: String, filters: [Filter], limit: Limit?)
     case table(action: TableAction, table: String)

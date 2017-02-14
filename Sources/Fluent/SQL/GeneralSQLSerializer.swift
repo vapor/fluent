@@ -1,8 +1,6 @@
-/**
-    A generic SQL serializer.
-    This class can be subclassed by
-    specific SQL serializers.
-*/
+/// A generic SQL serializer.
+/// This class can be subclassed by
+/// specific SQL serializers.
 open class GeneralSQLSerializer: SQLSerializer {
     public let sql: SQL
 
@@ -406,8 +404,17 @@ open class GeneralSQLSerializer: SQLSerializer {
 
     open func sql(_ type: Schema.Field.DataType) -> String {
         switch type {
-        case .id:
-            return "INTEGER PRIMARY KEY"
+        case .id(let type):
+            let typeString: String
+            switch type {
+            case .int:
+                typeString = "INTEGER"
+            case .uuid:
+                typeString = "STRING"
+            case .custom(let dataType):
+                typeString = dataType
+            }
+            return typeString  + " PRIMARY KEY"
         case .int:
             return "INTEGER"
         case .string(_):
@@ -446,7 +453,7 @@ open class GeneralSQLSerializer: SQLSerializer {
         )
     }
 
-    open func sql(_ joins: [Union]) -> String {
+    open func sql(_ joins: [Join]) -> String {
         var clause: [String] = []
 
         for join in joins {
@@ -456,15 +463,15 @@ open class GeneralSQLSerializer: SQLSerializer {
         return sql(clause)
     }
 
-    open func sql(_ join: Union) -> String {
+    open func sql(_ join: Join) -> String {
         var clause: [String] = []
 
         clause += "JOIN"
         clause += sql(join.foreign.entity)
         clause += "ON"
-        clause += "\(sql(join.local.entity)).\(sql(join.localKey))"
+        clause += "\(sql(join.local.entity)).\(sql(join.local.idKey))"
         clause += "="
-        clause += "\(sql(join.foreign.entity)).\(sql(join.foreignKey))"
+        clause += "\(sql(join.foreign.entity)).\(sql(join.local.foreignIdKey))"
 
         return sql(clause)
     }

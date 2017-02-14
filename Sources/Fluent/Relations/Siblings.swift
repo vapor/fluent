@@ -1,47 +1,54 @@
-public final class Siblings<T: Entity> {
-    fileprivate let _query: Query<T>
-    fileprivate let _left: Entity.Type
+/// Represents a many-to-many relationship
+/// through a Pivot table from the Local 
+/// entity to the Foreign entity.
+public final class Siblings<
+    Local: Entity, Foreign: Entity
+> {
+    /// This will be used to filter the 
+    /// collection of foreign entities related
+    /// to the local entity type.
+    let local: Local
 
-    public let localKey: String
-    public let foreignKey: String
-
-    public init<E: Entity>(entity: E, localKey: String?, foreignKey: String?) throws {
-        guard let ident = entity.id else {
-            throw RelationError.noIdentifier
-        }
-
-        let query = try T.query()
-
-        let localKey = localKey ?? T.idKey 
-        let foreignKey = foreignKey ?? "\(T.name)_\(T.idKey)"
-
-        self.localKey = localKey
-        self.foreignKey = foreignKey
-        
-        self._left = E.self
-
-        let pivot = Pivot<E, T>.self
-
-        try query.union(
-            pivot,
-            localKey: localKey,
-            foreignKey: foreignKey
-        )
-
-        try query.filter(pivot, "\(E.name)_\(E.idKey)", ident)
-
-        _query = query
+    /// Create a new Siblings relationsip using 
+    /// a Local and Foreign entity.
+    public init(
+        from local: Local,
+        to foreignType: Foreign.Type = Foreign.self
+    ) throws {
+        self.local = local
     }
 }
 
 extension Siblings: QueryRepresentable {
-    public func makeQuery() -> Query<T> {
-        return _query
+    /// Creates a Query from the Siblings relation.
+    /// This includes a pivot, join, and filter.
+    public func makeQuery() throws -> Query<Foreign> {
+        guard let localId = local.id else {
+            throw RelationError.idRequired(local)
+        }
+
+        let query = try Foreign.query()
+
+        let pivot = Pivot<Local, Foreign>.self
+        try query.join(pivot)
+        try query.filter(pivot, Local.foreignIdKey, localId)
+
+        return query
+    }
+}
+
+extension Siblings {
+    public func pivot() -> Pivot<Local, Foreign>.Type {
+        return Pivot<Local, Foreign>.self
     }
 }
 
 extension Entity {
-    public func siblings<T: Entity>(_ localKey: String? = nil, _ foreignKey: String? = nil) throws -> Siblings<T> {
-        return try Siblings(entity: self, localKey: localKey, foreignKey: foreignKey)
+    /// Creates a Siblings relation using the current
+    /// entity as the Local entity in the relation.
+    public func siblings<Foreign: Entity>(
+        type foreignType: Foreign.Type = Foreign.self
+    ) throws -> Siblings<Self, Foreign> {
+        return try Siblings(from: self)
     }
 }
