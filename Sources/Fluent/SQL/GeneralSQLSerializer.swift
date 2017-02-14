@@ -1,8 +1,6 @@
-/**
-    A generic SQL serializer.
-    This class can be subclassed by
-    specific SQL serializers.
-*/
+/// A generic SQL serializer.
+/// This class can be subclassed by
+/// specific SQL serializers.
 open class GeneralSQLSerializer: SQLSerializer {
     public let sql: SQL
 
@@ -63,6 +61,27 @@ open class GeneralSQLSerializer: SQLSerializer {
 
             if let limit = limit {
                 statement += sql(limit: limit)
+            }
+
+            return (
+                sql(statement),
+                values
+            )
+        case .count(let table, let filters, let unions):
+            var statement: [String] = []
+            var values: [Node] = []
+
+            statement += "SELECT COUNT(*) as _fluent_count FROM"
+            statement += sql(table)
+
+            if !unions.isEmpty {
+                statement += sql(unions)
+            }
+
+            if !filters.isEmpty {
+                let (filtersClause, filtersValues) = sql(filters)
+                statement += filtersClause
+                values += filtersValues
             }
 
             return (
@@ -228,7 +247,7 @@ open class GeneralSQLSerializer: SQLSerializer {
                 statement += "\(sql(filter.entity.entity)).\(sql(key))"
                 statement += sql(comparison)
                 statement += "?"
-    
+
                 /**
                     `.like` comparison operator requires additional
                     processing of `value`
@@ -253,6 +272,9 @@ open class GeneralSQLSerializer: SQLSerializer {
             let (clause, subvals) = sql(filters, relation: relation)
             statement += "(\(clause))"
             values += subvals
+        case .raw(command: let command, values: let subvalues):
+            statement += command
+            values += subvalues
         }
 
         return (
@@ -362,8 +384,7 @@ open class GeneralSQLSerializer: SQLSerializer {
                 subclause += "DROP " + sql(name)
             }
 
-            clause += sql(list: subclause)
-
+            clause += subclause.joined(separator: ", ")
 
             return sql(clause)
         case .create(let columns):
@@ -389,8 +410,30 @@ open class GeneralSQLSerializer: SQLSerializer {
 
         clause += sql(column.name)
         clause += sql(column.type)
+        
         if !column.optional {
             clause += "NOT NULL"
+        }
+        
+        if column.unique {
+            clause += "UNIQUE"
+        }
+
+        if let d = column.default {
+            let dc: String
+
+            switch d {
+            case .number(let n):
+                dc = "'" + n.description + "'"
+            case .null:
+                dc = "NULL"
+            case .bool(let b):
+                dc = b ? "TRUE" : "FALSE"
+            default:
+                dc = "'" + (d.string ?? "") + "'"
+            }
+
+            clause += "DEFAULT \(dc)"
         }
 
         return clause.joined(separator: " ")
@@ -399,8 +442,17 @@ open class GeneralSQLSerializer: SQLSerializer {
 
     open func sql(_ type: Schema.Field.DataType) -> String {
         switch type {
-        case .id:
-            return "INTEGER PRIMARY KEY"
+        case .id(let type):
+            let typeString: String
+            switch type {
+            case .int:
+                typeString = "INTEGER"
+            case .uuid:
+                typeString = "STRING"
+            case .custom(let dataType):
+                typeString = dataType
+            }
+            return typeString  + " PRIMARY KEY"
         case .int:
             return "INTEGER"
         case .string(_):
@@ -411,6 +463,8 @@ open class GeneralSQLSerializer: SQLSerializer {
             return "BOOL"
         case .data:
             return "BLOB"
+        case .custom(let type):
+            return type
         }
     }
 
@@ -437,7 +491,7 @@ open class GeneralSQLSerializer: SQLSerializer {
         )
     }
 
-    open func sql(_ joins: [Union]) -> String {
+    open func sql(_ joins: [Join]) -> String {
         var clause: [String] = []
 
         for join in joins {
@@ -447,15 +501,15 @@ open class GeneralSQLSerializer: SQLSerializer {
         return sql(clause)
     }
 
-    open func sql(_ join: Union) -> String {
+    open func sql(_ join: Join) -> String {
         var clause: [String] = []
 
         clause += "JOIN"
         clause += sql(join.foreign.entity)
         clause += "ON"
-        clause += "\(sql(join.local.entity)).\(sql(join.localKey))"
+        clause += "\(sql(join.local.entity)).\(sql(join.local.idKey))"
         clause += "="
-        clause += "\(sql(join.foreign.entity)).\(sql(join.foreignKey))"
+        clause += "\(sql(join.foreign.entity)).\(sql(join.local.foreignIdKey))"
 
         return sql(clause)
     }

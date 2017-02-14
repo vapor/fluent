@@ -3,20 +3,26 @@ extension SQL {
         switch query.action {
         case .fetch:
             self = .select(
-                table: query.entity,
+                table: T.entity,
                 filters: query.filters,
-                joins: query.unions,
+                joins: query.joins,
                 orders: query.sorts,
                 limit: query.limit
             )
+        case .count:
+            self = .count(
+                table: T.entity,
+                filters: query.filters,
+                joins: query.joins
+            )
         case .create:
             self = .insert(
-                table: query.entity,
+                table: T.entity,
                 data: query.data
             )
         case .delete:
             self = .delete(
-                table: query.entity,
+                table: T.entity,
                 filters: query.filters,
                 joins: query.unions,
                 orders: query.sorts,
@@ -24,7 +30,7 @@ extension SQL {
             )
         case .modify:
             self = .update(
-                table: query.entity,
+                table: T.entity,
                 filters: query.filters,
                 joins: query.unions,
                 data: query.data

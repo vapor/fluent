@@ -51,7 +51,41 @@ class PreparationTests: XCTestCase {
         }
 
         do {
-            try database.prepare(TestPreparation.self)
+            try TestPreparation.prepare(database)
+        } catch {
+            XCTFail("Preparation failed: \(error)")
+        }
+    }
+    
+    func testStringIdentifiedModelPreparation() {
+        let driver = TestSchemaDriver { schema in
+            guard case .create(let entity, let fields) = schema else {
+                XCTFail("Invalid schema")
+                return
+            }
+            
+            XCTAssertEqual(entity, "stringidentifiedthings")
+            
+            guard fields.count == 1 else {
+                XCTFail("Invalid field count")
+                return
+            }
+            
+            guard case .id(let keyType) = fields[0].type else {
+                XCTFail("Invalid first field \(fields[0])")
+                return
+            }
+            
+            guard case .custom(let length) = keyType, length == "STRING(10)" else {
+                XCTFail("Invalid key type \(keyType) for id")
+                return
+            }
+        }
+        
+        let database = Database(driver)
+        
+        do {
+            try StringIdentifiedThing.prepare(database)
         } catch {
             XCTFail("Preparation failed: \(error)")
         }
@@ -93,7 +127,7 @@ class PreparationTests: XCTestCase {
         let database = Database(driver)
 
         do {
-            try database.prepare(TestModel.self)
+            try TestModel.prepare(database)
         } catch {
             XCTFail("Preparation failed: \(error)")
         }
@@ -124,7 +158,7 @@ final class TestModel: Entity {
 
     static func prepare(_ database: Database) throws {
         try database.create(entity) { builder in
-            builder.id()
+            builder.id(for: self)
             builder.string("name")
             builder.int("age")
         }
@@ -151,18 +185,34 @@ class TestPreparation: Preparation {
 }
 
 class TestSchemaDriver: Driver {
+    var idType: IdentifierType = .int
     var idKey: String = "id"
-
-    @discardableResult
-    func query<T: Entity>(_ query: Query<T>) throws -> Node { return .null }
 
     var testClosure: (Schema) -> ()
     init(testClosure: @escaping (Schema) -> ()) {
         self.testClosure = testClosure
     }
+    
+    func makeConnection() throws -> Connection {
+        return TestSchemaConnection(driver: self)
+    }
+}
+
+struct TestSchemaConnection: Connection {
+    public var closed: Bool = false
+    
+    var driver: TestSchemaDriver
+    
+    init(driver: TestSchemaDriver) {
+        self.driver = driver
+    }
+    
+    @discardableResult
+    func query<T: Entity>(_ query: Query<T>) throws -> Node { return .null }
+
 
     func schema(_ schema: Schema) throws {
-        testClosure(schema)
+        driver.testClosure(schema)
     }
 
 

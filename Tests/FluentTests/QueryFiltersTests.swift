@@ -6,6 +6,8 @@ class QueryFiltersTests: XCTestCase {
         ("testBasalQuery", testBasalQuery),
         ("testBasicQuery", testBasicQuery),
         ("testLikeQuery", testLikeQuery),
+        ("testCountQuery", testCountQuery),
+        ("testDeleteQuery", testDeleteQuery),
     ]
 
     override func setUp() {
@@ -22,9 +24,7 @@ class QueryFiltersTests: XCTestCase {
         XCTAssert(query.filters.count == 0, "Filters should be empty")
         XCTAssert(query.data == nil, "Data should be empty")
         XCTAssert(query.limit == nil, "Limit should be empty")
-        XCTAssert(query.entity == DummyModel.entity, "Entity should match")
     }
-
 
     func testBasicQuery() throws {
         let query = try DummyModel.query().filter("name", "Vapor")
@@ -64,6 +64,19 @@ class QueryFiltersTests: XCTestCase {
         XCTAssert(comparison == .hasPrefix, "Position should be start")
         XCTAssert(value.string == "Vap", "Value should be Vap")
     }
+ 
+    func testCountQuery() throws {
+        let query = try DummyModel.query().filter("id", 5)
+
+        do {
+            let numberOfResults = try query.count()
+            XCTAssertEqual(numberOfResults, 0)
+        } catch {
+            XCTFail("Count should not have failed")
+        }
+
+        XCTAssert(query.action == .count)
+    }
 
     func testDeleteQuery() throws {
         let query = try DummyModel.query().filter("id", 5)
@@ -75,6 +88,11 @@ class QueryFiltersTests: XCTestCase {
         }
 
         XCTAssert(query.action == .delete)
+    }
+  
+    func testLimitQuery() throws {
+        let query = try DummyModel.query().limit(5)
+        XCTAssertEqual(query.limit?.count, 5)
     }
 
 }

@@ -148,6 +148,10 @@ extension Node {
             case .or:
                 return passesOne(filters)
             }
+        case .raw(command: let command, values: let values):
+            // TODO: Throw error, memory DB doesn't support raw?
+            print("not handling \(command) values \(values)")
+            return true
         }
         return false
 

@@ -22,8 +22,26 @@ extension MemoryDriver {
             data = data.fails(filters)
         }
 
-        func fetch(_ filters: [Filter], _ sorts: [Sort]) -> [Node] {
-            return data.passes(filters).sort(sorts)
+        func fetch(_ filters: [Filter], _ sorts: [Sort], _ limit: Limit? = nil) -> [Node] {
+            var dataToReturn = data.passes(filters).sort(sorts)
+            
+            if let limit = limit {
+                if dataToReturn.count > 0 {
+                    var count = limit.count + limit.offset - 1
+                    
+                    if limit.offset > dataToReturn.count {
+                        return []
+                    }
+                    
+                    if count >= dataToReturn.count {
+                        count = dataToReturn.count - 1
+                    }
+                    
+                    dataToReturn = Array(dataToReturn[limit.offset...count])
+                }
+            }
+            
+            return dataToReturn
         }
 
         func modify(_ update: Node, filters: [Filter]) -> [Node] {
@@ -39,9 +57,9 @@ extension MemoryDriver {
             return modified
         }
 
-        init() {
-            increment = 0
-            data = []
+        init(data: [Node] = [], increment: Int = 0) {
+            self.data = data
+            self.increment = increment
         }
     }
 }

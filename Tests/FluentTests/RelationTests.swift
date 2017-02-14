@@ -17,6 +17,11 @@ class RelationTests: XCTestCase {
     }
 
     func testHasMany() throws {
+        Atom.database = database
+        Proton.database = database
+        Nucleus.database = database
+        Group.database = database
+        
         let hydrogen = try Atom(node: [
             "id": 42,
             "name": "Hydrogen",
@@ -48,7 +53,7 @@ class RelationTests: XCTestCase {
         water.id = 1337
         try water.save()
 
-        var pivot = Pivot<Atom, Compound>(hydrogen, water)
+        var pivot = try Pivot<Atom, Compound>(hydrogen, water)
         try pivot.save()
 
         _ = try hydrogen.compounds().all()
@@ -64,7 +69,7 @@ class RelationTests: XCTestCase {
         Nucleus.database = database
 
         do {
-            let query = try hydrogen.children("nookleus_id", Nucleus.self).makeQuery()
+            let query = try hydrogen.children(type: Nucleus.self).makeQuery()
             let (sql, _) = GeneralSQLSerializer(sql: query.sql).serialize()
             print(sql)
         } catch {

@@ -1,9 +1,7 @@
-/**
-    Defines a `Filter` that can be 
-    added on fetch, delete, and update
-    operations to limit the set of 
-    data affected.
-*/
+/// Defines a `Filter` that can be
+/// added on fetch, delete, and update
+/// operations to limit the set of
+/// data affected.
 public struct Filter {
     public enum Relation {
         case and, or
@@ -13,6 +11,7 @@ public struct Filter {
         case compare(String, Comparison, Node)
         case subset(String, Scope, [Node])
         case group(Relation, [Filter])
+        case raw(command: String, values: [Node])
     }
 
     public init(_ entity: Entity.Type, _ method: Method) {
@@ -34,6 +33,8 @@ extension Filter: CustomStringConvertible {
             return "(\(entity)) \(field) \(scope) \(valueDescriptions)"
         case .group(let relation, let filters):
             return filters.map { $0.description }.joined(separator: "\(relation)")
+        case .raw(command: let query, values: let values):
+            return "\(query) \(values)"
         }
     }
 }
@@ -76,13 +77,11 @@ extension QueryRepresentable {
 
     //MARK: Filter
 
-    /**
-        Adds a `.compare` filter to the query's
-        filters.
-
-        Used for filtering results based on how
-        a result's value compares to the supplied value.
-    */
+    /// Adds a `.compare` filter to the query's
+    /// filters.
+    ///
+    /// Used for filtering results based on how
+    /// a result's value compares to the supplied value.
     @discardableResult
     public func filter(
         _ field: String,
@@ -92,13 +91,11 @@ extension QueryRepresentable {
         return try makeQuery().filter(T.self, field, comparison, value)
     }
 
-    /**
-        Adds a `.subset` filter to the query's
-        filters.
-
-        Used for filtering results based on whether
-        a result's value is or is not in a set.
-    */
+    /// Adds a `.subset` filter to the query's
+    /// filters.
+    ///
+    /// Used for filtering results based on whether
+    /// a result's value is or is not in a set.
     @discardableResult
     public func filter(
         _ field: String,
@@ -109,9 +106,7 @@ extension QueryRepresentable {
     }
 
 
-    /**
-        Shortcut for creating a `.equals` filter.
-    */
+    /// Shortcut for creating a `.equals` filter.
     @discardableResult
     public func filter(
         _ field: String,
@@ -120,12 +115,25 @@ extension QueryRepresentable {
         return try makeQuery().filter(T.self, field, .equals, value)
     }
 
-
+    /// Shortcut for creating a `.contains` filter.
     @discardableResult
     public func filter(
         _ field: String,
         contains value: NodeRepresentable
     ) throws -> Query<Self.T> {
         return try filter(T.self, field, .contains, value)
+    }
+}
+
+extension QueryRepresentable {
+    /// Shortcut for creating a `.raw` filter.
+    @discardableResult
+    public func raw(command: String, values: [NodeRepresentable] = []) throws -> Query<Self.T> {
+        let query = try makeQuery()
+
+        let values = try values.map { try $0.makeNode() }
+        let filter = Filter(T.self, .raw(command: command, values: values))
+        query.filters.append(filter)
+        return query
     }
 }

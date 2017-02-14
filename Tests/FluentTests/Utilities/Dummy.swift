@@ -21,6 +21,8 @@ final class DummyModel: Entity {
 }
 
 class DummyDriver: Driver {
+    var idType: IdentifierType = .int
+
     var idKey: String {
         return "foo"
     }
@@ -28,8 +30,20 @@ class DummyDriver: Driver {
     enum Error: Swift.Error {
         case broken
     }
+    
+    func makeConnection() throws -> Connection {
+        return DummyConnection()
+    }
+}
+
+class DummyConnection: Connection {
+    public var closed: Bool = false
 
     func query<T: Entity>(_ query: Query<T>) throws -> Node {
+        if query.action == .count {
+            return 0
+        }
+        
         return .array([])
     }
 

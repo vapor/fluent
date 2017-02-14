@@ -2,6 +2,7 @@
 
 import XCTest
 @testable import FluentTests
+@testable import FluentTesterTests
 
 XCTMain([
 	testCase(MemoryTests.allTests),
@@ -12,7 +13,8 @@ XCTMain([
     testCase(RelationTests.allTests),
     testCase(SchemaCreateTests.allTests),
     testCase(SQLSerializerTests.allTests),
-    testCase(UnionTests.allTests)
+    testCase(JoinTests.allTests),
+    testCase(MemoryBenchmarkTests.allTests)
 ])
 
 #endif

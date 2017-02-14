@@ -1,9 +1,6 @@
 extension Schema {
-    /**
-        Creates a Schema.
-     
-        Cannot modify or delete fields.
-    */
+    /// Creates schema.
+    /// Cannot delete or modify fields.
     public class Creator {
         public let entity: String
         public var fields: [Field]
@@ -13,47 +10,110 @@ extension Schema {
             fields = []
         }
 
-        public func id(
-            _ name: String = "id",
-            optional: Bool = false
-        ) {
-            fields += Field(name: name, type: .id, optional: optional)
+        public func id<E: Entity>(for entityType: E.Type) {
+            fields += Field(
+                name: E.idKey,
+                type: .id(type: E.idType)
+            )
+        }
+
+        public func foreignId<E: Entity>(for entityType: E.Type) {
+            fields += Field(
+                name: E.foreignIdKey,
+                type: .id(type: E.idType)
+            )
         }
 
         public func int(
             _ name: String,
-            optional: Bool = false
+            optional: Bool = false,
+            unique: Bool = false,
+            default: NodeRepresentable? = nil
         ) {
-            fields += Field(name: name, type: .int, optional: optional)
+            fields += Field(
+                name: name, 
+                type: .int,
+                optional: optional,
+                unique: unique,
+                default: `default`
+            )
         }
 
         public func string(
             _ name: String,
             length: Int? = nil,
-            optional: Bool = false
+            optional: Bool = false,
+            unique: Bool = false,
+            default: NodeRepresentable? = nil
         ) {
-            fields += Field(name: name, type: .string(length: length), optional: optional)
+            fields += Field(
+                name: name,
+                type: .string(length: length),
+                optional: optional,
+                unique: unique,
+                default: `default`
+            )
         }
 
         public func double(
             _ name: String,
-            optional: Bool = false
+            optional: Bool = false,
+            unique: Bool = false,
+            default: NodeRepresentable? = nil
         ) {
-            fields += Field(name: name, type: .double, optional: optional)
+            fields += Field(
+                name: name,
+                type: .double,
+                optional: optional,
+                unique: unique,
+                default: `default`
+            )
         }
 
         public func bool(
             _ name: String,
-            optional: Bool = false
+            optional: Bool = false,
+            unique: Bool = false,
+            default: NodeRepresentable? = nil
         ) {
-            fields += Field(name: name, type: .bool, optional: optional)
+            fields += Field(
+                name: name,
+                type: .bool,
+                optional: optional,
+                unique: unique,
+                default: `default`
+            )
         }
 
         public func data(
             _ name: String,
-            optional: Bool = false
+            optional: Bool = false,
+            unique: Bool = false,
+            default: NodeRepresentable? = nil
         ) {
-            fields += Field(name: name, type: .data, optional: optional)
+            fields += Field(
+                name: name,
+                type: .data,
+                optional: optional,
+                unique: unique,
+                default: `default`
+            )
+        }
+
+        public func custom(
+            _ name: String,
+            type: String,
+            optional: Bool = false,
+            unique: Bool = false,
+            default: NodeRepresentable? = nil
+        ) {
+            fields += Field(
+                name: name,
+                type: .custom(type: type),
+                optional: optional,
+                unique: unique,
+                default: `default`
+            )
         }
 
         public var schema: Schema {
@@ -61,12 +121,35 @@ extension Schema {
         }
 
         // MARK: Relations
-
         public func parent<E: Entity>(
             _ entity: E.Type = E.self,
-            optional: Bool = false
+            optional: Bool = false,
+            unique: Bool = false,
+            default: NodeRepresentable? = nil
         ) {
-            fields += Field(name: "\(entity.name)_id", type: .int, optional: optional)
+            parent(
+                idKey: E.idKey,
+                idType: E.idType,
+                optional: optional, 
+                unique: unique, 
+                default: `default`
+            )
+        }
+
+        public func parent(
+            idKey: String,
+            idType: IdentifierType,
+            optional: Bool = false,
+            unique: Bool = false,
+            default: NodeRepresentable? = nil
+        ) {
+            fields += Field(
+                name: idKey,
+                type: .id(type: idType),
+                optional: optional,
+                unique: unique,
+                default: `default`
+            )
         }
     }
 }

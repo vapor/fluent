@@ -5,7 +5,7 @@ final class User: Entity {
     
     static func prepare(_ database: Fluent.Database) throws {
         try database.create(entity) { builder in
-            builder.id()
+            builder.id(for: self)
             builder.string("name")
             builder.string("email")
         }
@@ -25,14 +25,14 @@ final class User: Entity {
     }
 
     init(node: Node, in context: Context) throws {
-        id = try node.extract("id")
+        id = try node.extract(type(of: self).idKey)
         name = try node.extract("name")
         email = try node.extract("email")
     }
 
     func makeNode(context: Context = EmptyNode) throws -> Node {
         return try Node(node: [
-            "id": id,
+            type(of: self).idKey: id,
             "name": name,
             "email": email
         ])

@@ -1,8 +1,6 @@
 extension Filter {
-    /**
-        Describes the various operators for
-        comparing values.
-    */
+    /// Describes the various operators for
+    /// comparing values.
     public enum Comparison {
         case equals
         case greaterThan
