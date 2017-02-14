@@ -4,6 +4,7 @@ public final class Storage {
     // doing id next, there's some other issues cuz that one needs to be publicly settable
     //    private var id: Node?
     fileprivate var exists: Bool = false
+    fileprivate var id: Node? = nil
 }
 
 public protocol Storable {
@@ -25,13 +26,28 @@ extension Storable {
             storage.exists = newValue
         }
     }
+
+    public var id: Node? {
+        get {
+            return storage.id
+        }
+        set {
+            // TODO: Should we log errs if storage.id already has value? 
+            // Users shouldn't overwrite id
+            storage.id = newValue
+        }
+    }
+}
+
+extension Entity {
+    public func set(id node: Node?) {
+        self.storage.id = node?[Self.idKey] ?? node
+    }
 }
 
 /// Represents an entity that can be
 /// stored and retrieved from the `Database`.
 public protocol Entity: Preparation, NodeConvertible, Storable {
-    // DELETE ME
-    var id: Node? { get set }
 
     /// The plural relational name of this model.
     /// Used as the collection or table name.
