@@ -106,7 +106,7 @@ final class TestModel: Entity {
     var id: Node?
     var name: String
     var age: Int
-    var exists: Bool = false
+    let storage = Storage()
 
     init(node: Node, in context: Context) throws {
         id = try node.extract("id")

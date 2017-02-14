@@ -1,7 +1,7 @@
 import Fluent
 
 struct CustomIdKey: Entity {
-    var exists: Bool = false
+    let storage = Storage()
     
     static var idKey: String {
         return "custom_id"
