@@ -13,7 +13,8 @@ public final class Siblings<
     /// a Local and Foreign entity.
     public init(
         localId: Node,
-        foreign: Foreign.Type = Foreign.self
+        localType: Local.Type = Local.self,
+        foreignType: Foreign.Type = Foreign.self
     ) throws {
         self.localId = localId
     }
@@ -43,7 +44,7 @@ extension Entity {
     /// Creates a Siblings relation using the current
     /// entity as the Local entity in the relation.
     public func siblings<Foreign: Entity>(
-        _ foreign: Foreign.Type = Foreign.self
+        type foreignType: Foreign.Type = Foreign.self
     ) throws -> Siblings<Self, Foreign> {
         guard let localId = id else {
             throw EntityError.idRequired(self)

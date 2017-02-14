@@ -12,6 +12,7 @@ public final class Children<
     /// Create a new Children relation.
     public init(
         parentId: Node,
+        parentType: Parent.Type = Parent.self,
         childType: Child.Type = Child.self
     ) {
         self.parentId = parentId
@@ -26,7 +27,7 @@ extension Children: QueryRepresentable {
 
 extension Entity {
     public func children<Child: Entity>(
-        _ childType: Child.Type = Child.self
+        type childType: Child.Type = Child.self
     ) throws -> Children<Self, Child> {
         guard let parentId = id else {
             throw EntityError.idRequired(self)
