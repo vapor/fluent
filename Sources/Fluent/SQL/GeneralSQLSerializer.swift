@@ -372,6 +372,10 @@ open class GeneralSQLSerializer: SQLSerializer {
 
         clause += sql(column.name)
         clause += sql(column.type)
+
+        if column.primary {
+            clause += "PRIMARY KEY"
+        }
         
         if !column.optional {
             clause += "NOT NULL"
@@ -414,7 +418,7 @@ open class GeneralSQLSerializer: SQLSerializer {
             case .custom(let dataType):
                 typeString = dataType
             }
-            return typeString  + " PRIMARY KEY"
+            return typeString
         case .int:
             return "INTEGER"
         case .string(_):
