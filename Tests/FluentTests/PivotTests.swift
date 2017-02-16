@@ -20,7 +20,7 @@ class PivotTests: XCTestCase {
         compound.id = 1337
         compound.exists = true
 
-        try atom.compounds().pivot().attach(atom, compound)
+        try atom.compounds.add(compound)
 
 
         guard let query = lqd.lastQuery else {

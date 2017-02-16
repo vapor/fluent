@@ -32,8 +32,8 @@ public final class Atom: Entity {
         ])
     }
 
-    public func compounds() throws -> Siblings<Atom, Compound> {
-        return try siblings()
+    var compounds: Siblings<Atom, Compound, Pivot<Atom, Compound>> {
+        return siblings()
     }
 
     public static func prepare(_ database: Database) throws {

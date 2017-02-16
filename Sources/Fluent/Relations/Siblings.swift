@@ -2,8 +2,8 @@
 /// through a Pivot table from the Local 
 /// entity to the Foreign entity.
 public final class Siblings<
-    Local: Entity, Foreign: Entity
-> {
+    Local: Entity, Foreign: Entity, Through: PivotProtocol & Entity
+> where Through.Left == Local, Through.Right == Foreign {
     /// This will be used to filter the 
     /// collection of foreign entities related
     /// to the local entity type.
@@ -13,9 +13,24 @@ public final class Siblings<
     /// a Local and Foreign entity.
     public init(
         from local: Local,
-        to foreignType: Foreign.Type = Foreign.self
-    ) throws {
+        to foreignType: Foreign.Type = Foreign.self,
+        through pivotType: Through.Type = Through.self
+    ) {
         self.local = local
+    }
+}
+
+extension Siblings {
+    public func add(_ foreign: Foreign) throws {
+        try Through.attach(local, foreign)
+    }
+
+    public func remove(_ foreign: Foreign) throws {
+        try Through.detach(local, foreign)
+    }
+
+    public func isAttached(_ foreign: Foreign) throws -> Bool {
+        return try Through.related(local, foreign)
     }
 }
 
@@ -29,7 +44,7 @@ extension Siblings: QueryRepresentable {
 
         let query = try Foreign.query()
 
-        let pivot = Pivot<Local, Foreign>.self
+        let pivot = Through.self
         try query.join(pivot)
         try query.filter(pivot, Local.foreignIdKey, localId)
 
@@ -37,18 +52,17 @@ extension Siblings: QueryRepresentable {
     }
 }
 
-extension Siblings {
-    public func pivot() -> Pivot<Local, Foreign>.Type {
-        return Pivot<Local, Foreign>.self
-    }
-}
-
 extension Entity {
     /// Creates a Siblings relation using the current
     /// entity as the Local entity in the relation.
-    public func siblings<Foreign: Entity>(
-        type foreignType: Foreign.Type = Foreign.self
-    ) throws -> Siblings<Self, Foreign> {
-        return try Siblings(from: self)
+    public func siblings<
+        Foreign: Entity, Through: PivotProtocol & Entity
+    > (
+        to foreignType: Foreign.Type = Foreign.self,
+        through pivotType: Through.Type = Through.self
+    ) -> Siblings<Self, Foreign, Through>
+        where Through.Left == Self, Through.Right == Foreign
+    {
+        return Siblings(from: self)
     }
 }

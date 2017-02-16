@@ -123,7 +123,7 @@ class JoinTests: XCTestCase {
         atom.id = Node(42)
 
         do {
-            _ = try atom.compounds().all()
+            _ = try atom.compounds.all()
         }
 
         if let sql = lqd.lastQuery {
