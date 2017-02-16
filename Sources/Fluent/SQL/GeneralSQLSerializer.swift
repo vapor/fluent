@@ -371,7 +371,7 @@ open class GeneralSQLSerializer: SQLSerializer {
         var clause: [String] = []
 
         clause += sql(column.name)
-        clause += sql(column.type, primary: column.primary)
+        clause += sql(column.type, primaryKey: column.primaryKey)
         
         if !column.optional {
             clause += "NOT NULL"
@@ -402,7 +402,7 @@ open class GeneralSQLSerializer: SQLSerializer {
     }
 
 
-    open func sql(_ type: Schema.Field.DataType, primary: Bool) -> String {
+    open func sql(_ type: Schema.Field.DataType, primaryKey: Bool) -> String {
         switch type {
         case .id(let type):
             let typeString: String
@@ -414,7 +414,7 @@ open class GeneralSQLSerializer: SQLSerializer {
             case .custom(let dataType):
                 typeString = dataType
             }
-            if primary {
+            if primaryKey {
                 return typeString + " PRIMARY KEY"
             } else {
                 return typeString

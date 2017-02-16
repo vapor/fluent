@@ -7,7 +7,7 @@ extension Schema {
         public let optional: Bool
         public let unique: Bool
         public let `default`: Node?
-        public let primary: Bool
+        public let primaryKey: Bool
 
         public enum DataType {
             case id(type: IdentifierType)
@@ -25,14 +25,14 @@ extension Schema {
             optional: Bool = false,
             unique: Bool = false,
             default: Node? = nil,
-            primary: Bool = false
+            primaryKey: Bool = false
         ) {
             self.name = name
             self.type = type
             self.optional = optional
             self.unique = unique
             self.default = `default`
-            self.primary = primary
+            self.primaryKey = primaryKey
         }
         
         public init(
@@ -41,7 +41,7 @@ extension Schema {
             optional: Bool = false,
             unique: Bool = false,
             default: NodeRepresentable? = nil,
-            primary: Bool = false
+            primaryKey: Bool = false
         ) {
             let node: Node?
             
@@ -57,7 +57,7 @@ extension Schema {
                 optional: optional,
                 unique: unique,
                 default: node,
-                primary: primary
+                primaryKey: primaryKey
             )
         }
     }

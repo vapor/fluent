@@ -14,7 +14,7 @@ extension Schema {
             fields += Field(
                 name: E.idKey,
                 type: .id(type: E.idType),
-                primary: true
+                primaryKey: true
             )
         }
 
