@@ -13,7 +13,8 @@ extension Schema {
         public func id<E: Entity>(for entityType: E.Type) {
             fields += Field(
                 name: E.idKey,
-                type: .id(type: E.idType)
+                type: .id(type: E.idType),
+                primaryKey: true
             )
         }
 

@@ -122,7 +122,7 @@ extension Entity {
 
     /// See Entity.idType
     public static var idType: IdentifierType {
-        return database?.driver.idType ?? .uuid
+        return database?.driver.idType ?? .int
     }
 
     /// See Entity.idKey

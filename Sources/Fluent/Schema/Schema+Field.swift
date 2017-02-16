@@ -2,11 +2,12 @@ extension Schema {
     /// Various types of fields
     /// that can be used in a Schema.
     public struct Field {
-        public var name: String
-        public var type: DataType
-        public var optional: Bool
-        public var unique: Bool
-        public var `default`: Node?
+        public let name: String
+        public let type: DataType
+        public let optional: Bool
+        public let unique: Bool
+        public let `default`: Node?
+        public let primaryKey: Bool
 
         public enum DataType {
             case id(type: IdentifierType)
@@ -23,13 +24,15 @@ extension Schema {
             type: DataType,
             optional: Bool = false,
             unique: Bool = false,
-            default: Node? = nil
+            default: Node? = nil,
+            primaryKey: Bool = false
         ) {
             self.name = name
             self.type = type
             self.optional = optional
             self.unique = unique
             self.default = `default`
+            self.primaryKey = primaryKey
         }
         
         public init(
@@ -37,7 +40,8 @@ extension Schema {
             type: DataType,
             optional: Bool = false,
             unique: Bool = false,
-            default: NodeRepresentable? = nil
+            default: NodeRepresentable? = nil,
+            primaryKey: Bool = false
         ) {
             let node: Node?
             
@@ -52,7 +56,8 @@ extension Schema {
                 type: type,
                 optional: optional,
                 unique: unique,
-                default: node
+                default: node,
+                primaryKey: primaryKey
             )
         }
     }
