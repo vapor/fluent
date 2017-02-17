@@ -421,6 +421,8 @@ open class GeneralSQLSerializer: SQLSerializer {
             }
         case .int:
             return "INTEGER"
+        case .bigInt:
+            return "BIGINT"
         case .string(_):
             return "STRING"
         case .double:

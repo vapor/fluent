@@ -12,6 +12,7 @@ extension Schema {
         public enum DataType {
             case id(type: IdentifierType)
             case int
+            case bigInt
             case string(length: Int?)
             case double
             case bool
