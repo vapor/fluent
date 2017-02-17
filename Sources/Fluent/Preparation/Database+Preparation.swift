@@ -1,8 +1,6 @@
 extension Database {
     public func prepare(_ preparations: [Preparation.Type]) throws {
-        for preparation in preparations {
-            try prepare(preparation)
-        }
+        try preparations.forEach(prepare)
     }
 
     public func hasPrepared(_ preparation: Preparation.Type) throws -> Bool {

@@ -134,10 +134,10 @@ extension Entity {
 
 // MARK: Relatable
 
-extension Entity {
+extension Storable where Self: Entity {
     /// See Entity.idKey -- instance implementation of static var
     public var idKey: String {
-        return type(of: self).idKey
+        return Self.idKey
     }
 }
 

@@ -14,7 +14,7 @@ extension PivotProtocol where Left: PivotProtocol, Self: Entity {
         let result = try Left
             .query()
             .join(self)
-            .filter(Left.self, Left.Left.foreignIdKey, leftId)
+            .filter(Left.self, Left.Left.foreignIdKey == leftId)
             .filter(Left.self, Left.Right.foreignIdKey, middleId)
             .filter(self, Right.foreignIdKey, rightId)
             .first()
