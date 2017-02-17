@@ -135,6 +135,13 @@ extension Entity {
 // MARK: Relatable
 
 extension Entity {
+    /// See Entity.idKey -- instance implementation of static var
+    public var idKey: String {
+        return type(of: self).idKey
+    }
+}
+
+extension Entity {
     /// See Entity.entity
     public static var entity: String {
         return name + "s"
@@ -153,11 +160,6 @@ extension Entity {
     /// See Entity.idKey
     public static var idKey: String {
         return database?.driver.idKey ?? "id"
-    }
-
-    /// See Entity.idKey -- instance implementation of static var
-    public var idKey: String {
-        return Self.idKey
     }
 
     /// See Entity.foreignIdKey
