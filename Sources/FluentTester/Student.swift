@@ -1,15 +1,13 @@
 import Fluent
 
 final class Student: Entity {
-    var id: Node?
-    
     var name: String
     var age: Int
     var ssn: String
     var donor: Bool
     var meta: Node
     
-    var exists = false
+    let storage = Storage()
     
     init(name: String, age: Int, ssn: String, donor: Bool, meta: Node) {
         self.name = name
@@ -20,17 +18,18 @@ final class Student: Entity {
     }
     
     init(node: Node, in context: Context) throws {
-        id = try node.extract("id")
         name = try node.extract("name")
         age = try node.extract("age")
         ssn = try node.extract("ssn")
         donor = try node.extract("donor")
         meta = try node.extract("meta")
+
+        id = try node.extract(idKey)
     }
     
     func makeNode(context: Context) throws -> Node {
         return try Node(node: [
-            "id": id,
+            idKey: id,
             "name": name,
             "age": age,
             "ssn": ssn,

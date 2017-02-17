@@ -1,9 +1,9 @@
 import Fluent
 
 final class Nucleus: Entity {
-    var exists: Bool = false
+    let storage = Storage()
     static var entity = "nuclei"
-    var id: Node?
+
     init(node: Node, in context: Context) throws { }
 
     func makeNode(context: Context = EmptyNode) -> Node { return .null }

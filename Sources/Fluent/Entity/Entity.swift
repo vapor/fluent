@@ -1,9 +1,43 @@
+public final class Storage {
+    public init() {}
+
+    fileprivate var exists: Bool = false
+    fileprivate var id: Node? = nil
+}
+
+public protocol Storable: class {
+    /// General implementation should just be `let storage = Storage()`
+    var storage: Storage { get }
+}
+
+extension Storable {
+    /// Whether or not entity was retrieved from database.
+    ///
+    /// This value shouldn't be interacted w/ external users
+    /// w/o explicit knowledge.
+    ///
+    public internal(set) var exists: Bool {
+        get {
+            return storage.exists
+        }
+        set {
+            storage.exists = newValue
+        }
+    }
+
+    public var id: Node? {
+        get {
+            return storage.id
+        }
+        set {
+            storage.id = newValue
+        }
+    }
+}
+
 /// Represents an entity that can be
 /// stored and retrieved from the `Database`.
-public protocol Entity: Preparation, NodeConvertible {
-    // DELETE ME
-    var id: Node? { get set }
-    var exists: Bool { get set }
+public protocol Entity: class, Preparation, NodeConvertible, Storable {
 
     /// The plural relational name of this model.
     /// Used as the collection or table name.
@@ -68,8 +102,8 @@ extension Entity {
 extension Entity {
     /// Persists the entity into the
     /// data store and sets the `id` property.
-    public mutating func save() throws {
-        try Self.query().save(&self)
+    public func save() throws {
+        try Self.query().save(self)
     }
 
     /// Deletes the entity from the data
@@ -98,16 +132,14 @@ extension Entity {
     }
 }
 
-// MARK: Deprecated
+// MARK: Relatable
+
 extension Entity {
-    public var exists: Bool {
-        // TODO: Implement me
-        get { return false }
-        set { }
+    /// See Entity.idKey -- instance implementation of static var
+    public var idKey: String {
+        return type(of: self).idKey
     }
 }
-
-// MARK: Relatable
 
 extension Entity {
     /// See Entity.entity

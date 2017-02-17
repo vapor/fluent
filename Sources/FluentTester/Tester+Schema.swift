@@ -9,7 +9,7 @@ extension Tester {
             try? Student.revert(database)
         }
         
-        var bob = Student(
+        let bob = Student(
             name: "Bob",
             age: 22,
             ssn: "382482",

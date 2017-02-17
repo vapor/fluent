@@ -66,7 +66,7 @@ class QueryFiltersTests: XCTestCase {
     }
  
     func testCountQuery() throws {
-        let query = try DummyModel.query().filter("id", 5)
+        let query = try DummyModel.query().filter(DummyModel.idKey, 5)
 
         do {
             let numberOfResults = try query.count()
@@ -79,7 +79,7 @@ class QueryFiltersTests: XCTestCase {
     }
 
     func testDeleteQuery() throws {
-        let query = try DummyModel.query().filter("id", 5)
+        let query = try DummyModel.query().filter(DummyModel.idKey, 5)
 
         do {
             try query.delete()

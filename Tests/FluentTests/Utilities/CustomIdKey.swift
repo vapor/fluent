@@ -1,7 +1,7 @@
 import Fluent
 
-struct CustomIdKey: Entity {
-    var exists: Bool = false
+final class CustomIdKey: Entity {
+    let storage = Storage()
     
     static var idKey: String {
         return "custom_id"
@@ -17,22 +17,21 @@ struct CustomIdKey: Entity {
         try database.delete(entity)
     }
     
-    var id: Fluent.Node?
     var label: String
     
     init(id: Node?, label: String) {
-        self.id = id
         self.label = label
+        self.id = id
     }
     
     init(node: Node, in context: Context) throws {
-        id = try node.extract(type(of: self).idKey)
         label = try node.extract("label")
+        id = try node.extract(idKey)
     }
     
     func makeNode(context: Context = EmptyNode) throws -> Node {
         return try Node(node: [
-            type(of: self).idKey: id,
+            idKey: id,
             "label": label,
         ])
     }

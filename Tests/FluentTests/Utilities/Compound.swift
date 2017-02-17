@@ -1,22 +1,21 @@
 import Fluent
 
 final class Compound: Entity {
-    var id: Node?
     var name: String
-    var exists: Bool = false
+    let storage = Storage()
 
     init(name: String) {
         self.name = name
     }
 
     init(node: Node, in context: Context) throws {
-        id = try node.extract(type(of: self).idKey)
         name = try node.extract("name")
+        id = try node.extract(idKey)
     }
 
     func makeNode(context: Context = EmptyNode) throws -> Node {
         return try Node(node: [
-            "id": id,
+            idKey: id,
             "name": name
         ])
     }
