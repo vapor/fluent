@@ -24,7 +24,7 @@ extension Children: QueryRepresentable {
             throw RelationError.idRequired(parent)
         }
 
-        return try Child.query().filter(Parent.foreignIdKey, parentId)
+        return try Child.query().filter(Parent.foreignIdKey == parentId)
     }
 }
 
