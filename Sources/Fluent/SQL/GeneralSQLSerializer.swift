@@ -88,17 +88,26 @@ open class GeneralSQLSerializer: SQLSerializer {
                 sql(statement),
                 values
             )
-        case .delete(let table, let filters, let limit):
+        case .delete(let table, let filters, let unions, let orders, let limit):
             var statement: [String] = []
             var values: [Node] = []
 
+            let tableSQL = sql(table)
             statement += "DELETE FROM"
-            statement += sql(table)
+            statement += tableSQL
+            
+            if !unions.isEmpty {
+                statement += sql(unions)
+            }
 
             if !filters.isEmpty {
                 let (filtersClause, filtersValues) = sql(filters)
                 statement += filtersClause
                 values += filtersValues
+            }
+            
+            if !orders.isEmpty {
+                statement += sql(orders)
             }
 
             if let limit = limit {
@@ -109,24 +118,32 @@ open class GeneralSQLSerializer: SQLSerializer {
                 sql(statement),
                 values
             )
-        case .update(let table, let filters, let data):
+        case .update(let table, let filters, let unions, let data):
             var statement: [String] = []
 
             var values: [Node] = []
 
+            let tableSQL = sql(table)
             statement += "UPDATE"
-            statement += sql(table)
-            statement += "SET"
+            statement += tableSQL
 
+            if !unions.isEmpty {
+                statement += sql(unions)
+            }
+
+            statement += "SET"
+            
             if let data = data, case .object(let obj) = data {
-                let (dataClause, dataValues) = sql(update: obj)
+                let (dataClause, dataValues) = sql(set: obj, table: table)
                 statement += dataClause
                 values += dataValues
             }
-
-            let (filterclause, filterValues) = sql(filters)
-            statement += filterclause
-            values += filterValues
+            
+            if !filters.isEmpty {
+                let (filterclause, filterValues) = self.sql(filters)
+                statement += filterclause
+                values += filterValues
+            }
 
             return (
                 sql(statement),
@@ -473,17 +490,38 @@ open class GeneralSQLSerializer: SQLSerializer {
         clause += "JOIN"
         clause += sql(join.foreign.entity)
         clause += "ON"
-        clause += "\(sql(join.local.entity)).\(sql(join.local.idKey))"
+
+        let localKey: String
+        let foreignKey: String
+
+        switch join.child {
+        case .foreign:
+            localKey = join.local.idKey
+            foreignKey = join.local.foreignIdKey
+        case .local:
+            localKey = join.foreign.foreignIdKey
+            foreignKey = join.foreign.idKey
+        }
+
+        clause += "\(sql(join.local.entity)).\(sql(localKey))"
         clause += "="
-        clause += "\(sql(join.foreign.entity)).\(sql(join.local.foreignIdKey))"
+        clause += "\(sql(join.foreign.entity)).\(sql(foreignKey))"
 
         return sql(clause)
     }
 
-    open func sql(update data: [String: Node]) -> (String, [Node]) {
+    open func sql(set data: [String: Node], table: String) -> (String, [Node]) {
+        var values: [Node] = []
+        var statement: [String] = []
+
+        data.forEach { (key, value) in
+            values += value
+            statement += sql(table) + "." + sql(key: key, value: value)
+        }
+
         return (
-            data.map(sql).joined(separator: ", "),
-            Array(data.values)
+            statement.joined(separator: ", "),
+            values
         )
     }
 
