@@ -8,7 +8,7 @@ extension Tester {
         }
         Atom.database = database
 
-        var hydrogen = Atom(id: nil, name: "Hydrogen", protons: 1, weight: 1.007)
+        let hydrogen = Atom(id: nil, name: "Hydrogen", protons: 1, weight: 1.007)
 
         guard hydrogen.exists == false else {
             throw Error.failed("Exists should be false since not yet saved.")

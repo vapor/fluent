@@ -46,7 +46,7 @@ class CallbacksTests: XCTestCase {
     var database: Database!
 
     func testCreateCallbacksCanMutateProperties() {
-        var result = DummyModel()
+        let result = DummyModel()
         XCTAssertFalse(result.wasModifiedOnCreate, "Result should not have been modified yet")
         
         try? result.save()
@@ -54,7 +54,7 @@ class CallbacksTests: XCTestCase {
     }
     
     func testUpdateCallbacksCanMutateProperties() {
-        var result = DummyModel()
+        let result = DummyModel()
         XCTAssertFalse(result.wasModifiedOnUpdate, "Result should not have been modified yet")
         
         try? result.save()

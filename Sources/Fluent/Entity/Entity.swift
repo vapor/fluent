@@ -6,6 +6,7 @@ public final class Storage {
 }
 
 public protocol Storable: class {
+    /// General implementation should just be `let storage = Storage()`
     var storage: Storage { get }
 }
 
@@ -15,7 +16,6 @@ extension Storable {
     /// This value shouldn't be interacted w/ external users
     /// w/o explicit knowledge.
     ///
-    /// General implementation should just be `let storage = Storage()`
     public internal(set) var exists: Bool {
         get {
             return storage.exists
@@ -30,16 +30,8 @@ extension Storable {
             return storage.id
         }
         set {
-            // TODO: Should we log errs if storage.id already has value? 
-            // Users shouldn't overwrite id
             storage.id = newValue
         }
-    }
-}
-
-extension Entity {
-    public var idKey: String {
-        return Self.idKey
     }
 }
 
@@ -161,6 +153,11 @@ extension Entity {
     /// See Entity.idKey
     public static var idKey: String {
         return database?.driver.idKey ?? "id"
+    }
+
+    /// See Entity.idKey -- instance implementation of static var
+    public var idKey: String {
+        return Self.idKey
     }
 
     /// See Entity.foreignIdKey

@@ -43,7 +43,7 @@ extension Database {
 
 
         // record that this preparation has run
-        var migration = Migration(name: preparation.name)
+        let migration = Migration(name: preparation.name)
         try migration.save()
     }
 }

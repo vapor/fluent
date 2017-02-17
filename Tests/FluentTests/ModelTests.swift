@@ -55,7 +55,7 @@ class ModelTests: XCTestCase {
     func testCustomIdentifiedThings() throws {
         CustomIdentifiedThing.database = db
 
-        var thing = try! CustomIdentifiedThing(node: ["#id": 123], in: EmptyNode)
+        let thing = try! CustomIdentifiedThing(node: ["#id": 123], in: EmptyNode)
 
         try! thing.save()
         let saveQ = GeneralSQLSerializer(sql: lqd.lastQuery!).serialize()
@@ -91,7 +91,7 @@ class ModelTests: XCTestCase {
         }
         UUIDModel.database = db
 
-        var test = UUIDModel()
+        let test = UUIDModel()
         do { try test.save() } catch {}
         XCTAssert(test.id != nil)
     }
