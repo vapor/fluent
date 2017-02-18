@@ -1,6 +1,3 @@
-/// Limits the count of results
-/// returned by the `Query`
-
 /// Groups results by an entity's
 /// field.
 public struct GroupBy {
