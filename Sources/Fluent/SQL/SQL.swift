@@ -9,8 +9,8 @@ public enum SQL {
     }
     
     case insert(table: String, data: Node?)
-    case select(table: String, filters: [Filter], joins: [Join], orders: [Sort], limit: Limit?)
-    case count(table: String, filters: [Filter], joins: [Join])
+    case select(table: String, filters: [Filter], joins: [Join], groups: [GroupBy], orders: [Sort], limit: Limit?)
+    case count(table: String, filters: [Filter], joins: [Join], groups: [GroupBy])
     case update(table: String, filters: [Filter], data: Node?)
     case delete(table: String, filters: [Filter], limit: Limit?)
     case table(action: TableAction, table: String)

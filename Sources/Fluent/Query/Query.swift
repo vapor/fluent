@@ -15,7 +15,11 @@ public final class Query<E: Entity> {
     /// Optionally limit the amount of
     /// entities affected by the action.
     public var limit: Limit?
-
+    
+    /// An array of groups that will
+    /// be applied to the result.
+    public var groups: [GroupBy]
+    
     /// An array of sorts that will
     /// be applied to the results.
     public var sorts: [Sort]
@@ -42,6 +46,7 @@ public final class Query<E: Entity> {
         action = .fetch
         self.database = database
         joins = []
+        groups = []
         sorts = []
         includeSoftDeleted = false
     }

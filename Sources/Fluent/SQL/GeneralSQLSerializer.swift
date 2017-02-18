@@ -37,7 +37,7 @@ open class GeneralSQLSerializer: SQLSerializer {
                 sql(statement),
                 values
             )
-        case .select(let table, let filters, let unions, let orders, let limit):
+        case .select(let table, let filters, let unions, let groups, let orders, let limit):
             var statement: [String] = []
             var values: [Node] = []
 
@@ -54,6 +54,10 @@ open class GeneralSQLSerializer: SQLSerializer {
                 statement += filtersClause
                 values += filtersValues
             }
+            
+            if !groups.isEmpty {
+                statement += sql(groups)
+            }
 
             if !orders.isEmpty {
                 statement += sql(orders)
@@ -67,7 +71,7 @@ open class GeneralSQLSerializer: SQLSerializer {
                 sql(statement),
                 values
             )
-        case .count(let table, let filters, let unions):
+        case .count(let table, let filters, let unions, let groups):
             var statement: [String] = []
             var values: [Node] = []
 
@@ -82,6 +86,10 @@ open class GeneralSQLSerializer: SQLSerializer {
                 let (filtersClause, filtersValues) = sql(filters)
                 statement += filtersClause
                 values += filtersValues
+            }
+            
+            if !groups.isEmpty {
+                statement += sql(groups)
             }
 
             return (
@@ -143,7 +151,26 @@ open class GeneralSQLSerializer: SQLSerializer {
 
         return statement.joined(separator: " ")
     }
-
+    
+    open func sql(_ group: GroupBy) -> String {
+        var clause: [String] = []
+        
+        clause += sql(group.entity.entity) + "." + sql(group.field)
+        
+        return sql(clause)
+    }
+    
+    open func sql(_ groups: [GroupBy]) -> String {
+        var clause: [String] = []
+        
+        clause += "GROUP BY"
+        
+        clause += groups.map { group in
+            return sql(group)
+        }.joined(separator: ", ")
+        
+        return sql(clause)
+    }
 
     open func sql(_ filters: [Filter]) -> (String, [Node]) {
         var statement: [String] = []
