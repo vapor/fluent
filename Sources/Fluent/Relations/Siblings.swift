@@ -26,8 +26,8 @@ extension Siblings
         Through.Left == Local,
         Through.Right == Foreign
 {
-    public func add(_ foreign: Foreign) throws {
-        try Through.attach(local, foreign)
+    public func add(_ foreign: Foreign) throws -> Through {
+        return try Through.attach(local, foreign)
     }
 
     public func remove(_ foreign: Foreign) throws {
