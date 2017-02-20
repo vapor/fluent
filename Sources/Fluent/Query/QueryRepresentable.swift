@@ -11,7 +11,7 @@ extension QueryRepresentable {
         query.action = .fetch
         query.limit = Limit(count: 1)
 
-        var model = try query.run().first
+        let model = try query.run().first
         model?.exists = true
 
         return model
@@ -25,7 +25,7 @@ extension QueryRepresentable {
 
         let models = try query.run()
         models.forEach { model in
-            var model = model
+            let model = model
             model.exists = true
         }
 
@@ -69,7 +69,7 @@ extension QueryRepresentable {
 
     /// Attempts to save a supplied entity
     /// and updates its identifier if successful.
-    public func save(_ model: inout T) throws {
+    public func save(_ model: T) throws {
         let query = try makeQuery()
 
         if let _ = model.id, model.exists {
@@ -135,7 +135,7 @@ extension QueryRepresentable {
         try query.run()
         model.didDelete()
 
-        var model = model
+        let model = model
         model.exists = false
     }
 }

@@ -5,15 +5,13 @@ class CallbacksTests: XCTestCase {
 
     /// Dummy Model implementation for testing.
     final class DummyModel: Entity {
-        var exists: Bool = false
+        let storage = Storage()
         var wasModifiedOnCreate: Bool = false
         var wasModifiedOnUpdate: Bool = false
 
         static func prepare(_ database: Database) throws {}
         static func revert(_ database: Database) throws {}
 
-        var id: Node?
-        
         init() {
             
         }
@@ -48,7 +46,7 @@ class CallbacksTests: XCTestCase {
     var database: Database!
 
     func testCreateCallbacksCanMutateProperties() {
-        var result = DummyModel()
+        let result = DummyModel()
         XCTAssertFalse(result.wasModifiedOnCreate, "Result should not have been modified yet")
         
         try? result.save()
@@ -56,7 +54,7 @@ class CallbacksTests: XCTestCase {
     }
     
     func testUpdateCallbacksCanMutateProperties() {
-        var result = DummyModel()
+        let result = DummyModel()
         XCTAssertFalse(result.wasModifiedOnUpdate, "Result should not have been modified yet")
         
         try? result.save()

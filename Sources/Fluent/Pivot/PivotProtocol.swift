@@ -39,7 +39,7 @@ extension PivotProtocol where Self: Entity {
     public static func attach(_ left: Left, _ right: Right) throws {
         _ = try assertSaved(left, right)
 
-        var pivot = try Pivot<Left, Right>(left, right)
+        let pivot = try Pivot<Left, Right>(left, right)
         try pivot.save()
     }
 

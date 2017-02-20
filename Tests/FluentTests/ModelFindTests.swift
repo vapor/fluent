@@ -5,15 +5,13 @@ class ModelFindTests: XCTestCase {
 
     /// Dummy Model implementation for testing.
     final class DummyModel: Entity {
-        var exists: Bool = false
+        let storage = Storage()
         static var entity: String {
             return "dummy_models"
         }
 
         static func prepare(_ database: Database) throws {}
         static func revert(_ database: Database) throws {}
-
-        var id: Node?
 
         init(node: Node, in context: Context) throws {
 

@@ -66,7 +66,7 @@ public final class Query<T: Entity> {
 
         for result in array {
             do {
-                var model = try T(node: result, in: _context)
+                let model = try T(node: result, in: _context)
                 if case .object(let dict) = result {
                     model.id = dict[T.idKey]
                 }

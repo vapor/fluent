@@ -14,3 +14,33 @@ extension Filter {
     }
     
 }
+
+func == (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
+    let node = try rhs.makeNode()
+    return .compare(lhs, .equals, node)
+}
+
+func > (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
+    let node = try rhs.makeNode()
+    return .compare(lhs, .greaterThan, node)
+}
+
+func < (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
+    let node = try rhs.makeNode()
+    return .compare(lhs, .lessThan, node)
+}
+
+func >= (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
+    let node = try rhs.makeNode()
+    return .compare(lhs, .greaterThanOrEquals, node)
+}
+
+func <= (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
+    let node = try rhs.makeNode()
+    return .compare(lhs, .lessThanOrEquals, node)
+}
+
+func != (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
+    let node = try rhs.makeNode()
+    return .compare(lhs, .notEquals, node)
+}

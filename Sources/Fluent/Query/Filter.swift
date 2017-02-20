@@ -126,6 +126,30 @@ extension QueryRepresentable {
 }
 
 extension QueryRepresentable {
+    @discardableResult
+    public func filter<T: Entity>(
+        _ entity: T.Type,
+        _ value: Filter.Method
+        ) throws -> Query<Self.T> {
+        let query = try makeQuery()
+        let filter = Filter(T.self, value)
+        query.filters.append(filter)
+        return query
+    }
+
+    /// Used to accept more freehand queries
+    @discardableResult
+    public func filter(
+        _ value: Filter.Method
+        ) throws -> Query<Self.T> {
+        let query = try makeQuery()
+        let filter = Filter(Self.T.self, value)
+        query.filters.append(filter)
+        return query
+    }
+}
+
+extension QueryRepresentable {
     /// Shortcut for creating a `.raw` filter.
     @discardableResult
     public func raw(command: String, values: [NodeRepresentable] = []) throws -> Query<Self.T> {

@@ -23,7 +23,7 @@ class RelationTests: XCTestCase {
         Group.database = database
         
         let hydrogen = try Atom(node: [
-            "id": 42,
+            Atom.idKey: 42,
             "name": "Hydrogen",
             "group_id": 1337
         ])
@@ -38,7 +38,7 @@ class RelationTests: XCTestCase {
         Compound.database = database
         Pivot<Atom, Compound>.database = database
 
-        var hydrogen = try Atom(node: [
+        let hydrogen = try Atom(node: [
             "name": "Hydrogen",
             "group_id": 1337
         ])
@@ -46,14 +46,14 @@ class RelationTests: XCTestCase {
         hydrogen.id = 42
         try hydrogen.save()
 
-        var water = try Compound(node: [
+        let water = try Compound(node: [
             "name": "Water"
         ])
         try water.save()
         water.id = 1337
         try water.save()
 
-        var pivot = try Pivot<Atom, Compound>(hydrogen, water)
+        let pivot = try Pivot<Atom, Compound>(hydrogen, water)
         try pivot.save()
 
         _ = try hydrogen.compounds.all()
@@ -61,7 +61,7 @@ class RelationTests: XCTestCase {
 
     func testCustomForeignKey() throws {
         let hydrogen = try Atom(node: [
-            "id": 42,
+            Atom.idKey: 42,
             "name": "Hydrogen",
             "group_id": 1337
         ])

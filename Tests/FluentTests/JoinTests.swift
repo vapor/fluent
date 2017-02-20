@@ -119,7 +119,7 @@ class JoinTests: XCTestCase {
 
 
     func testSiblings() throws {
-        var atom = Atom(name: "Hydrogen")
+        let atom = Atom(name: "Hydrogen")
         atom.id = Node(42)
 
         do {

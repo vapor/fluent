@@ -1,26 +1,26 @@
 import Fluent
 
-struct Atom: Entity {    
-    var id: Node?
+final class Atom: Entity {
     var name: String
     var groupId: Node
-    var exists: Bool = false
+    let storage = Storage()
 
     init(name: String, id: Node? = nil) {
-        self.id = id
         self.name = name
-        groupId = 0
+        self.groupId = 0
+        self.id = id
     }
 
     init(node: Node, in context: Context) throws {
-        id = try node.extract(type(of: self).idKey)
         name = try node.extract("name")
         groupId = try node.extract("group_id")
+
+        id = try node.extract(idKey)
     }
 
     func makeNode(context: Context = EmptyNode) throws -> Node {
         return try Node(node: [
-            type(of: self).idKey: id,
+            idKey: id,
             "name": name,
             "group_id": groupId
         ])

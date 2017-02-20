@@ -16,21 +16,21 @@ extension Tester {
         Compound.database = database
         Pivot<Atom, Compound>.database = database
 
-        var hydrogen = Atom(id: nil, name: "Hydrogen", protons: 1, weight: 1.007)
+        let hydrogen = Atom(id: nil, name: "Hydrogen", protons: 1, weight: 1.007)
         try hydrogen.save()
 
-        var carbon = Atom(id: nil, name: "Carbon", protons: 6, weight: 12.011)
+        let carbon = Atom(id: nil, name: "Carbon", protons: 6, weight: 12.011)
         try carbon.save()
 
-        var oxygen = Atom(id: nil, name: "Oxygen", protons: 8, weight: 15.999)
+        let oxygen = Atom(id: nil, name: "Oxygen", protons: 8, weight: 15.999)
         try oxygen.save()
 
-        var water = Compound(id: nil, name: "Water")
+        let water = Compound(id: nil, name: "Water")
         try water.save()
         try Pivot<Atom, Compound>.attach(hydrogen, water)
         try Pivot<Atom, Compound>.attach(oxygen, water)
 
-        var sugar = Compound(id: nil, name: "Sugar")
+        let sugar = Compound(id: nil, name: "Sugar")
         try sugar.save()
         try Pivot<Atom, Compound>.attach(hydrogen, sugar)
         try Pivot<Atom, Compound>.attach(oxygen, sugar)
@@ -72,13 +72,13 @@ extension Tester {
         Pivot<Atom, Compound>.database = database
         Pivot<Pivot<Atom, Compound>, Student>.database = database
 
-        var hydrogen = Atom(id: nil, name: "Hydrogen", protons: 1, weight: 1.007)
+        let hydrogen = Atom(id: nil, name: "Hydrogen", protons: 1, weight: 1.007)
         try hydrogen.save()
 
-        var water = Compound(id: nil, name: "Water")
+        let water = Compound(id: nil, name: "Water")
         try water.save()
 
-        var vapor = Student(
+        let vapor = Student(
             name: "Vapor",
             age: 2,
             ssn: "123",
@@ -87,10 +87,10 @@ extension Tester {
         )
         try vapor.save()
 
-        var hydrogenWater = try Pivot<Atom, Compound>(hydrogen, water)
+        let hydrogenWater = try Pivot<Atom, Compound>(hydrogen, water)
         try hydrogenWater.save()
 
-        var hwVapor = try Pivot<Pivot<Atom, Compound>, Student>(hydrogenWater, vapor)
+        let hwVapor = try Pivot<Pivot<Atom, Compound>, Student>(hydrogenWater, vapor)
         try hwVapor.save()
 
         let pivot1 = Pivot<Student, Pivot<Atom, Compound>>.self
@@ -113,7 +113,7 @@ extension Tester {
             throw Error.failed("Pivot relation failed.")
         }
 
-        var helium = Atom(id: nil, name: "Helium", protons: 2, weight: 2.007)
+        let helium = Atom(id: nil, name: "Helium", protons: 2, weight: 2.007)
         try helium.save()
 
         let result3 = try pivot1.related(
