@@ -14,7 +14,8 @@ XCTMain([
     testCase(SchemaCreateTests.allTests),
     testCase(SQLSerializerTests.allTests),
     testCase(UnionTests.allTests),
-    testCase(MemoryBenchmarkTests.allTests)
+    testCase(MemoryBenchmarkTests.allTests),
+    testCase(ChildTests.allTests)
 ])
 
 #endif
