@@ -38,7 +38,7 @@ extension Entity {
     public func parent<P: Entity>(
         id parentId: Node,
         type parentType: P.Type = P.self
-    ) throws -> Parent<Self, P> {
+    ) -> Parent<Self, P> {
         return Parent(from: self, withId: parentId)
     }
 }

@@ -154,12 +154,12 @@ extension Entity {
 
     /// See Entity.idType
     public static var idType: IdentifierType {
-        return database?.driver.idType ?? .int
+        return database?.idType ?? .int
     }
 
     /// See Entity.idKey
     public static var idKey: String {
-        return database?.driver.idKey ?? "id"
+        return database?.idKey ?? "id"
     }
 
     /// See Entity.foreignIdKey

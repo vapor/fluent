@@ -2,8 +2,8 @@
 /// through a Pivot table from the Local 
 /// entity to the Foreign entity.
 public final class Siblings<
-    Local: Entity, Foreign: Entity, Through: PivotProtocol & Entity
-> where Through.Left == Local, Through.Right == Foreign {
+    Local: Entity, Foreign: Entity, Through: Entity
+> {
     /// This will be used to filter the 
     /// collection of foreign entities related
     /// to the local entity type.
@@ -20,7 +20,12 @@ public final class Siblings<
     }
 }
 
-extension Siblings {
+extension Siblings
+    where
+        Through: PivotProtocol,
+        Through.Left == Local,
+        Through.Right == Foreign
+{
     public func add(_ foreign: Foreign) throws {
         try Through.attach(local, foreign)
     }

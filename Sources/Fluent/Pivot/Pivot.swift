@@ -12,9 +12,9 @@ public final class Pivot<
 
     public static var entity: String {
         if Left.name < Right.name {
-            return "\(Left.name)_\(Right.name)"
+            return "\(Left.name)\(pivotNameConnector)\(Right.name)"
         } else {
-            return "\(Right.name)_\(Left.name)"
+            return "\(Right.name)\(pivotNameConnector)\(Left.name)"
         }
     }
 
@@ -74,3 +74,5 @@ public final class Pivot<
         try database.delete(entity)
     }
 }
+
+public var pivotNameConnector: String = "_"

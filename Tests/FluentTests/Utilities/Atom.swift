@@ -31,11 +31,11 @@ final class Atom: Entity {
     }
 
     func group() throws -> Parent<Atom, Group> {
-        return try parent(id: groupId)
+        return parent(id: groupId)
     }
 
     func protons() throws -> Children<Atom, Proton> {
-        return try children()
+        return children()
     }
 
     func nucleus() throws -> Nucleus? {
