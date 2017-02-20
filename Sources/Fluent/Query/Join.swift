@@ -15,7 +15,7 @@ public struct Join {
     public let base: Entity.Type
 
     /// Entity that will be joining
-    /// the local data
+    /// the base data
     public let joined: Entity.Type
 
     /// See Child enum
@@ -25,10 +25,20 @@ public struct Join {
     /// a foreign id pointer to the other entity
     public enum Child {
         /// The base entity contains
-        /// a foreign id pointer
+        /// a foreign id pointer to the joined data
+        ///
+        /// base        | joined
+        /// ------------+-------
+        /// joined_id   | id
         case base
         /// The joined entity contains
-        /// a foreign id pointer
+        /// a foreign id pointer to the base data
+        /// 
+        /// base | joined
+        /// -----+--------
+        /// id   | base_id
+        ///
+        /// This is the default case.
         case joined
     }
 
