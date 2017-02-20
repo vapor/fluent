@@ -12,16 +12,31 @@
 public struct Join {
     /// Entity that will be accepting
     /// the joined data
-    public let local: Entity.Type
+    public let base: Entity.Type
 
     /// Entity that will be joining
     /// the local data
-    public let foreign: Entity.Type
+    public let joined: Entity.Type
+
+    /// See Child enum
+    public let child: Child
+
+    /// Indicates which entity contains
+    /// a foreign id pointer to the other entity
+    public enum Child {
+        /// The base entity contains
+        /// a foreign id pointer
+        case base
+        /// The joined entity contains
+        /// a foreign id pointer
+        case joined
+    }
 
     /// Create a new Join
-    public init(local: Entity.Type, foreign: Entity.Type) {
-        self.local = local
-        self.foreign = foreign
+    public init(base: Entity.Type, joined: Entity.Type, child: Child = .joined) {
+        self.base = base
+        self.joined = joined
+        self.child = child
     }
 }
 
@@ -30,14 +45,16 @@ extension QueryRepresentable {
     /// See Join for more information.
     @discardableResult
     public func join(
-        _ foreign: Entity.Type,
-        local: Entity.Type = T.self
+        _ joined: Entity.Type,
+        base: Entity.Type = T.self,
+        child: Join.Child = .joined
     ) throws -> Query<Self.T> {
         let query = try makeQuery()
 
         let join = Join(
-            local: local,
-            foreign: foreign
+            base: base,
+            joined: joined,
+            child: child
         )
         
         query.joins.append(join)
