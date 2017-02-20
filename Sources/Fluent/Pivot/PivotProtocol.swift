@@ -37,6 +37,7 @@ extension PivotProtocol where Self: Entity {
     }
 
     /// See PivotProtocol.attach
+    @discardableResult
     public static func attach(_ left: Left, _ right: Right) throws -> Self {
         _ = try assertSaved(left, right)
 
