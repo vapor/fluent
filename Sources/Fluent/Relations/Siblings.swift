@@ -49,9 +49,8 @@ extension Siblings: QueryRepresentable {
 
         let query = try Foreign.query()
 
-        let pivot = Through.self
-        try query.join(pivot)
-        try query.filter(pivot, Local.foreignIdKey, localId)
+        try query.join(Through.self)
+        try query.filter(Through.self, Local.foreignIdKey, localId)
 
         return query
     }
@@ -61,13 +60,11 @@ extension Entity {
     /// Creates a Siblings relation using the current
     /// entity as the Local entity in the relation.
     public func siblings<
-        Foreign: Entity, Through: PivotProtocol & Entity
+        Foreign: Entity, Through: Entity
     > (
         to foreignType: Foreign.Type = Foreign.self,
         through pivotType: Through.Type = Through.self
-    ) -> Siblings<Self, Foreign, Through>
-        where Through.Left == Self, Through.Right == Foreign
-    {
+    ) -> Siblings<Self, Foreign, Through> {
         return Siblings(from: self)
     }
 }
