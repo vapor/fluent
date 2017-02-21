@@ -474,21 +474,9 @@ open class GeneralSQLSerializer: SQLSerializer {
         clause += sql(join.joined.entity)
         clause += "ON"
 
-        let baseKey: String
-        let joinedKey: String
-
-        switch join.child {
-        case .base:
-            baseKey = join.joined.foreignIdKey
-            joinedKey = join.base.idKey
-        case .joined:
-            baseKey = join.base.idKey
-            joinedKey = join.base.foreignIdKey
-        }
-
-        clause += "\(sql(join.base.entity)).\(sql(baseKey))"
+        clause += "\(sql(join.base.entity)).\(sql(join.baseKey))"
         clause += "="
-        clause += "\(sql(join.joined.entity)).\(sql(joinedKey))"
+        clause += "\(sql(join.joined.entity)).\(sql(join.joinedKey))"
 
         return sql(clause)
     }

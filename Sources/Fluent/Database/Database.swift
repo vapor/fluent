@@ -36,13 +36,18 @@ public final class Database: Executor {
     /// which do not themselves implement `Entity.idType`.
     public var idType: IdentifierType
 
+    /// A closure for handling database logs
+    public typealias LogCallback = (Log) -> ()
+
+    /// All queries performed by the database will be
+    /// sent here right before they are run.
+    public var log: LogCallback?
+
     /// Creates a `Database` with the supplied
     /// `Driver`. This cannot be changed later.
     public init(_ driver: Driver, maxConnections: Int = 128) {
         idKey = driver.idKey
         idType = driver.idType
-        shouldLog = false
-        logs = []
 
         threadConnectionPool = ThreadConnectionPool(
             makeConnection: driver.makeConnection,
@@ -50,14 +55,6 @@ public final class Database: Executor {
         )
         self.driver = driver
     }
-
-    /// If set to true, the database will store
-    /// all queries ran in the `logs` property.
-    public var shouldLog: Bool
-
-    /// If `shouldLog` is set to true, all queries
-    /// performed by this database will be stored here.
-    public var logs: [Log]
 }
 
 // MARK: Executor
@@ -66,26 +63,20 @@ extension Database {
     /// See Executor protocol.
     @discardableResult
     public func query<T: Entity>(_ query: Query<T>) throws -> Node {
-        if shouldLog {
-            logs.append(Log(query))
-        }
+        log?(Log(query))
         return try threadConnectionPool.connection().query(query)
     }
     
     /// Seeee Executor protocol.
     public func schema(_ schema: Schema) throws {
-        if shouldLog {
-            logs.append(Log(schema))
-        }
+        log?(Log(schema))
         try threadConnectionPool.connection().schema(schema)
     }
     
     /// Seeee Executor protocol.
     @discardableResult
     public func raw(_ raw: String, _ values: [Node]) throws -> Node {
-        if shouldLog {
-            logs.append(Log(raw: raw))
-        }
+        log?(Log(raw: raw))
         return try threadConnectionPool.connection().raw(raw, values)
     }
 }

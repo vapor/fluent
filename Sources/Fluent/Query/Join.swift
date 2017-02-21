@@ -18,35 +18,36 @@ public struct Join {
     /// the base data
     public let joined: Entity.Type
 
-    /// See Child enum
-    public let child: Child
 
-    /// Indicates which entity contains
-    /// a foreign id pointer to the other entity
-    public enum Child {
-        /// The base entity contains
-        /// a foreign id pointer to the joined data
-        ///
-        /// base        | joined
-        /// ------------+-------
-        /// joined_id   | id
-        case base
-        /// The joined entity contains
-        /// a foreign id pointer to the base data
-        /// 
-        /// base | joined
-        /// -----+--------
-        /// id   | base_id
-        ///
-        /// This is the default case.
-        case joined
-    }
+    /// The key from the base table that will
+    /// be compared to the key from the joined
+    /// table during the join.
+    ///
+    /// base        | joined
+    /// ------------+-------
+    /// <baseKey>   | base_id
+    public let baseKey: String
+
+    /// The key from the joined table that will
+    /// be compared to the key from the base
+    /// table during the join.
+    ///
+    /// base | joined
+    /// -----+-------
+    /// id   | <joined_key>
+    public let joinedKey: String
 
     /// Create a new Join
-    public init(base: Entity.Type, joined: Entity.Type, child: Child = .joined) {
+    public init<Base: Entity, Joined: Entity>(
+        base: Base.Type,
+        joined: Joined.Type,
+        baseKey: String = Base.idKey,
+        joinedKey: String = Base.foreignIdKey
+    ) {
         self.base = base
         self.joined = joined
-        self.child = child
+        self.baseKey = baseKey
+        self.joinedKey = joinedKey
     }
 }
 
@@ -54,21 +55,26 @@ extension QueryRepresentable {
     /// Create and add a Join to this Query.
     /// See Join for more information.
     @discardableResult
-    public func join(
-        _ joined: Entity.Type,
-        base: Entity.Type = T.self,
-        child: Join.Child = .joined
+    public func join<Joined: Entity>(
+        _ joined: Joined.Type,
+        baseKey: String = T.idKey,
+        joinedKey: String = T.foreignIdKey
     ) throws -> Query<Self.T> {
-        let query = try makeQuery()
-
         let join = Join(
-            base: base,
+            base: T.self,
             joined: joined,
-            child: child
+            baseKey: baseKey,
+            joinedKey: joinedKey
         )
-        
-        query.joins.append(join)
 
+        return try self.join(join)
+    }
+
+
+    @discardableResult
+    public func join(_ join: Join) throws -> Query<Self.T> {
+        let query = try makeQuery()
+        query.joins.append(join)
         return query
     }
 }
