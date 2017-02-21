@@ -30,8 +30,8 @@ public final class MemoryDriver: Driver {
     
     func prepare(union: Join) -> Group {
         // create unioned table from two groups
-        let local = prepare(group: union.local.entity)
-        let foreign = prepare(group: union.foreign.entity)
+        let local = prepare(group: union.base.entity)
+        let foreign = prepare(group: union.joined.entity)
         
         var unioned: [Node] = []
         
@@ -39,7 +39,7 @@ public final class MemoryDriver: Driver {
         // into one group
         for l in local.data {
             for f in foreign.data {
-                if l[union.local.idKey] == f[union.local.foreignIdKey] {
+                if l[union.base.idKey] == f[union.base.foreignIdKey] {
                     var lf: [String: Node] = [:]
                     
                     if let of = f.nodeObject {

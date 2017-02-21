@@ -34,10 +34,10 @@ class JoinTests: XCTestCase {
                 XCTAssertEqual(orders.count, 0)
                 XCTAssertEqual(joins.count, 1)
                 if let join = joins.first {
-                    XCTAssert(join.local == Atom.self)
-                    XCTAssertEqual(join.foreign.foreignIdKey, "compound_\(lqd.idKey)")
-                    XCTAssert(join.foreign == Compound.self)
-                    XCTAssertEqual(join.foreign.idKey, lqd.idKey)
+                    XCTAssert(join.base == Atom.self)
+                    XCTAssertEqual(join.joined.foreignIdKey, "compound_\(lqd.idKey)")
+                    XCTAssert(join.joined == Compound.self)
+                    XCTAssertEqual(join.joined.idKey, lqd.idKey)
                 }
                 XCTAssert(limit == nil)
             default:
@@ -61,10 +61,10 @@ class JoinTests: XCTestCase {
                 XCTAssertEqual(orders.count, 0)
                 XCTAssertEqual(joins.count, 1)
                 if let join = joins.first {
-                    XCTAssert(join.local == Atom.self)
-                    XCTAssertEqual(join.foreign.idKey, Compound.idKey)
-                    XCTAssert(join.foreign == Compound.self)
-                    XCTAssertEqual(join.foreign.foreignIdKey, Compound.foreignIdKey)
+                    XCTAssert(join.base == Atom.self)
+                    XCTAssertEqual(join.joined.idKey, Compound.idKey)
+                    XCTAssert(join.joined == Compound.self)
+                    XCTAssertEqual(join.joined.foreignIdKey, Compound.foreignIdKey)
                 }
                 XCTAssert(limit == nil)
             default:
@@ -123,7 +123,7 @@ class JoinTests: XCTestCase {
         atom.id = Node(42)
 
         do {
-            _ = try atom.compounds().all()
+            _ = try atom.compounds.all()
         }
 
         if let sql = lqd.lastQuery {

@@ -471,11 +471,12 @@ open class GeneralSQLSerializer: SQLSerializer {
         var clause: [String] = []
 
         clause += "JOIN"
-        clause += sql(join.foreign.entity)
+        clause += sql(join.joined.entity)
         clause += "ON"
-        clause += "\(sql(join.local.entity)).\(sql(join.local.idKey))"
+
+        clause += "\(sql(join.base.entity)).\(sql(join.baseKey))"
         clause += "="
-        clause += "\(sql(join.foreign.entity)).\(sql(join.local.foreignIdKey))"
+        clause += "\(sql(join.joined.entity)).\(sql(join.joinedKey))"
 
         return sql(clause)
     }

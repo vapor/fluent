@@ -18,9 +18,37 @@ public final class Database: Executor {
     /// one for each thread
     public let threadConnectionPool: ThreadConnectionPool
 
+    /// The string value for the
+    /// default identifier key.
+    ///
+    /// The `idKey` will be used when
+    /// `Model.find(_:)` or other find
+    /// by identifier methods are used.
+    ///
+    /// This value is overriden by
+    /// entities that implement the
+    /// `Entity.idKey` static property.
+    public var idKey: String
+
+    /// The default type for values stored against the identifier key.
+    ///
+    /// The `idType` will be accessed by those Entity implementations
+    /// which do not themselves implement `Entity.idType`.
+    public var idType: IdentifierType
+
+    /// A closure for handling database logs
+    public typealias LogCallback = (Log) -> ()
+
+    /// All queries performed by the database will be
+    /// sent here right before they are run.
+    public var log: LogCallback?
+
     /// Creates a `Database` with the supplied
     /// `Driver`. This cannot be changed later.
     public init(_ driver: Driver, maxConnections: Int = 128) {
+        idKey = driver.idKey
+        idType = driver.idType
+
         threadConnectionPool = ThreadConnectionPool(
             makeConnection: driver.makeConnection,
             maxConnections: maxConnections // some number larger than the max threads
@@ -35,17 +63,20 @@ extension Database {
     /// See Executor protocol.
     @discardableResult
     public func query<T: Entity>(_ query: Query<T>) throws -> Node {
+        log?(Log(query))
         return try threadConnectionPool.connection().query(query)
     }
     
     /// Seeee Executor protocol.
     public func schema(_ schema: Schema) throws {
+        log?(Log(schema))
         try threadConnectionPool.connection().schema(schema)
     }
     
     /// Seeee Executor protocol.
     @discardableResult
     public func raw(_ raw: String, _ values: [Node]) throws -> Node {
+        log?(Log(raw: raw))
         return try threadConnectionPool.connection().raw(raw, values)
     }
 }

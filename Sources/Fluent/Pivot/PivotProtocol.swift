@@ -13,7 +13,8 @@ public protocol PivotProtocol {
 
     /// Attaches the two entities
     /// Entities must be saved before attempting attach.
-    static func attach(_ left: Left, _ right: Right) throws
+    @discardableResult
+    static func attach(_ left: Left, _ right: Right) throws -> Self
 
     /// Detaches the two entities.
     /// Entities must be saved before attempting detach.
@@ -36,11 +37,17 @@ extension PivotProtocol where Self: Entity {
     }
 
     /// See PivotProtocol.attach
-    public static func attach(_ left: Left, _ right: Right) throws {
+    @discardableResult
+    public static func attach(_ left: Left, _ right: Right) throws -> Self {
         _ = try assertSaved(left, right)
 
-        let pivot = try Pivot<Left, Right>(left, right)
+        let pivot = try self.init(node: [
+            Left.foreignIdKey: left.id,
+            Right.foreignIdKey: right.id
+        ])
         try pivot.save()
+
+        return pivot
     }
 
     /// See PivotProtocol.detach

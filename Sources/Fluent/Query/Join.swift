@@ -12,16 +12,42 @@
 public struct Join {
     /// Entity that will be accepting
     /// the joined data
-    public let local: Entity.Type
+    public let base: Entity.Type
 
     /// Entity that will be joining
-    /// the local data
-    public let foreign: Entity.Type
+    /// the base data
+    public let joined: Entity.Type
+
+
+    /// The key from the base table that will
+    /// be compared to the key from the joined
+    /// table during the join.
+    ///
+    /// base        | joined
+    /// ------------+-------
+    /// <baseKey>   | base_id
+    public let baseKey: String
+
+    /// The key from the joined table that will
+    /// be compared to the key from the base
+    /// table during the join.
+    ///
+    /// base | joined
+    /// -----+-------
+    /// id   | <joined_key>
+    public let joinedKey: String
 
     /// Create a new Join
-    public init(local: Entity.Type, foreign: Entity.Type) {
-        self.local = local
-        self.foreign = foreign
+    public init<Base: Entity, Joined: Entity>(
+        base: Base.Type,
+        joined: Joined.Type,
+        baseKey: String = Base.idKey,
+        joinedKey: String = Base.foreignIdKey
+    ) {
+        self.base = base
+        self.joined = joined
+        self.baseKey = baseKey
+        self.joinedKey = joinedKey
     }
 }
 
@@ -29,19 +55,26 @@ extension QueryRepresentable {
     /// Create and add a Join to this Query.
     /// See Join for more information.
     @discardableResult
-    public func join(
-        _ foreign: Entity.Type,
-        local: Entity.Type = T.self
+    public func join<Joined: Entity>(
+        _ joined: Joined.Type,
+        baseKey: String = T.idKey,
+        joinedKey: String = T.foreignIdKey
     ) throws -> Query<Self.T> {
-        let query = try makeQuery()
-
         let join = Join(
-            local: local,
-            foreign: foreign
+            base: T.self,
+            joined: joined,
+            baseKey: baseKey,
+            joinedKey: joinedKey
         )
-        
-        query.joins.append(join)
 
+        return try self.join(join)
+    }
+
+
+    @discardableResult
+    public func join(_ join: Join) throws -> Query<Self.T> {
+        let query = try makeQuery()
+        query.joins.append(join)
         return query
     }
 }

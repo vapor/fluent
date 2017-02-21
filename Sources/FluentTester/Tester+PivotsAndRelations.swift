@@ -36,16 +36,16 @@ extension Tester {
         try Pivot<Atom, Compound>.attach(oxygen, sugar)
         try Pivot<Atom, Compound>.attach(carbon, sugar)
 
-        let hydrogenCompounds = try hydrogen.compounds().all()
+        let hydrogenCompounds = try hydrogen.compounds.all()
         try testEquals(hydrogenCompounds, [water, sugar])
-        let carbonCompounds = try carbon.compounds().all()
+        let carbonCompounds = try carbon.compounds.all()
         try testEquals(carbonCompounds, [sugar])
-        let oxygenCompounds = try oxygen.compounds().all()
+        let oxygenCompounds = try oxygen.compounds.all()
         try testEquals(oxygenCompounds, [water, sugar])
 
-        let sugarAtoms = try sugar.atoms().all()
+        let sugarAtoms = try sugar.atoms.all()
         try testEquals(sugarAtoms, [carbon, oxygen, hydrogen])
-        let waterAtoms = try water.atoms().all()
+        let waterAtoms = try water.atoms.all()
         try testEquals(waterAtoms, [oxygen, hydrogen])
     }
 

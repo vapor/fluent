@@ -26,16 +26,16 @@ final class Atom: Entity {
         ])
     }
 
-    func compounds() throws -> Siblings<Atom, Compound> {
-        return try siblings()
+    var compounds: Siblings<Atom, Compound, Pivot<Atom, Compound>> {
+        return siblings()
     }
 
     func group() throws -> Parent<Atom, Group> {
-        return try parent(id: groupId)
+        return parent(id: groupId)
     }
 
     func protons() throws -> Children<Atom, Proton> {
-        return try children()
+        return children()
     }
 
     func nucleus() throws -> Nucleus? {

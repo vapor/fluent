@@ -56,7 +56,7 @@ class RelationTests: XCTestCase {
         let pivot = try Pivot<Atom, Compound>(hydrogen, water)
         try pivot.save()
 
-        _ = try hydrogen.compounds().all()
+        _ = try hydrogen.compounds.all()
     }
 
     func testCustomForeignKey() throws {

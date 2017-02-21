@@ -21,9 +21,12 @@ public final class Compound: Entity {
         ])
     }
 
-    public func atoms() throws -> Siblings<Compound, Atom> {
-        return try siblings()
+    var atoms: Siblings<Compound, Atom, Pivot<Compound, Atom>> {
+        return siblings()
     }
+
+    // wish this would work!
+    // lazy var atoms = Siblings(from: self, to: Atom.self, through: Pivot<Compound, Atom>.self)
 
     public static func prepare(_ database: Fluent.Database) throws {
         try database.create(entity) { builder in

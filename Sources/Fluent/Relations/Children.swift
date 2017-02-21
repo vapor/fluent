@@ -31,8 +31,7 @@ extension Children: QueryRepresentable {
 extension Entity {
     public func children<Child: Entity>(
         type childType: Child.Type = Child.self
-    ) throws -> Children<Self, Child> {
-
+    ) -> Children<Self, Child> {
         return Children(from: self)
     }
 }
