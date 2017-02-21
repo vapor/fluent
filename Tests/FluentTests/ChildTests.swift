@@ -47,13 +47,13 @@ class Owner: Entity {
     }
     
     static func prepare(_ database: Fluent.Database) throws {
-        try database.create("Owners") { pet in
+        try database.create(entity) { pet in
             pet.id()
             pet.string("name")
         }
     }
     static func revert(_ database: Fluent.Database) throws {
-        try database.delete("Pets")
+        try database.delete(Owner.entity)
     }
     
     func makeNode(context: Context) throws -> Node {
@@ -86,14 +86,14 @@ class Pet: Entity {
     }
     
     static func prepare(_ database: Fluent.Database) throws {
-        try database.create("Pets") { pet in
+        try database.create(entity) { pet in
             pet.id()
             pet.string("name")
             pet.parent(Owner.self, optional: false)
         }
     }
     static func revert(_ database: Fluent.Database) throws {
-        try database.delete("Pets")
+        try database.delete(Pet.entity)
     }
     
     func makeNode(context: Context) throws -> Node {
