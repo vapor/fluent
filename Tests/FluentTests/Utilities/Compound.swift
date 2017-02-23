@@ -21,12 +21,12 @@ final class Compound: Entity {
     }
 
     static func prepare(_ database: Fluent.Database) throws {
-        try database.create(entity) { builder in
+        try database.create(self) { builder in
             builder.id(for: self)
             builder.string("name")
         }
     }
     static func revert(_ database: Fluent.Database) throws {
-        try database.delete(entity)
+        try database.delete(self)
     }
 }

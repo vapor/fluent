@@ -40,7 +40,7 @@ final class Student: Entity {
     }
     
     static func prepare(_ database: Database) throws {
-        try database.create(entity) { students in
+        try database.create(self) { students in
             students.id(for: self)
             students.string("name", length: 64)
             students.int("age")
@@ -49,12 +49,12 @@ final class Student: Entity {
         }
         
         // separate to ensure modification works
-        try database.modify(entity) { students in
+        try database.modify(self) { students in
             students.custom("meta", type: "JSON", optional: true)
         }
     }
     
     static func revert(_ database: Database) throws {
-        try database.delete(entity)
+        try database.delete(self)
     }
 }

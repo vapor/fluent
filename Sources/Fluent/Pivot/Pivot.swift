@@ -63,7 +63,7 @@ public final class Pivot<
     }
 
     public static func prepare(_ database: Database) throws {
-        try database.create(entity) { builder in
+        try database.create(self) { builder in
             builder.id(for: self)
             builder.foreignId(for: Left.self)
             builder.foreignId(for: Right.self)
@@ -71,7 +71,7 @@ public final class Pivot<
     }
 
     public static func revert(_ database: Database) throws {
-        try database.delete(entity)
+        try database.delete(self)
     }
 }
 

@@ -36,7 +36,7 @@ public final class Atom: Entity {
     }
 
     public static func prepare(_ database: Database) throws {
-        try database.create(entity) { atoms in
+        try database.create(self) { atoms in
             atoms.id(for: self)
             atoms.string("name")
             atoms.int("protons")
@@ -45,6 +45,6 @@ public final class Atom: Entity {
     }
 
     public static func revert(_ database: Database) throws {
-        try database.delete(entity)
+        try database.delete(self)
     }
 }

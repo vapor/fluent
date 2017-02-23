@@ -4,14 +4,14 @@ final class User: Entity {
     let storage = Storage()
     
     static func prepare(_ database: Fluent.Database) throws {
-        try database.create(entity) { builder in
+        try database.create(self) { builder in
             builder.id(for: self)
             builder.string("name")
             builder.string("email")
         }
     }
     static func revert(_ database: Fluent.Database) throws {
-        try database.delete(entity)
+        try database.delete(self)
     }
 
     var name: String

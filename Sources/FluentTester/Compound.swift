@@ -29,13 +29,13 @@ public final class Compound: Entity {
     // lazy var atoms = Siblings(from: self, to: Atom.self, through: Pivot<Compound, Atom>.self)
 
     public static func prepare(_ database: Fluent.Database) throws {
-        try database.create(entity) { builder in
+        try database.create(self) { builder in
             builder.id(for: self)
             builder.string("name")
         }
     }
 
     public static func revert(_ database: Fluent.Database) throws {
-        try database.delete(entity)
+        try database.delete(self)
     }
 }
