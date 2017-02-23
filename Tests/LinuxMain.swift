@@ -5,7 +5,6 @@ import XCTest
 @testable import FluentTesterTests
 
 XCTMain([
-	testCase(MemoryTests.allTests),
     testCase(ModelFindTests.allTests),
     testCase(PreparationTests.allTests),
     testCase(QueryFiltersTests.allTests),
