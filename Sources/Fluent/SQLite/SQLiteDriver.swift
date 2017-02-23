@@ -1,13 +1,27 @@
 import SQLite
 
+/// An in memory driver that can be used for debugging and testing
+/// built on top of SQLiteDriver
 public final class MemoryDriver: SQLiteDriver {
-    public init() {
-        let database = try! SQLite(path: ":memory:")
+    public init() throws {
+        let database = try SQLite(path: ":memory:")
         super.init(database: database)
     }
 }
 
+/// Driver for using the SQLite database with Vapor
+/// For debugging, we provide an in memory version of this driver
+/// at MemoryDriver
+///
+/// Because SQLite is not a distributed and easily scaled database,
+/// we do not recommend using it in Production
 public class SQLiteDriver: Fluent.Driver, Connection {
+
+    /// Describes the errors this
+    /// driver can throw.
+    public enum Error: Swift.Error {
+        case unsupported(String)
+    }
 
     public var idKey: String = "id"
     public var idType: IdentifierType = .int
@@ -33,21 +47,12 @@ public class SQLiteDriver: Fluent.Driver, Connection {
     }
 
     /**
-        Describes the errors this
-        driver can throw.
-    */
-    public enum Error: Swift.Error {
-        case unsupported(String)
-    }
-
-    /**
         Executes the query.
     */
     @discardableResult
     public func query<T: Entity>(_ query: Query<T>) throws -> Node {
         let serializer = SQLiteSerializer(sql: query.sql)
         let (statement, values) = serializer.serialize()
-        print("statement: \(statement) values: \(values)")
         let results = try database.execute(statement) { statement in
             try self.bind(statement: statement, to: values)
         }
@@ -71,7 +76,6 @@ public class SQLiteDriver: Fluent.Driver, Connection {
         values and returns the results.
     */
     public func raw(_ statement: String, _ values: [Node] = []) throws -> Node {
-        print("[raw] statement: \(statement) values: \(values)")
         let results = try database.execute(statement) { statement in
             try self.bind(statement: statement, to: values)
         }

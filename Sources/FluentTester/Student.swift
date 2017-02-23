@@ -5,7 +5,7 @@ final class Student: Entity {
     var age: Int
     var ssn: String
     var donor: Bool
-    var meta: Node
+    var meta: Node?
     
     let storage = Storage()
     

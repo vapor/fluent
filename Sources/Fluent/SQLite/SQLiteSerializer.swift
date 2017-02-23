@@ -16,12 +16,6 @@ public class SQLiteSerializer: GeneralSQLSerializer {
             return "TEXT"
         }
 
-//        switch type {
-//        case .id(type: let idType):
-//            switch idType {
-//                case .int
-//            }
-//        }
         return super.sql(type, primaryKey: primaryKey)
     }
 }

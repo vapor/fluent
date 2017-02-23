@@ -2,19 +2,19 @@ import XCTest
 @testable import Fluent
 
 class RelationTests: XCTestCase {
-//    static let allTests = [
-//        ("testHasMany", testHasMany),
-//        ("testBelongsToMany", testBelongsToMany),
-//        ("testCustomForeignKey", testCustomForeignKey),
-//        ("testPivotDatabase", testPivotDatabase),
-//    ]
+    static let allTests = [
+        ("testHasMany", testHasMany),
+        ("testBelongsToMany", testBelongsToMany),
+        ("testCustomForeignKey", testCustomForeignKey),
+        ("testPivotDatabase", testPivotDatabase),
+    ]
 
     var memory: MemoryDriver!
     var database: Database!
     let ents = [Atom.self, Proton.self, Nucleus.self, Group.self] as [Entity.Type]
 
     override func setUp() {
-        memory = MemoryDriver()
+        memory = try! MemoryDriver()
         database = Database(memory)
 
         try! ents.forEach { ent in

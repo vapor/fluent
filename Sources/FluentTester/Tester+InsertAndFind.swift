@@ -2,11 +2,11 @@ import Fluent
 
 extension Tester {
     public func testInsertAndFind() throws {
+        Atom.database = database
         try Atom.prepare(database)
         defer {
             try? Atom.revert(database)
         }
-        Atom.database = database
 
         let hydrogen = Atom(id: nil, name: "Hydrogen", protons: 1, weight: 1.007)
 

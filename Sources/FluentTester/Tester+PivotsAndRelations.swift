@@ -1,45 +1,32 @@
 import Fluent
 
-final class Repro: Entity {
-    let storage = Storage()
-
-    init(node: Node, in context: Context) throws {
-
-        id = node[idKey]
-    }
-
-    func makeNode(context: Context) throws -> Node {
-        return Node([:])
-    }
-}
-
-extension Repro {
-    static func prepare(_ database: Database) throws {
-//        try database.create(entity) { repros in
-//            repros.custom("meta", type: "JSON")
-//        }
-    }
-
-    static func revert(_ database: Database) throws {
-        try database.delete(entity)
-    }
-}
-
 extension Tester {
-    public func testPivotsAndRelations() throws {
-        try Atom.prepare(database)
-        try Compound.prepare(database)
-        try Pivot<Atom, Compound>.prepare(database)
-        
-        defer {
-            try? Atom.revert(database)
-            try? Compound.revert(database)
-            try? Pivot<Atom, Compound>.revert(database)
-        }
-
+    func setup() {
         Atom.database = database
+        try! Atom.prepare(database)
         Compound.database = database
+        try! Compound.prepare(database)
+        Student.database = database
+        try! Student.prepare(database)
+
         Pivot<Atom, Compound>.database = database
+        try! Pivot<Atom, Compound>.prepare(database)
+        Pivot<Pivot<Atom, Compound>, Student>.database = database
+        try! Pivot<Pivot<Atom, Compound>, Student>.prepare(database)
+    }
+
+    func teardown() {
+        try! Atom.revert(database)
+        try! Compound.revert(database)
+        try! Student.revert(database)
+
+        try! Pivot<Atom, Compound>.revert(database)
+        try! Pivot<Pivot<Atom, Compound>, Student>.revert(database)
+    }
+
+    public func testPivotsAndRelations() throws {
+        setup()
+        defer { teardown() }
 
         let hydrogen = Atom(id: nil, name: "Hydrogen", protons: 1, weight: 1.007)
         try hydrogen.save()
@@ -74,33 +61,10 @@ extension Tester {
         try testEquals(waterAtoms, [oxygen, hydrogen])
     }
 
-    public func testRepro() throws {
-        try Repro.prepare(database)
-    }
-    
+
     public func testDoublePivot() throws {
-        try? Atom.revert(database)
-        try? Compound.revert(database)
-        try? Pivot<Atom, Compound>.revert(database)
-        
-        try Atom.prepare(database)
-        try Compound.prepare(database)
-        try Student.prepare(database)
-        try Pivot<Atom, Compound>.prepare(database)
-        try Pivot<Pivot<Atom, Compound>, Student>.prepare(database)
-
-        defer {
-            try? Atom.revert(database)
-            try? Compound.revert(database)
-            try? Pivot<Atom, Compound>.revert(database)
-            try? Pivot<Pivot<Atom, Compound>, Student>.revert(database)
-        }
-
-        Atom.database = database
-        Compound.database = database
-        Student.database = database
-        Pivot<Atom, Compound>.database = database
-        Pivot<Pivot<Atom, Compound>, Student>.database = database
+        setup()
+        defer { teardown() }
 
         let hydrogen = Atom(id: nil, name: "Hydrogen", protons: 1, weight: 1.007)
         try hydrogen.save()
