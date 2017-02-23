@@ -11,33 +11,37 @@ class RelationTests: XCTestCase {
 
     var memory: MemoryDriver!
     var database: Database!
+    let ents = [Atom.self, Proton.self, Nucleus.self, Group.self] as [Entity.Type]
+
     override func setUp() {
-        memory = MemoryDriver()
+        memory = try! MemoryDriver()
         database = Database(memory)
+
+        try! ents.forEach { ent in
+            ent.database = database
+            try ent.prepare(database)
+        }
+    }
+
+    override func tearDown() {
+        try! ents.forEach { ent in try ent.revert(database) }
     }
 
     func testHasMany() throws {
-        Atom.database = database
-        Proton.database = database
-        Nucleus.database = database
-        Group.database = database
-        
+
         let hydrogen = try Atom(node: [
             Atom.idKey: 42,
             "name": "Hydrogen",
             "group_id": 1337
         ])
 
-        _ = try hydrogen.protons().all()
+        let protons = try hydrogen.protons()
+        _ = try protons.all()
         _ = try hydrogen.nucleus()
         _ = try hydrogen.group()
     }
 
     func testBelongsToMany() throws {
-        Atom.database = database
-        Compound.database = database
-        Pivot<Atom, Compound>.database = database
-
         let hydrogen = try Atom(node: [
             "name": "Hydrogen",
             "group_id": 1337

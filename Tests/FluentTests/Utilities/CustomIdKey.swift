@@ -8,13 +8,13 @@ final class CustomIdKey: Entity {
     }
     
     static func prepare(_ database: Fluent.Database) throws {
-        try database.create(entity) { builder in
+        try database.create(self) { builder in
             builder.id(for: CustomIdKey.self)
             builder.string("label")
         }
     }
     static func revert(_ database: Fluent.Database) throws {
-        try database.delete(entity)
+        try database.delete(self)
     }
     
     var label: String

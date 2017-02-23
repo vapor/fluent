@@ -24,12 +24,12 @@ final class CustomIdentifiedThing: Entity {
     static var idType: IdentifierType { return .custom("INTEGER") }
     
     static func prepare(_ database: Database) throws {
-        try database.create(entity) { creator throws in
+        try database.create(self) { creator throws in
             creator.id(for: self)
         }
     }
     
     static func revert(_ database: Database) throws {
-        try database.delete(entity)
+        try database.delete(self)
     }
 }

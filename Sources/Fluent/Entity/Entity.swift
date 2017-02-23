@@ -16,7 +16,7 @@ extension Storable {
     /// This value shouldn't be interacted w/ external users
     /// w/o explicit knowledge.
     ///
-    public internal(set) var exists: Bool {
+    public var exists: Bool {
         get {
             return storage.exists
         }
@@ -184,5 +184,20 @@ extension Entity {
         set {
             Database.map[Self.name] = newValue
         }
+    }
+}
+
+extension Entity {
+    @discardableResult
+    public func assertExists() throws -> Node {
+        guard let id = self.id else {
+            throw EntityError.noId(Self.self)
+        }
+
+        guard exists else {
+            throw EntityError.doesntExist(Self.self)
+        }
+
+        return id
     }
 }

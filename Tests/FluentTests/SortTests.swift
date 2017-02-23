@@ -8,7 +8,7 @@ class SortTests: XCTestCase {
 
     var database: Database!
     override func setUp() {
-        database = Database(MemoryDriver())
+        database = Database(try! MemoryDriver())
     }
 
     func testBasic() throws {
