@@ -47,7 +47,7 @@ public class SQLiteDriver: Fluent.Driver, Connection {
     public func query<T: Entity>(_ query: Query<T>) throws -> Node {
         let serializer = SQLiteSerializer(sql: query.sql)
         let (statement, values) = serializer.serialize()
-        print("statement: \(statement)")
+        print("statement: \(statement) values: \(values)")
         let results = try database.execute(statement) { statement in
             try self.bind(statement: statement, to: values)
         }
@@ -71,6 +71,7 @@ public class SQLiteDriver: Fluent.Driver, Connection {
         values and returns the results.
     */
     public func raw(_ statement: String, _ values: [Node] = []) throws -> Node {
+        print("[raw] statement: \(statement) values: \(values)")
         let results = try database.execute(statement) { statement in
             try self.bind(statement: statement, to: values)
         }

@@ -36,7 +36,6 @@ final class Student: Entity {
             "donor": donor,
             "meta": meta
         ])
-        print("Made node: \(node)")
         return node
     }
     
@@ -50,9 +49,9 @@ final class Student: Entity {
         }
         
         // separate to ensure modification works
-//        try database.modify(entity) { students in
-//            students.custom("meta", type: "JSON", optional: true)
-//        }
+        try database.modify(entity) { students in
+            students.custom("meta", type: "JSON", optional: true)
+        }
     }
     
     static func revert(_ database: Database) throws {
