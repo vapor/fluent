@@ -187,35 +187,15 @@ extension Entity {
     }
 }
 
-/// Entity errors
-public enum EntityExistsError: Swift.Error, CustomStringConvertible {
-    /// All entities from db must have an id
-    case noId
-    /// All entities from
-    case doesntExist
-
-    public var description: String {
-        let reason: String
-        switch self {
-        case .noId:
-            reason = "missing id, entities can't exist in a fluent database without their id being set"
-        case .doesntExist:
-            reason = "this object wasn't fetched from the database"
-        }
-
-        return "\(EntityExistsError.self) - \(reason)"
-    }
-}
-
 extension Entity {
     @discardableResult
     public func assertExists() throws -> Node {
         guard let id = self.id else {
-            throw EntityExistsError.noId
+            throw EntityError.noId(Self.self)
         }
 
         guard exists else {
-            throw EntityExistsError.doesntExist
+            throw EntityError.doesntExist(Self.self)
         }
 
         return id
