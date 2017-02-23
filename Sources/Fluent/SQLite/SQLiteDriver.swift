@@ -21,6 +21,7 @@ public class SQLiteDriver: Fluent.Driver, Connection {
     /// driver can throw.
     public enum Error: Swift.Error {
         case unsupported(String)
+        case unspecified(Swift.Error)
     }
 
     public var idKey: String = "id"
@@ -133,5 +134,19 @@ public class SQLiteDriver: Fluent.Driver, Connection {
 
     public func makeConnection() throws -> Connection {
         return SQLiteDriver(database: database)
+    }
+}
+
+extension SQLiteDriver.Error: CustomStringConvertible {
+    public var description: String {
+        let response: String
+        switch self {
+        case .unsupported(let msg):
+            response = "unsupported - \(msg)"
+        case .unspecified(let error):
+            response = "unknown or extension error found - \(error)"
+        }
+
+        return "\(SQLiteDriver.Error.self) \(response)"
     }
 }
