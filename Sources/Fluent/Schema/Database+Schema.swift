@@ -1,7 +1,7 @@
 extension Database {
     /// Modifies the schema of the database
     /// for the given entity.
-    public func modify(_ entity: String, closure: (Schema.Modifier) throws -> ()) throws {
+    public func modify(custom entity: String, closure: (Schema.Modifier) throws -> ()) throws {
         let modifier = Schema.Modifier(entity)
         try closure(modifier)
         _ = try schema(modifier.schema)
@@ -9,7 +9,7 @@ extension Database {
 
     /// Creates the schema of the database
     /// for the given entity.
-    public func create(_ entity: String, closure: (Schema.Creator) throws -> ()) throws {
+    public func create(custom entity: String, closure: (Schema.Creator) throws -> ()) throws {
         let creator = Schema.Creator(entity)
         try closure(creator)
         _ = try schema(creator.schema)
@@ -17,7 +17,7 @@ extension Database {
 
     /// Deletes the schema of the database
     /// for the given entity.
-    public func delete(_ entity: String) throws {
+    public func delete(custom entity: String) throws {
         let schema = Schema.delete(entity: entity)
         _ = try self.schema(schema)
     }
