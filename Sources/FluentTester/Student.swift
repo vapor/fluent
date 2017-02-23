@@ -28,7 +28,7 @@ final class Student: Entity {
     }
     
     func makeNode(context: Context) throws -> Node {
-        return try Node(node: [
+        let node = try Node(node: [
             idKey: id,
             "name": name,
             "age": age,
@@ -36,10 +36,12 @@ final class Student: Entity {
             "donor": donor,
             "meta": meta
         ])
+        print("Made node: \(node)")
+        return node
     }
     
     static func prepare(_ database: Database) throws {
-        try database.create("students") { students in
+        try database.create(entity) { students in
             students.id(for: self)
             students.string("name", length: 64)
             students.int("age")
@@ -48,12 +50,12 @@ final class Student: Entity {
         }
         
         // separate to ensure modification works
-        try database.modify("students") { students in
-            students.custom("meta", type: "JSON")
-        }
+//        try database.modify(entity) { students in
+//            students.custom("meta", type: "JSON", optional: true)
+//        }
     }
     
     static func revert(_ database: Database) throws {
-        try database.delete("students")
+        try database.delete(entity)
     }
 }

@@ -1,5 +1,30 @@
 import Fluent
 
+final class Repro: Entity {
+    let storage = Storage()
+
+    init(node: Node, in context: Context) throws {
+
+        id = node[idKey]
+    }
+
+    func makeNode(context: Context) throws -> Node {
+        return Node([:])
+    }
+}
+
+extension Repro {
+    static func prepare(_ database: Database) throws {
+//        try database.create(entity) { repros in
+//            repros.custom("meta", type: "JSON")
+//        }
+    }
+
+    static func revert(_ database: Database) throws {
+        try database.delete(entity)
+    }
+}
+
 extension Tester {
     public func testPivotsAndRelations() throws {
         try Atom.prepare(database)
@@ -49,10 +74,15 @@ extension Tester {
         try testEquals(waterAtoms, [oxygen, hydrogen])
     }
 
+    public func testRepro() throws {
+        try Repro.prepare(database)
+    }
+    
     public func testDoublePivot() throws {
-        let driver = MemoryDriver()
-        let database = Database(driver)
-
+        try? Atom.revert(database)
+        try? Compound.revert(database)
+        try? Pivot<Atom, Compound>.revert(database)
+        
         try Atom.prepare(database)
         try Compound.prepare(database)
         try Student.prepare(database)

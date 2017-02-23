@@ -45,6 +45,18 @@ class CallbacksTests: XCTestCase {
 
     var database: Database!
 
+    func testFoo() {
+//        do {
+//            try Atom.prepare(database)
+//            try Compound.prepare(database)
+//            try Student.prepare(database)
+//            try Pivot<Atom, Compound>.prepare(database)
+//        } catch {
+//            print("ERr: \(error)")
+//            print("")
+//        }
+    }
+
     func testCreateCallbacksCanMutateProperties() {
         let result = DummyModel()
         XCTAssertFalse(result.wasModifiedOnCreate, "Result should not have been modified yet")
