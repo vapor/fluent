@@ -173,13 +173,13 @@ class TestPreparation: Preparation {
     static var testClosure: (Schema.Creator) -> () = { _ in }
 
     static func prepare(_ database: Database) throws {
-        try database.create(self) { builder in
+        try database.create(custom: entity) { builder in
             self.testClosure(builder)
         }
     }
 
     static func revert(_ database: Database) throws {
-        try database.delete(self)
+        try database.delete(custom: entity)
     }
 }
 
