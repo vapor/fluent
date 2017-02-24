@@ -1,5 +1,3 @@
-import Fluent
-
 public final class Atom: Entity {
     public var name: String
     public var protons: Int

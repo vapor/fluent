@@ -1,5 +1,3 @@
-import Fluent
-
 public final class Compound: Entity {
     public var name: String
     public let storage = Storage()
