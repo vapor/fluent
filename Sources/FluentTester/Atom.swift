@@ -1,5 +1,3 @@
-import Fluent
-
 public final class Atom: Entity {
     public var name: String
     public var protons: Int
@@ -15,11 +13,11 @@ public final class Atom: Entity {
     }
 
     public init(node: Node, in context: Context) throws {
-        name = try node.extract("name")
-        protons = try node.extract("protons")
-        weight = try node.extract("weight")
+        name = try node.get("name")
+        protons = try node.get("protons")
+        weight = try node.get("weight")
 
-        id = try node.extract(idKey)
+        id = try node.get(idKey)
     }
 
     public func makeNode(context: Context) throws -> Node {

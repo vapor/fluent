@@ -1,4 +1,6 @@
-import Fluent
+#if !COCOAPODS
+    @_exported import Fluent
+#endif
 
 public final class Tester {
     public let database: Database

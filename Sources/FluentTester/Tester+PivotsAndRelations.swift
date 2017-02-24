@@ -1,5 +1,3 @@
-import Fluent
-
 extension Tester {
     func setup() {
         Atom.database = database

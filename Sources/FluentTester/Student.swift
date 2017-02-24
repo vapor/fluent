@@ -1,5 +1,3 @@
-import Fluent
-
 final class Student: Entity {
     var name: String
     var age: Int
@@ -18,13 +16,13 @@ final class Student: Entity {
     }
     
     init(node: Node, in context: Context) throws {
-        name = try node.extract("name")
-        age = try node.extract("age")
-        ssn = try node.extract("ssn")
-        donor = try node.extract("donor")
-        meta = try node.extract("meta")
+        name = try node.get("name")
+        age = try node.get("age")
+        ssn = try node.get("ssn")
+        donor = try node.get("donor")
+        meta = try node.get("meta")
 
-        id = try node.extract(idKey)
+        id = try node.get(idKey)
     }
     
     func makeNode(context: Context) throws -> Node {

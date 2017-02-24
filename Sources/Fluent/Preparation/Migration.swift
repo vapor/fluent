@@ -8,8 +8,8 @@ final class Migration: Entity {
     }
 
     init(node: Node, in context: Context) throws {
-        name = try node.extract("name")
-        id = try node.extract(idKey)
+        name = try node.get("name")
+        id = try node.get(idKey)
     }
 
     func makeNode(context: Context = EmptyNode) throws -> Node {

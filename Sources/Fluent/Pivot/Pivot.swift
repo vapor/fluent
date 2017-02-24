@@ -48,10 +48,10 @@ public final class Pivot<
     }
 
     public init(node: Node, in context: Context) throws {
-        leftId = try node.extract(Left.foreignIdKey)
-        rightId = try node.extract(Right.foreignIdKey)
+        leftId = try node.get(Left.foreignIdKey)
+        rightId = try node.get(Right.foreignIdKey)
 
-        id = try node.extract(idKey)
+        id = try node.get(idKey)
     }
 
     public func makeNode(context: Context) throws -> Node {

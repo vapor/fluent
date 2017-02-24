@@ -15,7 +15,7 @@ final class StringIdentifiedThing: Entity {
     let storage = Storage()
     
     init(node: Node, in context: Context) throws {
-        id = try node.extract(idKey)
+        id = try node.get(idKey)
     }
     
     func makeNode(context: Context = EmptyNode) throws -> Node {
