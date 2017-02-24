@@ -1,5 +1,3 @@
-import Fluent
-
 extension Tester {
     public func testSchema() throws {
         Student.database = database

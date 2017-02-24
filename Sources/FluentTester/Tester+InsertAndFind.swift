@@ -1,5 +1,3 @@
-import Fluent
-
 extension Tester {
     public func testInsertAndFind() throws {
         Atom.database = database

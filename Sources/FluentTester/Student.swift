@@ -1,5 +1,3 @@
-import Fluent
-
 final class Student: Entity {
     var name: String
     var age: Int

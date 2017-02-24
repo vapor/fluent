@@ -1,5 +1,3 @@
-import Fluent
-
 extension Tester {
     public func test(_ f: () throws -> (), _ name: String) throws {
         do {
