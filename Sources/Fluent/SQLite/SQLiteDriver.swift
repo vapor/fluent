@@ -2,10 +2,11 @@ import SQLite
 
 /// An in memory driver that can be used for debugging and testing
 /// built on top of SQLiteDriver
-public final class MemoryDriver: SQLiteDriver {
+public final class MemoryDriver: SQLiteDriverProtocol {
+    public let database: SQLite
+
     public init() throws {
-        let database = try SQLite(path: ":memory:")
-        super.init(database: database)
+        database = try SQLite(path: ":memory:")
     }
 }
 
@@ -15,41 +16,37 @@ public final class MemoryDriver: SQLiteDriver {
 ///
 /// Because SQLite is not a distributed and easily scaled database,
 /// we do not recommend using it in Production
-public class SQLiteDriver: Fluent.Driver, Connection {
+public final class SQLiteDriver: SQLiteDriverProtocol {
+    public let database: SQLite
 
-    /// Describes the errors this
-    /// driver can throw.
-    public enum Error: Swift.Error {
-        case unsupported(String)
-        case unspecified(Swift.Error)
+    /// Creates a new SQLiteDriver pointing
+    /// to the database at the supplied path.
+    public init(path: String? = nil) throws {
+        database = try SQLite(path: 
+            path ?? "Database/main.sqlite"
+        )
+    }
+}
+
+public protocol SQLiteDriverProtocol: Fluent.Driver, Connection {
+    var database: SQLite { get }
+}
+
+extension SQLiteDriverProtocol {
+    public var idKey: String {
+        return "id"
     }
 
-    public var idKey: String = "id"
-    public var idType: IdentifierType = .int
+    public var idType: IdentifierType {
+        return .int
+    }
 
     public var closed: Bool {
         // TODO: FIXME
         return false
     }
 
-    let database: SQLite
-
-    /**
-        Creates a new SQLiteDriver pointing
-        to the database at the supplied path.
-    */
-    public convenience init(path: String = "Database/main.sqlite") throws {
-        let database = try SQLite(path: path)
-        self.init(database: database)
-    }
-
-    fileprivate init(database: SQLite) {
-        self.database = database
-    }
-
-    /**
-        Executes the query.
-    */
+    /// Executes the query.
     @discardableResult
     public func query<T: Entity>(_ query: Query<T>) throws -> Node {
         let serializer = SQLiteSerializer(sql: query.sql)
@@ -71,11 +68,9 @@ public class SQLiteDriver: Fluent.Driver, Connection {
       try _ = raw(statement, values)
     }
 
-    /**
-        Executes a raw query with an
-        optional array of paramterized
-        values and returns the results.
-    */
+    /// Executes a raw query with an
+    /// optional array of paramterized
+    /// values and returns the results.
     public func raw(_ statement: String, _ values: [Node] = []) throws -> Node {
         let results = try database.execute(statement) { statement in
             try self.bind(statement: statement, to: values)
@@ -83,10 +78,8 @@ public class SQLiteDriver: Fluent.Driver, Connection {
         return map(results: results)
     }
 
-    /**
-        Binds an array of values to the
-        SQLite statement.
-    */
+    /// Binds an array of values to the
+    /// SQLite statement.
     func bind(statement: SQLite.Statement, to values: [Node]) throws {
         for value in values {
             switch value {
@@ -102,9 +95,9 @@ public class SQLiteDriver: Fluent.Driver, Connection {
             case .string(let string):
                 try statement.bind(string)
             case .array(_):
-                throw Error.unsupported("Array values not supported.")
+                throw SQLiteDriverError.unsupported("Array values not supported.")
             case .object(_):
-                throw Error.unsupported("Dictionary values not supported.")
+                throw SQLiteDriverError.unsupported("Dictionary values not supported.")
             case .null:
                 try statement.null()
             case .bool(let bool):
@@ -118,9 +111,7 @@ public class SQLiteDriver: Fluent.Driver, Connection {
         }
     }
 
-    /**
-        Maps SQLite Results to Fluent results.
-    */
+    /// Maps SQLite Results to Fluent results.
     func map(results: [SQLite.Result.Row]) -> Node {
         let res: [Node] = results.map { row in
             var object: Node = .object([:])
@@ -133,20 +124,29 @@ public class SQLiteDriver: Fluent.Driver, Connection {
     }
 
     public func makeConnection() throws -> Connection {
-        return SQLiteDriver(database: database)
+        // SQLite must be configured with 
+        // SQLITE_OPEN_FULLMUTEX for this to work
+        return self
     }
 }
 
-extension SQLiteDriver.Error: CustomStringConvertible {
+/// Describes the errors this
+/// driver can throw.
+public enum SQLiteDriverError: Swift.Error {
+    case unsupported(String)
+    case unspecified(Swift.Error)
+}
+
+extension SQLiteDriverError: CustomStringConvertible {
     public var description: String {
         let response: String
         switch self {
         case .unsupported(let msg):
-            response = "unsupported - \(msg)"
+            response = "Unsupported: \(msg)"
         case .unspecified(let error):
-            response = "unknown or extension error found - \(error)"
+            response = "Unknown: \(error)"
         }
 
-        return "\(SQLiteDriver.Error.self) \(response)"
+        return "SQLite driver error: \(response)"
     }
 }
