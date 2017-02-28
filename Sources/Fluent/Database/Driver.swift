@@ -21,6 +21,10 @@ public protocol Driver: Executor {
     /// which do not themselves implement `Entity.idType`.
     var idType: IdentifierType { get }
 
+    /// The naming convetion to use for foreign
+    /// id keys, ex: snake_case vs. camelCase.
+    var keyNamingConvention: KeyNamingConvention { get }
+
     /// Creates a connection for executing
     /// queries. This method is used to
     /// automatically create a connection

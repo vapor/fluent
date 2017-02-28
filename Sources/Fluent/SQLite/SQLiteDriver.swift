@@ -41,6 +41,10 @@ extension SQLiteDriverProtocol {
         return .int
     }
 
+    public var keyNamingConvention: KeyNamingConvention {
+        return .snake_case
+    }
+
     public var closed: Bool {
         // TODO: FIXME
         return false

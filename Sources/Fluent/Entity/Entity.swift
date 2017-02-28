@@ -52,6 +52,10 @@ public protocol Entity: class, Preparation, NodeConvertible, Storable {
     /// ex: uuid, integer, etc
     static var idType: IdentifierType { get }
 
+    /// The naming convetion to use for foreign
+    /// id keys, ex: snake_case vs. camelCase.
+    static var keyNamingConvention: KeyNamingConvention { get }
+
     /// The name of the column that corresponds
     /// to this entity's identifying key.
     /// The default is 'database.driver.idKey',
@@ -166,6 +170,10 @@ extension Entity {
     public static var foreignIdKey: String {
         return "\(name)_\(idKey)"
     }
+
+    public static var keyNamingConvention: KeyNamingConvention {
+        return database?.keyNamingConvention ?? .snake_case
+    }
 }
 
 // MARK: Database
@@ -200,4 +208,9 @@ extension Entity {
 
         return id
     }
+}
+
+public enum KeyNamingConvention {
+    case snake_case
+    case camelCase
 }
