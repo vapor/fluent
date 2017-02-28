@@ -4,7 +4,7 @@ final class Proton: Entity {
     let storage = Storage()
     init(node: Node, in context: Context) throws {}
 
-    func makeNode(context: Context = EmptyNode) -> Node { return .null }
+    func makeNode(in context: Context = EmptyNode) -> Node { return .null }
     static func prepare(_ database: Database) throws {
         try database.create(self) { protons in
             protons.id(for: self)
