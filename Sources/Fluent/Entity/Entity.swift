@@ -208,7 +208,6 @@ extension Entity {
     /// relatable object from the static database map.
     public static var database: Database? {
         get {
-            print(Database.map)
             if let db = Database.map[Self.identifier] {
                 return db
             } else {
