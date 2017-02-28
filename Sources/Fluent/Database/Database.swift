@@ -37,7 +37,8 @@ public final class Database: Executor {
     public var idType: IdentifierType
 
     /// The naming convetion to use for foreign
-    /// id keys, ex: snake_case vs. camelCase.
+    /// id keys, table names, etc.
+    /// ex: snake_case vs. camelCase.
     public var keyNamingConvention: KeyNamingConvention
 
     /// A closure for handling database logs

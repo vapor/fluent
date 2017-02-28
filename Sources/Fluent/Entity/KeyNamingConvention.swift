@@ -1,5 +1,6 @@
 /// The naming convetion to use for foreign
-/// id keys, ex: snake_case vs. camelCase.
+/// id keys, table names, etc.
+/// ex: snake_case vs. camelCase.
 public enum KeyNamingConvention {
     case snake_case
     case camelCase

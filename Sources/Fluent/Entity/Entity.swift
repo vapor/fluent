@@ -53,7 +53,8 @@ public protocol Entity: class, Preparation, NodeConvertible, Storable {
     static var idType: IdentifierType { get }
 
     /// The naming convetion to use for foreign
-    /// id keys, ex: snake_case vs. camelCase.
+    /// id keys, table names, etc.
+    /// ex: snake_case vs. camelCase.
     static var keyNamingConvention: KeyNamingConvention { get }
 
     /// The name of the column that corresponds
