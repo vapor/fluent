@@ -29,7 +29,7 @@ final class CustomIdKey: Entity {
         id = try node.get(idKey)
     }
     
-    func makeNode(context: Context = EmptyNode) throws -> Node {
+    func makeNode(in context: Context = EmptyNode) throws -> Node {
         return try Node(node: [
             idKey: id,
             "label": label,

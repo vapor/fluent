@@ -82,7 +82,7 @@ class ModelTests: XCTestCase {
             init(node: Node, in context: Context) throws {
                 id = try node.get(idKey)
             }
-            func makeNode(context: Context) throws -> Node {
+            func makeNode(in context: Context) throws -> Node {
                 return try Node(node: [idKey: id])
             }
             static func prepare(_ database: Database) throws {}

@@ -21,19 +21,17 @@ final class Student: Entity {
         ssn = try node.get("ssn")
         donor = try node.get("donor")
         meta = try node.get("meta")
-
         id = try node.get(idKey)
     }
     
-    func makeNode(context: Context) throws -> Node {
-        let node = try Node(node: [
-            idKey: id,
-            "name": name,
-            "age": age,
-            "ssn": ssn,
-            "donor": donor,
-            "meta": meta
-        ])
+    func makeNode(in context: Context) throws -> Node {
+        var node = Node()
+        try node.set(idKey, id)
+        try node.set("name", name)
+        try node.set("age", age)
+        try node.set("ssn", ssn)
+        try node.set("donor", donor)
+        try node.set("meta", meta)
         return node
     }
     

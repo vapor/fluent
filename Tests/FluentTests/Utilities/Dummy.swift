@@ -13,7 +13,7 @@ final class DummyModel: Entity {
 
     }
 
-    func makeNode(context: Context) -> Node {
+    func makeNode(in context: Context) -> Node {
         return .null
     }
 }

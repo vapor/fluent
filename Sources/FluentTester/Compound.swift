@@ -12,7 +12,7 @@ public final class Compound: Entity {
         id = try node.get(idKey)
     }
 
-    public func makeNode(context: Context) throws -> Node {
+    public func makeNode(in context: Context) throws -> Node {
         return try Node(node: [
             idKey: id,
             "name": name

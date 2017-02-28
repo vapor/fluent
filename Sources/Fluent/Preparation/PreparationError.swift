@@ -1,22 +1,43 @@
-public enum PreparationError: Error {
+public enum PreparationError {
     case alreadyPrepared
     case revertImpossible
     case unspecified(Error)
 }
 
-extension PreparationError: CustomStringConvertible {
-    public var description: String {
-        let reason: String
-
+extension PreparationError: Debuggable {
+    public var identifier: String {
         switch self {
         case .alreadyPrepared:
-            reason = "Database has already been prepared."
+            return "alreadyPrepared"
         case .revertImpossible:
-            reason = "Revert is not possible"
-        case .unspecified(let error):
-            reason = "\(error)"
+            return "revertImpossible"
+        case .unspecified(_):
+            return "unspecified"
         }
+    }
 
-        return "Database preparation error: \(reason)"
+    public var reason: String {
+        switch self {
+        case .alreadyPrepared:
+            return "Database has already been prepared."
+        case .revertImpossible:
+            return "Revert is not possible"
+        case .unspecified(let error):
+            return "unspecified \(error)"
+        }
+    }
+
+    public var possibleCauses: [String] {
+        return [
+            "database isn't connecting properly",
+            "entity might not have database variable set properly",
+            "already reverted"
+        ]
+    }
+
+    public var suggestedFixes: [String] {
+        return [
+            "verify your database is setup properly",
+        ]
     }
 }

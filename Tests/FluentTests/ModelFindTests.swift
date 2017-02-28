@@ -17,7 +17,7 @@ class ModelFindTests: XCTestCase {
 
         }
 
-        func makeNode(context: Context = EmptyNode) -> Node {
+        func makeNode(in context: Context = EmptyNode) -> Node {
             return .null
         }
 

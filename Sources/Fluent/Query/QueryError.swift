@@ -4,19 +4,42 @@ public enum QueryError: Error {
     case unspecified(Error)
 }
 
-extension QueryError: CustomStringConvertible {
-    public var description: String {
-        let reason: String
+extension QueryError: Debuggable {
+    public var identifier: String {
+        switch self {
+        case .notSupported(_):
+            return "notSupported"
+        case .invalidDriverResponse(_):
+            return "invalidDriverResponse"
+        case .unspecified(_):
+            return "unspecified"
+        }
+    }
 
+    public var reason: String {
         switch self {
         case .notSupported(let string):
-            reason = "Not supported: \(string)"
+            return "Not supported: \(string)"
         case .invalidDriverResponse(let string):
-            reason = "Invalid driver response: \(string)"
+            return "Invalid driver response: \(string)"
         case .unspecified(let error):
-            reason = "\(error)"
+            return "\(error)"
         }
+    }
 
-        return "Database query error: \(reason)"
+    public var possibleCauses: [String] {
+        return [
+            "operation not supported by current database",
+            "the database has become corrupted",
+            "the database version doesn't have expected behavior"
+        ]
+    }
+
+    public var suggestedFixes: [String] {
+        return [
+            "verify your database version is the expected one",
+            "ensure your tables look as expected",
+            "verify this operation is supported by your database"
+        ]
     }
 }

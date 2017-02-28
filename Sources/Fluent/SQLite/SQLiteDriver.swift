@@ -136,21 +136,39 @@ extension SQLiteDriverProtocol {
 
 /// Describes the errors this
 /// driver can throw.
-public enum SQLiteDriverError: Swift.Error {
+public enum SQLiteDriverError {
     case unsupported(String)
     case unspecified(Swift.Error)
 }
 
-extension SQLiteDriverError: CustomStringConvertible {
-    public var description: String {
-        let response: String
+extension SQLiteDriverError: Debuggable {
+    public var identifier: String {
+        switch self {
+        case .unsupported(_):
+            return "unsupported"
+        case .unspecified(_):
+            return "unspecified"
+        }
+    }
+
+    public var reason: String {
         switch self {
         case .unsupported(let msg):
-            response = "Unsupported: \(msg)"
+            return "Unsupported Command: \(msg)"
         case .unspecified(let error):
-            response = "Unknown: \(error)"
+            return "Unspecified: \(error)"
         }
+    }
 
-        return "SQLite driver error: \(response)"
+    public var possibleCauses: [String] {
+        return [
+            "using operations not supported by sqlite"
+        ]
+    }
+
+    public var suggestedFixes: [String] {
+        return [
+            "verify data is not corrupt if data type should be supported by sqlite"
+        ]
     }
 }

@@ -74,7 +74,7 @@ extension QueryRepresentable {
 
         if let _ = model.id, model.exists {
             try model.willUpdate()
-            let node = try model.makeNode(context: query._context)
+            let node = try model.makeNode(in: query._context)
             try modify(node)
             model.didUpdate()
         } else {
@@ -84,7 +84,7 @@ extension QueryRepresentable {
                 model.id = UUID.random().makeNode()
             }
             try model.willCreate()
-            let node = try model.makeNode(context: query._context)
+            let node = try model.makeNode(in: query._context)
             let id = try query.create(node)
             if id != nil, id != .null, id != 0 {
                 model.id = id
