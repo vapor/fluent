@@ -25,7 +25,7 @@ final class Student: Entity {
         id = try node.get(idKey)
     }
     
-    func makeNode(context: Context) throws -> Node {
+    func makeNode(in context: Context) throws -> Node {
         let node = try Node(node: [
             idKey: id,
             "name": name,
