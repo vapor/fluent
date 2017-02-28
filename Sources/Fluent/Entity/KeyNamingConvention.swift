@@ -13,8 +13,8 @@ extension String {
         guard var expanded = characters
             .first
             .flatMap({ String($0) })
-            else {
-                return ""
+        else {
+            return self
         }
 
         characters.suffix(from: 1).forEach { char in
@@ -29,6 +29,10 @@ extension String {
     }
 
     internal func camelCase() -> String {
+        guard characters.count > 0 else {
+            return self
+        }
+
         return
             String(characters.prefix(1)).lowercased() +
             String(characters.dropFirst())
