@@ -37,7 +37,7 @@ class SchemaCreateTests: XCTestCase {
         
         let (statement, values) = serializer.serialize()
         
-        XCTAssertEqual(statement, "CREATE TABLE `stringidentifiedthings` (`#id` STRING(10) PRIMARY KEY NOT NULL)")
+        XCTAssertEqual(statement, "CREATE TABLE `string_identified_things` (`#id` STRING(10) PRIMARY KEY NOT NULL)")
         XCTAssertEqual(values.count, 0)
     }
  
@@ -52,7 +52,7 @@ class SchemaCreateTests: XCTestCase {
         
         let (statement, values) = serializer.serialize()
         
-        XCTAssertEqual(statement, "CREATE TABLE `customidentifiedthings` (`#id` INTEGER PRIMARY KEY NOT NULL)")
+        XCTAssertEqual(statement, "CREATE TABLE `custom_identified_things` (`#id` INTEGER PRIMARY KEY NOT NULL)")
         XCTAssertEqual(values.count, 0)
     }
     

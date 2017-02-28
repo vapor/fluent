@@ -64,7 +64,7 @@ class PreparationTests: XCTestCase {
                 return
             }
             
-            XCTAssertEqual(entity, "stringidentifiedthings")
+            XCTAssertEqual(entity, "string_identified_things")
             
             guard fields.count == 1 else {
                 XCTFail("Invalid field count")
@@ -98,7 +98,7 @@ class PreparationTests: XCTestCase {
                 return
             }
 
-            XCTAssertEqual(entity, "testmodels")
+            XCTAssertEqual(entity, "test_models")
 
             guard fields.count == 3 else {
                 XCTFail("Invalid field count")
@@ -184,6 +184,7 @@ class TestPreparation: Preparation {
 }
 
 class TestSchemaDriver: Driver {
+    var keyNamingConvention: KeyNamingConvention = .snake_case
     var idType: IdentifierType = .int
     var idKey: String = "id"
 

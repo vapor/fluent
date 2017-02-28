@@ -68,6 +68,12 @@ public protocol Entity: class, Preparation, NodeConvertible, Storable {
     /// ex: "foo_id".
     static var foreignIdKey: String { get }
 
+    /// Used for internal storage of the type
+    /// Uses `String(describing: self)` by default,
+    /// but types with Left/Right generics (like pivots)
+    /// must implement a custom identifier.
+    static var identifier: String { get }
+
     /// Called before the entity will be created.
     /// Throwing will cancel the creation.
     func willCreate() throws
@@ -151,9 +157,20 @@ extension Entity {
         return name + "s"
     }
 
+    // See Entity.identifier
+    public static var identifier: String {
+        return String(describing: self)
+    }
+
     /// See Entity.name
     public static var name: String {
-        return String(describing: self).lowercased()
+        let typeName = String(describing: self)
+        switch keyNamingConvention {
+        case .snake_case:
+            return typeName.snake_case()
+        case .camelCase:
+            return typeName.camelCase()
+        }
     }
 
     /// See Entity.idType
@@ -168,13 +185,20 @@ extension Entity {
 
     /// See Entity.foreignIdKey
     public static var foreignIdKey: String {
-        return "\(name)_\(idKey)"
+        switch keyNamingConvention {
+        case .snake_case:
+            return "\(name)_\(idKey)"
+        case .camelCase:
+            return "\(name)\(idKey.capitalized)"
+        }
+
     }
 
     public static var keyNamingConvention: KeyNamingConvention {
         return database?.keyNamingConvention ?? .snake_case
     }
 }
+
 
 // MARK: Database
 
@@ -183,14 +207,15 @@ extension Entity {
     /// relatable object from the static database map.
     public static var database: Database? {
         get {
-            if let db = Database.map[Self.name] {
+            print(Database.map)
+            if let db = Database.map[Self.identifier] {
                 return db
             } else {
                 return Database.default
             }
         }
         set {
-            Database.map[Self.name] = newValue
+            Database.map[Self.identifier] = newValue
         }
     }
 }
@@ -208,9 +233,4 @@ extension Entity {
 
         return id
     }
-}
-
-public enum KeyNamingConvention {
-    case snake_case
-    case camelCase
 }

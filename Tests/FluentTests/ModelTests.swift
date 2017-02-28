@@ -41,14 +41,14 @@ class ModelTests: XCTestCase {
         
         try! thing.save()
         let saveQ = GeneralSQLSerializer(sql: lqd.lastQuery!).serialize()
-        XCTAssertEqual(saveQ.0, "INSERT INTO `stringidentifiedthings` (`#id`) VALUES (?)")
+        XCTAssertEqual(saveQ.0, "INSERT INTO `string_identified_things` (`#id`) VALUES (?)")
         XCTAssertEqual(saveQ.1, ["derp"])
         XCTAssertTrue(thing.exists)
         
         _ = try! StringIdentifiedThing.find("derp")
         let findQ = GeneralSQLSerializer(sql: lqd.lastQuery!).serialize()
 
-        XCTAssertEqual(findQ.0, "SELECT `stringidentifiedthings`.* FROM `stringidentifiedthings` WHERE `stringidentifiedthings`.`#id` = ? LIMIT 0, 1")
+        XCTAssertEqual(findQ.0, "SELECT `string_identified_things`.* FROM `string_identified_things` WHERE `string_identified_things`.`#id` = ? LIMIT 0, 1")
         XCTAssertEqual(findQ.1, ["derp"])
     }
     
@@ -59,7 +59,7 @@ class ModelTests: XCTestCase {
 
         try! thing.save()
         let saveQ = GeneralSQLSerializer(sql: lqd.lastQuery!).serialize()
-        XCTAssertEqual(saveQ.0, "INSERT INTO `customidentifiedthings` (`#id`) VALUES (?)")
+        XCTAssertEqual(saveQ.0, "INSERT INTO `custom_identified_things` (`#id`) VALUES (?)")
         XCTAssertEqual(saveQ.1, [123])
         XCTAssertTrue(thing.exists)
 
@@ -67,7 +67,7 @@ class ModelTests: XCTestCase {
         if let sql = lqd.lastQuery {
             let findQ = GeneralSQLSerializer(sql: sql).serialize()
 
-            XCTAssertEqual(findQ.0, "SELECT `customidentifiedthings`.* FROM `customidentifiedthings` WHERE `customidentifiedthings`.`#id` = ? LIMIT 0, 1")
+            XCTAssertEqual(findQ.0, "SELECT `custom_identified_things`.* FROM `custom_identified_things` WHERE `custom_identified_things`.`#id` = ? LIMIT 0, 1")
             XCTAssertEqual(findQ.1, [123])
         } else {
             XCTFail("No last query")
@@ -95,4 +95,29 @@ class ModelTests: XCTestCase {
         do { try test.save() } catch {}
         XCTAssert(test.id != nil)
     }
+
+
+    func testKeyNamingConvention() throws {
+        Database.default = nil
+        XCTAssertEqual(CamelModel.foreignIdKey, "camelModelId")
+        XCTAssertEqual(SnakeModel.foreignIdKey, "snake_model_id")
+    }
+}
+
+final class CamelModel: Entity {
+    let storage = Storage()
+    init(node: Node, in context: Context) throws {}
+    func makeNode(context: Context) throws -> Node { return .null }
+    static func prepare(_ database: Database) throws {}
+    static func revert(_ database: Database) throws {}
+    static var keyNamingConvention = KeyNamingConvention.camelCase
+}
+
+final class SnakeModel: Entity {
+    let storage = Storage()
+    init(node: Node, in context: Context) throws {}
+    func makeNode(context: Context) throws -> Node { return .null }
+    static func prepare(_ database: Database) throws {}
+    static func revert(_ database: Database) throws {}
+    static var keyNamingConvention = KeyNamingConvention.snake_case
 }
