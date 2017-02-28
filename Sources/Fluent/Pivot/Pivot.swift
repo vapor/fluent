@@ -18,6 +18,14 @@ public final class Pivot<
         }
     }
 
+    public static var identifier: String {
+        if Left.name < Right.name {
+            return "Pivot<\(Left.identifier),\(Right.identifier)>"
+        } else {
+            return "Pivot<\(Right.identifier),\(Left.identifier)>"
+        }
+    }
+
     public static var name: String {
         return entity
     }

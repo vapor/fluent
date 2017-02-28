@@ -36,6 +36,11 @@ public final class Database: Executor {
     /// which do not themselves implement `Entity.idType`.
     public var idType: IdentifierType
 
+    /// The naming convetion to use for foreign
+    /// id keys, table names, etc.
+    /// ex: snake_case vs. camelCase.
+    public var keyNamingConvention: KeyNamingConvention
+
     /// A closure for handling database logs
     public typealias LogCallback = (Log) -> ()
 
@@ -48,6 +53,7 @@ public final class Database: Executor {
     public init(_ driver: Driver, maxConnections: Int = 128) {
         idKey = driver.idKey
         idType = driver.idType
+        keyNamingConvention = driver.keyNamingConvention
 
         threadConnectionPool = ThreadConnectionPool(
             makeConnection: driver.makeConnection,

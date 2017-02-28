@@ -1,6 +1,7 @@
 import Fluent
 
 class LastQueryDriver: Driver {
+    var keyNamingConvention: KeyNamingConvention = .snake_case
     var idType: IdentifierType = .int
     var idKey: String = "#id"
 

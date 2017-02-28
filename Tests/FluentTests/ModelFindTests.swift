@@ -25,6 +25,8 @@ class ModelFindTests: XCTestCase {
 
     /// Dummy Driver implementation for testing.
     class DummyDriver: Driver {
+        var keyNamingConvention: KeyNamingConvention = .snake_case
+
         var idType: IdentifierType = .int
         
         var idKey: String {
