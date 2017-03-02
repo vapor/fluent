@@ -24,12 +24,15 @@ extension SQL {
             self = .delete(
                 table: T.entity,
                 filters: query.filters,
+                joins: query.unions,
+                orders: query.sorts,
                 limit: query.limit
             )
         case .modify:
             self = .update(
                 table: T.entity,
                 filters: query.filters,
+                joins: query.unions,
                 data: query.data
             )
         }
