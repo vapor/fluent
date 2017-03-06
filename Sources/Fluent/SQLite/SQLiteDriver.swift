@@ -60,7 +60,7 @@ extension SQLiteDriverProtocol {
         }
 
         if let id = database.lastId, query.action == .create {
-            return try id.makeNode(in: nil)
+            return id.makeNode(in: query.context)
         } else {
             return map(results: results)
         }
@@ -120,7 +120,7 @@ extension SQLiteDriverProtocol {
         let res: [Node] = results.map { row in
             var object: Node = .object([:])
             for (key, value) in row.data {
-                object[key] = value.makeNode(in: nil)
+                object[key] = value.makeNode(in: rowContext)
             }
             return object
         }

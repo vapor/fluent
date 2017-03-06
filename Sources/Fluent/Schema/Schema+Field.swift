@@ -46,7 +46,7 @@ extension Schema {
             let node: Node?
             
             if let d = `default` {
-                node = try? d.makeNode(in: nil)
+                node = try? d.makeNode(in: rowContext)
             } else {
                 node = nil
             }

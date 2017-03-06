@@ -13,10 +13,10 @@ final class Migration: Entity {
     }
 
     func makeNode(in context: Context?) throws -> Node {
-        return try Node(node: [
-            idKey: id,
-            "name": name
-        ])
+        var node = Node([:])
+        try node.set(idKey, id)
+        try node.set("name", name)
+        return node
     }
 
     static func prepare(_ database: Database) throws {

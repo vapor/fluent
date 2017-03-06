@@ -63,11 +63,13 @@ public final class Pivot<
     }
 
     public func makeNode(in context: Context?) throws -> Node {
-        return try Node(node: [
+        let node = [
             idKey: id,
             Left.foreignIdKey: leftId,
             Right.foreignIdKey: rightId,
-        ])
+        ]
+
+        return try Node(node: node)
     }
 
     public static func prepare(_ database: Database) throws {

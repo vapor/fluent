@@ -149,7 +149,7 @@ final class TestModel: Entity {
 
     func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
-            idKey: id,
+            idKey: id ?? nil,
             "name": name,
             "age": age
         ])

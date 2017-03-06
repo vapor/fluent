@@ -20,7 +20,7 @@ final class Atom: Entity {
 
     func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
-            idKey: id,
+            idKey: id ?? nil,
             "name": name,
             "group_id": groupId
         ])
