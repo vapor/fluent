@@ -55,14 +55,14 @@ public final class Pivot<
         self.rightId = rightId
     }
 
-    public init(node: Node, in context: Context) throws {
+    public init(node: Node) throws {
         leftId = try node.get(Left.foreignIdKey)
         rightId = try node.get(Right.foreignIdKey)
 
         id = try node.get(idKey)
     }
 
-    public func makeNode(in context: Context) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
             idKey: id,
             Left.foreignIdKey: leftId,

@@ -24,12 +24,12 @@ final class CustomIdKey: Entity {
         self.id = id
     }
     
-    init(node: Node, in context: Context) throws {
+    init(node: Node) throws {
         label = try node.get("label")
         id = try node.get(idKey)
     }
     
-    func makeNode(in context: Context = EmptyNode) throws -> Node {
+    func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
             idKey: id,
             "label": label,

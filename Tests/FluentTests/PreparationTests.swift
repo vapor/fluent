@@ -141,13 +141,13 @@ final class TestModel: Entity {
     var age: Int
     let storage = Storage()
 
-    init(node: Node, in context: Context) throws {
+    init(node: Node) throws {
         name = try node.get("name")
         age = try node.get("age")
         id = try node.get(idKey)
     }
 
-    func makeNode(in context: Context = EmptyNode) throws -> Node {
+    func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
             idKey: id,
             "name": name,

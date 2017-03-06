@@ -9,11 +9,11 @@ final class DummyModel: Entity {
     static func prepare(_ database: Database) throws {}
     static func revert(_ database: Database) throws {}
 
-    init(node: Node, in context: Context) throws {
+    init(node: Node) throws {
 
     }
 
-    func makeNode(in context: Context) -> Node {
+    func makeNode(in context: Context?) -> Node {
         return .null
     }
 }

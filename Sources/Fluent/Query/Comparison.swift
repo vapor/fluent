@@ -16,31 +16,31 @@ extension Filter {
 }
 
 func == (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
-    let node = try rhs.makeNode()
+    let node = try rhs.makeNode(in: nil)
     return .compare(lhs, .equals, node)
 }
 
 func > (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
-    let node = try rhs.makeNode()
+    let node = try rhs.makeNode(in: nil)
     return .compare(lhs, .greaterThan, node)
 }
 
 func < (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
-    let node = try rhs.makeNode()
+    let node = try rhs.makeNode(in: nil)
     return .compare(lhs, .lessThan, node)
 }
 
 func >= (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
-    let node = try rhs.makeNode()
+    let node = try rhs.makeNode(in: nil)
     return .compare(lhs, .greaterThanOrEquals, node)
 }
 
 func <= (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
-    let node = try rhs.makeNode()
+    let node = try rhs.makeNode(in: nil)
     return .compare(lhs, .lessThanOrEquals, node)
 }
 
 func != (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
-    let node = try rhs.makeNode()
+    let node = try rhs.makeNode(in: nil)
     return .compare(lhs, .notEquals, node)
 }

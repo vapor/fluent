@@ -15,7 +15,7 @@ final class Student: Entity {
         self.meta = meta
     }
     
-    init(node: Node, in context: Context) throws {
+    init(node: Node) throws {
         name = try node.get("name")
         age = try node.get("age")
         ssn = try node.get("ssn")
@@ -24,8 +24,8 @@ final class Student: Entity {
         id = try node.get(idKey)
     }
     
-    func makeNode(in context: Context) throws -> Node {
-        var node = Node()
+    func makeNode(in context: Context?) throws -> Node {
+        var node = Node([:])
         try node.set(idKey, id)
         try node.set("name", name)
         try node.set("age", age)

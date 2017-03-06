@@ -81,7 +81,7 @@ extension QueryRepresentable {
             if model.id == nil, case .uuid = T.idType {
                 // automatically generates uuids
                 // for models without them
-                model.id = UUID.random().makeNode()
+                model.id = UUID.random().makeNode(in: nil)
             }
             try model.willCreate()
             let node = try model.makeNode(in: query._context)

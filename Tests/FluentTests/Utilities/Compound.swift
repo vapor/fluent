@@ -8,12 +8,12 @@ final class Compound: Entity {
         self.name = name
     }
 
-    init(node: Node, in context: Context) throws {
+    init(node: Node) throws {
         name = try node.get("name")
         id = try node.get(idKey)
     }
 
-    func makeNode(in context: Context = EmptyNode) throws -> Node {
+    func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
             idKey: id,
             "name": name

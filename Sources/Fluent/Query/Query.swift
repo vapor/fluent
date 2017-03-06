@@ -58,7 +58,7 @@ public final class Query<T: Entity> {
     /// and casting to the Query's generic destination type.
     @discardableResult
     internal func run() throws -> [T] {
-        guard case .array(let array) = try raw() else {
+        guard let array = try raw().typeArray else {
             throw QueryError.invalidDriverResponse("Array required.")
         }
 
@@ -67,7 +67,7 @@ public final class Query<T: Entity> {
         for result in array {
             do {
                 let model = try T(node: result, in: _context)
-                if case .object(let dict) = result {
+                if let dict = result.typeObject {
                     model.id = dict[T.idKey]
                 }
                 models.append(model)
