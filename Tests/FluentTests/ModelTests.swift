@@ -37,7 +37,7 @@ class ModelTests: XCTestCase {
     
     func testStringIdentifiedThings() throws {
         StringIdentifiedThing.database = db
-        let thing = try! StringIdentifiedThing(node: ["#id": "derp"], in: EmptyNode)
+        let thing = try! StringIdentifiedThing(node: ["#id": "derp"], in: nil)
         
         try! thing.save()
         let saveQ = GeneralSQLSerializer(sql: lqd.lastQuery!).serialize()
@@ -55,7 +55,7 @@ class ModelTests: XCTestCase {
     func testCustomIdentifiedThings() throws {
         CustomIdentifiedThing.database = db
 
-        let thing = try! CustomIdentifiedThing(node: ["#id": 123], in: EmptyNode)
+        let thing = try! CustomIdentifiedThing(node: ["#id": 123], in: nil)
 
         try! thing.save()
         let saveQ = GeneralSQLSerializer(sql: lqd.lastQuery!).serialize()
@@ -79,10 +79,10 @@ class ModelTests: XCTestCase {
             let storage = Storage()
             
             init() {}
-            init(node: Node, in context: Context) throws {
+            init(node: Node) throws {
                 id = try node.get(idKey)
             }
-            func makeNode(in context: Context) throws -> Node {
+            func makeNode(in context: Context?) throws -> Node {
                 return try Node(node: [idKey: id])
             }
             static func prepare(_ database: Database) throws {}
@@ -106,8 +106,8 @@ class ModelTests: XCTestCase {
 
 final class CamelModel: Entity {
     let storage = Storage()
-    init(node: Node, in context: Context) throws {}
-    func makeNode(context: Context) throws -> Node { return .null }
+    init(node: Node) throws {}
+    func makeNode(in context: Context?) throws -> Node { return .null }
     static func prepare(_ database: Database) throws {}
     static func revert(_ database: Database) throws {}
     static var keyNamingConvention = KeyNamingConvention.camelCase
@@ -115,8 +115,8 @@ final class CamelModel: Entity {
 
 final class SnakeModel: Entity {
     let storage = Storage()
-    init(node: Node, in context: Context) throws {}
-    func makeNode(context: Context) throws -> Node { return .null }
+    init(node: Node) throws {}
+    func makeNode(in context: Context?) throws -> Node { return .null }
     static func prepare(_ database: Database) throws {}
     static func revert(_ database: Database) throws {}
     static var keyNamingConvention = KeyNamingConvention.snake_case

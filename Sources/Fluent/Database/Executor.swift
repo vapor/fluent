@@ -35,7 +35,7 @@ public protocol Executor {
 extension Executor {
     @discardableResult
     public func raw(_ raw: String, _ values: [NodeRepresentable] = []) throws -> Node {
-        let nodes = try values.map { try $0.makeNode() }
+        let nodes = try values.map { try $0.makeNode(in: rowContext) }
         return try self.raw(raw, nodes)
     }
 }

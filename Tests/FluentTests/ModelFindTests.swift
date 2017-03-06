@@ -13,11 +13,11 @@ class ModelFindTests: XCTestCase {
         static func prepare(_ database: Database) throws {}
         static func revert(_ database: Database) throws {}
 
-        init(node: Node, in context: Context) throws {
+        init(node: Node) throws {
 
         }
 
-        func makeNode(in context: Context = EmptyNode) -> Node {
+        func makeNode(in context: Context?) -> Node {
             return .null
         }
 

@@ -118,7 +118,7 @@ open class GeneralSQLSerializer: SQLSerializer {
             statement += sql(table)
             statement += "SET"
 
-            if let data = data, case .object(let obj) = data {
+            if let data = data, let obj = data.typeObject {
                 let (dataClause, dataValues) = sql(update: obj)
                 statement += dataClause
                 values += dataValues
@@ -384,7 +384,7 @@ open class GeneralSQLSerializer: SQLSerializer {
         if let d = column.default {
             let dc: String
 
-            switch d {
+            switch d.wrapped {
             case .number(let n):
                 dc = "'" + n.description + "'"
             case .null:
@@ -439,7 +439,7 @@ open class GeneralSQLSerializer: SQLSerializer {
             return nil
         }
 
-        guard case .object(let dict) = node else {
+        guard let dict = node.typeObject else {
             return nil
         }
 

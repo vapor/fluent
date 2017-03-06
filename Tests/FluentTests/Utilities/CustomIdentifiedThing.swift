@@ -13,11 +13,11 @@ final class CustomIdentifiedThing: Entity {
     let storage = Storage()
     static let idKey = "#id"
     
-    init(node: Node, in context: Context) throws {
+    init(node: Node) throws {
         id = try node.get(idKey)
     }
     
-    func makeNode(in context: Context = EmptyNode) throws -> Node {
+    func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [idKey: id])
     }
     

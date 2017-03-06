@@ -25,6 +25,12 @@ public final class Query<T: Entity> {
     /// execution.
     public var joins: [Join]
 
+    private(set) lazy var context: RowContext = {
+        let context = RowContext()
+        context.database = self.database
+        return context
+    }()
+
     /// Creates a new `Query` with the
     /// `Model`'s database.
     public init(_ database: Database) {
@@ -33,7 +39,6 @@ public final class Query<T: Entity> {
         self.database = database
         joins = []
         sorts = []
-        _context = DatabaseContext(database)
     }
 
     /// Performs the Query returning the raw
@@ -49,16 +54,12 @@ public final class Query<T: Entity> {
     /// should be sent.
     internal let database: Database
 
-    /// Cached DatabaseContext used for
-    /// node parsing and serialization.
-    internal let _context: DatabaseContext
-
 
     /// Internal method for running the query
     /// and casting to the Query's generic destination type.
     @discardableResult
     internal func run() throws -> [T] {
-        guard case .array(let array) = try raw() else {
+        guard let array = try raw().typeArray else {
             throw QueryError.invalidDriverResponse("Array required.")
         }
 
@@ -66,8 +67,8 @@ public final class Query<T: Entity> {
 
         for result in array {
             do {
-                let model = try T(node: result, in: _context)
-                if case .object(let dict) = result {
+                let model = try T(node: result, in: context)
+                if let dict = result.typeObject {
                     model.id = dict[T.idKey]
                 }
                 models.append(model)

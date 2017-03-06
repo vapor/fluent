@@ -14,11 +14,11 @@ final class StringIdentifiedThing: Entity {
     static var idKey = "#id"
     let storage = Storage()
     
-    init(node: Node, in context: Context) throws {
+    init(node: Node) throws {
         id = try node.get(idKey)
     }
     
-    func makeNode(in context: Context = EmptyNode) throws -> Node {
+    func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [idKey: id])
     }
     

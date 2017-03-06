@@ -12,7 +12,7 @@ public final class Atom: Entity {
         self.id = id
     }
 
-    public init(node: Node, in context: Context) throws {
+    public init(node: Node) throws {
         name = try node.get("name")
         protons = try node.get("protons")
         weight = try node.get("weight")
@@ -20,9 +20,9 @@ public final class Atom: Entity {
         id = try node.get(idKey)
     }
 
-    public func makeNode(in context: Context) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
-            idKey: id,
+            idKey: id ?? nil,
             "name": name,
             "protons": protons,
             "weight": weight

@@ -48,7 +48,7 @@ extension QueryRepresentable {
         _ value: NodeRepresentable
     ) throws -> Query<Self.T> {
         let query = try makeQuery()
-        let filter = Filter(entity, .compare(field, comparison, try value.makeNode()))
+        let filter = Filter(entity, .compare(field, comparison, try value.makeNode(in: query.context)))
         query.filters.append(filter)
         return query
     }
@@ -61,7 +61,7 @@ extension QueryRepresentable {
         _ set: [NodeRepresentable]
         ) throws -> Query<Self.T> {
         let query = try makeQuery()
-        let filter = Filter(T.self, .subset(field, scope, try set.map({ try $0.makeNode() })))
+        let filter = Filter(T.self, .subset(field, scope, try set.map({ try $0.makeNode(in: query.context) })))
         query.filters.append(filter)
         return query
     }
@@ -155,7 +155,7 @@ extension QueryRepresentable {
     public func raw(command: String, values: [NodeRepresentable] = []) throws -> Query<Self.T> {
         let query = try makeQuery()
 
-        let values = try values.map { try $0.makeNode() }
+        let values = try values.map { try $0.makeNode(in: query.context) }
         let filter = Filter(T.self, .raw(command: command, values: values))
         query.filters.append(filter)
         return query

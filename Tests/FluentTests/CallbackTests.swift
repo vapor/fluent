@@ -16,11 +16,11 @@ class CallbacksTests: XCTestCase {
             
         }
         
-        init(node: Node, in context: Context) throws {
+        init(node: Node) throws {
 
         }
 
-        func makeNode(in context: Context = EmptyNode) -> Node {
+        func makeNode(in context: Context?) -> Node {
             return .null
         }
         

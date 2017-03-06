@@ -4,9 +4,9 @@ final class Nucleus: Entity {
     let storage = Storage()
     static var entity = "nuclei"
 
-    init(node: Node, in context: Context) throws { }
+    init(node: Node) throws { }
 
-    func makeNode(in context: Context = EmptyNode) -> Node { return .null }
+    func makeNode(in context: Context?) -> Node { return .null }
     static func prepare(_ database: Database) throws {
         try database.create(self) { nuclei in
             nuclei.id(for: self)
