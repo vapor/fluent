@@ -1,7 +1,6 @@
-/// Represents a database row or entity. 
-/// Fluent parses Rows from fetch queries and serializes
-/// Rows to create and update queries.
-public struct Row: StructuredDataWrapper {
+/// Represents a database row identifier.
+/// Uses the same context as Row.
+public struct Identifier: StructuredDataWrapper {
     public static let defaultContext = rowContext
     public var wrapped: StructuredData
     public let context: Context
