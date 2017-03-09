@@ -19,20 +19,18 @@ final class CustomIdKey: Entity {
     
     var label: String
     
-    init(id: Node?, label: String) {
+    init(id: Identifier?, label: String) {
         self.label = label
         self.id = id
     }
     
-    init(node: Node) throws {
-        label = try node.get("label")
-        id = try node.get(idKey)
+    init(row: Row) throws {
+        label = try row.get("label")
     }
     
-    func makeNode(in context: Context?) throws -> Node {
-        return try Node(node: [
-            idKey: id ?? nil,
-            "label": label,
-        ])
+    func makeRow() throws -> Row {
+        var row = Row()
+        try row.set("label", label)
+        return row
     }
 }

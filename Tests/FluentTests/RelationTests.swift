@@ -28,12 +28,11 @@ class RelationTests: XCTestCase {
     }
 
     func testHasMany() throws {
-
-        let hydrogen = try Atom(node: [
-            Atom.idKey: 42,
+        let hydrogen = try Atom(row: [
             "name": "Hydrogen",
             "group_id": 1337
         ])
+        hydrogen.id = 42
 
         let protons = try hydrogen.protons()
         _ = try protons.all()
@@ -42,7 +41,7 @@ class RelationTests: XCTestCase {
     }
 
     func testBelongsToMany() throws {
-        let hydrogen = try Atom(node: [
+        let hydrogen = try Atom(row: [
             "name": "Hydrogen",
             "group_id": 1337
         ])
@@ -50,7 +49,7 @@ class RelationTests: XCTestCase {
         hydrogen.id = 42
         try hydrogen.save()
 
-        let water = try Compound(node: [
+        let water = try Compound(row: [
             "name": "Water"
         ])
         try water.save()
@@ -64,11 +63,11 @@ class RelationTests: XCTestCase {
     }
 
     func testCustomForeignKey() throws {
-        let hydrogen = try Atom(node: [
-            Atom.idKey: 42,
+        let hydrogen = try Atom(row: [
             "name": "Hydrogen",
             "group_id": 1337
         ])
+        hydrogen.id = 42
         Atom.database = database
         Nucleus.database = database
 

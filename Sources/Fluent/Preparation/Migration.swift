@@ -7,16 +7,16 @@ final class Migration: Entity {
         self.name = name
     }
 
-    init(node: Node) throws {
-        name = try node.get("name")
-        id = try node.get(idKey)
+    init(row: Row) throws {
+        name = try row.get("name")
+        id = try row.get(idKey)
     }
 
-    func makeNode(in context: Context?) throws -> Node {
-        var node = Node([:])
-        try node.set(idKey, id)
-        try node.set("name", name)
-        return node
+    func makeRow() throws -> Row {
+        var row = Row()
+        try row.set(idKey, id)
+        try row.set("name", name)
+        return row
     }
 
     static func prepare(_ database: Database) throws {

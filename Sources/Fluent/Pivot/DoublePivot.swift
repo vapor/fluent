@@ -9,7 +9,9 @@ extension PivotProtocol where Left: PivotProtocol, Self: Entity {
         middle: Left.Right,
         right: Right
     ) throws -> Bool {
-        let (leftId, middleId, rightId) = try assertSaved(left, middle, right)
+        let leftId = try left.assertExists()
+        let middleId = try middle.assertExists()
+        let rightId = try right.assertExists()
 
         let result = try Left
             .query()
@@ -31,7 +33,9 @@ extension PivotProtocol where Right: PivotProtocol, Self: Entity {
         middle: Right.Left,
         right: Right.Right
     ) throws -> Bool {
-        let (leftId, middleId, rightId) = try assertSaved(left, middle, right)
+        let leftId = try left.assertExists()
+        let middleId = try middle.assertExists()
+        let rightId = try right.assertExists()
         
         let result = try Right
             .query()
@@ -43,38 +47,4 @@ extension PivotProtocol where Right: PivotProtocol, Self: Entity {
 
         return result != nil
     }
-}
-
-// MARK: Convenience
-
-private func assertSaved(
-    _ left: Entity,
-    _ middle: Entity,
-    _ right: Entity
-) throws -> (Node, Node, Node) {
-    guard left.exists else {
-        throw PivotError.existRequired(left)
-    }
-
-    guard let leftId = left.id else {
-        throw PivotError.idRequired(left)
-    }
-
-    guard middle.exists else {
-        throw PivotError.existRequired(middle)
-    }
-
-    guard let middleId = middle.id else {
-        throw PivotError.idRequired(middle)
-    }
-
-    guard right.exists else {
-        throw PivotError.existRequired(right)
-    }
-
-    guard let rightId = right.id else {
-        throw PivotError.idRequired(right)
-    }
-    
-    return (leftId, middleId, rightId)
 }

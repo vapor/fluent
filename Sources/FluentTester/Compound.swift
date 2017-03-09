@@ -2,21 +2,20 @@ public final class Compound: Entity {
     public var name: String
     public let storage = Storage()
 
-    public init(id: Node?, name: String) {
+    public init(id: Identifier?, name: String) {
         self.name = name
         self.id = id
     }
 
-    public init(node: Node) throws {
-        name = try node.get("name")
-        id = try node.get(idKey)
+    public init(row: Row) throws {
+        name = try row.get("name")
     }
 
-    public func makeNode(in context: Context?) throws -> Node {
-        return try Node(node: [
-            idKey: id ?? nil,
-            "name": name
-        ])
+    public func makeRow() throws -> Row {
+        var row = Row()
+        try row.set(idKey, id)
+        try row.set("name", name)
+        return row
     }
 
     var atoms: Siblings<Compound, Atom, Pivot<Compound, Atom>> {
