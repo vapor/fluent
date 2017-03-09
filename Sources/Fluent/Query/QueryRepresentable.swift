@@ -58,13 +58,14 @@ extension QueryRepresentable {
     /// Attempts the create action for the supplied
     /// serialized data.
     /// Returns the new entity's identifier.
-    public func create(_ serialized: Node?) throws -> Node {
+    public func create(_ row: Row?) throws -> Identifier {
         let query = try makeQuery()
 
         query.action = .create
-        query.data = serialized
+        query.data = try row.makeNode(in: query.context)
 
-        return try query.raw()
+        let raw = try query.raw()
+        return Identifier(raw)
     }
 
     /// Attempts to save a supplied entity
@@ -74,18 +75,20 @@ extension QueryRepresentable {
 
         if let _ = model.id, model.exists {
             try model.willUpdate()
-            let node = try model.makeNode(in: query.context)
-            try modify(node)
+            var row = try model.makeRow()
+            try row.set(T.idKey, model.id)
+            try modify(row)
             model.didUpdate()
         } else {
             if model.id == nil, case .uuid = T.idType {
                 // automatically generates uuids
                 // for models without them
-                model.id = UUID.random().makeNode(in: query.context)
+                model.id = Identifier(UUID.random())
             }
             try model.willCreate()
-            let node = try model.makeNode(in: query.context)
-            let id = try query.create(node)
+            var row = try model.makeRow()
+            try row.set(T.idKey, model.id)
+            let id = try query.create(row)
             if id != nil, id != .null, id != 0 {
                 model.id = id
             }
@@ -125,7 +128,7 @@ extension QueryRepresentable {
             .compare(
                 T.idKey,
                 .equals,
-                id
+                id.makeNode(in: query.context)
             )
         )
 
@@ -144,14 +147,14 @@ extension QueryRepresentable {
 extension QueryRepresentable {
     /// Attempts to modify model's collection with
     /// the supplied serialized data.
-    public func modify(_ serialized: Node?) throws {
+    public func modify(_ row: Row?) throws {
         let query = try makeQuery()
 
         query.action = .modify
-        query.data = serialized
+        query.data = try row.makeNode(in: query.context)
 
         let idKey = T.idKey
-        if let id = serialized?[idKey] {
+        if let id = row?[idKey] {
             _ = try filter(idKey, id)
         }
         try query.run()

@@ -13,13 +13,17 @@ import Fluent
 final class StringIdentifiedThing: Entity {
     static var idKey = "#id"
     let storage = Storage()
+
+    init() {}
     
-    init(node: Node) throws {
-        id = try node.get(idKey)
+    init(row: Row) throws {
+        id = try row.get(idKey)
     }
     
-    func makeNode(in context: Context?) throws -> Node {
-        return try Node(node: [idKey: id])
+    func makeRow() throws -> Row {
+        var row = Row()
+        try row.set(idKey, id)
+        return row
     }
     
     static var idType: IdentifierType { return .custom("STRING(10)") }

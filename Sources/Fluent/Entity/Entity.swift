@@ -2,7 +2,7 @@ public final class Storage {
     public init() {}
 
     fileprivate var exists: Bool = false
-    fileprivate var id: Node? = nil
+    fileprivate var id: Identifier? = nil
 }
 
 public protocol Storable: class {
@@ -25,7 +25,7 @@ extension Storable {
         }
     }
 
-    public var id: Node? {
+    public var id: Identifier? {
         get {
             return storage.id
         }
@@ -37,7 +37,8 @@ extension Storable {
 
 /// Represents an entity that can be
 /// stored and retrieved from the `Database`.
-public protocol Entity: class, Preparation, NodeConvertible, Storable {
+public protocol Entity: class, Preparation, RowConvertible, Storable {
+    var id: Identifier? { get set }
 
     /// The plural relational name of this model.
     /// Used as the collection or table name.
@@ -222,7 +223,7 @@ extension Entity {
 
 extension Entity {
     @discardableResult
-    public func assertExists() throws -> Node {
+    public func assertExists() throws -> Identifier {
         guard let id = self.id else {
             throw EntityError.noId(Self.self)
         }

@@ -9,13 +9,8 @@ final class DummyModel: Entity {
     static func prepare(_ database: Database) throws {}
     static func revert(_ database: Database) throws {}
 
-    init(node: Node) throws {
-
-    }
-
-    func makeNode(in context: Context?) -> Node {
-        return .null
-    }
+    init(row: Row) {}
+    func makeRow() -> Row { return .null}
 }
 
 class DummyDriver: Driver {

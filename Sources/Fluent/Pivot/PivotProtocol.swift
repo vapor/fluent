@@ -26,7 +26,8 @@ public protocol PivotProtocol {
 extension PivotProtocol where Self: Entity {
     /// See PivotProtocol.related
     public static func related(_ left: Left, _ right: Right) throws -> Bool {
-        let (leftId, rightId) = try assertSaved(left, right)
+        let leftId = try left.assertExists()
+        let rightId = try right.assertExists()
 
         let results = try query()
             .filter(type(of: left).foreignIdKey, leftId)
@@ -39,12 +40,14 @@ extension PivotProtocol where Self: Entity {
     /// See PivotProtocol.attach
     @discardableResult
     public static func attach(_ left: Left, _ right: Right) throws -> Self {
-        _ = try assertSaved(left, right)
+        let leftId = try left.assertExists()
+        let rightId = try right.assertExists()
 
-        let pivot = try self.init(node: [
-            Left.foreignIdKey: left.id,
-            Right.foreignIdKey: right.id
-        ])
+        var row = Row()
+        try row.set(Left.foreignIdKey, leftId)
+        try row.set(Right.foreignIdKey, rightId)
+
+        let pivot = try self.init(row: row)
         try pivot.save()
 
         return pivot
@@ -52,33 +55,12 @@ extension PivotProtocol where Self: Entity {
 
     /// See PivotProtocol.detach
     public static func detach(_ left: Left, _ right: Right) throws {
-        let (leftId, rightId) = try assertSaved(left, right)
+        let leftId = try left.assertExists()
+        let rightId = try right.assertExists()
 
         try query()
             .filter(Left.foreignIdKey, leftId)
             .filter(Right.foreignIdKey, rightId)
             .delete()
     }
-}
-
-// MARK: Convenience
-
-private func assertSaved(_ left: Entity, _ right: Entity) throws -> (Node, Node) {
-    guard left.exists else {
-        throw PivotError.existRequired(left)
-    }
-
-    guard let leftId = left.id else {
-        throw PivotError.idRequired(left)
-    }
-
-    guard right.exists else {
-        throw PivotError.existRequired(right)
-    }
-
-    guard let rightId = right.id else {
-        throw PivotError.idRequired(right)
-    }
-
-    return (leftId, rightId)
 }

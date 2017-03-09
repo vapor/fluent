@@ -17,24 +17,24 @@ final class User: Entity {
     var name: String
     var email: String
 
-    init(id: Node?, name: String, email: String) {
+    init(id: Identifier?, name: String, email: String) {
         self.name = name
         self.email = email
         self.id = id
     }
 
-    init(node: Node) throws {
-        name = try node.get("name")
-        email = try node.get("email")
-        id = try node.get(idKey)
+    init(row: Row) throws {
+        name = try row.get("name")
+        email = try row.get("email")
+        id = try row.get(idKey)
     }
 
-    func makeNode(in context: Context?) throws -> Node {
-        return try Node(node: [
-            idKey: id ?? nil,
-            "name": name,
-            "email": email
-        ])
+    func makeRow() throws -> Row {
+        var row = Row()
+        try row.set(idKey, id)
+        try row.set("name", name)
+        try row.set("email", email)
+        return row
     }
 }
 

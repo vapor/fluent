@@ -15,24 +15,24 @@ final class Student: Entity {
         self.meta = meta
     }
     
-    init(node: Node) throws {
-        name = try node.get("name")
-        age = try node.get("age")
-        ssn = try node.get("ssn")
-        donor = try node.get("donor")
-        meta = try node.get("meta")
-        id = try node.get(idKey)
+    init(row: Row) throws {
+        name = try row.get("name")
+        age = try row.get("age")
+        ssn = try row.get("ssn")
+        donor = try row.get("donor")
+        meta = try row.get("meta")
+        id = try row.get(idKey)
     }
     
-    func makeNode(in context: Context?) throws -> Node {
-        var node = Node([:])
-        try node.set(idKey, id)
-        try node.set("name", name)
-        try node.set("age", age)
-        try node.set("ssn", ssn)
-        try node.set("donor", donor)
-        try node.set("meta", meta)
-        return node
+    func makeRow() throws -> Row {
+        var row = Row()
+        try row.set(idKey, id)
+        try row.set("name", name)
+        try row.set("age", age)
+        try row.set("ssn", ssn)
+        try row.set("donor", donor)
+        try row.set("meta", meta)
+        return row
     }
     
     static func prepare(_ database: Database) throws {

@@ -5,25 +5,23 @@ final class Atom: Entity {
     var groupId: Node
     let storage = Storage()
 
-    init(name: String, id: Node? = nil) {
+    init(name: String, id: Identifier? = nil) {
         self.name = name
         self.groupId = 0
         self.id = id
     }
 
-    init(node: Node) throws {
-        name = try node.get("name")
-        groupId = try node.get("group_id")
-
-        id = try node.get(idKey)
+    init(row: Row) throws {
+        name = try row.get("name")
+        groupId = try row.get("group_id")
     }
 
-    func makeNode(in context: Context?) throws -> Node {
-        return try Node(node: [
-            idKey: id ?? nil,
-            "name": name,
-            "group_id": groupId
-        ])
+    func makeRow() throws -> Row {
+        var row = Row()
+        try row.set(idKey, id)
+        try row.set("name", name)
+        try row.set("group_id", groupId)
+        return row
     }
 
     var compounds: Siblings<Atom, Compound, Pivot<Atom, Compound>> {

@@ -67,9 +67,13 @@ public final class Query<T: Entity> {
 
         for result in array {
             do {
-                let model = try T(node: result, in: context)
-                if let dict = result.typeObject {
-                    model.id = dict[T.idKey]
+                let row = Row(node: result)
+                let model = try T(row: row)
+                if 
+                    let dict = result.typeObject, 
+                    let id = dict[T.idKey]
+                {
+                    model.id = Identifier(id)
                 }
                 models.append(model)
             } catch {
