@@ -110,7 +110,7 @@ extension QueryRepresentable {
         }
 
         query.action = .delete
-        try query.run()
+        try query.raw()
     }
 
     /// Attempts to delete the supplied entity
@@ -135,7 +135,7 @@ extension QueryRepresentable {
         query.filters.append(filter)
 
         try model.willDelete()
-        try query.run()
+        try query.raw()
         model.didDelete()
 
         let model = model
