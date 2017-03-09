@@ -25,6 +25,8 @@ extension Storable {
         }
     }
 
+    /// The entity's primary identifier
+    /// used for updating, filtering, deleting, etc.
     public var id: Identifier? {
         get {
             return storage.id
@@ -38,6 +40,10 @@ extension Storable {
 /// Represents an entity that can be
 /// stored and retrieved from the `Database`.
 public protocol Entity: class, Preparation, RowConvertible, Storable {
+    /// The entity's primary identifier
+    /// used for updating, filtering, deleting, etc.
+    /// - note: automatically implemented by Storable
+    ///         only override for custom use cases
     var id: Identifier? { get set }
 
     /// The plural relational name of this model.
