@@ -157,6 +157,6 @@ extension QueryRepresentable {
         if let id = row?[idKey] {
             _ = try filter(idKey, id)
         }
-        try query.run()
+        try query.raw()
     }
 }
