@@ -12,11 +12,13 @@ public struct Page<T: Entity & Paginatable> {
         data: [T],
         size: Int = T.pageSize,
         total: Int
-    ) {
-        self.number = number > 0 ? number : 1
+    ) throws {
+        guard number > 0 else {
+            throw PaginationError.invalidPageNumber(number)
+        }
+        self.number = number
         self.data = data
         self.size = size
         self.total = total
     }
 }
-

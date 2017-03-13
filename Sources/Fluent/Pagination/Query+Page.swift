@@ -4,6 +4,9 @@ extension QueryRepresentable where T: Paginatable {
         count: Int = T.pageSize,
         _ sorts: [Sort] = T.pageSorts
     ) throws -> Page<T> {
+        guard page > 0 else {
+            throw PaginationError.invalidPageNumber(page)
+        }
         // require page 1 or greater
         let page = page > 0 ? page : 1
 
@@ -23,7 +26,7 @@ extension QueryRepresentable where T: Paginatable {
         // fetch the data
         let data = try query.all()
 
-        return Page(
+        return try Page(
             number: page,
             data: data,
             size: count,
