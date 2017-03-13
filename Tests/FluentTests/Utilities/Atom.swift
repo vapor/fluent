@@ -40,17 +40,6 @@ final class Atom: Entity {
         return try children().first()
     }
 
-    static func prepare(_ database: Fluent.Database) throws {
-        try database.create(self) { builder in
-            builder.id(for: self)
-            builder.string("name")
-            builder.int("group_id")
-        }
-    }
-    static func revert(_ database: Fluent.Database) throws {
-        try database.delete(self)
-    }
-
     // MARK: Callbacks
 
     func willCreate() {
@@ -75,5 +64,18 @@ final class Atom: Entity {
 
     func didDelete() {
         print("Atom did delete.")
+    }
+}
+
+extension Atom: Preparation {
+    static func prepare(_ database: Fluent.Database) throws {
+        try database.create(self) { builder in
+            builder.id(for: self)
+            builder.string("name")
+            builder.int("group_id")
+        }
+    }
+    static func revert(_ database: Fluent.Database) throws {
+        try database.delete(self)
     }
 }

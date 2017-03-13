@@ -39,7 +39,7 @@ extension Storable {
 
 /// Represents an entity that can be
 /// stored and retrieved from the `Database`.
-public protocol Entity: class, Preparation, RowConvertible, Storable {
+public protocol Entity: class, RowConvertible, Storable {
     /// The entity's primary identifier
     /// used for updating, filtering, deleting, etc.
     /// - note: automatically implemented by Storable

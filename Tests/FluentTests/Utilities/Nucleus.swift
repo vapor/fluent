@@ -6,6 +6,9 @@ final class Nucleus: Entity {
 
     init(row: Row) { }
     func makeRow() -> Row { return .null }
+}
+
+extension Nucleus: Preparation {
     static func prepare(_ database: Database) throws {
         try database.create(self) { nuclei in
             nuclei.id(for: self)

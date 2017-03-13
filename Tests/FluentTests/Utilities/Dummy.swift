@@ -6,9 +6,6 @@ final class DummyModel: Entity {
         return "dummy_models"
     }
 
-    static func prepare(_ database: Database) throws {}
-    static func revert(_ database: Database) throws {}
-
     init(row: Row) {}
     func makeRow() -> Row { return .null}
 }
