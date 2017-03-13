@@ -18,5 +18,6 @@ public final class Tester {
         try test(testPivotsAndRelations, "Pivots and relations")
         try test(testDoublePivot, "Double pivot")
         try test(testSchema, "Schema")
+        try test(testPaginate, "Pagination")
     }
 }

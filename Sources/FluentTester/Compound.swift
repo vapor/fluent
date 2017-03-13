@@ -2,7 +2,7 @@ public final class Compound: Entity {
     public var name: String
     public let storage = Storage()
 
-    public init(id: Identifier?, name: String) {
+    public init(id: Identifier? = nil, name: String) {
         self.name = name
         self.id = id
     }
@@ -22,9 +22,6 @@ public final class Compound: Entity {
         return siblings()
     }
 
-    // wish this would work!
-    // lazy var atoms = Siblings(from: self, to: Atom.self, through: Pivot<Compound, Atom>.self)
-
     public static func prepare(_ database: Fluent.Database) throws {
         try database.create(self) { builder in
             builder.id(for: self)
@@ -34,5 +31,17 @@ public final class Compound: Entity {
 
     public static func revert(_ database: Fluent.Database) throws {
         try database.delete(self)
+    }
+}
+
+extension Compound: Paginatable {
+    public static var pageSize: Int {
+        return 2
+    }
+
+    public static var pageSorts: [Sort] {
+        return [
+            Sort(self, "name", .ascending)
+        ]
     }
 }
