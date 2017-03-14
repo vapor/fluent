@@ -57,11 +57,11 @@ extension QueryRepresentable {
     @discardableResult
     public func join<Joined: Entity>(
         _ joined: Joined.Type,
-        baseKey: String = T.idKey,
-        joinedKey: String = T.foreignIdKey
-    ) throws -> Query<Self.T> {
+        baseKey: String = E.idKey,
+        joinedKey: String = E.foreignIdKey
+    ) throws -> Query<Self.E> {
         let join = Join(
-            base: T.self,
+            base: E.self,
             joined: joined,
             baseKey: baseKey,
             joinedKey: joinedKey
@@ -72,7 +72,7 @@ extension QueryRepresentable {
 
 
     @discardableResult
-    public func join(_ join: Join) throws -> Query<Self.T> {
+    public func join(_ join: Join) throws -> Query<Self.E> {
         let query = try makeQuery()
         query.joins.append(join)
         return query

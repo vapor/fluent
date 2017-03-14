@@ -1,12 +1,12 @@
 public protocol QueryRepresentable {
-    associatedtype T: Entity
-    func makeQuery() throws -> Query<T>
+    associatedtype E: Entity
+    func makeQuery() throws -> Query<E>
 }
 
 // MARK: Fetch
 extension QueryRepresentable {
     /// Returns all entities retrieved by the query.
-    public func all() throws -> [T] {
+    public func all() throws -> [E] {
         let query = try makeQuery()
         query.action = .fetch
 
@@ -14,26 +14,26 @@ extension QueryRepresentable {
             throw QueryError.invalidDriverResponse("Array required.")
         }
 
-        var models: [T] = []
+        var models: [E] = []
 
         for result in array {
             do {
                 let row = Row(node: result)
-                let model = try T(row: row)
+                let model = try E(row: row)
                 if
                     let dict = result.typeObject,
-                    let id = dict[T.idKey]
+                    let id = dict[E.idKey]
                 {
                     model.id = Identifier(id)
                 }
                 model.exists = true
-                if T.timestamps {
-                    model.storage.createdAt = try row.get(T.createdAtKey)
-                    model.storage.updatedAt = try row.get(T.updatedAtKey)
+                if E.usesTimestamps {
+                    model.storage.createdAt = try row.get(E.createdAtKey)
+                    model.storage.updatedAt = try row.get(E.updatedAtKey)
                 }
                 models.append(model)
             } catch {
-                print("Could not initialize \(T.self), skipping: \(error)")
+                print("Could not initialize \(E.self), skipping: \(error)")
             }
         }
 
@@ -41,7 +41,7 @@ extension QueryRepresentable {
     }
 
     /// Returns the first entity retrieved by the query.
-    public func first() throws -> T? {
+    public func first() throws -> E? {
         let query = try makeQuery()
         query.action = .fetch
         query.limit = Limit(count: 1)
@@ -90,33 +90,33 @@ extension QueryRepresentable {
 
     /// Attempts to save a supplied entity
     /// and updates its identifier if successful.
-    public func save(_ model: T) throws {
+    public func save(_ model: E) throws {
         let query = try makeQuery()
 
         if let _ = model.id, model.exists {
             try model.willUpdate()
             var row = try model.makeRow()
-            if T.timestamps {
+            if E.usesTimestamps {
                 let now = Date()
-                try row.set(T.updatedAtKey, now)
+                try row.set(E.updatedAtKey, now)
                 model.storage.updatedAt = now
             }
-            try row.set(T.idKey, model.id)
+            try row.set(E.idKey, model.id)
             try modify(row)
             model.didUpdate()
         } else {
-            if model.id == nil, case .uuid = T.idType {
+            if model.id == nil, case .uuid = E.idType {
                 // automatically generates uuids
                 // for models without them
                 model.id = Identifier(UUID.random())
             }
             try model.willCreate()
             var row = try model.makeRow()
-            try row.set(T.idKey, model.id)
-            if T.timestamps {
+            try row.set(E.idKey, model.id)
+            if E.usesTimestamps {
                 let now = Date()
-                try row.set(T.createdAtKey, now)
-                try row.set(T.updatedAtKey, now)
+                try row.set(E.createdAtKey, now)
+                try row.set(E.updatedAtKey, now)
                 model.storage.createdAt = now
                 model.storage.updatedAt = now
             }
@@ -147,7 +147,7 @@ extension QueryRepresentable {
 
     /// Attempts to delete the supplied entity
     /// if its identifier is set.
-    public func delete(_ model: T) throws {
+    public func delete(_ model: E) throws {
         guard let id = model.id else {
             return
         }
@@ -156,9 +156,9 @@ extension QueryRepresentable {
         query.action = .delete
 
         let filter = Filter(
-            T.self,
+            E.self,
             .compare(
-                T.idKey,
+                E.idKey,
                 .equals,
                 id.makeNode(in: query.context)
             )
@@ -185,7 +185,7 @@ extension QueryRepresentable {
         query.action = .modify
         query.data = try row.makeNode(in: query.context)
 
-        let idKey = T.idKey
+        let idKey = E.idKey
         if let id = row?[idKey] {
             _ = try filter(idKey, id)
         }

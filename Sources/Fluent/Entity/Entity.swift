@@ -95,7 +95,7 @@ public protocol Entity: class, Preparation, RowConvertible, Storable {
     /// If true, timestamps will be added when
     /// creating a schema for this entity
     /// - note: inherits from database by default
-    static var timestamps: Bool { get }
+    static var usesTimestamps: Bool { get }
 
     /// Called before the entity will be created.
     /// Throwing will cancel the creation.
@@ -225,8 +225,8 @@ extension Entity {
 // MARK: Timestamps
 
 extension Entity {
-    public static var timestamps: Bool {
-        return database?.timestamps ?? true
+    public static var usesTimestamps: Bool {
+        return database?.usesTimestamps ?? true
     }
 
     public static var updatedAtKey: String {

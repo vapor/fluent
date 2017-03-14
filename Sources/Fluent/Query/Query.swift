@@ -1,5 +1,5 @@
 /// Represents an abstract database query.
-public final class Query<T: Entity> {
+public final class Query<E: Entity> {
     /// The type of action to perform
     /// on the data. Defaults to `.fetch`
     public var action: Action
@@ -57,7 +57,7 @@ public final class Query<T: Entity> {
 
 extension Query: QueryRepresentable {
     /// Conformance to `QueryRepresentable`
-    public func makeQuery() -> Query<T> {
+    public func makeQuery() -> Query<E> {
         return self
     }
 }

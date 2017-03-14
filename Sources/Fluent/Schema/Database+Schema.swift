@@ -32,7 +32,7 @@ extension Database {
         let creator = Schema.Creator(e.entity)
 
         // add timestamps
-        if E.timestamps {
+        if E.usesTimestamps {
             creator.date(E.createdAtKey)
             creator.date(E.updatedAtKey)
         }

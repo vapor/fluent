@@ -109,8 +109,7 @@ extension SQLiteDriverProtocol {
             case .bytes(let data):
                 try statement.bind(String(describing: data))
             case .date(let date):
-                let dateString = Date.outgoingDateFormatter.string(from: date)
-                try statement.bind(dateString)
+                try statement.bind(Node(.date(date), in: nil).string ?? "")
             }
         }
     }

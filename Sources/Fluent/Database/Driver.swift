@@ -29,7 +29,7 @@ public protocol Driver: Executor {
     /// If true, timestamps will be added when
     /// creating a schema for entities under this driver
     /// - note: true by default
-    var timestamps: Bool { get }
+    var usesTimestamps: Bool { get }
 
     /// Creates a connection for executing
     /// queries. This method is used to
@@ -62,10 +62,10 @@ extension Driver {
 
 // MARK: Defaults
 
-public var defaultTimestamps = true
+public var usesTimestampsDefault = true
 
 extension Driver {
-    public var timestamps: Bool {
-        return defaultTimestamps
+    public var usesTimestamps: Bool {
+        return usesTimestampsDefault
     }
 }

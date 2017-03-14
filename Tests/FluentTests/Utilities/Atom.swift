@@ -2,7 +2,7 @@ import Fluent
 
 final class Atom: Entity {
     var name: String
-    var groupId: Node
+    var groupId: Identifier
     let storage = Storage()
 
     init(name: String, id: Identifier? = nil) {
