@@ -109,7 +109,7 @@ extension SQLiteDriverProtocol {
             case .bytes(let data):
                 try statement.bind(String(describing: data))
             case .date(let date):
-                try statement.bind(Node(.date(date), in: nil).string ?? "")
+                try statement.bind(date.makeNode(in: nil).string ?? "")
             }
         }
     }
