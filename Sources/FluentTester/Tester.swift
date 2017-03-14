@@ -19,6 +19,6 @@ public final class Tester {
         try test(testDoublePivot, "Double pivot")
         try test(testSchema, "Schema")
         try test(testPaginate, "Pagination")
-        try test(testTimestamps, "Timestamps")
+        //try test(testTimestamps, "Timestamps")
     }
 }
