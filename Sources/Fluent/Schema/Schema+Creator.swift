@@ -86,7 +86,7 @@ extension Schema {
             )
         }
 
-        public func data(
+        public func bytes(
             _ name: String,
             optional: Bool = false,
             unique: Bool = false,
@@ -94,7 +94,22 @@ extension Schema {
         ) {
             fields += Field(
                 name: name,
-                type: .data,
+                type: .bytes,
+                optional: optional,
+                unique: unique,
+                default: `default`
+            )
+        }
+
+        public func date(
+            _ name: String,
+            optional: Bool = false,
+            unique: Bool = false,
+            default: NodeRepresentable? = nil
+        ) {
+            fields += Field(
+                name: name,
+                type: .date,
                 optional: optional,
                 unique: unique,
                 default: `default`

@@ -39,7 +39,6 @@ extension Database {
             model.database = self
         }
 
-
         // record that this preparation has run
         let migration = Migration(name: preparation.name)
         try migration.save()

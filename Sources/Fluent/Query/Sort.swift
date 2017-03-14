@@ -1,7 +1,6 @@
 /// Sorts results based on a field
 /// and direction.
 public struct Sort {
-
     /// The types of directions
     /// fields can be sorted.
     public enum Direction {
@@ -27,9 +26,9 @@ public struct Sort {
 extension QueryRepresentable {
     /// Add a Sort to the Query.
     /// See Sort for more information.
-    public func sort(_ field: String, _ direction: Sort.Direction) throws -> Query<T> {
+    public func sort(_ field: String, _ direction: Sort.Direction) throws -> Query<E> {
         let query = try makeQuery()
-        let sort = Sort(T.self, field, direction)
+        let sort = Sort(E.self, field, direction)
         query.sorts.append(sort)
         return query
     }

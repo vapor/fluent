@@ -46,7 +46,7 @@ extension QueryRepresentable {
         _ field: String,
         _ comparison: Filter.Comparison,
         _ value: NodeRepresentable
-    ) throws -> Query<Self.T> {
+    ) throws -> Query<Self.E> {
         let query = try makeQuery()
         let filter = Filter(entity, .compare(field, comparison, try value.makeNode(in: query.context)))
         query.filters.append(filter)
@@ -59,7 +59,7 @@ extension QueryRepresentable {
         _ field: String,
         _ scope: Filter.Scope,
         _ set: [NodeRepresentable]
-        ) throws -> Query<Self.T> {
+        ) throws -> Query<Self.E> {
         let query = try makeQuery()
         let filter = Filter(T.self, .subset(field, scope, try set.map({ try $0.makeNode(in: query.context) })))
         query.filters.append(filter)
@@ -71,7 +71,7 @@ extension QueryRepresentable {
         _ entity: T.Type,
         _ field: String,
         _ value: NodeRepresentable
-    ) throws -> Query<Self.T> {
+    ) throws -> Query<Self.E> {
         return try makeQuery().filter(entity, field, .equals, value)
     }
 
@@ -87,8 +87,8 @@ extension QueryRepresentable {
         _ field: String,
         _ comparison: Filter.Comparison,
         _ value: NodeRepresentable
-    ) throws -> Query<Self.T> {
-        return try makeQuery().filter(T.self, field, comparison, value)
+    ) throws -> Query<Self.E> {
+        return try makeQuery().filter(E.self, field, comparison, value)
     }
 
     /// Adds a `.subset` filter to the query's
@@ -101,8 +101,8 @@ extension QueryRepresentable {
         _ field: String,
         _ scope: Filter.Scope,
         _ set: [NodeRepresentable]
-    ) throws -> Query<Self.T> {
-        return try makeQuery().filter(T.self, field, scope, set)
+    ) throws -> Query<Self.E> {
+        return try makeQuery().filter(E.self, field, scope, set)
     }
 
 
@@ -111,8 +111,8 @@ extension QueryRepresentable {
     public func filter(
         _ field: String,
         _ value: NodeRepresentable
-    ) throws -> Query<Self.T> {
-        return try makeQuery().filter(T.self, field, .equals, value)
+    ) throws -> Query<Self.E> {
+        return try makeQuery().filter(E.self, field, .equals, value)
     }
 
     /// Shortcut for creating a `.contains` filter.
@@ -120,8 +120,8 @@ extension QueryRepresentable {
     public func filter(
         _ field: String,
         contains value: NodeRepresentable
-    ) throws -> Query<Self.T> {
-        return try filter(T.self, field, .contains, value)
+    ) throws -> Query<Self.E> {
+        return try filter(E.self, field, .contains, value)
     }
 }
 
@@ -130,7 +130,7 @@ extension QueryRepresentable {
     public func filter<T: Entity>(
         _ entity: T.Type,
         _ value: Filter.Method
-        ) throws -> Query<Self.T> {
+    ) throws -> Query<Self.E> {
         let query = try makeQuery()
         let filter = Filter(T.self, value)
         query.filters.append(filter)
@@ -141,9 +141,9 @@ extension QueryRepresentable {
     @discardableResult
     public func filter(
         _ value: Filter.Method
-        ) throws -> Query<Self.T> {
+    ) throws -> Query<Self.E> {
         let query = try makeQuery()
-        let filter = Filter(Self.T.self, value)
+        let filter = Filter(E.self, value)
         query.filters.append(filter)
         return query
     }
@@ -152,11 +152,11 @@ extension QueryRepresentable {
 extension QueryRepresentable {
     /// Shortcut for creating a `.raw` filter.
     @discardableResult
-    public func raw(command: String, values: [NodeRepresentable] = []) throws -> Query<Self.T> {
+    public func raw(command: String, values: [NodeRepresentable] = []) throws -> Query<Self.E> {
         let query = try makeQuery()
 
         let values = try values.map { try $0.makeNode(in: query.context) }
-        let filter = Filter(T.self, .raw(command: command, values: values))
+        let filter = Filter(E.self, .raw(command: command, values: values))
         query.filters.append(filter)
         return query
     }

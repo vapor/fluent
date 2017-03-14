@@ -3,6 +3,8 @@ public final class Storage {
 
     fileprivate var exists: Bool = false
     fileprivate var id: Identifier? = nil
+    internal var createdAt: Date? = nil
+    internal var updatedAt: Date? = nil
 }
 
 public protocol Storable: class {
@@ -34,6 +36,14 @@ extension Storable {
         set {
             storage.id = newValue
         }
+    }
+
+    public var createdAt: Date? {
+        return storage.createdAt
+    }
+
+    public var updatedAt: Date? {
+        return storage.updatedAt
     }
 }
 
@@ -81,6 +91,11 @@ public protocol Entity: class, Preparation, RowConvertible, Storable {
     /// but types with Left/Right generics (like pivots)
     /// must implement a custom identifier.
     static var identifier: String { get }
+
+    /// If true, timestamps will be added when
+    /// creating a schema for this entity
+    /// - note: inherits from database by default
+    static var usesTimestamps: Bool { get }
 
     /// Called before the entity will be created.
     /// Throwing will cancel the creation.
@@ -204,6 +219,32 @@ extension Entity {
 
     public static var keyNamingConvention: KeyNamingConvention {
         return database?.keyNamingConvention ?? .snake_case
+    }
+}
+
+// MARK: Timestamps
+
+extension Entity {
+    public static var usesTimestamps: Bool {
+        return database?.usesTimestamps ?? true
+    }
+
+    public static var updatedAtKey: String {
+        switch keyNamingConvention {
+        case .camelCase:
+            return "updatedAt"
+        case .snake_case:
+            return "updated_at"
+        }
+    }
+
+    public static var createdAtKey: String {
+        switch keyNamingConvention {
+        case .camelCase:
+            return "createdAt"
+        case .snake_case:
+            return "created_at"
+        }
     }
 }
 

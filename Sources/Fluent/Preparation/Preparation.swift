@@ -1,6 +1,7 @@
 /// A preparation prepares the database for
 /// any task that it may need to perform during runtime.
 public protocol Preparation {
+
     /// The prepare method should call any methods
     /// it needs on the database to prepare.
     static func prepare(_ database: Database) throws

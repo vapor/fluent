@@ -1,5 +1,5 @@
 /// Represents an abstract database query.
-public final class Query<T: Entity> {
+public final class Query<E: Entity> {
     /// The type of action to perform
     /// on the data. Defaults to `.fetch`
     public var action: Action
@@ -53,41 +53,11 @@ public final class Query<T: Entity> {
     /// The database to which the query
     /// should be sent.
     internal let database: Database
-
-
-    /// Internal method for running the query
-    /// and casting to the Query's generic destination type.
-    @discardableResult
-    internal func run() throws -> [T] {
-        guard let array = try raw().typeArray else {
-            throw QueryError.invalidDriverResponse("Array required.")
-        }
-
-        var models: [T] = []
-
-        for result in array {
-            do {
-                let row = Row(node: result)
-                let model = try T(row: row)
-                if 
-                    let dict = result.typeObject, 
-                    let id = dict[T.idKey]
-                {
-                    model.id = Identifier(id)
-                }
-                models.append(model)
-            } catch {
-                print("Could not initialize \(T.self), skipping: \(error)")
-            }
-        }
-
-        return models
-    }
 }
 
 extension Query: QueryRepresentable {
     /// Conformance to `QueryRepresentable`
-    public func makeQuery() -> Query<T> {
+    public func makeQuery() -> Query<E> {
         return self
     }
 }

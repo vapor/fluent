@@ -6,7 +6,7 @@ public final class Parent<
 > {
     /// The parent entity id. This
     /// will be used to find the parent.
-    public let parentId: Node
+    public let parentId: Identifier
 
     /// The child requesting its parent
     public let child: Child
@@ -20,7 +20,7 @@ public final class Parent<
     public init(
         from child: Child,
         to parentType: Parent.Type = Parent.self,
-        withId parentId: Node
+        withId parentId: Identifier
     ) {
         self.child = child
         self.parentId = parentId
@@ -36,7 +36,7 @@ extension Parent: QueryRepresentable {
 
 extension Entity {
     public func parent<P: Entity>(
-        id parentId: Node,
+        id parentId: Identifier,
         type parentType: P.Type = P.self
     ) -> Parent<Self, P> {
         return Parent(from: self, withId: parentId)

@@ -30,6 +30,13 @@ extension Database {
         if e.database == nil { e.database = self }
 
         let creator = Schema.Creator(e.entity)
+
+        // add timestamps
+        if E.usesTimestamps {
+            creator.date(E.createdAtKey)
+            creator.date(E.updatedAtKey)
+        }
+
         try closure(creator)
         _ = try schema(creator.schema)
     }

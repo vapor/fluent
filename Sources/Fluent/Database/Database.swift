@@ -41,6 +41,11 @@ public final class Database: Executor {
     /// ex: snake_case vs. camelCase.
     public var keyNamingConvention: KeyNamingConvention
 
+    /// If true, timestamps will be added when
+    /// creating a schema for entities in this db
+    /// - note: inherits from driver.timestamps on init
+    public var usesTimestamps: Bool
+
     /// A closure for handling database logs
     public typealias LogCallback = (Log) -> ()
 
@@ -54,6 +59,7 @@ public final class Database: Executor {
         idKey = driver.idKey
         idType = driver.idType
         keyNamingConvention = driver.keyNamingConvention
+        usesTimestamps = driver.usesTimestamps
 
         threadConnectionPool = ThreadConnectionPool(
             makeConnection: driver.makeConnection,
@@ -68,7 +74,7 @@ public final class Database: Executor {
 extension Database {
     /// See Executor protocol.
     @discardableResult
-    public func query<T: Entity>(_ query: Query<T>) throws -> Node {
+    public func query<E: Entity>(_ query: Query<E>) throws -> Node {
         log?(Log(query))
         return try threadConnectionPool.connection().query(query)
     }
