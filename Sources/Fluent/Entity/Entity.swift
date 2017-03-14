@@ -94,7 +94,7 @@ public protocol Entity: class, Preparation, RowConvertible, Storable {
 
     /// If true, timestamps will be added when
     /// creating a schema for this entity
-    /// - note: true by default
+    /// - note: inherits from database by default
     static var timestamps: Bool { get }
 
     /// Called before the entity will be created.
