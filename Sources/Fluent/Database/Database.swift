@@ -43,7 +43,7 @@ public final class Database: Executor {
 
     /// If true, timestamps will be added when
     /// creating a schema for entities in this db
-    /// - note: true by default
+    /// - note: inherits from driver.timestamps on init
     public var timestamps: Bool
 
     /// A closure for handling database logs
