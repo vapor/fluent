@@ -20,12 +20,13 @@ extension Tester {
 
         let compounds = try Compound.all()
 
+        let now = Date()
         for compound in compounds {
             guard let createdAt = compound.createdAt else {
                 throw Error.failed("Compound \(compound.name) did not have a created at")
             }
 
-            guard createdAt.isWithin(seconds: 1, of: Date()) else {
+            guard createdAt.isWithin(seconds: 1, of: now) else {
                 throw Error.failed("Created at wasn't right")
             }
         }
@@ -55,7 +56,11 @@ extension Tester {
 
 extension Date {
     public func isWithin(seconds: Double, of other: Date) -> Bool {
-        return abs(other.timeIntervalSince1970 - self.timeIntervalSince1970) <= seconds
+        var diff = other.timeIntervalSince1970 - self.timeIntervalSince1970
+        if diff < 0 {
+            diff = diff * -1.0
+        }
+        return diff <= seconds
     }
 
     public var unix: Int {
