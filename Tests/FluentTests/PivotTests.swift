@@ -8,6 +8,7 @@ class PivotTests: XCTestCase {
     override func setUp() {
         lqd = LastQueryDriver()
         db = Database(lqd)
+        db.timestamps = false
     }
 
     func testEntityAttach() throws {

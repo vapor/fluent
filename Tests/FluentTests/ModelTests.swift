@@ -12,6 +12,7 @@ class ModelTests: XCTestCase {
     override func setUp() {
         lqd = LastQueryDriver()
         db = Database(lqd)
+        db.timestamps = false
     }
 
     func testExamples() throws {

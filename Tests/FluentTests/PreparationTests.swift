@@ -125,6 +125,7 @@ class PreparationTests: XCTestCase {
         }
 
         let database = Database(driver)
+        database.timestamps = false
 
         do {
             try TestModel.prepare(database)

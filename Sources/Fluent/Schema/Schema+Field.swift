@@ -15,7 +15,8 @@ extension Schema {
             case string(length: Int?)
             case double
             case bool
-            case data
+            case bytes
+            case date
             case custom(type: String)
         }
 

@@ -26,6 +26,11 @@ public protocol Driver: Executor {
     /// ex: snake_case vs. camelCase.
     var keyNamingConvention: KeyNamingConvention { get }
 
+    /// If true, timestamps will be added when
+    /// creating a schema for entities under this driver
+    /// - note: true by default
+    var timestamps: Bool { get }
+
     /// Creates a connection for executing
     /// queries. This method is used to
     /// automatically create a connection
@@ -52,5 +57,15 @@ extension Driver {
     @discardableResult
     public func raw(_ raw: String, _ values: [Node]) throws -> Node {
         return try makeConnection().raw(raw, values)
+    }
+}
+
+// MARK: Defaults
+
+public var defaultTimestamps = true
+
+extension Driver {
+    public var timestamps: Bool {
+        return defaultTimestamps
     }
 }

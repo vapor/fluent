@@ -5,31 +5,51 @@ public protocol QueryRepresentable {
 
 // MARK: Fetch
 extension QueryRepresentable {
+    /// Returns all entities retrieved by the query.
+    public func all() throws -> [T] {
+        let query = try makeQuery()
+        query.action = .fetch
+
+        guard let array = try query.raw().typeArray else {
+            throw QueryError.invalidDriverResponse("Array required.")
+        }
+
+        var models: [T] = []
+
+        for result in array {
+            do {
+                let row = Row(node: result)
+                let model = try T(row: row)
+                if
+                    let dict = result.typeObject,
+                    let id = dict[T.idKey]
+                {
+                    model.id = Identifier(id)
+                }
+                model.exists = true
+                if T.timestamps {
+                    model.storage.createdAt = try row.get(T.createdAtKey)
+                    model.storage.updatedAt = try row.get(T.updatedAtKey)
+                }
+                models.append(model)
+            } catch {
+                print("Could not initialize \(T.self), skipping: \(error)")
+            }
+        }
+
+        return models
+    }
+
     /// Returns the first entity retrieved by the query.
     public func first() throws -> T? {
         let query = try makeQuery()
         query.action = .fetch
         query.limit = Limit(count: 1)
 
-        let model = try query.run().first
+        let model = try query.all().first
         model?.exists = true
 
         return model
-    }
-
-    /// Returns all entities retrieved by the query.
-    public func all() throws -> [T] {
-        let query = try makeQuery()
-
-        query.action = .fetch
-
-        let models = try query.run()
-        models.forEach { model in
-            let model = model
-            model.exists = true
-        }
-
-        return models
     }
 
     /// Returns the number of results for the query.
@@ -76,6 +96,11 @@ extension QueryRepresentable {
         if let _ = model.id, model.exists {
             try model.willUpdate()
             var row = try model.makeRow()
+            if T.timestamps {
+                let now = Date()
+                try row.set(T.updatedAtKey, now)
+                model.storage.updatedAt = now
+            }
             try row.set(T.idKey, model.id)
             try modify(row)
             model.didUpdate()
@@ -88,6 +113,13 @@ extension QueryRepresentable {
             try model.willCreate()
             var row = try model.makeRow()
             try row.set(T.idKey, model.id)
+            if T.timestamps {
+                let now = Date()
+                try row.set(T.createdAtKey, now)
+                try row.set(T.updatedAtKey, now)
+                model.storage.createdAt = now
+                model.storage.updatedAt = now
+            }
             let id = try query.create(row)
             if id != nil, id != .null, id != 0 {
                 model.id = id
@@ -157,6 +189,7 @@ extension QueryRepresentable {
         if let id = row?[idKey] {
             _ = try filter(idKey, id)
         }
+        
         try query.raw()
     }
 }

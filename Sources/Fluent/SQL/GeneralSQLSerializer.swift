@@ -427,8 +427,10 @@ open class GeneralSQLSerializer: SQLSerializer {
             return "DOUBLE"
         case .bool:
             return "BOOL"
-        case .data:
+        case .bytes:
             return "BLOB"
+        case .date:
+            return "TIMESTAMP"
         case .custom(let type):
             return type
         }
