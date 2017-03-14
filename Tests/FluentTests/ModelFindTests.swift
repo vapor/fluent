@@ -10,9 +10,6 @@ class ModelFindTests: XCTestCase {
             return "dummy_models"
         }
 
-        static func prepare(_ database: Database) throws {}
-        static func revert(_ database: Database) throws {}
-
         init(row: Row) throws {
 
         }

@@ -11,7 +11,7 @@ class RelationTests: XCTestCase {
 
     var memory: MemoryDriver!
     var database: Database!
-    let ents = [Atom.self, Proton.self, Nucleus.self, Group.self] as [Entity.Type]
+    let ents = [Atom.self, Proton.self, Nucleus.self, Group.self] as [(Entity & Preparation).Type]
 
     override func setUp() {
         memory = try! MemoryDriver()

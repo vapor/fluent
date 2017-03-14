@@ -90,8 +90,6 @@ class ModelTests: XCTestCase {
                 try row.set(idKey, id)
                 return row
             }
-            static func prepare(_ database: Database) throws {}
-            static func revert(_ database: Database) throws {}
             static var idType = IdentifierType.uuid
         }
         UUIDModel.database = db
@@ -113,8 +111,6 @@ final class CamelModel: Entity {
     let storage = Storage()
     init(row: Row) throws {}
     func makeRow() throws -> Row { return .null }
-    static func prepare(_ database: Database) throws {}
-    static func revert(_ database: Database) throws {}
     static var keyNamingConvention = KeyNamingConvention.camelCase
 }
 
@@ -122,7 +118,5 @@ final class SnakeModel: Entity {
     let storage = Storage()
     init(row: Row) throws {}
     func makeRow() throws -> Row { return .null }
-    static func prepare(_ database: Database) throws {}
-    static func revert(_ database: Database) throws {}
     static var keyNamingConvention = KeyNamingConvention.snake_case
 }

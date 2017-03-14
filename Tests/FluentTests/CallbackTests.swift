@@ -9,9 +9,6 @@ class CallbacksTests: XCTestCase {
         var wasModifiedOnCreate: Bool = false
         var wasModifiedOnUpdate: Bool = false
 
-        static func prepare(_ database: Database) throws {}
-        static func revert(_ database: Database) throws {}
-
         init() {
             
         }
