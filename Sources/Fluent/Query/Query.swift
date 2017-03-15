@@ -23,7 +23,7 @@ public final class Query<E: Entity> {
     /// An array of joins: other entities
     /// that will be queried during this query's
     /// execution.
-    public var joins: [Join]
+    public var joins: [RawOr<Join>]
 
     private(set) lazy var context: RowContext = {
         let context = RowContext()

@@ -74,7 +74,7 @@ extension QueryRepresentable {
     @discardableResult
     public func join(_ join: Join) throws -> Query<Self.E> {
         let query = try makeQuery()
-        query.joins.append(join)
+        query.joins.append(.some(join))
         return query
     }
 }

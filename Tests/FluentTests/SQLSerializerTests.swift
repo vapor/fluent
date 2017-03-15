@@ -221,6 +221,19 @@ class SQLSerializerTests: XCTestCase {
         XCTAssertEqual(statement, "SELECT `users`.* FROM `users` WHERE `users`.`name` = ? AND aGe ~~ ?")
         XCTAssertEqual(values.count, 2)
     }
+
+    func testRawJoinsAndFilters() throws {
+        let query = Query<User>(db)
+        try query.join(Atom.self)
+        try query.filter(Atom.self, "size", 42)
+        try query.filter(raw: "`foo`.aGe ~~ ?", [22])
+        try query.join(raw: "JOIN `foo` ON `users`.BAR !~ `foo`.🚀")
+
+        let (statement, values) = serialize(query)
+
+        XCTAssertEqual(statement, "SELECT `users`.* FROM `users` JOIN `atoms` ON `users`.`id` = `atoms`.`user_id` JOIN `foo` ON `users`.BAR !~ `foo`.🚀 WHERE `atoms`.`size` = ? AND `foo`.aGe ~~ ?")
+        XCTAssertEqual(values.count, 2)
+    }
 }
 
 // MARK: Utilities

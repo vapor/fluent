@@ -3,6 +3,8 @@ public enum RawOr<Wrapped> {
     case some(Wrapped)
 }
 
+// MARK: Filter
+
 extension QueryRepresentable {
     @discardableResult
     public func filter(
@@ -22,6 +24,19 @@ extension QueryRepresentable {
         let query = try makeQuery()
         let values = try values.map { try $0.makeNode(in: query.context) }
         query.filters.append(.raw(string, values))
+        return query
+    }
+}
+
+// MARK: Join
+
+extension QueryRepresentable {
+    @discardableResult
+    public func join(
+        raw string: String
+    ) throws -> Query<E> {
+        let query = try makeQuery()
+        query.joins.append(.raw(string, []))
         return query
     }
 }

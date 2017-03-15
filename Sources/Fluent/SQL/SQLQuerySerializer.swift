@@ -494,7 +494,7 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         }
     }
 
-    open func joins(_ joins: [Join]) -> String {
+    open func joins(_ joins: [RawOr<Join>]) -> String {
         var fragments: [String] = []
 
         for j in joins {
@@ -502,6 +502,15 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         }
 
         return concatenate(fragments)
+    }
+
+    open func join(_ rawOrJoin: RawOr<Join>) -> String {
+        switch rawOrJoin {
+        case .raw(let string, _):
+            return string
+        case .some(let j):
+            return join(j)
+        }
     }
 
     open func join(_ join: Join) -> String {
