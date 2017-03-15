@@ -23,12 +23,10 @@ class PivotTests: XCTestCase {
 
         try atom.compounds.add(compound)
 
-        guard let query = lqd.lastQuery else {
+        guard let (sql, _) = lqd.lastQuery else {
             XCTFail("No query recorded")
             return
         }
-
-        let (sql, _) = GeneralSQLSerializer(sql: query).serialize()
 
         XCTAssertEqual(
             sql,

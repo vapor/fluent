@@ -6,6 +6,8 @@ public enum KeyNamingConvention {
     case camelCase
 }
 
+// MARK: Convert PascalCase to snake and camel
+
 extension String {
     internal func snake_case() -> String {
         let characters = Array(self.characters)

@@ -3,7 +3,7 @@ extension Tester {
         Atom.database = database
         try Atom.prepare(database)
         defer {
-            try? Atom.revert(database)
+            try! Atom.revert(database)
         }
 
         let hydrogen = Atom(id: nil, name: "Hydrogen", protons: 1, weight: 1.007)

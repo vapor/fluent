@@ -14,7 +14,7 @@ public struct Log {
     }
 
     /// Create a log from raw sql and values.
-    init(sql: String, values: [Node]) {
+    init(sql: String, values: [Node] = []) {
         var log = sql
         if values.count > 0 {
             let valuesString = values.map({ $0.string ?? "" }).joined(separator: ", ")
@@ -25,15 +25,8 @@ public struct Log {
     }
 
     /// Create a log from a Query
-    init<T: Entity>(_ query: Query<T>) {
-        let serializer = GeneralSQLSerializer(sql: query.sql)
-        let (sql, values) = serializer.serialize()
-        self.init(sql: sql, values: values)
-    }
-
-    /// Create a log from a Schema query
-    init(_ schema: Schema) {
-        let serializer = GeneralSQLSerializer(sql: schema.sql)
+    init<E: Entity>(_ query: Query<E>) {
+        let serializer = GeneralSQLSerializer(query)
         let (sql, values) = serializer.serialize()
         self.init(sql: sql, values: values)
     }

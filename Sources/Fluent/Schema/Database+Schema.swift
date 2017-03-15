@@ -1,35 +1,10 @@
 extension Database {
-    /// Modifies the schema of the database
-    /// for the given entity.
-    public func modify(custom entity: String, closure: (Schema.Modifier) throws -> ()) throws {
-        let modifier = Schema.Modifier(entity)
-        try closure(modifier)
-        _ = try schema(modifier.schema)
-    }
-
     /// Creates the schema of the database
     /// for the given entity.
-    public func create(custom entity: String, closure: (Schema.Creator) throws -> ()) throws {
-        let creator = Schema.Creator(entity)
-        try closure(creator)
-        _ = try schema(creator.schema)
-    }
-
-    /// Deletes the schema of the database
-    /// for the given entity.
-    public func delete(custom entity: String) throws {
-        let schema = Schema.delete(entity: entity)
-        _ = try self.schema(schema)
-    }
-}
-
-extension Database {
-    /// Creates the schema of the database
-    /// for the given entity.
-    public func create<E: Entity>(_ e: E.Type, closure: (Schema.Creator) throws -> ()) throws {
+    public func create<E: Entity>(_ e: E.Type, closure: (Creator) throws -> ()) throws {
         if e.database == nil { e.database = self }
 
-        let creator = Schema.Creator(e.entity)
+        let creator = Creator()
 
         // add timestamps
         if E.usesTimestamps {
@@ -38,17 +13,26 @@ extension Database {
         }
 
         try closure(creator)
-        _ = try schema(creator.schema)
+
+        let query = Query<E>(self)
+        query.action = .schema(.create(creator.fields))
+        try self.query(query)
     }
 
     /// Modifies the schema of the database
     /// for the given entity.
-    public func modify<E: Entity>(_ e: E.Type, closure: (Schema.Modifier) throws -> ()) throws {
+    public func modify<E: Entity>(_ e: E.Type, closure: (Modifier) throws -> ()) throws {
         if e.database == nil { e.database = self }
 
-        let modifier = Schema.Modifier(e.entity)
+        let modifier = Modifier()
         try closure(modifier)
-        _ = try schema(modifier.schema)
+
+        let query = Query<E>(self)
+        query.action = .schema(.modify(
+            add: modifier.fields,
+            remove: modifier.delete
+        ))
+        try self.query(query)
     }
 
     /// Deletes the schema of the database
@@ -56,7 +40,8 @@ extension Database {
     public func delete<E: Entity>(_ e: E.Type) throws {
         if e.database == nil { e.database = self }
 
-        let schema = Schema.delete(entity: e.entity)
-        _ = try self.schema(schema)
+        let query = Query<E>(self)
+        query.action = .schema(.delete)
+        try self.query(query)
     }
 }

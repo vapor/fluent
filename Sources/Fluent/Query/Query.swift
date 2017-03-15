@@ -20,6 +20,11 @@ public final class Query<E: Entity> {
     /// be applied to the results.
     public var sorts: [Sort]
 
+    /// An array of custom, raw query
+    /// fragments that must be specially supported
+    /// by the underlying driver
+    public var raws: [Raw]
+
     /// An array of joins: other entities
     /// that will be queried during this query's
     /// execution.
@@ -39,6 +44,7 @@ public final class Query<E: Entity> {
         self.database = database
         joins = []
         sorts = []
+        raws = []
     }
 
     /// Performs the Query returning the raw

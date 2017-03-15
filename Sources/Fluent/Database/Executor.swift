@@ -15,11 +15,7 @@ public protocol Executor {
     /// returns an array of results fetched,
     /// created, or updated by the action.
     @discardableResult
-    func query<T: Entity>(_ query: Query<T>) throws -> Node
-    
-    /// Creates the `Schema` indicated
-    /// by the `Builder`.
-    func schema(_ schema: Schema) throws
+    func query<E: Entity>(_ query: Query<E>) throws -> Node
     
     /// Drivers that support raw querying
     /// accept string queries and parameterized values.

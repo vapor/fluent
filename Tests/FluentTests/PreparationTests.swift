@@ -8,12 +8,10 @@ class PreparationTests: XCTestCase {
 
     func testManualPreparation() {
         let driver = TestSchemaDriver { schema in
-            guard case .create(let entity, let fields) = schema else {
+            guard case .create(let fields) = schema else {
                 XCTFail("Invalid schema")
                 return
             }
-
-            XCTAssertEqual(entity, "users")
 
             guard fields.count == 3 else {
                 XCTFail("Invalid field count")
@@ -43,7 +41,6 @@ class PreparationTests: XCTestCase {
 
         let database = Database(driver)
 
-        TestPreparation.entity = "users"
         TestPreparation.testClosure = { builder in
             builder.int("id")
             builder.string("name")
@@ -59,12 +56,10 @@ class PreparationTests: XCTestCase {
     
     func testStringIdentifiedModelPreparation() {
         let driver = TestSchemaDriver { schema in
-            guard case .create(let entity, let fields) = schema else {
+            guard case .create(let fields) = schema else {
                 XCTFail("Invalid schema")
                 return
             }
-            
-            XCTAssertEqual(entity, "string_identified_things")
             
             guard fields.count == 1 else {
                 XCTFail("Invalid field count")
@@ -93,12 +88,10 @@ class PreparationTests: XCTestCase {
 
     func testModelPreparation() {
         let driver = TestSchemaDriver { schema in
-            guard case .create(let entity, let fields) = schema else {
+            guard case .create(let fields) = schema else {
                 XCTFail("Invalid schema")
                 return
             }
-
-            XCTAssertEqual(entity, "test_models")
 
             guard fields.count == 3 else {
                 XCTFail("Invalid field count")
@@ -168,17 +161,16 @@ final class TestModel: Entity {
 }
 
 class TestPreparation: Preparation {
-    static var entity: String = ""
-    static var testClosure: (Schema.Creator) -> () = { _ in }
+    static var testClosure: (Creator) -> () = { _ in }
 
     static func prepare(_ database: Database) throws {
-        try database.create(custom: entity) { builder in
+        try database.create(Atom.self) { builder in
             self.testClosure(builder)
         }
     }
 
     static func revert(_ database: Database) throws {
-        try database.delete(custom: entity)
+        try database.delete(Atom.self)
     }
 }
 
@@ -216,11 +208,4 @@ struct TestSchemaConnection: Connection {
 
 
     func raw(_ raw: String, _ values: [Node]) throws -> Node { return .null }
-}
-
-extension SQLSerializerTests {
-    private func serialize(_ sql: SQL) -> (String, [Node]) {
-        let serializer = GeneralSQLSerializer(sql: sql)
-        return serializer.serialize()
-    }
 }

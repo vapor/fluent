@@ -79,13 +79,7 @@ extension Database {
         return try threadConnectionPool.connection().query(query)
     }
     
-    /// Seeee Executor protocol.
-    public func schema(_ schema: Schema) throws {
-        log?(Log(schema))
-        try threadConnectionPool.connection().schema(schema)
-    }
-    
-    /// Seeee Executor protocol.
+    /// See Executor protocol.
     @discardableResult
     public func raw(_ raw: String, _ values: [Node]) throws -> Node {
         log?(Log(raw: raw))
