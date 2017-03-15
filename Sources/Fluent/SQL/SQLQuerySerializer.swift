@@ -287,7 +287,7 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         case .bytes:
             return "BLOB"
         case .date:
-            return "TIMESTAMP"
+            return "DATETIME"
         case .custom(let type):
             return type
         }

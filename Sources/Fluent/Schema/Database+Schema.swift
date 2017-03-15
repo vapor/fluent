@@ -5,6 +5,7 @@ extension Database {
         if e.database == nil { e.database = self }
 
         let creator = Creator()
+        try closure(creator)
 
         // add timestamps
         if let T = E.self as? Timestampable.Type {
@@ -16,8 +17,6 @@ extension Database {
         if let S = E.self as? SoftDeletable.Type {
             creator.date(S.deletedAtKey, optional: true)
         }
-
-        try closure(creator)
 
         let query = Query<E>(self)
         query.action = .schema(.create(creator.fields))
