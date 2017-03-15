@@ -221,27 +221,18 @@ extension QueryRepresentable {
             let s = model as? SoftDeletable,
             !s.shouldForceDelete
         {
+            // soft delete the model
             try s.softDelete()
+            // note: model still 'exists'
         } else {
+            // permenantly delete the model
             query.action = .delete
-
-            let filter = Filter(
-                E.self,
-                .compare(
-                    E.idKey,
-                    .equals,
-                    id.makeNode(in: query.context)
-                )
-            )
-
-            query.filters.append(filter)
-
+            try query.filter(E.idKey, id)
             try model.willDelete()
             try query.raw()
             model.didDelete()
+            model.exists = false
         }
-
-        model.exists = false
     }
 }
 
