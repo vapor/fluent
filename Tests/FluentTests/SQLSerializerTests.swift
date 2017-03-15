@@ -39,7 +39,7 @@ class SQLSerializerTests: XCTestCase {
     func testRegularSelect() {
         let filter = Filter(User.self, .compare("age", .greaterThanOrEquals, 21))
         let query = Query<User>(db)
-        query.filters.append(.some(filter))
+        query.filters.append(filter)
         query.limit = Limit(count: 5)
         let (statement, values) = serialize(query)
 
@@ -51,7 +51,7 @@ class SQLSerializerTests: XCTestCase {
     func testOffsetSelect() {
         let filter = Filter(User.self, .compare("age", .greaterThanOrEquals, 21))
         let query = Query<User>(db)
-        query.filters.append(.some(filter))
+        query.filters.append(filter)
         query.limit = Limit(count: 5, offset: 15)
         let (statement, values) = serialize(query)
         
@@ -62,7 +62,7 @@ class SQLSerializerTests: XCTestCase {
     func testFilterCompareSelect() {
         let filter = Filter(User.self, .compare("name", .notEquals, "duck"))
         let query = Query<User>(db)
-        query.filters.append(.some(filter))
+        query.filters.append(filter)
         let (statement, values) = serialize(query)
 
         XCTAssertEqual(statement, "SELECT `users`.* FROM `users` WHERE `users`.`name` != ?")
@@ -73,7 +73,7 @@ class SQLSerializerTests: XCTestCase {
     func testFilterLikeSelect() {
         let filter = Filter(User.self, .compare("name", .hasPrefix, "duc"))
         let query = Query<User>(db)
-        query.filters.append(.some(filter))
+        query.filters.append(filter)
         let (statement, values) = serialize(query)
 
         XCTAssertEqual(statement, "SELECT `users`.* FROM `users` WHERE `users`.`name` LIKE ?")
@@ -168,16 +168,10 @@ class SQLSerializerTests: XCTestCase {
     }
 
     func testFilterGroup() throws {
-        let one = Filter(User.self, .compare("1", .equals, .string("1")))
-        let two = Filter(User.self, .compare("2", .equals, .string("2")))
-        let three = Filter(User.self, .compare("3", .equals, .string("3")))
-        let four = Filter(User.self, .compare("4", .equals, .string("4")))
-        let group = Filter(User.self, .group(.or, [.some(two), .some(three)]))
-
         let query = Query<User>(db)
-        try query.filter(one)
-        try query.filter(group)
-        try query.filter(four)
+        try query.filter("1", 1)
+        try query.or { try $0.filter("2", 2).filter("3", 3) }
+        try query.filter("4", 4)
         let (statement, values) = serialize(query)
 
         XCTAssertEqual(statement, "SELECT `users`.* FROM `users` WHERE `users`.`1` = ? AND (`users`.`2` = ? OR `users`.`3` = ?) AND `users`.`4` = ?")
@@ -223,7 +217,7 @@ class SQLSerializerTests: XCTestCase {
     }
 
     func testRawJoinsAndFilters() throws {
-        let query = Query<User>(db)
+        let query = Query<Compound>(db)
         try query.join(Atom.self)
         try query.filter(Atom.self, "size", 42)
         try query.filter(raw: "`foo`.aGe ~~ ?", [22])
@@ -231,7 +225,7 @@ class SQLSerializerTests: XCTestCase {
 
         let (statement, values) = serialize(query)
 
-        XCTAssertEqual(statement, "SELECT `users`.* FROM `users` JOIN `atoms` ON `users`.`id` = `atoms`.`user_id` JOIN `foo` ON `users`.BAR !~ `foo`.🚀 WHERE `atoms`.`size` = ? AND `foo`.aGe ~~ ?")
+        XCTAssertEqual(statement, "SELECT `compounds`.* FROM `compounds` JOIN `atoms` ON `compounds`.`id` = `atoms`.`compound_id` JOIN `foo` ON `users`.BAR !~ `foo`.🚀 WHERE `atoms`.`size` = ? AND `foo`.aGe ~~ ?")
         XCTAssertEqual(values.count, 2)
     }
 }

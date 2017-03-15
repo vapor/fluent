@@ -30,9 +30,8 @@ class QueryFiltersTests: XCTestCase {
         let query = try DummyModel.query().filter("name", "Vapor")
 
         guard
-            let rawOrFilter = query.filters.first,
-            query.filters.count == 1,
-            case .some(let filter) = rawOrFilter
+            let filter = query.filters.first?.wrapped,
+            query.filters.count == 1
         else {
             XCTFail("Should be one filter")
             return
@@ -52,9 +51,8 @@ class QueryFiltersTests: XCTestCase {
         let query = try DummyModel.query().filter("name", .hasPrefix, "Vap")
 
         guard
-            let rawOrFilter = query.filters.first,
-            query.filters.count == 1,
-            case .some(let filter) = rawOrFilter
+            let filter = query.filters.first?.wrapped,
+            query.filters.count == 1
         else {
             XCTFail("Should be one filter")
             return

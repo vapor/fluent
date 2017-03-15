@@ -3,6 +3,17 @@ public enum RawOr<Wrapped> {
     case some(Wrapped)
 }
 
+extension RawOr {
+    var wrapped: Wrapped? {
+        switch self {
+        case .some(let wrapped):
+            return wrapped
+        case .raw:
+            return nil
+        }
+    }
+}
+
 // MARK: Filter
 
 extension QueryRepresentable {
@@ -28,6 +39,12 @@ extension QueryRepresentable {
     }
 }
 
+extension Array where Element == RawOr<Filter> {
+    public mutating func append(_ filter: Filter) {
+        append(.some(filter))
+    }
+}
+
 // MARK: Join
 
 extension QueryRepresentable {
@@ -38,6 +55,12 @@ extension QueryRepresentable {
         let query = try makeQuery()
         query.joins.append(.raw(string, []))
         return query
+    }
+}
+
+extension Array where Element == RawOr<Join> {
+    public mutating func append(_ join: Join) {
+        append(.some(join))
     }
 }
 
