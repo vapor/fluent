@@ -54,6 +54,8 @@ extension Tester {
     }
 }
 
+extension Compound: Timestampable { }
+
 extension Date {
     public func isWithin(seconds: Double, of other: Date) -> Bool {
         var diff = other.timeIntervalSince1970 - self.timeIntervalSince1970

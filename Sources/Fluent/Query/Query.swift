@@ -31,6 +31,10 @@ public final class Query<E: Entity> {
         return context
     }()
 
+    /// If true, soft deleted entities will be 
+    /// included (given the Entity type is SoftDeletable)
+    internal var includeSoftDeleted: Bool
+
     /// Creates a new `Query` with the
     /// `Model`'s database.
     public init(_ database: Database) {
@@ -39,6 +43,7 @@ public final class Query<E: Entity> {
         self.database = database
         joins = []
         sorts = []
+        includeSoftDeleted = false
     }
 
     /// Performs the Query returning the raw

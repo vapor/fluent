@@ -20,5 +20,6 @@ public final class Tester {
         try test(testSchema, "Schema")
         try test(testPaginate, "Pagination")
         try test(testTimestamps, "Timestamps")
+        try test(testSoftDelete, "Soft Delete")
     }
 }

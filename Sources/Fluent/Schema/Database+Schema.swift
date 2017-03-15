@@ -32,9 +32,14 @@ extension Database {
         let creator = Schema.Creator(e.entity)
 
         // add timestamps
-        if E.usesTimestamps {
-            creator.date(E.createdAtKey)
-            creator.date(E.updatedAtKey)
+        if let T = E.self as? Timestampable.Type {
+            creator.date(T.createdAtKey)
+            creator.date(T.updatedAtKey)
+        }
+
+        // add soft delete
+        if let S = E.self as? SoftDeletable.Type {
+            creator.date(S.deletedAtKey, optional: true)
         }
 
         try closure(creator)
