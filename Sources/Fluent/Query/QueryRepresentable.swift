@@ -164,7 +164,7 @@ extension QueryRepresentable {
             )
         )
 
-        query.filters.append(filter)
+        query.filters.append(.some(filter))
 
         try model.willDelete()
         try query.raw()

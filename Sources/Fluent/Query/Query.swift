@@ -6,7 +6,7 @@ public final class Query<E: Entity> {
 
     /// An array of filters to apply
     ///during the query's action.
-    public var filters: [Filter]
+    public var filters: [RawOr<Filter>]
 
     /// Optional data to be used during
     ///`.create` or `.updated` actions.
@@ -19,11 +19,6 @@ public final class Query<E: Entity> {
     /// An array of sorts that will
     /// be applied to the results.
     public var sorts: [Sort]
-
-    /// An array of custom, raw query
-    /// fragments that must be specially supported
-    /// by the underlying driver
-    public var raws: [Raw]
 
     /// An array of joins: other entities
     /// that will be queried during this query's
@@ -44,7 +39,6 @@ public final class Query<E: Entity> {
         self.database = database
         joins = []
         sorts = []
-        raws = []
     }
 
     /// Performs the Query returning the raw

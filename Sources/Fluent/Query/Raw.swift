@@ -1,60 +1,38 @@
-public enum Raw {
-    case filter(String, [Node])
-    case join(String)
-    case limit(String)
-    case sort(String)
+public enum RawOr<Wrapped> {
+    case raw(String, [Node])
+    case some(Wrapped)
 }
 
-extension Raw {
-    public init(
-        filter: String,
-        values: [NodeRepresentable] = []
-    ) throws {
-        let values = try values.map { nr in
-            return try nr.makeNode(in: nil)
-        }
-        self = .filter(filter, values)
+extension QueryRepresentable {
+    @discardableResult
+    public func filter(
+        raw string: String,
+        _ values: [Node] = []
+    ) throws -> Query<E> {
+        let query = try makeQuery()
+        query.filters.append(.raw(string, values))
+        return query
+    }
+
+    @discardableResult
+    public func filter(
+        raw string: String,
+        _ values: [NodeRepresentable]
+    ) throws -> Query<E> {
+        let query = try makeQuery()
+        let values = try values.map { try $0.makeNode(in: query.context) }
+        query.filters.append(.raw(string, values))
+        return query
     }
 }
 
-extension Sequence where Iterator.Element == Raw {
-    /// All raw filters and values
-    public var filters: [(String, [Node])] {
-        return flatMap { raw in
-            guard case .filter(let string, let values) = raw else {
-                return nil
-            }
-            return (string, values)
-        }
-    }
-
-    /// All raw joins
-    public var joins: [String] {
-        return flatMap { raw in
-            guard case .join(let string) = raw else {
-                return nil
-            }
-            return string
-        }
-    }
-
-    /// All raw limits
-    public var limits: [String] {
-        return flatMap { raw in
-            guard case .limit(let string) = raw else {
-                return nil
-            }
-            return string
-        }
-    }
-
-    /// All raw sorts
-    public var sorts: [String] {
-        return flatMap { raw in
-            guard case .sort(let string) = raw else {
-                return nil
-            }
-            return string
+extension RawOr: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .raw(let string, let values):
+            return "[raw] \(string) \(values)"
+        case .some(let wrapped):
+            return "\(wrapped)"
         }
     }
 }

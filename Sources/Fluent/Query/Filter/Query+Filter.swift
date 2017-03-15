@@ -5,7 +5,7 @@ extension QueryRepresentable {
         _ filter: Filter
     ) throws -> Query<Self.E> {
         let query = try makeQuery()
-        query.filters.append(filter)
+        query.filters.append(.some(filter))
         return query
     }
 

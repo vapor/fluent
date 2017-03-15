@@ -10,7 +10,7 @@ public struct Filter {
     public enum Method {
         case compare(String, Comparison, Node)
         case subset(String, Scope, [Node])
-        case group(Relation, [Filter])
+        case group(Relation, [RawOr<Filter>])
     }
 
     public init(_ entity: Entity.Type, _ method: Method) {

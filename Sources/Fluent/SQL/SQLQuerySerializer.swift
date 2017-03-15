@@ -67,7 +67,6 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         if !query.joins.isEmpty {
             statement += joins(query.joins)
         }
-        statement += query.raws.joins
 
         if !query.filters.isEmpty {
             let (filtersClause, filtersValues) = filters(query.filters)
@@ -306,7 +305,7 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
     }
 
 
-    open func filters(_ f: [Filter]) -> (String, [Node]) {
+    open func filters(_ f: [RawOr<Filter>]) -> (String, [Node]) {
         var fragments: [String] = []
 
         fragments += "WHERE"
@@ -321,7 +320,7 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         )
     }
 
-    open func filters(_ filters: [Filter], _ r: Filter.Relation) -> (String, [Node]) {
+    open func filters(_ filters: [RawOr<Filter>], _ r: Filter.Relation) -> (String, [Node]) {
         var fragments: [String] = []
         var values: [Node] = []
 
@@ -351,6 +350,15 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
             word = "OR"
         }
         return word
+    }
+
+    open func filter(_ f: RawOr<Filter>) -> (String, [Node]) {
+        switch f {
+        case .raw(let string, let values):
+            return (string, values)
+        case .some(let f):
+            return filter(f)
+        }
     }
 
     open func filter(_ filter: Filter) -> (String, [Node]) {

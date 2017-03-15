@@ -50,7 +50,8 @@ class ModelFindTests: XCTestCase {
         
         func query<E: Entity>(_ query: Query<E>) throws -> Node {
             if
-                let filter = query.filters.first,
+                let rawOrFilter = query.filters.first,
+                case .some(let filter) = rawOrFilter,
                 case .compare(let key, let comparison, let value) = filter.method,
                 query.action == .fetch &&
                     query.filters.count == 1 &&
