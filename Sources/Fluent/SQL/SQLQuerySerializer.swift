@@ -243,13 +243,13 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
 
             switch d.wrapped {
             case .number(let n):
-                dc = "'" + n.description + "'"
+                dc = "'\(n.description)'"
             case .null:
                 dc = "NULL"
             case .bool(let b):
                 dc = b ? "TRUE" : "FALSE"
             default:
-                dc = "'" + (d.string ?? "") + "'"
+                dc = "'\((d.string ?? ""))'"
             }
 
             clause += "DEFAULT \(dc)"
