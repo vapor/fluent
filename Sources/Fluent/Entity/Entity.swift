@@ -1,52 +1,3 @@
-public final class Storage {
-    public init() {}
-
-    fileprivate var exists: Bool = false
-    fileprivate var id: Identifier? = nil
-    internal var createdAt: Date? = nil
-    internal var updatedAt: Date? = nil
-}
-
-public protocol Storable: class {
-    /// General implementation should just be `let storage = Storage()`
-    var storage: Storage { get }
-}
-
-extension Storable {
-    /// Whether or not entity was retrieved from database.
-    ///
-    /// This value shouldn't be interacted w/ external users
-    /// w/o explicit knowledge.
-    ///
-    public var exists: Bool {
-        get {
-            return storage.exists
-        }
-        set {
-            storage.exists = newValue
-        }
-    }
-
-    /// The entity's primary identifier
-    /// used for updating, filtering, deleting, etc.
-    public var id: Identifier? {
-        get {
-            return storage.id
-        }
-        set {
-            storage.id = newValue
-        }
-    }
-
-    public var createdAt: Date? {
-        return storage.createdAt
-    }
-
-    public var updatedAt: Date? {
-        return storage.updatedAt
-    }
-}
-
 /// Represents an entity that can be
 /// stored and retrieved from the `Database`.
 public protocol Entity: class, RowConvertible, Storable {
@@ -91,11 +42,6 @@ public protocol Entity: class, RowConvertible, Storable {
     /// but types with Left/Right generics (like pivots)
     /// must implement a custom identifier.
     static var identifier: String { get }
-
-    /// If true, timestamps will be added when
-    /// creating a schema for this entity
-    /// - note: inherits from database by default
-    static var usesTimestamps: Bool { get }
 
     /// Called before the entity will be created.
     /// Throwing will cancel the creation.
@@ -150,10 +96,14 @@ extension Entity {
         return try Self.query().all()
     }
 
+    /// Returns all entities for this `Model`.
+    public static func count() throws -> Int {
+        return try Self.query().count()
+    }
+
     /// Finds the entity with the given `id`.
     public static func find(_ id: NodeRepresentable) throws -> Self? {
-        guard let _ = database else { return nil }
-        return try Self.query().filter(Self.idKey, .equals, id).first()
+        return try Self.query().find(id)
     }
 
     //// Creates a `Query` instance for this `Model`.
@@ -222,32 +172,6 @@ extension Entity {
     }
 }
 
-// MARK: Timestamps
-
-extension Entity {
-    public static var usesTimestamps: Bool {
-        return database?.usesTimestamps ?? true
-    }
-
-    public static var updatedAtKey: String {
-        switch keyNamingConvention {
-        case .camelCase:
-            return "updatedAt"
-        case .snake_case:
-            return "updated_at"
-        }
-    }
-
-    public static var createdAtKey: String {
-        switch keyNamingConvention {
-        case .camelCase:
-            return "createdAt"
-        case .snake_case:
-            return "created_at"
-        }
-    }
-}
-
 
 // MARK: Database
 
@@ -268,7 +192,11 @@ extension Entity {
     }
 }
 
+// MARK: Convenience
+
 extension Entity {
+    /// Asserts that the entity exists and returns
+    /// its identifier.
     @discardableResult
     public func assertExists() throws -> Identifier {
         guard let id = self.id else {
