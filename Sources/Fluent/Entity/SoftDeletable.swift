@@ -23,6 +23,8 @@ public protocol SoftDeletable: Entity {
 extension SoftDeletable {
     /// Soft deletes the entity, setting
     /// its `deletedAt` date to now
+    /// - note: internal since it is meant
+    ///         to be called by `model.delete()`
     internal func softDelete() throws {
         try assertExists()
         try willSoftDelete()
@@ -31,6 +33,7 @@ extension SoftDeletable {
         didSoftDelete()
     }
 
+    /// Permanently deletes the model.
     public func forceDelete() throws {
         try assertExists()
         try willForceDelete()
@@ -39,8 +42,8 @@ extension SoftDeletable {
         didForceDelete()
     }
 
-    /// Restores the entity, setting its
-    /// `deletedAt` date to nil
+    /// Restores a soft deleted entity, 
+    /// setting its `deletedAt` date to nil
     public func restore() throws {
         try assertExists()
         try willRestore()
@@ -93,10 +96,14 @@ extension QueryRepresentable where E: SoftDeletable {
 // MARK: Entity
 
 extension Entity where Self: SoftDeletable {
+    /// Includes soft deleted entities in
+    /// the results
     public static func withSoftDeleted() throws -> Query<Self> {
         return try query().withSoftDeleted()
     }
 
+    /// If true, calls to `model.delete()`
+    /// should permanently delete the model.
     internal var shouldForceDelete: Bool {
         get { return storage.shouldForceDelete }
         set { storage.shouldForceDelete = newValue }

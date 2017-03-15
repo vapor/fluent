@@ -10,11 +10,15 @@ extension QueryRepresentable {
         let query = try makeQuery()
         query.action = .fetch
 
-        // soft deleteable
+        // if this is a soft deletable entity,
+        // and soft deleted rows should not be included,
+        // then filter them out
         if
             let S = E.self as? SoftDeletable.Type,
             !query.includeSoftDeleted
         {
+            // require that all entities have deletedAt = null
+            // or to some date in the future (not deleted yet)
             try query.or { subquery in
                 try subquery.filter(S.deletedAtKey, Node.null)
                 try subquery.filter(S.deletedAtKey, .greaterThan, Date())
@@ -210,6 +214,9 @@ extension QueryRepresentable {
         let id = try model.assertExists()
         let query = try makeQuery()
 
+        // if the model is soft deletable and
+        // does not have the force delete flag set,
+        // then soft delete it.
         if
             let s = model as? SoftDeletable,
             !s.shouldForceDelete
