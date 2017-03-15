@@ -10,6 +10,21 @@ extension QueryRepresentable {
         let query = try makeQuery()
         query.action = .fetch
 
+        // if this is a soft deletable entity,
+        // and soft deleted rows should not be included,
+        // then filter them out
+        if
+            let S = E.self as? SoftDeletable.Type,
+            !query.includeSoftDeleted
+        {
+            // require that all entities have deletedAt = null
+            // or to some date in the future (not deleted yet)
+            try query.or { subquery in
+                try subquery.filter(S.deletedAtKey, Node.null)
+                try subquery.filter(S.deletedAtKey, .greaterThan, Date())
+            }
+        }
+
         guard let array = try query.raw().typeArray else {
             throw QueryError.invalidDriverResponse("Array required.")
         }
@@ -20,17 +35,26 @@ extension QueryRepresentable {
             do {
                 let row = Row(node: result)
                 let model = try E(row: row)
-                if
-                    let dict = result.typeObject,
-                    let id = dict[E.idKey]
-                {
-                    model.id = Identifier(id)
-                }
+                model.id = try row.get(E.idKey)
                 model.exists = true
-                if E.usesTimestamps {
-                    model.storage.createdAt = try row.get(E.createdAtKey)
-                    model.storage.updatedAt = try row.get(E.updatedAtKey)
+
+                // timestampable
+                if
+                    let T = E.self as? Timestampable.Type,
+                    let t = model as? Timestampable
+                {
+                    t.createdAt = try row.get(T.createdAtKey)
+                    t.updatedAt = try row.get(T.updatedAtKey)
                 }
+
+                // soft deletable
+                if
+                    let S = E.self as? SoftDeletable.Type,
+                    let s = model as? SoftDeletable
+                {
+                    s.deletedAt = try row.get(S.deletedAtKey)
+                }
+
                 models.append(model)
             } catch {
                 print("Could not initialize \(E.self), skipping: \(error)")
@@ -47,15 +71,29 @@ extension QueryRepresentable {
         query.limit = Limit(count: 1)
 
         let model = try query.all().first
-        model?.exists = true
 
         return model
+    }
+
+    /// Returns the first entity with the given `id`.
+    public func find(_ id: NodeRepresentable) throws -> E? {
+        return try makeQuery()
+            .filter(E.idKey, id)
+            .first()
     }
 
     /// Returns the number of results for the query.
     public func count() throws -> Int {
         let query = try makeQuery()
         query.action = .count
+
+        // soft deletable
+        if let S = E.self as? SoftDeletable.Type {
+            try query.or { subquery in
+                try subquery.filter(S.deletedAtKey, Node.null)
+                try subquery.filter(S.deletedAtKey, .greaterThan, Date())
+            }
+        }
 
         let raw = try query.raw()
 
@@ -96,12 +134,30 @@ extension QueryRepresentable {
         if let _ = model.id, model.exists {
             try model.willUpdate()
             var row = try model.makeRow()
-            if E.usesTimestamps {
-                let now = Date()
-                try row.set(E.updatedAtKey, now)
-                model.storage.updatedAt = now
-            }
             try row.set(E.idKey, model.id)
+
+            // timestampable
+            if
+                let T = E.self as? Timestampable.Type,
+                let t = model as? Timestampable
+            {
+                let now = Date()
+                try row.set(T.updatedAtKey, now)
+                t.updatedAt = now
+            }
+
+            // soft deletable
+            if
+                let S = E.self as? SoftDeletable.Type,
+                let s = model as? SoftDeletable
+            {
+                if let deletedAt = s.deletedAt {
+                    try row.set(S.deletedAtKey, deletedAt)
+                } else {
+                    try row.set(S.deletedAtKey, Node.null)
+                }
+            }
+
             try modify(row)
             model.didUpdate()
         } else {
@@ -113,17 +169,24 @@ extension QueryRepresentable {
             try model.willCreate()
             var row = try model.makeRow()
             try row.set(E.idKey, model.id)
-            if E.usesTimestamps {
+
+            // timestampable
+            if
+                let T = E.self as? Timestampable.Type,
+                let t = model as? Timestampable
+            {
                 let now = Date()
-                try row.set(E.createdAtKey, now)
-                try row.set(E.updatedAtKey, now)
-                model.storage.createdAt = now
-                model.storage.updatedAt = now
+                try row.set(T.createdAtKey, now)
+                try row.set(T.updatedAtKey, now)
+                t.createdAt = now
+                t.updatedAt = now
             }
+
             let id = try query.create(row)
             if id != nil, id != .null, id != 0 {
                 model.id = id
             }
+
             model.didCreate()
         }
         model.exists = true
@@ -148,30 +211,28 @@ extension QueryRepresentable {
     /// Attempts to delete the supplied entity
     /// if its identifier is set.
     public func delete(_ model: E) throws {
-        guard let id = model.id else {
-            return
-        }
+        let id = try model.assertExists()
         let query = try makeQuery()
 
-        query.action = .delete
-
-        let filter = Filter(
-            E.self,
-            .compare(
-                E.idKey,
-                .equals,
-                id.makeNode(in: query.context)
-            )
-        )
-
-        query.filters.append(.some(filter))
-
-        try model.willDelete()
-        try query.raw()
-        model.didDelete()
-
-        let model = model
-        model.exists = false
+        // if the model is soft deletable and
+        // does not have the force delete flag set,
+        // then soft delete it.
+        if
+            let s = model as? SoftDeletable,
+            !s.shouldForceDelete
+        {
+            // soft delete the model
+            try s.softDelete()
+            // note: model still 'exists'
+        } else {
+            // permenantly delete the model
+            query.action = .delete
+            try query.filter(E.idKey, id)
+            try model.willDelete()
+            try query.raw()
+            model.didDelete()
+            model.exists = false
+        }
     }
 }
 

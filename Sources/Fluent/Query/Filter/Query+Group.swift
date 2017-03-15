@@ -2,6 +2,7 @@ public typealias QueryClosure<E: Entity> = (Query<E>) throws -> ()
 
 extension QueryRepresentable {
     /// Grouped filter closure with specified relation.
+    @discardableResult
     public func group(
         _ relation: Filter.Relation,
         _ closure: QueryClosure<E>
@@ -18,11 +19,13 @@ extension QueryRepresentable {
     }
 
     /// Grouped `and` filter subquery
+    @discardableResult
     public func and(_ closure: QueryClosure<E>) throws -> Query<E> {
         return try group(.and, closure)
     }
 
     /// Grouped `or` filter subquery
+    @discardableResult
     public func or(_ closure: QueryClosure<E>) throws -> Query<E> {
         return try group(.or, closure)
     }
