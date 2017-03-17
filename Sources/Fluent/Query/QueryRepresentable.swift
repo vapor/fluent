@@ -25,7 +25,7 @@ extension QueryRepresentable {
             }
         }
 
-        guard let array = try query.raw().typeArray else {
+        guard let array = try query.raw().array else {
             throw QueryError.invalidDriverResponse("Array required.")
         }
 
