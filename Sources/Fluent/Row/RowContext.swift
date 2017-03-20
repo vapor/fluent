@@ -17,9 +17,3 @@ extension Context {
     }
 }
 
-// MARK: Error
-
-public enum RowContextError: Error {
-    case unexpectedContext(Context?)
-    case unspecified(Swift.Error)
-}
