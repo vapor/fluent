@@ -6,6 +6,7 @@ extension SQL {
                 table: T.entity,
                 filters: query.filters,
                 joins: query.joins,
+                groups: query.groups,
                 orders: query.sorts,
                 limit: query.limit
             )
@@ -13,7 +14,8 @@ extension SQL {
             self = .count(
                 table: T.entity,
                 filters: query.filters,
-                joins: query.joins
+                joins: query.joins,
+                groups: query.groups
             )
         case .create:
             self = .insert(
