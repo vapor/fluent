@@ -198,7 +198,7 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
     // MARK: Schema
 
 
-    open func create(_ add: [Field]) -> (String, [Node]) {
+    open func create(_ add: [RawOr<Field>]) -> (String, [Node]) {
         var statement: [String] = []
 
         statement += "CREATE TABLE"
@@ -211,7 +211,7 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         )
     }
 
-    open func alter(add: [Field], drop: [Field]) -> (String, [Node]) {
+    open func alter(add: [RawOr<Field>], drop: [RawOr<Field>]) -> (String, [Node]) {
         var statement: [String] = []
 
         statement += "ALTER TABLE"
@@ -224,7 +224,14 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         }
 
         for field in drop {
-            subclause += "DROP " + escape(field.name)
+            let name: String
+            switch field {
+            case .raw(let raw, _):
+                name = raw
+            case .some(let some):
+                name = some.name
+            }
+            subclause += "DROP " + escape(name)
         }
 
         statement += subclause.joined(separator: ", ")
@@ -247,14 +254,21 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         )
     }
 
-    open func columns(_ fields: [Field]) -> String {
-        let string = fields.map { field in
-            return column(field)
-            }.joined(separator: ", ")
-
-        return "(\(string))"
+    open func columns(_ fields: [RawOr<Field>]) -> String {
+        let parsed: [String] = fields.map(column)
+            
+        return "(" + parsed.joined(separator: ", ") + ")"
     }
 
+    open func column(_ field: RawOr<Field>) -> String {
+        switch field {
+        case .raw(let raw, _):
+            return raw
+        case .some(let some):
+            return column(some)
+        }
+    }
+    
     open func column(_ field: Field) -> String {
         var clause: [String] = []
 

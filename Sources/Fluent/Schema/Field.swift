@@ -76,69 +76,34 @@ extension Field: Equatable {
 
 extension Field.DataType: Equatable {
     public static func ==(lhs: Field.DataType, rhs: Field.DataType) -> Bool {
-        switch lhs {
-        case .id(let a):
-            switch rhs {
-            case .id(let b): return a == b
-            default: return false
-            }
-        case .int:
-            switch rhs {
-            case .int: return true
-            default: return false
-            }
-        case .string:
-            switch rhs {
-            case .string: return true
-            default: return false
-            }
-        case .double:
-            switch rhs {
-            case .double: return true
-            default: return false
-            }
-        case .bool:
-            switch rhs {
-            case .bool: return true
-            default: return false
-            }
-        case .bytes:
-            switch rhs {
-            case .bytes: return true
-            default: return false
-            }
-        case .date:
-            switch rhs {
-            case .date: return true
-            default: return false
-            }
-        case .custom(let a):
-            switch rhs {
-            case .custom(let b): return a == b
-            default: return false
-            }
+        switch (lhs, rhs) {
+        case (.id(let a), .id(let b)):
+            return a == b
+        case (.int, .int),
+             (.string, .string),
+             (.double, .double),
+             (.bool, .bool),
+             (.bytes, .bytes),
+             (.date, .date):
+            return true
+        case (.custom(let a), .custom(let b)):
+            return a == b
+        default:
+            return false
         }
     }
 }
 
 extension IdentifierType: Equatable {
     public static func ==(lhs: IdentifierType, rhs: IdentifierType) -> Bool {
-        switch lhs {
-        case .int:
-            switch rhs {
-            case .int: return true
-            default: return false
-            }
-        case .uuid:
-            switch rhs {
-            case .uuid: return true
-            default: return false
-            }
-        case .custom(let a):
-            switch rhs {
-            case .custom(let b): return a == b
-            default: return false
-            }
+        switch (lhs, rhs) {
+        case (.int, .int),
+             (.uuid, .uuid):
+            return true
+        case (.custom(let a), .custom(let b)):
+            return a == b
+        default:
+            return false
         }
     }
 }

@@ -11,8 +11,8 @@ public enum Action {
 }
 
 public enum Schema {
-    case create([Field])
-    case modify(add: [Field], remove: [Field])
+    case create([RawOr<Field>])
+    case modify(add: [RawOr<Field>], remove: [RawOr<Field>])
     case delete
 }
 

@@ -1,8 +1,8 @@
 /// Modifies a schema. A subclass of Creator.
 /// Can modify or delete fields.
 public final class Modifier: Builder {
-    public var fields: [Field]
-    public var delete: [Field]
+    public var fields: [RawOr<Field>]
+    public var delete: [RawOr<Field>]
 
     public init() {
         fields = []
@@ -14,6 +14,6 @@ public final class Modifier: Builder {
             name: name,
             type: .custom(type: "delete")
         )
-        delete.append(field)
+        delete.append(.some(field))
     }
 }

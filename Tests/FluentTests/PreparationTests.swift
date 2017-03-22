@@ -18,24 +18,24 @@ class PreparationTests: XCTestCase {
                 return
             }
 
-            guard case .int = fields[0].type else {
+            guard case .int = fields[0].wrapped!.type else {
                 XCTFail("Invalid first field")
                 return
             }
-            XCTAssertEqual(fields[0].name, "id")
+            XCTAssertEqual(fields[0].wrapped?.name, "id")
 
-            guard case .string(let colTwoLength) = fields[1].type else {
+            guard case .string(let colTwoLength) = fields[1].wrapped!.type else {
                 XCTFail("Invalid second field")
                 return
             }
-            XCTAssertEqual(fields[1].name, "name")
+            XCTAssertEqual(fields[1].wrapped?.name, "name")
             XCTAssertEqual(colTwoLength, nil)
 
-            guard case .string(let colThreeLength) = fields[2].type else {
+            guard case .string(let colThreeLength) = fields[2].wrapped!.type else {
                 XCTFail("Invalid second field")
                 return
             }
-            XCTAssertEqual(fields[2].name, "email")
+            XCTAssertEqual(fields[2].wrapped?.name, "email")
             XCTAssertEqual(colThreeLength, 128)
         }
 
@@ -66,7 +66,7 @@ class PreparationTests: XCTestCase {
                 return
             }
             
-            guard case .id(let keyType) = fields[0].type else {
+            guard case .id(let keyType) = fields[0].wrapped!.type else {
                 XCTFail("Invalid first field \(fields[0])")
                 return
             }
@@ -98,23 +98,23 @@ class PreparationTests: XCTestCase {
                 return
             }
 
-            guard case .id = fields[0].type else {
+            guard case .id = fields[0].wrapped!.type else {
                 XCTFail("Invalid first field")
                 return
             }
 
-            guard case .string(let colTwoLength) = fields[1].type else {
+            guard case .string(let colTwoLength) = fields[1].wrapped!.type else {
                 XCTFail("Invalid second field")
                 return
             }
-            XCTAssertEqual(fields[1].name, "name")
+            XCTAssertEqual(fields[1].wrapped!.name, "name")
             XCTAssertEqual(colTwoLength, nil)
 
-            guard case .int = fields[2].type else {
+            guard case .int = fields[2].wrapped!.type else {
                 XCTFail("Invalid second field")
                 return
             }
-            XCTAssertEqual(fields[2].name, "age")
+            XCTAssertEqual(fields[2].wrapped?.name, "age")
         }
 
         let database = Database(driver)

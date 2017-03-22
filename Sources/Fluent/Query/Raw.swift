@@ -4,7 +4,7 @@ public enum RawOr<Wrapped> {
 }
 
 extension RawOr {
-    var wrapped: Wrapped? {
+    public var wrapped: Wrapped? {
         switch self {
         case .some(let wrapped):
             return wrapped

@@ -1,15 +1,19 @@
 public protocol Builder: class {
-    var fields: [Field] { get set }
+    var fields: [RawOr<Field>] { get set }
 }
 
 extension Builder {
+    public func addField(_ field: Field) {
+        fields.append(.some(field))
+    }
+    
     public func id<E: Entity>(for entityType: E.Type) {
         let field = Field(
             name: E.idKey,
             type: .id(type: E.idType),
             primaryKey: true
         )
-        fields.append(field)
+        addField(field)
     }
 
     public func foreignId<E: Entity>(for entityType: E.Type) {
@@ -17,7 +21,7 @@ extension Builder {
             name: E.foreignIdKey,
             type: .id(type: E.idType)
         )
-        fields.append(field)
+        addField(field)
     }
 
     public func int(
@@ -33,7 +37,7 @@ extension Builder {
             unique: unique,
             default: `default`
         )
-        fields.append(field)
+        addField(field)
     }
 
     public func string(
@@ -50,7 +54,7 @@ extension Builder {
             unique: unique,
             default: `default`
         )
-        fields.append(field)
+        addField(field)
     }
 
     public func double(
@@ -66,7 +70,7 @@ extension Builder {
             unique: unique,
             default: `default`
         )
-        fields.append(field)
+        addField(field)
     }
 
     public func bool(
@@ -82,7 +86,7 @@ extension Builder {
             unique: unique,
             default: `default`
         )
-        fields.append(field)
+        addField(field)
     }
 
     public func bytes(
@@ -98,7 +102,7 @@ extension Builder {
             unique: unique,
             default: `default`
         )
-        fields.append(field)
+        addField(field)
     }
 
     public func date(
@@ -114,7 +118,7 @@ extension Builder {
             unique: unique,
             default: `default`
         )
-        fields.append(field)
+        addField(field)
     }
 
     public func custom(
@@ -131,7 +135,7 @@ extension Builder {
             unique: unique,
             default: `default`
         )
-        fields.append(field)
+        addField(field)
     }
 
     // MARK: Relations
@@ -165,6 +169,12 @@ extension Builder {
             unique: unique,
             default: `default`
         )
-        fields.append(field)
+        addField(field)
+    }
+    
+    // MARK: Raw
+    
+    public func raw(_ string: String) {
+        fields.append(.raw(string, []))
     }
 }
