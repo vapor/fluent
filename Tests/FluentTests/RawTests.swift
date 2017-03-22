@@ -19,6 +19,8 @@ class RawTests: XCTestCase {
     override func setUp(){
         lqd = LastQueryDriver()
         db = Database(lqd)
+        Compound.database = db
+        Atom.database = db
     }
 
     func testBasic() throws {

@@ -3,7 +3,7 @@ import Fluent
 class LastQueryDriver: Driver {
     var keyNamingConvention: KeyNamingConvention = .snake_case
     var idType: IdentifierType = .int
-    var idKey: String = "#id"
+    let idKey: String = "#id"
 
     var lastQuery: (String, [Node])?
     var lastRaw: (String, [Node])?
