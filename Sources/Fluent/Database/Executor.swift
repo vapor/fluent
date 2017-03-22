@@ -22,6 +22,10 @@ public protocol Executor {
     ///
     /// This allows Fluent extensions to be written that
     /// can support custom querying behavior.
+    ///
+    /// - note: Passing parameterized values as a `[Node]` array
+    ///         instead of interpolating them into the raw string
+    ///         can help prevent SQL injection.
     @discardableResult
     func raw(_ raw: String, _ values: [Node]) throws -> Node
 }
