@@ -43,6 +43,10 @@ extension Database {
         let migration = Migration(name: preparation.name)
         try migration.save()
     }
+    
+    public func removeMetadata() throws {
+        try Migration.revert(self)
+    }
 }
 
 extension Preparation {
