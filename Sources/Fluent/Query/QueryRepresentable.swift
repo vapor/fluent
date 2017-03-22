@@ -201,11 +201,6 @@ extension QueryRepresentable {
     /// in the model's collection.
     public func delete() throws {
         let query = try makeQuery()
-
-        guard query.joins.count == 0 else {
-            throw QueryError.notSupported("Cannot perform delete on queries that contain joins. Delete the entities directly instead.")
-        }
-
         query.action = .delete
         try query.raw()
     }

@@ -102,47 +102,59 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
     }
 
     open func count() -> (String, [Node]) {
-        var fragments: [String] = []
+        var statement: [String] = []
         var values: [Node] = []
 
-        fragments += "SELECT COUNT(*) as _fluent_count FROM"
-        fragments += escape(E.entity)
+        statement += "SELECT COUNT(*) as _fluent_count FROM"
+        statement += escape(E.entity)
 
         if !query.joins.isEmpty {
-            fragments += joins(query.joins)
+            statement += joins(query.joins)
         }
 
         if !query.filters.isEmpty {
             let (filtersClause, filtersValues) = filters(query.filters)
-            fragments += filtersClause
+            statement += filtersClause
             values += filtersValues
         }
 
         return (
-            concatenate(fragments),
+            concatenate(statement),
             values
         )
     }
 
     open func delete() -> (String, [Node]) {
-        var fragments: [String] = []
+        var statement: [String] = []
         var values: [Node] = []
 
-        fragments += "DELETE FROM"
-        fragments += escape(E.entity)
+        statement += "DELETE"
+        if !query.joins.isEmpty {
+            statement += escape(E.entity)
+        }
+        statement += "FROM"
+        statement += escape(E.entity)
+        
+        if !query.joins.isEmpty {
+            statement += joins(query.joins)
+        }
 
         if !query.filters.isEmpty {
             let (filtersClause, filtersValues) = filters(query.filters)
-            fragments += filtersClause
+            statement += filtersClause
             values += filtersValues
+        }
+        
+        if !query.sorts.isEmpty {
+            statement += sorts(query.sorts)
         }
 
         if let l = query.limits.first {
-            fragments += limit(l)
+            statement += limit(l)
         }
 
         return (
-            concatenate(fragments),
+            concatenate(statement),
             values
         )
     }

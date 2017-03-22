@@ -205,4 +205,15 @@ class SQLSerializerTests: XCTestCase {
         XCTAssertEqual(statement, "SELECT `users`.* FROM `users` WHERE `users`.`age` > ? ORDER BY `users`.`name` ASC, `users`.`email` DESC")
         XCTAssertEqual(values.count, 1)
     }
+    
+    func testJoinedDelete() throws {
+        let query = Query<Compound>(db)
+        try query.join(Atom.self)
+        try query.filter(Atom.self, "name", "Hydrogen")
+        try query.delete()
+        
+        let (statement, values) = serialize(query)
+        XCTAssertEqual(statement, "DELETE `compounds` FROM `compounds` JOIN `atoms` ON `compounds`.`id` = `atoms`.`compound_id` WHERE `atoms`.`name` = ?")
+        XCTAssertEqual(values.count, 1)
+    }
 }
