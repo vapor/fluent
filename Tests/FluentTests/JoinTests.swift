@@ -4,8 +4,6 @@ import XCTest
 class JoinTests: XCTestCase {
     static let allTests = [
         ("testBasic", testBasic),
-        ("testCustom", testCustom),
-        ("testSQL", testSQL),
         ("testSQLFilters", testSQLFilters),
         ("testSiblings", testSiblings)
     ]
@@ -26,65 +24,8 @@ class JoinTests: XCTestCase {
         let query = try Query<Atom>(db).join(Compound.self)
         try lqd.query(query)
 
-        if let sql = lqd.lastQuery {
-            switch sql {
-            case .select(let table, let filters, let joins, let orders, let limit):
-                XCTAssertEqual(table, "atoms")
-                XCTAssertEqual(filters.count, 0)
-                XCTAssertEqual(orders.count, 0)
-                XCTAssertEqual(joins.count, 1)
-                if let join = joins.first {
-                    XCTAssert(join.base == Atom.self)
-                    XCTAssertEqual(join.joined.foreignIdKey, "compound_\(lqd.idKey)")
-                    XCTAssert(join.joined == Compound.self)
-                    XCTAssertEqual(join.joined.idKey, lqd.idKey)
-                }
-                XCTAssert(limit == nil)
-            default:
-                XCTFail("Invalid SQL type.")
-            }
-        } else {
-            XCTFail("No last query.")
-        }
-    }
-
-    func testCustom() throws {
-        let query = try Query<Atom>(db).join(Compound.self)
-        try lqd.query(query)
-
-
-        if let sql = lqd.lastQuery {
-            switch sql {
-            case .select(let table, let filters, let joins, let orders, let limit):
-                XCTAssertEqual(table, "atoms")
-                XCTAssertEqual(filters.count, 0)
-                XCTAssertEqual(orders.count, 0)
-                XCTAssertEqual(joins.count, 1)
-                if let join = joins.first {
-                    XCTAssert(join.base == Atom.self)
-                    XCTAssertEqual(join.joined.idKey, Compound.idKey)
-                    XCTAssert(join.joined == Compound.self)
-                    XCTAssertEqual(join.joined.foreignIdKey, Compound.foreignIdKey)
-                }
-                XCTAssert(limit == nil)
-            default:
-                XCTFail("Invalid SQL type.")
-            }
-        } else {
-            XCTFail("No last query.")
-        }
-    }
-
-    func testSQL() throws {
-        let query = try Query<Atom>(db).join(Compound.self)
-        try lqd.query(query)
-
-
-        if let sql = lqd.lastQuery {
-            let serializer = GeneralSQLSerializer(sql: sql)
-            let (statement, values) = serializer.serialize()
-            XCTAssertEqual(statement, "SELECT `atoms`.* FROM `atoms` JOIN `compounds` ON `atoms`.`#id` = `compounds`.`atom_#id`")
-            XCTAssertEqual(values.count, 0)
+        if let (sql, _) = lqd.lastQuery {
+            XCTAssertEqual(sql, "SELECT `atoms`.* FROM `atoms` JOIN `compounds` ON `atoms`.`#id` = `compounds`.`atom_#id`")
         } else {
             XCTFail("No last query.")
         }
@@ -98,14 +39,8 @@ class JoinTests: XCTestCase {
 
         try lqd.query(query)
 
-
-        if let sql = lqd.lastQuery {
-            let serializer = GeneralSQLSerializer(sql: sql)
-            let (statement, values) = serializer.serialize()
-            XCTAssertEqual(
-                statement,
-                "SELECT `atoms`.* FROM `atoms` JOIN `compounds` ON `atoms`.`#id` = `compounds`.`atom_#id` WHERE `atoms`.`protons` > ? AND `compounds`.`atoms` < ?"
-            )
+        if let (sql, values) = lqd.lastQuery {
+            XCTAssertEqual(sql, "SELECT `atoms`.* FROM `atoms` JOIN `compounds` ON `atoms`.`#id` = `compounds`.`atom_#id` WHERE `atoms`.`protons` > ? AND `compounds`.`atoms` < ?")
             if values.count == 2 {
                 XCTAssertEqual(values[0].int, 5)
                 XCTAssertEqual(values[1].int, 128)
@@ -126,11 +61,9 @@ class JoinTests: XCTestCase {
             _ = try atom.compounds.all()
         }
 
-        if let sql = lqd.lastQuery {
-            let serializer = GeneralSQLSerializer(sql: sql)
-            let (statement, values) = serializer.serialize()
+        if let (sql, values) = lqd.lastQuery {
             XCTAssertEqual(
-                statement,
+                sql,
                 "SELECT `compounds`.* FROM `compounds` JOIN `atom_compound` ON `compounds`.`#id` = `atom_compound`.`compound_#id` WHERE `atom_compound`.`atom_#id` = ?"
             )
             XCTAssertEqual(values.count, 1)

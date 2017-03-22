@@ -8,42 +8,39 @@ class PreparationTests: XCTestCase {
 
     func testManualPreparation() {
         let driver = TestSchemaDriver { schema in
-            guard case .create(let entity, let fields) = schema else {
+            guard case .create(let fields) = schema else {
                 XCTFail("Invalid schema")
                 return
             }
-
-            XCTAssertEqual(entity, "users")
 
             guard fields.count == 3 else {
                 XCTFail("Invalid field count")
                 return
             }
 
-            guard case .int = fields[0].type else {
+            guard case .int = fields[0].wrapped!.type else {
                 XCTFail("Invalid first field")
                 return
             }
-            XCTAssertEqual(fields[0].name, "id")
+            XCTAssertEqual(fields[0].wrapped?.name, "id")
 
-            guard case .string(let colTwoLength) = fields[1].type else {
+            guard case .string(let colTwoLength) = fields[1].wrapped!.type else {
                 XCTFail("Invalid second field")
                 return
             }
-            XCTAssertEqual(fields[1].name, "name")
+            XCTAssertEqual(fields[1].wrapped?.name, "name")
             XCTAssertEqual(colTwoLength, nil)
 
-            guard case .string(let colThreeLength) = fields[2].type else {
+            guard case .string(let colThreeLength) = fields[2].wrapped!.type else {
                 XCTFail("Invalid second field")
                 return
             }
-            XCTAssertEqual(fields[2].name, "email")
+            XCTAssertEqual(fields[2].wrapped?.name, "email")
             XCTAssertEqual(colThreeLength, 128)
         }
 
         let database = Database(driver)
 
-        TestPreparation.entity = "users"
         TestPreparation.testClosure = { builder in
             builder.int("id")
             builder.string("name")
@@ -59,19 +56,17 @@ class PreparationTests: XCTestCase {
     
     func testStringIdentifiedModelPreparation() {
         let driver = TestSchemaDriver { schema in
-            guard case .create(let entity, let fields) = schema else {
+            guard case .create(let fields) = schema else {
                 XCTFail("Invalid schema")
                 return
             }
-            
-            XCTAssertEqual(entity, "string_identified_things")
             
             guard fields.count == 1 else {
                 XCTFail("Invalid field count")
                 return
             }
             
-            guard case .id(let keyType) = fields[0].type else {
+            guard case .id(let keyType) = fields[0].wrapped!.type else {
                 XCTFail("Invalid first field \(fields[0])")
                 return
             }
@@ -93,35 +88,33 @@ class PreparationTests: XCTestCase {
 
     func testModelPreparation() {
         let driver = TestSchemaDriver { schema in
-            guard case .create(let entity, let fields) = schema else {
+            guard case .create(let fields) = schema else {
                 XCTFail("Invalid schema")
                 return
             }
-
-            XCTAssertEqual(entity, "test_models")
 
             guard fields.count == 3 else {
                 XCTFail("Invalid field count")
                 return
             }
 
-            guard case .id = fields[0].type else {
+            guard case .id = fields[0].wrapped!.type else {
                 XCTFail("Invalid first field")
                 return
             }
 
-            guard case .string(let colTwoLength) = fields[1].type else {
+            guard case .string(let colTwoLength) = fields[1].wrapped!.type else {
                 XCTFail("Invalid second field")
                 return
             }
-            XCTAssertEqual(fields[1].name, "name")
+            XCTAssertEqual(fields[1].wrapped!.name, "name")
             XCTAssertEqual(colTwoLength, nil)
 
-            guard case .int = fields[2].type else {
+            guard case .int = fields[2].wrapped!.type else {
                 XCTFail("Invalid second field")
                 return
             }
-            XCTAssertEqual(fields[2].name, "age")
+            XCTAssertEqual(fields[2].wrapped?.name, "age")
         }
 
         let database = Database(driver)
@@ -167,17 +160,16 @@ final class TestModel: Entity {
 }
 
 class TestPreparation: Preparation {
-    static var entity: String = ""
-    static var testClosure: (Schema.Creator) -> () = { _ in }
+    static var testClosure: (Creator) -> () = { _ in }
 
     static func prepare(_ database: Database) throws {
-        try database.create(custom: entity) { builder in
+        try database.create(Atom.self) { builder in
             self.testClosure(builder)
         }
     }
 
     static func revert(_ database: Database) throws {
-        try database.delete(custom: entity)
+        try database.delete(Atom.self)
     }
 }
 
@@ -215,11 +207,4 @@ struct TestSchemaConnection: Connection {
 
 
     func raw(_ raw: String, _ values: [Node]) throws -> Node { return .null }
-}
-
-extension SQLSerializerTests {
-    private func serialize(_ sql: SQL) -> (String, [Node]) {
-        let serializer = GeneralSQLSerializer(sql: sql)
-        return serializer.serialize()
-    }
 }

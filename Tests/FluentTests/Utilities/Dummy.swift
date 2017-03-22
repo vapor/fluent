@@ -31,16 +31,12 @@ class DummyDriver: Driver {
 class DummyConnection: Connection {
     public var closed: Bool = false
 
-    func query<T: Entity>(_ query: Query<T>) throws -> Node {
+    func query<E: Entity>(_ query: Query<E>) throws -> Node {
         if query.action == .count {
             return 0
         }
         
         return .array([])
-    }
-
-    func schema(_ schema: Schema) throws {
-
     }
 
     func raw(_ raw: String, _ values: [Node]) throws -> Node {

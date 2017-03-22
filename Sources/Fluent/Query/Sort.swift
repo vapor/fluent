@@ -26,10 +26,18 @@ public struct Sort {
 extension QueryRepresentable {
     /// Add a Sort to the Query.
     /// See Sort for more information.
+    @discardableResult
     public func sort(_ field: String, _ direction: Sort.Direction) throws -> Query<E> {
         let query = try makeQuery()
         let sort = Sort(E.self, field, direction)
-        query.sorts.append(sort)
+        try query.sort(sort)
+        return query
+    }
+    
+    @discardableResult
+    public func sort(_ sort: Sort) throws -> Query<E> {
+        let query = try makeQuery()
+        query.sorts.append(.some(sort))
         return query
     }
 }

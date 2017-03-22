@@ -1,5 +1,6 @@
 /// A SQL serializer.
 public protocol SQLSerializer {
-    init(sql: SQL)
-    func serialize() -> (String, [Node])
+    associatedtype E: Entity
+    init(_ query: Query<E>)
+    func serialize() throws -> (String, [Node])
 }

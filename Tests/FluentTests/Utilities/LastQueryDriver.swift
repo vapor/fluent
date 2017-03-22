@@ -3,10 +3,9 @@ import Fluent
 class LastQueryDriver: Driver {
     var keyNamingConvention: KeyNamingConvention = .snake_case
     var idType: IdentifierType = .int
-    var idKey: String = "#id"
+    let idKey: String = "#id"
 
-    var lastQuery: SQL?
-    var lastSchema: Schema?
+    var lastQuery: (String, [Node])?
     var lastRaw: (String, [Node])?
     
     func makeConnection() throws -> Connection {
@@ -24,16 +23,14 @@ struct LastQueryConnection: Connection {
     }
     
     @discardableResult
-    func query<T: Entity>(_ query: Query<T>) throws -> Node {
-        let sql = query.sql
-        driver.lastQuery = sql
-        return Node.array([
-            Node.object([T.idKey: 5])
-        ])
-    }
-
-    func schema(_ schema: Schema) throws {
-        driver.lastSchema = schema
+    func query<E: Entity>(_ query: Query<E>) throws -> Node {
+        let serializer = GeneralSQLSerializer(query)
+        driver.lastQuery = serializer.serialize()
+        return try Node(node: [
+            [
+                E.idKey: 5
+            ]
+        ], in: nil)
     }
 
     func raw(_ raw: String, _ values: [Node]) throws -> Node {

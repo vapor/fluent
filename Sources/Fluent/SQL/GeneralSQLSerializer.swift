@@ -1,398 +1,312 @@
-/// A generic SQL serializer.
-/// This class can be subclassed by
-/// specific SQL serializers.
-open class GeneralSQLSerializer: SQLSerializer {
-    public let sql: SQL
-
-    public required init(sql: SQL) {
-        self.sql = sql
+/// Serializers a Query into general SQL
+open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
+    public let query: Query<E>
+    public required init(_ query: Query<E>) {
+        self.query = query
     }
 
     open func serialize() -> (String, [Node]) {
-        switch sql {
-        case .table(let action, let table):
-            var statement: [String] = []
+        switch query.action {
+        case .create:
+            return insert()
+        case .fetch:
+            return select()
+        case .count:
+            return count()
+        case .delete:
+            return delete()
+        case .modify:
+            return modify()
+        case .schema(let schema):
+            switch schema {
+            case .create(let fields):
+                return create(fields)
+            case .modify(let add, let remove):
+                return alter(add: add, drop: remove)
+            case .delete:
+                return drop()
+            }
+        }
+    }
 
-            statement += sql(action, table)
+    // MARK: Data
 
-            return (
-                statement.joined(separator: " "),
-                []
-            )
-        case .insert(let table, let data):
-            var statement: [String] = []
+    open func insert() -> (String, [Node]) {
+        var statement: [String] = []
 
-            statement += "INSERT INTO"
-            statement += sql(table)
+        statement += "INSERT INTO"
+        statement += escape(E.entity)
 
-            let values: [Node]
-            if let (dataClause, dataValues) = sql(data) {
-                statement += dataClause
-                values = dataValues
-            } else {
-                values = []
+        let bind: [Node]
+
+        if !query.data.isEmpty {
+            statement += keys(query.data.keys.array)
+            statement += "VALUES"
+            let (fragment, nodes) = values(query.data.values.array)
+            statement += fragment
+            bind = nodes
+        } else {
+            bind = []
+        }
+
+        return (
+            concatenate(statement),
+            bind
+        )
+    }
+
+    open func select() -> (String, [Node]) {
+        var statement: [String] = []
+        var values: [Node] = []
+
+        let table = escape(E.entity)
+        
+        var columns: [String] = ["\(table).*"]
+        
+        statement += "SELECT"
+        for key in query.keys {
+            switch key {
+            case .raw(let raw, _):
+                columns.append(raw)
+            case .some(let some):
+                columns.append(escape(some))
+            }
+        }
+        
+        statement += columns.joined(separator: ", ")
+        statement += "FROM"
+        statement += table
+
+        if !query.joins.isEmpty {
+            statement += joins(query.joins)
+        }
+
+        if !query.filters.isEmpty {
+            let (filtersClause, filtersValues) = filters(query.filters)
+            statement += filtersClause
+            values += filtersValues
+        }
+
+        if !query.sorts.isEmpty {
+            statement += sorts(query.sorts)
+        }
+
+        if let l = query.limits.first {
+            statement += limit(l)
+        }
+
+        return (
+            concatenate(statement),
+            values
+        )
+    }
+
+    open func count() -> (String, [Node]) {
+        var statement: [String] = []
+        var values: [Node] = []
+
+        statement += "SELECT COUNT(*) as _fluent_count FROM"
+        statement += escape(E.entity)
+
+        if !query.joins.isEmpty {
+            statement += joins(query.joins)
+        }
+
+        if !query.filters.isEmpty {
+            let (filtersClause, filtersValues) = filters(query.filters)
+            statement += filtersClause
+            values += filtersValues
+        }
+
+        return (
+            concatenate(statement),
+            values
+        )
+    }
+
+    open func delete() -> (String, [Node]) {
+        var statement: [String] = []
+        var values: [Node] = []
+
+        statement += "DELETE"
+        if !query.joins.isEmpty {
+            statement += escape(E.entity)
+        }
+        statement += "FROM"
+        statement += escape(E.entity)
+        
+        if !query.joins.isEmpty {
+            statement += joins(query.joins)
+        }
+
+        if !query.filters.isEmpty {
+            let (filtersClause, filtersValues) = filters(query.filters)
+            statement += filtersClause
+            values += filtersValues
+        }
+        
+        if !query.sorts.isEmpty {
+            statement += sorts(query.sorts)
+        }
+
+        if let l = query.limits.first {
+            statement += limit(l)
+        }
+
+        return (
+            concatenate(statement),
+            values
+        )
+    }
+
+    open func modify() -> (String, [Node]) {
+        var statement: [String] = []
+
+        var values: [Node] = []
+
+        statement += "UPDATE"
+        statement += escape(E.entity)
+        statement += "SET"
+
+        if !query.data.isEmpty {
+            var fragments: [String] = []
+
+            query.data.forEach { (key, value) in
+                let keyString: String
+                switch key {
+                case .raw(let raw, _):
+                    keyString = raw
+                case .some(let some):
+                    keyString = escape(some)
+                }
+                
+                
+                let valueString: String
+                switch value {
+                case .raw(let raw, _):
+                    valueString = raw
+                case .some(let some):
+                    valueString = placeholder(some)
+                    values.append(some)
+                }
+                fragments += keyString + " = " + valueString
             }
 
-            return (
-                sql(statement),
-                values
-            )
-        case .select(let table, let filters, let unions, let orders, let limit):
-            var statement: [String] = []
-            var values: [Node] = []
+            statement += fragments.joined(separator: ", ")
+        }
 
-            let tableSQL = sql(table)
-            statement += "SELECT \(tableSQL).* FROM"
-            statement += tableSQL
-
-            if !unions.isEmpty {
-                statement += sql(unions)
-            }
-
-            if !filters.isEmpty {
-                let (filtersClause, filtersValues) = sql(filters)
-                statement += filtersClause
-                values += filtersValues
-            }
-
-            if !orders.isEmpty {
-                statement += sql(orders)
-            }
-
-            if let limit = limit {
-                statement += sql(limit: limit)
-            }
-
-            return (
-                sql(statement),
-                values
-            )
-        case .count(let table, let filters, let unions):
-            var statement: [String] = []
-            var values: [Node] = []
-
-            statement += "SELECT COUNT(*) as _fluent_count FROM"
-            statement += sql(table)
-
-            if !unions.isEmpty {
-                statement += sql(unions)
-            }
-
-            if !filters.isEmpty {
-                let (filtersClause, filtersValues) = sql(filters)
-                statement += filtersClause
-                values += filtersValues
-            }
-
-            return (
-                sql(statement),
-                values
-            )
-        case .delete(let table, let filters, let limit):
-            var statement: [String] = []
-            var values: [Node] = []
-
-            statement += "DELETE FROM"
-            statement += sql(table)
-
-            if !filters.isEmpty {
-                let (filtersClause, filtersValues) = sql(filters)
-                statement += filtersClause
-                values += filtersValues
-            }
-
-            if let limit = limit {
-                statement += sql(limit: limit)
-            }
-
-            return (
-                sql(statement),
-                values
-            )
-        case .update(let table, let filters, let data):
-            var statement: [String] = []
-
-            var values: [Node] = []
-
-            statement += "UPDATE"
-            statement += sql(table)
-            statement += "SET"
-
-            if let data = data, let obj = data.object {
-                let (dataClause, dataValues) = sql(update: obj)
-                statement += dataClause
-                values += dataValues
-            }
-
-            let (filterclause, filterValues) = sql(filters)
+        if !query.filters.isEmpty {
+            let (filterclause, filterValues) = filters(query.filters)
             statement += filterclause
             values += filterValues
-
-            return (
-                sql(statement),
-                values
-            )
         }
-    }
-
-    open func sql(limit: Limit) -> String {
-        var statement: [String] = []
-
-        statement += "LIMIT"
-        statement += "\(limit.offset), \(limit.count)"
-
-        return statement.joined(separator: " ")
-    }
-
-
-    open func sql(_ filters: [Filter]) -> (String, [Node]) {
-        var statement: [String] = []
-
-        statement += "WHERE"
-
-        let (clause, values) = sql(filters, relation: .and)
-
-        statement += clause
 
         return (
-            sql(statement),
+            concatenate(statement),
             values
         )
     }
 
-    open func sql(_ filters: [Filter], relation: Filter.Relation) -> (String, [Node]) {
+    // MARK: Schema
+
+
+    open func create(_ add: [RawOr<Field>]) -> (String, [Node]) {
         var statement: [String] = []
-        var values: [Node] = []
 
-
-        var subStatement: [String] = []
-
-        for filter in filters {
-            let (clause, subValues) = sql(filter)
-            subStatement += clause
-            values += subValues
-        }
-
-        statement += subStatement.joined(separator: " \(sql(relation)) ")
+        statement += "CREATE TABLE"
+        statement += escape(E.entity)
+        statement += columns(add)
 
         return (
-            sql(statement),
-            values
+            concatenate(statement),
+            []
         )
     }
 
-    open func sql(_ relation: Filter.Relation) -> String {
-        let word: String
-        switch relation {
-        case .and:
-            word = "AND"
-        case .or:
-            word = "OR"
-        }
-        return word
-    }
-
-    open func sql(_ filter: Filter) -> (String, [Node]) {
+    open func alter(add: [RawOr<Field>], drop: [RawOr<Field>]) -> (String, [Node]) {
         var statement: [String] = []
-        var values: [Node] = []
 
-        switch filter.method {
-        case .compare(let key, let comparison, let value):
-            // `.null` needs special handling in the case of `.equals` or `.notEquals`.
-            if comparison == .equals && value == .null {
-                statement += "\(sql(filter.entity.entity)).\(sql(key)) IS NULL"
-            }
-            else if comparison == .notEquals && value == .null {
-                statement += "\(sql(filter.entity.entity)).\(sql(key)) IS NOT NULL"
-            }
-            else {
-                statement += "\(sql(filter.entity.entity)).\(sql(key))"
-                statement += sql(comparison)
-                statement += "?"
+        statement += "ALTER TABLE"
+        statement += escape(E.entity)
 
-                /**
-                    `.like` comparison operator requires additional
-                    processing of `value`
-                 */
-                switch comparison {
-                case .hasPrefix:
-                    values += sql(hasPrefix: value)
-                case .hasSuffix:
-                    values += sql(hasSuffix: value)
-                case .contains:
-                    values += sql(contains: value)
-                default:
-                    values += value
-                }
-            }
-        case .subset(let key, let scope, let subValues):
-            statement += "\(sql(filter.entity.entity)).\(sql(key))"
-            statement += sql(scope)
-            statement += sql(subValues)
-            values += subValues
-        case .group(let relation, let filters):
-            let (clause, subvals) = sql(filters, relation: relation)
-            statement += "(\(clause))"
-            values += subvals
-        case .raw(command: let command, values: let subvalues):
-            statement += command
-            values += subvalues
+        var subclause: [String] = []
+
+        for field in add {
+            subclause += "ADD " + column(field)
         }
+
+        for field in drop {
+            let name: String
+            switch field {
+            case .raw(let raw, _):
+                name = raw
+            case .some(let some):
+                name = some.name
+            }
+            subclause += "DROP " + escape(name)
+        }
+
+        statement += subclause.joined(separator: ", ")
 
         return (
-            sql(statement),
-            values
+            concatenate(statement),
+            []
         )
     }
 
-    open func sql(_ sort: Sort) -> String {
+    open func drop() -> (String, [Node]) {
+        var statement: [String] = []
+
+        statement += "DROP TABLE IF EXISTS"
+        statement += escape(E.entity)
+
+        return (
+            concatenate(statement),
+            []
+        )
+    }
+
+    open func columns(_ fields: [RawOr<Field>]) -> String {
+        let parsed: [String] = fields.map(column)
+            
+        return "(" + parsed.joined(separator: ", ") + ")"
+    }
+
+    open func column(_ field: RawOr<Field>) -> String {
+        switch field {
+        case .raw(let raw, _):
+            return raw
+        case .some(let some):
+            return column(some)
+        }
+    }
+    
+    open func column(_ field: Field) -> String {
         var clause: [String] = []
 
-        clause += sql(sort.entity.entity) + "." + sql(sort.field)
+        clause += escape(field.name)
+        clause += type(field.type, primaryKey: field.primaryKey)
 
-        switch sort.direction {
-        case .ascending:
-            clause += "ASC"
-        case .descending:
-            clause += "DESC"
-        }
-
-        return sql(clause)
-    }
-
-    open func sql(_ sorts: [Sort]) -> String {
-        var clause: [String] = []
-
-        clause += "ORDER BY"
-
-        clause += sorts.map { sort in
-            return sql(sort)
-        }.joined(separator: ", ")
-
-        return sql(clause)
-    }
-
-    open func sql(_ comparison: Filter.Comparison) -> String {
-        switch comparison {
-        case .equals:
-            return "="
-        case .greaterThan:
-            return ">"
-        case .greaterThanOrEquals:
-            return ">="
-        case .lessThan:
-            return "<"
-        case .lessThanOrEquals:
-            return "<="
-        case .notEquals:
-            return "!="
-        case .hasSuffix:
-            fallthrough
-        case .hasPrefix:
-            fallthrough
-        case .contains:
-            return "LIKE"
-        }
-    }
-
-    open func sql(hasPrefix value: Node) -> Node {
-        guard let string = value.string else {
-            return value
-        }
-
-        return .string("\(string)%")
-    }
-
-    open func sql(hasSuffix value: Node) -> Node {
-        guard let string = value.string else {
-            return value
-        }
-
-        return .string("%\(string)")
-    }
-
-    open func sql(contains value: Node) -> Node {
-        guard let string = value.string else {
-            return value
-        }
-
-        return .string("%\(string)%")
-    }
-
-    open func sql(_ scope: Filter.Scope) -> String {
-        switch scope {
-        case .in:
-            return "IN"
-        case .notIn:
-            return "NOT IN"
-        }
-    }
-
-    open func sql(_ tableAction: SQL.TableAction, _ table: String) -> String {
-        switch tableAction {
-        case .alter(let create, let delete):
-            var clause: [String] = []
-
-            clause += "ALTER TABLE"
-            clause += sql(table)
-
-            var subclause: [String] = []
-
-            for column in create {
-                subclause += "ADD " + sql(column)
-            }
-
-            for name in delete {
-                subclause += "DROP " + sql(name)
-            }
-
-            clause += subclause.joined(separator: ", ")
-
-            return sql(clause)
-        case .create(let columns):
-            var clause: [String] = []
-
-            clause += "CREATE TABLE"
-            clause += sql(table)
-            clause += sql(columns)
-
-            return sql(clause)
-        case .drop:
-            var clause: [String] = []
-
-            clause += "DROP TABLE IF EXISTS"
-            clause += sql(table)
-
-            return sql(clause)
-        }
-    }
-
-    open func sql(_ column: Schema.Field) -> String {
-        var clause: [String] = []
-
-        clause += sql(column.name)
-        clause += sql(column.type, primaryKey: column.primaryKey)
-        
-        if !column.optional {
+        if !field.optional {
             clause += "NOT NULL"
         }
-        
-        if column.unique {
+
+        if field.unique {
             clause += "UNIQUE"
         }
 
-        if let d = column.default {
+        if let d = field.default {
             let dc: String
 
             switch d.wrapped {
             case .number(let n):
-                dc = "'" + n.description + "'"
+                dc = "'\(n.description)'"
             case .null:
                 dc = "NULL"
             case .bool(let b):
                 dc = b ? "TRUE" : "FALSE"
             default:
-                dc = "'" + (d.string ?? "") + "'"
+                dc = "'\((d.string ?? ""))'"
             }
 
             clause += "DEFAULT \(dc)"
@@ -402,7 +316,7 @@ open class GeneralSQLSerializer: SQLSerializer {
     }
 
 
-    open func sql(_ type: Schema.Field.DataType, primaryKey: Bool) -> String {
+    open func type(_ type: Field.DataType, primaryKey: Bool) -> String {
         switch type {
         case .id(let type):
             let typeString: String
@@ -430,95 +344,311 @@ open class GeneralSQLSerializer: SQLSerializer {
         case .bytes:
             return "BLOB"
         case .date:
-            return "TIMESTAMP"
+            return "DATETIME"
         case .custom(let type):
             return type
         }
     }
 
-    open func sql(_ data: Node?) -> (String, [Node])? {
-        guard let node = data else {
-            return nil
+    // MARK: Query Types
+
+    open func limit(_ limit: RawOr<Limit>) -> String {
+        var statement: [String] = []
+
+        statement += "LIMIT"
+        switch limit {
+        case .raw(let raw, _):
+            statement += raw
+        case .some(let some):
+            statement += "\(some.offset), \(some.count)"
         }
 
-        guard let dict = node.object else {
-            return nil
-        }
+        return statement.joined(separator: " ")
+    }
 
-        var clause: [String] = []
 
-        let values = Array(dict.values)
+    open func filters(_ f: [RawOr<Filter>]) -> (String, [Node]) {
+        var fragments: [String] = []
 
-        clause += sql(keys: Array(dict.keys))
-        clause += "VALUES"
-        clause += sql(values)
+        fragments += "WHERE"
+
+        let (clause, values) = filters(f, .and)
+
+        fragments += clause
 
         return (
-            sql(clause),
+            concatenate(fragments),
             values
         )
     }
 
-    open func sql(_ joins: [Join]) -> String {
-        var clause: [String] = []
+    open func filters(_ filters: [RawOr<Filter>], _ r: Filter.Relation) -> (String, [Node]) {
+        var fragments: [String] = []
+        var values: [Node] = []
 
-        for join in joins {
-            clause += sql(join)
+
+        var subFragments: [String] = []
+
+        for f in filters {
+            let (clause, subValues) = filter(f)
+            subFragments += clause
+            values += subValues
         }
 
-        return sql(clause)
-    }
+        fragments += subFragments.joined(separator: " \(relation(r)) ")
 
-    open func sql(_ join: Join) -> String {
-        var clause: [String] = []
-
-        clause += "JOIN"
-        clause += sql(join.joined.entity)
-        clause += "ON"
-
-        clause += "\(sql(join.base.entity)).\(sql(join.baseKey))"
-        clause += "="
-        clause += "\(sql(join.joined.entity)).\(sql(join.joinedKey))"
-
-        return sql(clause)
-    }
-
-    open func sql(update data: [String: Node]) -> (String, [Node]) {
         return (
-            data.map(sql).joined(separator: ", "),
-            Array(data.values)
+            concatenate(fragments),
+            values
         )
     }
 
-    open func sql(key: String, value: Node) -> String {
-        return sql(key) + " = " + sql(value)
+    open func relation(_ relation: Filter.Relation) -> String {
+        let word: String
+        switch relation {
+        case .and:
+            word = "AND"
+        case .or:
+            word = "OR"
+        }
+        return word
     }
 
-    open func sql(_ strings: [String]) -> String {
-        return strings.joined(separator: " ")
+    open func filter(_ f: RawOr<Filter>) -> (String, [Node]) {
+        switch f {
+        case .raw(let string, let values):
+            return (string, values)
+        case .some(let f):
+            return filter(f)
+        }
     }
 
-    open func sql(keys: [String]) -> String {
-        return sql(list: keys.map { sql($0) })
+    open func filter(_ filter: Filter) -> (String, [Node]) {
+        var statement: [String] = []
+        var values: [Node] = []
+
+        switch filter.method {
+        case .compare(let key, let c, let value):
+            // `.null` needs special handling in the case of `.equals` or `.notEquals`.
+            if c == .equals && value == .null {
+                statement += escape(filter.entity.entity) + "." + escape(key) + " IS NULL"
+            }
+            else if c == .notEquals && value == .null {
+                statement += escape(filter.entity.entity) + "." + escape(key) + " IS NOT NULL"
+            }
+            else {
+                statement += escape(filter.entity.entity) + "." + escape(key)
+                statement += comparison(c)
+                statement += "?"
+
+                /// `.like` comparison operator requires additional
+                /// processing of `value`
+                switch c {
+                case .hasPrefix:
+                    values += hasPrefix(value)
+                case .hasSuffix:
+                    values += hasSuffix(value)
+                case .contains:
+                    values += contains(value)
+                default:
+                    values += value
+                }
+            }
+        case .subset(let key, let s, let subValues):
+            statement += escape(filter.entity.entity) + "." + escape(key)
+            statement += scope(s)
+            statement += placeholders(subValues)
+            values += subValues
+        case .group(let relation, let f):
+            let (clause, subvals) = filters(f, relation)
+            statement += "(\(clause))"
+            values += subvals
+        }
+
+        return (
+            concatenate(statement),
+            values
+        )
     }
 
-    open func sql(list: [String]) -> String {
-        return "(" + list.joined(separator: ", ") + ")"
+    open func sorts(_ sorts: [RawOr<Sort>]) -> String {
+        var clause: [String] = []
+
+        clause += "ORDER BY"
+        
+        var fragments: [String] = []
+        sorts.forEach { sort in
+            switch sort {
+            case .raw(let raw, _):
+                fragments.append(raw)
+            case .some(let some):
+                fragments.append(self.sort(some))
+            }
+        }
+        clause.append(fragments.joined(separator: ", "))
+
+        return clause.joined(separator: " ")
     }
 
-    open func sql(_ values: [Node]) -> String {
-        return "(" + values.map { sql($0) }.joined(separator: ", ") + ")"
+    open func sort(_ sort: Sort) -> String {
+        var clause: [String] = []
+
+        clause += escape(sort.entity.entity) + "." + escape(sort.field)
+
+        switch sort.direction {
+        case .ascending:
+            clause += "ASC"
+        case .descending:
+            clause += "DESC"
+        }
+
+        return clause.joined(separator: " ")
     }
 
-    open func sql(_ value: Node) -> String {
+    open func comparison(_ comparison: Filter.Comparison) -> String {
+        switch comparison {
+        case .equals:
+            return "="
+        case .greaterThan:
+            return ">"
+        case .greaterThanOrEquals:
+            return ">="
+        case .lessThan:
+            return "<"
+        case .lessThanOrEquals:
+            return "<="
+        case .notEquals:
+            return "!="
+        case .hasSuffix:
+            fallthrough
+        case .hasPrefix:
+            fallthrough
+        case .contains:
+            return "LIKE"
+        case .custom(let string):
+            return string
+        }
+    }
+
+    open func hasPrefix(_ value: Node) -> Node {
+        guard let string = value.string else {
+            return value
+        }
+
+        return .string("\(string)%")
+    }
+
+    open func hasSuffix(_ value: Node) -> Node {
+        guard let string = value.string else {
+            return value
+        }
+
+        return .string("%\(string)")
+    }
+
+    open func contains(_ value: Node) -> Node {
+        guard let string = value.string else {
+            return value
+        }
+
+        return .string("%\(string)%")
+    }
+
+    open func scope(_ scope: Filter.Scope) -> String {
+        switch scope {
+        case .in:
+            return "IN"
+        case .notIn:
+            return "NOT IN"
+        }
+    }
+
+    open func joins(_ joins: [RawOr<Join>]) -> String {
+        var fragments: [String] = []
+
+        for j in joins {
+            fragments += join(j)
+        }
+
+        return concatenate(fragments)
+    }
+
+    open func join(_ rawOrJoin: RawOr<Join>) -> String {
+        switch rawOrJoin {
+        case .raw(let string, _):
+            return string
+        case .some(let j):
+            return join(j)
+        }
+    }
+
+    open func join(_ join: Join) -> String {
+        var fragments: [String] = []
+
+        fragments += "JOIN"
+        fragments += escape(join.joined.entity)
+        fragments += "ON"
+
+        fragments += "\(escape(join.base.entity)).\(escape(join.baseKey))"
+        fragments += "="
+        fragments += "\(escape(join.joined.entity)).\(escape(join.joinedKey))"
+
+        return concatenate(fragments)
+    }
+
+    // MARK: Convenience
+
+    open func concatenate(_ fragments: [String]) -> String {
+        return fragments.joined(separator: " ")
+    }
+
+    open func keys(_ keys: [RawOr<String>]) -> String {
+        let parsed: [String] = keys.map { key in
+            switch key {
+            case .raw(let raw, _):
+                return raw
+            case .some(let some):
+                return escape(some)
+            }
+        }
+        return list(parsed)
+    }
+
+    open func list(_ list: [String]) -> String {
+        let string = list.joined(separator: ", ")
+        return "(\(string))"
+    }
+
+    open func values(_ values: [RawOr<Node>]) -> (String, [Node]) {
+        var v: [Node] = []
+        
+        let parsed: [String] = values.map { value in
+            switch value {
+            case .raw(let string, _):
+                return string
+            case .some(let some):
+                v.append(some)
+                return placeholder(some)
+            }
+        }
+        
+        let string = parsed.joined(separator: ", ")
+        return (
+            "(" + string + ")",
+            v
+        )
+    }
+    
+    open func placeholders(_ values: [Node]) -> String {
+        let strings: [String] = values.map(placeholder)
+        return "(" + strings.joined(separator: ", ") + ")"
+    }
+
+    open func placeholder(_ value: Node) -> String {
         return "?"
     }
 
-    open func sql(_ columns: [Schema.Field]) -> String {
-        return "(" + columns.map { sql($0) }.joined(separator: ", ") + ")"
-    }
-
-    open func sql(_ string: String) -> String {
+    open func escape(_ string: String) -> String {
         return "`\(string)`"
     }
 }

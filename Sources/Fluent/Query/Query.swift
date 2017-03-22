@@ -6,24 +6,28 @@ public final class Query<E: Entity> {
 
     /// An array of filters to apply
     ///during the query's action.
-    public var filters: [Filter]
+    public var filters: [RawOr<Filter>]
 
     /// Optional data to be used during
-    ///`.create` or `.updated` actions.
-    public var data: Node?
+    ///`.create` or `.modify` actions.
+    public var data: [RawOr<String>: RawOr<Node>]
+    
+    /// Optional keys to access during
+    /// `.fetch` actions
+    public var keys: [RawOr<String>]
 
     /// Optionally limit the amount of
     /// entities affected by the action.
-    public var limit: Limit?
+    public var limits: [RawOr<Limit>]
 
     /// An array of sorts that will
     /// be applied to the results.
-    public var sorts: [Sort]
+    public var sorts: [RawOr<Sort>]
 
     /// An array of joins: other entities
     /// that will be queried during this query's
     /// execution.
-    public var joins: [Join]
+    public var joins: [RawOr<Join>]
 
     private(set) lazy var context: RowContext = {
         let context = RowContext()
@@ -42,8 +46,11 @@ public final class Query<E: Entity> {
         action = .fetch
         self.database = database
         joins = []
+        limits = []
         sorts = []
         includeSoftDeleted = false
+        data = [:]
+        keys = []
     }
 
     /// Performs the Query returning the raw

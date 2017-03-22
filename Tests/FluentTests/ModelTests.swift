@@ -24,13 +24,11 @@ class ModelTests: XCTestCase {
 
         XCTAssertTrue(atom.exists, "Model should exist after saving.")
 
-        let (sql, _) = GeneralSQLSerializer(sql: lqd.lastQuery!).serialize()
+        let (sql, _) = lqd.lastQuery!
         print(sql)
 
         atom.name = "bob"
         try atom.save()
-
-        let (_, _) = GeneralSQLSerializer(sql: lqd.lastQuery!).serialize()
 
         try atom.delete()
     }
@@ -40,17 +38,18 @@ class ModelTests: XCTestCase {
         let thing = StringIdentifiedThing()
         thing.id = "derp"
         
-        try! thing.save()
-        let saveQ = GeneralSQLSerializer(sql: lqd.lastQuery!).serialize()
-        XCTAssertEqual(saveQ.0, "INSERT INTO `string_identified_things` (`#id`) VALUES (?)")
-        XCTAssertEqual(saveQ.1, ["derp"])
+        try thing.save()
+        if let (sql, values) = lqd.lastQuery {
+            XCTAssertEqual(sql, "INSERT INTO `string_identified_things` (`#id`) VALUES (?)")
+            XCTAssertEqual(values, ["derp"])
+        }
         XCTAssertTrue(thing.exists)
         
-        _ = try! StringIdentifiedThing.find("derp")
-        let findQ = GeneralSQLSerializer(sql: lqd.lastQuery!).serialize()
-
-        XCTAssertEqual(findQ.0, "SELECT `string_identified_things`.* FROM `string_identified_things` WHERE `string_identified_things`.`#id` = ? LIMIT 0, 1")
-        XCTAssertEqual(findQ.1, ["derp"])
+        _ = try StringIdentifiedThing.find("derp")
+        if let (sql, values) = lqd.lastQuery {
+            XCTAssertEqual(sql, "SELECT `string_identified_things`.* FROM `string_identified_things` WHERE `string_identified_things`.`#id` = ? LIMIT 0, 1")
+            XCTAssertEqual(values, ["derp"])
+        }
     }
     
     func testCustomIdentifiedThings() throws {
@@ -59,18 +58,18 @@ class ModelTests: XCTestCase {
         let thing = CustomIdentifiedThing()
         thing.id = 123
 
-        try! thing.save()
-        let saveQ = GeneralSQLSerializer(sql: lqd.lastQuery!).serialize()
-        XCTAssertEqual(saveQ.0, "INSERT INTO `custom_identified_things` (`#id`) VALUES (?)")
-        XCTAssertEqual(saveQ.1, [123])
+        try thing.save()
+        if let (sql, values) = lqd.lastQuery {
+            XCTAssertEqual(sql, "INSERT INTO `custom_identified_things` (`#id`) VALUES (?)")
+            XCTAssertEqual(values, [123])
+
+        }
         XCTAssertTrue(thing.exists)
 
         _ = try CustomIdentifiedThing.find(123)
-        if let sql = lqd.lastQuery {
-            let findQ = GeneralSQLSerializer(sql: sql).serialize()
-
-            XCTAssertEqual(findQ.0, "SELECT `custom_identified_things`.* FROM `custom_identified_things` WHERE `custom_identified_things`.`#id` = ? LIMIT 0, 1")
-            XCTAssertEqual(findQ.1, [123])
+        if let (sql, values) = lqd.lastQuery {
+            XCTAssertEqual(sql, "SELECT `custom_identified_things`.* FROM `custom_identified_things` WHERE `custom_identified_things`.`#id` = ? LIMIT 0, 1")
+            XCTAssertEqual(values, [123])
         } else {
             XCTFail("No last query")
         }

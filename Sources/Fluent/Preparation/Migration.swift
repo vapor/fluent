@@ -14,7 +14,6 @@ final class Migration: Entity {
 
     func makeRow() throws -> Row {
         var row = Row()
-        try row.set(idKey, id)
         try row.set("name", name)
         return row
     }

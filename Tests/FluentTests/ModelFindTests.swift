@@ -48,9 +48,9 @@ class ModelFindTests: XCTestCase {
             self.driver = driver
         }
         
-        func query<T: Entity>(_ query: Query<T>) throws -> Node {
+        func query<E: Entity>(_ query: Query<E>) throws -> Node {
             if
-                let filter = query.filters.first,
+                let filter = query.filters.first?.wrapped,
                 case .compare(let key, let comparison, let value) = filter.method,
                 query.action == .fetch &&
                     query.filters.count == 1 &&
@@ -67,10 +67,6 @@ class ModelFindTests: XCTestCase {
             }
             
             return .array([])
-        }
-
-        func schema(_ builder: Schema) throws {
-            //
         }
 
         func raw(_ raw: String, _ values: [Node]) throws -> Node {

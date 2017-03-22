@@ -1,30 +1,30 @@
 extension Tester {
-    func setup() {
+    func setup() throws {
         Atom.database = database
-        try! Atom.prepare(database)
+        try Atom.prepare(database)
         Compound.database = database
-        try! Compound.prepare(database)
+        try Compound.prepare(database)
         Student.database = database
-        try! Student.prepare(database)
+        try Student.prepare(database)
 
         Pivot<Atom, Compound>.database = database
-        try! Pivot<Atom, Compound>.prepare(database)
+        try Pivot<Atom, Compound>.prepare(database)
         Pivot<Pivot<Atom, Compound>, Student>.database = database
-        try! Pivot<Pivot<Atom, Compound>, Student>.prepare(database)
+        try Pivot<Pivot<Atom, Compound>, Student>.prepare(database)
     }
 
-    func teardown() {
-        try! Atom.revert(database)
-        try! Compound.revert(database)
-        try! Student.revert(database)
+    func teardown() throws {
+        try Atom.revert(database)
+        try Compound.revert(database)
+        try Student.revert(database)
 
-        try! Pivot<Atom, Compound>.revert(database)
-        try! Pivot<Pivot<Atom, Compound>, Student>.revert(database)
+        try Pivot<Atom, Compound>.revert(database)
+        try Pivot<Pivot<Atom, Compound>, Student>.revert(database)
     }
 
     public func testPivotsAndRelations() throws {
-        setup()
-        defer { teardown() }
+        try setup()
+        defer { try! teardown() }
 
         let hydrogen = Atom(id: nil, name: "Hydrogen", protons: 1, weight: 1.007)
         try hydrogen.save()
@@ -61,8 +61,8 @@ extension Tester {
 
 
     public func testDoublePivot() throws {
-        setup()
-        defer { teardown() }
+        try setup()
+        defer { try? teardown() }
 
         let hydrogen = Atom(id: nil, name: "Hydrogen", protons: 1, weight: 1.007)
         try hydrogen.save()

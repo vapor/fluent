@@ -52,8 +52,8 @@ extension SQLiteDriverProtocol {
 
     /// Executes the query.
     @discardableResult
-    public func query<T: Entity>(_ query: Query<T>) throws -> Node {
-        let serializer = SQLiteSerializer(sql: query.sql)
+    public func query<E: Entity>(_ query: Query<E>) throws -> Node {
+        let serializer = SQLiteSerializer(query)
         let (statement, values) = serializer.serialize()
         let results = try database.execute(statement) { statement in
             try self.bind(statement: statement, to: values)
@@ -64,12 +64,6 @@ extension SQLiteDriverProtocol {
         } else {
             return map(results: results)
         }
-    }
-
-    public func schema(_ schema: Schema) throws {
-      let serializer = SQLiteSerializer(sql: schema.sql)
-      let (statement, values) = serializer.serialize()
-      try _ = raw(statement, values)
     }
 
     /// Executes a raw query with an

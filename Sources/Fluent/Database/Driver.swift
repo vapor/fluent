@@ -39,13 +39,8 @@ public protocol Driver: Executor {
 extension Driver {
     /// See Executor protocol.
     @discardableResult
-    public func query<T: Entity>(_ query: Query<T>) throws -> Node {
+    public func query<E: Entity>(_ query: Query<E>) throws -> Node {
         return try makeConnection().query(query)
-    }
-
-    /// See Executor protocol.
-    public func schema(_ schema: Schema) throws {
-        return try makeConnection().schema(schema)
     }
 
     /// See Executor protocol.

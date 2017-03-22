@@ -3,7 +3,7 @@ extension Tester {
         Compound.database = database
         try Compound.prepare(database)
         defer {
-            try? Compound.revert(database)
+            try! Compound.revert(database)
         }
 
         let ethanol = Compound(name: "Ethanol")

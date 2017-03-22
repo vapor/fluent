@@ -11,6 +11,7 @@ extension Filter {
         case hasSuffix
         case hasPrefix
         case contains
+        case custom(String)
     }
     
 }
@@ -43,4 +44,25 @@ func <= (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
 func != (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
     let node = try rhs.makeNode(in: rowContext)
     return .compare(lhs, .notEquals, node)
+}
+
+extension Filter.Comparison: Equatable {
+    public static func ==(lhs: Filter.Comparison, rhs: Filter.Comparison) -> Bool {
+        switch (lhs, rhs) {
+        case (.equals, .equals),
+             (.greaterThan, .greaterThan),
+             (.lessThan, .lessThan),
+             (.greaterThanOrEquals, .greaterThanOrEquals),
+             (.lessThanOrEquals, .lessThanOrEquals),
+             (.notEquals, .notEquals),
+             (.hasSuffix, .hasSuffix),
+             (.hasPrefix, .hasPrefix),
+             (.contains, .contains):
+            return true
+        case (.custom(let a), .custom(let b)):
+            return a == b
+        default:
+            return false
+        }
+    }
 }

@@ -9,31 +9,40 @@ class SchemaCreateTests: XCTestCase {
         ("testDelete", testDelete),
     ]
 
+    var db: Database!
+
+    override func setUp() {
+        let lqd = LastQueryDriver()
+        db = Database(lqd)
+    }
+
     func testCreate() throws {
-        let builder = Schema.Creator("users")
+        let builder = Creator()
 
         builder.int("id")
         builder.string("name")
         builder.string("email", length: 256)
         builder.custom("profile", type: "JSON")
 
-        let sql = builder.schema.sql
-        let serializer = GeneralSQLSerializer(sql: sql)
+        let query = Query<Atom>(db)
+        query.action = .schema(.create(builder.fields))
 
+        let serializer = GeneralSQLSerializer(query)
         let (statement, values) = serializer.serialize()
 
-        XCTAssertEqual(statement, "CREATE TABLE `users` (`id` INTEGER NOT NULL, `name` STRING NOT NULL, `email` STRING NOT NULL, `profile` JSON NOT NULL)")
+        XCTAssertEqual(statement, "CREATE TABLE `atoms` (`id` INTEGER NOT NULL, `name` STRING NOT NULL, `email` STRING NOT NULL, `profile` JSON NOT NULL)")
         XCTAssertEqual(values.count, 0)
     }
     
     
     func testStringIdentifiedEntity() throws {
-        let builder = Schema.Creator(StringIdentifiedThing.entity)
+        let builder = Creator()
         
         builder.id(for: StringIdentifiedThing.self)
-        
-        let sql = builder.schema.sql
-        let serializer = GeneralSQLSerializer(sql: sql)
+
+        let query = Query<StringIdentifiedThing>(db)
+        query.action = .schema(.create(builder.fields))
+        let serializer = GeneralSQLSerializer(query)
         
         let (statement, values) = serializer.serialize()
         
@@ -43,12 +52,13 @@ class SchemaCreateTests: XCTestCase {
  
     
     func testCustomIdentifiedEntity() throws {
-        let builder = Schema.Creator(CustomIdentifiedThing.entity)
+        let builder = Creator()
         
         builder.id(for: CustomIdentifiedThing.self)
         
-        let sql = builder.schema.sql
-        let serializer = GeneralSQLSerializer(sql: sql)
+        let query = Query<CustomIdentifiedThing>(db)
+        query.action = .schema(.create(builder.fields))
+        let serializer = GeneralSQLSerializer(query)
         
         let (statement, values) = serializer.serialize()
         
@@ -57,44 +67,46 @@ class SchemaCreateTests: XCTestCase {
     }
     
     func testStringDefault() throws {
-        let builder = Schema.Creator("table")
+        let builder = Creator()
         
         builder.string("string", default: "default")
         
-        let sql = builder.schema.sql
-        let serializer = GeneralSQLSerializer(sql: sql)
+        let query = Query<Atom>(db)
+        query.action = .schema(.create(builder.fields))
+        let serializer = GeneralSQLSerializer(query)
         
         let (statement, values) = serializer.serialize()
         
-        XCTAssertEqual(statement, "CREATE TABLE `table` (`string` STRING NOT NULL DEFAULT 'default')")
+        XCTAssertEqual(statement, "CREATE TABLE `atoms` (`string` STRING NOT NULL DEFAULT 'default')")
         XCTAssertEqual(values.count, 0)
     }
 
     func testModify() throws {
-        let builder = Schema.Modifier("users")
+        let builder = Modifier()
 
         builder.int("id")
         builder.string("name")
         builder.string("email", length: 256)
         builder.delete("age")
 
-        let sql = builder.schema.sql
-        let serializer = GeneralSQLSerializer(sql: sql)
+        let query = Query<Atom>(db)
+        query.action = .schema(.modify(add: builder.fields, remove: builder.delete))
+        let serializer = GeneralSQLSerializer(query)
 
         let (statement, values) = serializer.serialize()
 
-        XCTAssertEqual(statement, "ALTER TABLE `users` ADD `id` INTEGER NOT NULL, ADD `name` STRING NOT NULL, ADD `email` STRING NOT NULL, DROP `age`")
+        XCTAssertEqual(statement, "ALTER TABLE `atoms` ADD `id` INTEGER NOT NULL, ADD `name` STRING NOT NULL, ADD `email` STRING NOT NULL, DROP `age`")
         XCTAssertEqual(values.count, 0)
     }
 
     func testDelete() throws {
-        let schema = Schema.delete(entity: "users")
-        let sql = schema.sql
-        let serializer = GeneralSQLSerializer(sql: sql)
+        let query = Query<Atom>(db)
+        query.action = .schema(.delete)
+        let serializer = GeneralSQLSerializer(query)
 
         let (statement, values) = serializer.serialize()
 
-        XCTAssertEqual(statement, "DROP TABLE IF EXISTS `users`")
+        XCTAssertEqual(statement, "DROP TABLE IF EXISTS `atoms`")
         XCTAssertEqual(values.count, 0)
     }
 }

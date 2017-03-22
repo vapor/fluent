@@ -11,7 +11,14 @@ class RelationTests: XCTestCase {
 
     var memory: MemoryDriver!
     var database: Database!
-    let ents = [Atom.self, Proton.self, Nucleus.self, Group.self] as [(Entity & Preparation).Type]
+    let ents = [
+        Atom.self,
+        Proton.self,
+        Nucleus.self,
+        Group.self,
+        Compound.self,
+        Pivot<Atom, Compound>.self
+    ] as [(Entity & Preparation).Type]
 
     override func setUp() {
         memory = try! MemoryDriver()
@@ -73,7 +80,7 @@ class RelationTests: XCTestCase {
 
         do {
             let query = try hydrogen.children(type: Nucleus.self).makeQuery()
-            let (sql, _) = GeneralSQLSerializer(sql: query.sql).serialize()
+            let (sql, _) = GeneralSQLSerializer(query).serialize()
             print(sql)
         } catch {
             print(error)

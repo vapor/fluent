@@ -22,14 +22,17 @@ class QueryFiltersTests: XCTestCase {
 
         XCTAssert(query.action == .fetch, "Default action should be fetch")
         XCTAssert(query.filters.count == 0, "Filters should be empty")
-        XCTAssert(query.data == nil, "Data should be empty")
-        XCTAssert(query.limit == nil, "Limit should be empty")
+        XCTAssert(query.data.isEmpty == true, "Data should be empty")
+        XCTAssert(query.limits.isEmpty == true, "Limit should be empty")
     }
 
     func testBasicQuery() throws {
         let query = try DummyModel.query().filter("name", "Vapor")
 
-        guard let filter = query.filters.first, query.filters.count == 1 else {
+        guard
+            let filter = query.filters.first?.wrapped,
+            query.filters.count == 1
+        else {
             XCTFail("Should be one filter")
             return
         }
@@ -48,9 +51,9 @@ class QueryFiltersTests: XCTestCase {
         let query = try DummyModel.query().filter("name", .hasPrefix, "Vap")
 
         guard
-            let filter = query.filters.first,
-            query.filters.count == 1 else
-        {
+            let filter = query.filters.first?.wrapped,
+            query.filters.count == 1
+        else {
             XCTFail("Should be one filter")
             return
         }
@@ -92,7 +95,7 @@ class QueryFiltersTests: XCTestCase {
   
     func testLimitQuery() throws {
         let query = try DummyModel.query().limit(5)
-        XCTAssertEqual(query.limit?.count, 5)
+        XCTAssertEqual(query.limits.first?.wrapped?.count, 5)
     }
 
 }

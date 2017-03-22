@@ -8,10 +8,6 @@ extension Tester {
             try? Compound.revert(database)
         }
 
-        database.log = { query in
-            print(query)
-        }
-
         let ethanol = Compound(name: "Ethanol")
         let hcl = Compound(name: "Hydrochloric Acid")
         let methanol = Compound(name: "Methanol")

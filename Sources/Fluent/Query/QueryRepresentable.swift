@@ -68,7 +68,7 @@ extension QueryRepresentable {
     public func first() throws -> E? {
         let query = try makeQuery()
         query.action = .fetch
-        query.limit = Limit(count: 1)
+        try query.limit(1)
 
         let model = try query.all().first
 
@@ -120,7 +120,9 @@ extension QueryRepresentable {
         let query = try makeQuery()
 
         query.action = .create
-        query.data = try row.makeNode(in: query.context)
+        try row.makeNode(in: query.context).rawOrObject?.forEach { (key, value) in
+            query.data[key] = value
+        }
 
         let raw = try query.raw()
         return Identifier(raw)
@@ -199,11 +201,6 @@ extension QueryRepresentable {
     /// in the model's collection.
     public func delete() throws {
         let query = try makeQuery()
-
-        guard query.joins.count == 0 else {
-            throw QueryError.notSupported("Cannot perform delete on queries that contain joins. Delete the entities directly instead.")
-        }
-
         query.action = .delete
         try query.raw()
     }
@@ -244,7 +241,9 @@ extension QueryRepresentable {
         let query = try makeQuery()
 
         query.action = .modify
-        query.data = try row.makeNode(in: query.context)
+        try row.makeNode(in: query.context).rawOrObject?.forEach { (key, value) in
+            query.data[key] = value
+        }
 
         let idKey = E.idKey
         if let id = row?[idKey] {

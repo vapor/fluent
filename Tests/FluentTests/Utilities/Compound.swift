@@ -19,7 +19,9 @@ final class Compound: Entity {
         try row.set("name", name)
         return row
     }
+}
 
+extension Compound: Preparation {
     static func prepare(_ database: Fluent.Database) throws {
         try database.create(self) { builder in
             builder.id(for: self)

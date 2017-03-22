@@ -69,7 +69,9 @@ public final class Pivot<
         try row.set(Right.foreignIdKey, rightId)
         return row
     }
+}
 
+extension Pivot: Preparation {
     public static func prepare(_ database: Database) throws {
         try database.create(self) { builder in
             builder.id(for: self)

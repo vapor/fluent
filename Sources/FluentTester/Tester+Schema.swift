@@ -3,7 +3,7 @@ extension Tester {
         Student.database = database
         try Student.prepare(database)
         defer {
-            try? Student.revert(database)
+            try! Student.revert(database)
         }
         
         let bob = Student(
