@@ -36,11 +36,11 @@ class SQLSerializerTests: XCTestCase {
         XCTAssert(values.isEmpty)
     }
 
-    func testRegularSelect() {
+    func testRegularSelect() throws {
         let filter = Filter(User.self, .compare("age", .greaterThanOrEquals, 21))
         let query = Query<User>(db)
         query.filters.append(filter)
-        query.limit = Limit(count: 5)
+        try query.limit(5)
         let (statement, values) = serialize(query)
 
         XCTAssertEqual(statement, "SELECT `users`.* FROM `users` WHERE `users`.`age` >= ? LIMIT 0, 5")
@@ -48,11 +48,11 @@ class SQLSerializerTests: XCTestCase {
         XCTAssertEqual(values.count, 1)
     }
     
-    func testOffsetSelect() {
+    func testOffsetSelect() throws {
         let filter = Filter(User.self, .compare("age", .greaterThanOrEquals, 21))
         let query = Query<User>(db)
         query.filters.append(filter)
-        query.limit = Limit(count: 5, offset: 15)
+        try query.limit(5, offset: 15)
         let (statement, values) = serialize(query)
         
         XCTAssertEqual(statement, "SELECT `users`.* FROM `users` WHERE `users`.`age` >= ? LIMIT 15, 5")
@@ -145,7 +145,7 @@ class SQLSerializerTests: XCTestCase {
     func testFilterCompareUpdate() throws {
         let query = Query<User>(db)
         try query.filter("name", "duck")
-        query.data = ["not it": true]
+        query.data = [.some("not it"): .some(true)]
         query.action = .modify
         let (statement, values) = serialize(query)
 
@@ -184,7 +184,7 @@ class SQLSerializerTests: XCTestCase {
 
         let query = Query<User>(db)
         try query.filter(adult)
-        query.sorts.append(name)
+        try query.sort(name)
         let (statement, values) = serialize(query)
 
         XCTAssertEqual(statement, "SELECT `users`.* FROM `users` WHERE `users`.`age` > ? ORDER BY `users`.`name` ASC")
@@ -198,43 +198,11 @@ class SQLSerializerTests: XCTestCase {
 
         let query = Query<User>(db)
         try query.filter(adult)
-        query.sorts += [name, email]
+        try query.sort(name)
+        try query.sort(email)
         let (statement, values) = serialize(query)
 
         XCTAssertEqual(statement, "SELECT `users`.* FROM `users` WHERE `users`.`age` > ? ORDER BY `users`.`name` ASC, `users`.`email` DESC")
         XCTAssertEqual(values.count, 1)
-    }
-
-    func testRawFilter() throws {
-        let query = Query<User>(db)
-        try query.filter("name", "bob")
-        try query.filter(raw: "aGe ~~ ?", [22])
-
-        let (statement, values) = serialize(query)
-
-        XCTAssertEqual(statement, "SELECT `users`.* FROM `users` WHERE `users`.`name` = ? AND aGe ~~ ?")
-        XCTAssertEqual(values.count, 2)
-    }
-
-    func testRawJoinsAndFilters() throws {
-        let query = Query<Compound>(db)
-        try query.join(Atom.self)
-        try query.filter(Atom.self, "size", 42)
-        try query.filter(raw: "`foo`.aGe ~~ ?", [22])
-        try query.join(raw: "JOIN `foo` ON `users`.BAR !~ `foo`.🚀")
-
-        let (statement, values) = serialize(query)
-
-        XCTAssertEqual(statement, "SELECT `compounds`.* FROM `compounds` JOIN `atoms` ON `compounds`.`id` = `atoms`.`compound_id` JOIN `foo` ON `users`.BAR !~ `foo`.🚀 WHERE `atoms`.`size` = ? AND `foo`.aGe ~~ ?")
-        XCTAssertEqual(values.count, 2)
-    }
-}
-
-// MARK: Utilities
-
-extension SQLSerializerTests {
-    func serialize<E: Entity>(_ query: Query<E>) -> (String, [Node]) {
-        let serializer = GeneralSQLSerializer(query)
-        return serializer.serialize()
     }
 }

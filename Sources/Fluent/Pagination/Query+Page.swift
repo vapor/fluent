@@ -15,13 +15,10 @@ extension QueryRepresentable where E: Paginatable {
         let total = try query.count()
 
         // limit the query to the desired page
-        query.limit = Limit(
-            count: count,
-            offset: (page - 1) * count
-        )
-
+        try query.limit(count, offset: (page - 1) * count)
+        
         // add the sorts w/o replacing
-        query.sorts += sorts
+        _ = try sorts.map(query.sort)
 
         // fetch the data
         let data = try query.all()

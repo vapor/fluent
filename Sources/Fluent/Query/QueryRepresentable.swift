@@ -25,7 +25,7 @@ extension QueryRepresentable {
             }
         }
 
-        guard let array = try query.raw().typeArray else {
+        guard let array = try query.raw().array else {
             throw QueryError.invalidDriverResponse("Array required.")
         }
 
@@ -68,7 +68,7 @@ extension QueryRepresentable {
     public func first() throws -> E? {
         let query = try makeQuery()
         query.action = .fetch
-        query.limit = Limit(count: 1)
+        try query.limit(1)
 
         let model = try query.all().first
 
@@ -120,7 +120,9 @@ extension QueryRepresentable {
         let query = try makeQuery()
 
         query.action = .create
-        query.data = try row.makeNode(in: query.context)
+        try row.makeNode(in: query.context).rawOrObject?.forEach { (key, value) in
+            query.data[key] = value
+        }
 
         let raw = try query.raw()
         return Identifier(raw)
@@ -244,7 +246,9 @@ extension QueryRepresentable {
         let query = try makeQuery()
 
         query.action = .modify
-        query.data = try row.makeNode(in: query.context)
+        try row.makeNode(in: query.context).rawOrObject?.forEach { (key, value) in
+            query.data[key] = value
+        }
 
         let idKey = E.idKey
         if let id = row?[idKey] {

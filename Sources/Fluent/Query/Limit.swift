@@ -18,9 +18,18 @@ public struct Limit {
 extension QueryRepresentable {
     /// Limits the count of results returned
     /// by the `Query`.
-    public func limit(_ count: Int, withOffset offset: Int = 0) throws -> Query<E> {
+    @discardableResult
+    public func limit(_ count: Int, offset: Int = 0) throws -> Query<E> {
         let query = try makeQuery()
-        query.limit = Limit(count: count, offset: offset)
+        let limit = Limit(count: count, offset: offset)
+        try query.limit(limit)
+        return query
+    }
+    
+    @discardableResult
+    public func limit(_ limit: Limit) throws -> Query<E> {
+        let query = try makeQuery()
+        query.limits.append(.some(limit))
         return query
     }
 }

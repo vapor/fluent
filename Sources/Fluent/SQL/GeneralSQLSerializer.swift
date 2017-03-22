@@ -37,22 +37,21 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         statement += "INSERT INTO"
         statement += escape(E.entity)
 
-        let values: [Node]
+        let bind: [Node]
 
-        if let dict = query.data?.typeObject {
-            values = Array(dict.values)
-            let k = Array(dict.keys)
-
-            statement += keys(k)
+        if !query.data.isEmpty {
+            statement += keys(query.data.keys.array)
             statement += "VALUES"
-            statement += placeholders(values)
+            let (fragment, nodes) = values(query.data.values.array)
+            statement += fragment
+            bind = nodes
         } else {
-            values = []
+            bind = []
         }
 
         return (
             concatenate(statement),
-            values
+            bind
         )
     }
 
@@ -61,7 +60,21 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         var values: [Node] = []
 
         let table = escape(E.entity)
-        statement += "SELECT \(table).* FROM"
+        
+        var columns: [String] = ["\(table).*"]
+        
+        statement += "SELECT"
+        for key in query.keys {
+            switch key {
+            case .raw(let raw, _):
+                columns.append(raw)
+            case .some(let some):
+                columns.append(escape(some))
+            }
+        }
+        
+        statement += columns.joined(separator: ", ")
+        statement += "FROM"
         statement += table
 
         if !query.joins.isEmpty {
@@ -78,7 +91,7 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
             statement += sorts(query.sorts)
         }
 
-        if let l = query.limit {
+        if let l = query.limits.first {
             statement += limit(l)
         }
 
@@ -124,7 +137,7 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
             values += filtersValues
         }
 
-        if let l = query.limit {
+        if let l = query.limits.first {
             fragments += limit(l)
         }
 
@@ -143,20 +156,38 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         statement += escape(E.entity)
         statement += "SET"
 
-        if let data = query.data, let obj = data.typeObject {
+        if !query.data.isEmpty {
             var fragments: [String] = []
 
-            obj.forEach { (key, value) in
-                fragments += escape(key) + " = " + placeholder(value)
+            query.data.forEach { (key, value) in
+                let keyString: String
+                switch key {
+                case .raw(let raw, _):
+                    keyString = raw
+                case .some(let some):
+                    keyString = escape(some)
+                }
+                
+                
+                let valueString: String
+                switch value {
+                case .raw(let raw, _):
+                    valueString = raw
+                case .some(let some):
+                    valueString = placeholder(some)
+                    values.append(some)
+                }
+                fragments += keyString + " = " + valueString
             }
 
             statement += fragments.joined(separator: ", ")
-            values += Array(obj.values)
         }
 
-        let (filterclause, filterValues) = filters(query.filters)
-        statement += filterclause
-        values += filterValues
+        if !query.filters.isEmpty {
+            let (filterclause, filterValues) = filters(query.filters)
+            statement += filterclause
+            values += filterValues
+        }
 
         return (
             concatenate(statement),
@@ -295,11 +326,16 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
 
     // MARK: Query Types
 
-    open func limit(_ limit: Limit) -> String {
+    open func limit(_ limit: RawOr<Limit>) -> String {
         var statement: [String] = []
 
         statement += "LIMIT"
-        statement += "\(limit.offset), \(limit.count)"
+        switch limit {
+        case .raw(let raw, _):
+            statement += raw
+        case .some(let some):
+            statement += "\(some.offset), \(some.count)"
+        }
 
         return statement.joined(separator: " ")
     }
@@ -409,14 +445,21 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         )
     }
 
-    open func sorts(_ sorts: [Sort]) -> String {
+    open func sorts(_ sorts: [RawOr<Sort>]) -> String {
         var clause: [String] = []
 
         clause += "ORDER BY"
-
-        clause += sorts
-            .map(sort)
-            .joined(separator: ", ")
+        
+        var fragments: [String] = []
+        sorts.forEach { sort in
+            switch sort {
+            case .raw(let raw, _):
+                fragments.append(raw)
+            case .some(let some):
+                fragments.append(self.sort(some))
+            }
+        }
+        clause.append(fragments.joined(separator: ", "))
 
         return clause.joined(separator: " ")
     }
@@ -533,8 +576,16 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         return fragments.joined(separator: " ")
     }
 
-    open func keys(_ keys: [String]) -> String {
-        return list(keys.map { escape($0) })
+    open func keys(_ keys: [RawOr<String>]) -> String {
+        let parsed: [String] = keys.map { key in
+            switch key {
+            case .raw(let raw, _):
+                return raw
+            case .some(let some):
+                return escape(some)
+            }
+        }
+        return list(parsed)
     }
 
     open func list(_ list: [String]) -> String {
@@ -542,11 +593,29 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         return "(\(string))"
     }
 
+    open func values(_ values: [RawOr<Node>]) -> (String, [Node]) {
+        var v: [Node] = []
+        
+        let parsed: [String] = values.map { value in
+            switch value {
+            case .raw(let string, _):
+                return string
+            case .some(let some):
+                v.append(some)
+                return placeholder(some)
+            }
+        }
+        
+        let string = parsed.joined(separator: ", ")
+        return (
+            "(" + string + ")",
+            v
+        )
+    }
+    
     open func placeholders(_ values: [Node]) -> String {
-        let string = values.map { value in
-            return placeholder(value)
-        }.joined(separator: ", ")
-        return "(\(string))"
+        let strings: [String] = values.map(placeholder)
+        return "(" + strings.joined(separator: ", ") + ")"
     }
 
     open func placeholder(_ value: Node) -> String {

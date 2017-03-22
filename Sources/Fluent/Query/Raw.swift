@@ -14,6 +14,39 @@ extension RawOr {
     }
 }
 
+extension RawOr: Hashable {
+    public var hashValue: Int {
+        switch self {
+        case .raw(let string, _):
+            return string.hashValue
+        case .some(let wrapped):
+            return "\(wrapped)".hashValue
+        }
+    }
+    
+    public static func ==(lhs: RawOr, rhs: RawOr) -> Bool {
+        return lhs.hashValue == rhs.hashValue
+    }
+}
+
+extension Node {
+    internal var rawOrObject: [RawOr<String>: RawOr<Node>]? {
+        guard let object = self.object else {
+            return nil
+        }
+        
+        var rawOrObject: [RawOr<String>: RawOr<Node>] = [:]
+        
+        for (key, value) in object {
+            let rawOrKey = RawOr<String>.some(key)
+            let rawOrValue = RawOr<Node>.some(value)
+            rawOrObject[rawOrKey] = rawOrValue
+        }
+        
+        return rawOrObject
+    }
+}
+
 // MARK: Filter
 
 extension QueryRepresentable {
@@ -72,5 +105,45 @@ extension RawOr: CustomStringConvertible {
         case .some(let wrapped):
             return "\(wrapped)"
         }
+    }
+}
+
+// MARK: Key
+
+extension QueryRepresentable {
+    @discardableResult
+    public func set(raw rawKey: String, equals rawValue: String) throws -> Query<E> {
+        let query = try makeQuery()
+        query.data[.raw(rawKey, [])] = .raw(rawValue, [])
+        return query
+    }
+    
+    @discardableResult
+    public func get(raw rawKey: String) throws -> Query<E> {
+        let query = try makeQuery()
+        query.keys.append(.raw(rawKey, []))
+        return query
+    }
+}
+
+// MARK: Sort
+
+extension QueryRepresentable {
+    @discardableResult
+    public func sort(raw: String) throws -> Query<E> {
+        let query = try makeQuery()
+        query.sorts.append(.raw(raw, []))
+        return query
+    }
+}
+
+// MARK: Limit
+
+extension QueryRepresentable {
+    @discardableResult
+    public func limit(raw: String) throws -> Query<E> {
+        let query = try makeQuery()
+        query.limits.append(.raw(raw, []))
+        return query
     }
 }
