@@ -63,11 +63,10 @@ class RawTests: XCTestCase {
     func testRawSet() throws {
         let query = Query<Compound>(db)
         try query.set(raw: "id", equals: "UUID()")
-        query.data[.some("name")] = RawOr<Node>.some("vapor")
         query.action = .modify
         let (statement, values) = serialize(query)
-        XCTAssertEqual(statement, "UPDATE `compounds` SET id = UUID(), `name` = ?")
-        XCTAssertEqual(values.count, 1)
+        XCTAssertEqual(statement, "UPDATE `compounds` SET id = UUID()")
+        XCTAssertEqual(values.count, 0)
     }
     
     func testRawGet() throws {
