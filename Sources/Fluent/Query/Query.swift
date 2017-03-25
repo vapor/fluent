@@ -38,6 +38,11 @@ public final class Query<E: Entity> {
     /// If true, soft deleted entities will be 
     /// included (given the Entity type is SoftDeletable)
     internal var includeSoftDeleted: Bool
+    
+    /// If true, uses appropriate distinct modifiers
+    /// on fetch and counts to return only distinct
+    /// results for this query.
+    public var distinct: Bool
 
     /// Creates a new `Query` with the
     /// `Model`'s database.
@@ -48,6 +53,7 @@ public final class Query<E: Entity> {
         joins = []
         limits = []
         sorts = []
+        distinct = false
         includeSoftDeleted = false
         data = [:]
         keys = []

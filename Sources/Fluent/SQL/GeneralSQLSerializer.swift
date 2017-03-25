@@ -64,6 +64,10 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         var columns: [String] = ["\(table).*"]
         
         statement += "SELECT"
+        if query.distinct {
+            statement += "DISTINCT"
+        }
+        
         for key in query.keys {
             switch key {
             case .raw(let raw, _):
@@ -105,7 +109,11 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         var statement: [String] = []
         var values: [Node] = []
 
-        statement += "SELECT COUNT(*) as _fluent_count FROM"
+        statement += "SELECT"
+        if query.distinct {
+            statement += "DISTINCT"
+        }
+        statement += "COUNT(*) as _fluent_count FROM"
         statement += escape(E.entity)
 
         if !query.joins.isEmpty {

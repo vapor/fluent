@@ -4,11 +4,13 @@ import XCTest
 class SQLSerializerTests: XCTestCase {
     static let allTests = [
         ("testBasicSelect", testBasicSelect),
+        ("testDistinctSelect", testDistinctSelect),
         ("testRegularSelect", testRegularSelect),
         ("testOffsetSelect", testOffsetSelect),
         ("testFilterCompareSelect", testFilterCompareSelect),
         ("testFilterLikeSelect", testFilterLikeSelect),
         ("testBasicCount", testBasicCount),
+        ("testDistinctCount", testDistinctCount),
         ("testRegularCount", testRegularCount),
         ("testFilterCompareCount", testFilterCompareCount),
         ("testFilterLikeCount", testFilterLikeCount),
@@ -33,6 +35,15 @@ class SQLSerializerTests: XCTestCase {
         let (statement, values) = serialize(query)
 
         XCTAssertEqual(statement, "SELECT `atoms`.* FROM `atoms`")
+        XCTAssert(values.isEmpty)
+    }
+    
+    func testDistinctSelect() {
+        let query = Query<Atom>(db)
+        query.distinct = true
+        let (statement, values) = serialize(query)
+        
+        XCTAssertEqual(statement, "SELECT DISTINCT `atoms`.* FROM `atoms`")
         XCTAssert(values.isEmpty)
     }
 
@@ -81,13 +92,22 @@ class SQLSerializerTests: XCTestCase {
         XCTAssertEqual(values.count, 1)
     }
 
-
     func testBasicCount() {
         let query = Query<User>(db)
         query.action = .count
         let (statement, values) = serialize(query)
 
         XCTAssertEqual(statement, "SELECT COUNT(*) as _fluent_count FROM `users`")
+        XCTAssert(values.isEmpty)
+    }
+    
+    func testDistinctCount() {
+        let query = Query<User>(db)
+        query.action = .count
+        query.distinct = true
+        let (statement, values) = serialize(query)
+        
+        XCTAssertEqual(statement, "SELECT DISTINCT COUNT(*) as _fluent_count FROM `users`")
         XCTAssert(values.isEmpty)
     }
 
