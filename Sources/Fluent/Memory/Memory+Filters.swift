@@ -58,14 +58,15 @@ extension Node {
         case .compare(let key, let comparison, let val):
             switch comparison {
             case .equals:
-                if
-                    let value = self[key]?.string,
-                    let val = val.string,
-                    val == value
-                {
+                if val == Node.null,
+                    self[key] == val {
                     return true
                 }
-
+                if let value = self[key]?.string,
+                    let val = val.string,
+                    val == value {
+                    return true
+                }
                 return false
             case .contains:
                 if let value = self[key]?.string,
@@ -119,7 +120,13 @@ extension Node {
                 }
                 return false
             case .notEquals:
-                if self[key] != val {
+                if val == Node.null,
+                    self[key] != val {
+                    return true
+                }
+                if let value = self[key]?.string,
+                    let val = val.string,
+                    value != val {
                     return true
                 }
                 return false
