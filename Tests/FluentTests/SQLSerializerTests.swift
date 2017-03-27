@@ -236,4 +236,45 @@ class SQLSerializerTests: XCTestCase {
         XCTAssertEqual(statement, "DELETE `compounds` FROM `compounds` JOIN `atoms` ON `compounds`.`id` = `atoms`.`compound_id` WHERE `atoms`.`name` = ?")
         XCTAssertEqual(values.count, 1)
     }
+
+    func testNull() throws {
+        let query = Query<Compound>(db)
+        let string: String? = nil
+        try query.filter("foo", string)
+        let (statement, values) = serialize(query)
+        XCTAssertEqual(statement, "SELECT `compounds`.* FROM `compounds` WHERE `compounds`.`foo` IS NULL")
+        XCTAssertEqual(values.count, 0)
+    }
+
+    func testNotNull() throws {
+        let query = Query<Compound>(db)
+        let string: String? = nil
+        try query.filter("foo", .notEquals, string)
+        let (statement, values) = serialize(query)
+        XCTAssertEqual(statement, "SELECT `compounds`.* FROM `compounds` WHERE `compounds`.`foo` IS NOT NULL")
+        XCTAssertEqual(values.count, 0)
+    }
+
+    func testNodeNull() throws {
+        let query = Query<Compound>(db)
+        try query.filter("foo", Node.null)
+        let (statement, values) = serialize(query)
+        XCTAssertEqual(statement, "SELECT `compounds`.* FROM `compounds` WHERE `compounds`.`foo` IS NULL")
+        XCTAssertEqual(values.count, 0)
+    }
+
+    func testPlainNil() throws {
+        let query = Query<Compound>(db)
+        try query.filter("foo", nil)
+        let (statement, values) = serialize(query)
+        XCTAssertEqual(statement, "SELECT `compounds`.* FROM `compounds` WHERE `compounds`.`foo` IS NULL")
+        XCTAssertEqual(values.count, 0)
+    }
 }
+
+
+
+
+
+
+

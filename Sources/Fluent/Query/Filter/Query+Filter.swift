@@ -15,10 +15,10 @@ extension QueryRepresentable {
         _ entity: T.Type,
         _ field: String,
         _ comparison: Filter.Comparison,
-        _ value: NodeRepresentable
+        _ value: NodeRepresentable?
     ) throws -> Query<Self.E> {
         let query = try makeQuery()
-        let value = try value.makeNode(in: query.context)
+        let value = try value?.makeNode(in: query.context) ?? .null
         let filter = Filter(entity, .compare(field, comparison, value))
         return try query.filter(filter)
     }
@@ -28,7 +28,7 @@ extension QueryRepresentable {
     public func filter<T: Entity>(
         _ entity: T.Type,
         _ field: String,
-        _ value: NodeRepresentable
+        _ value: NodeRepresentable?
     ) throws -> Query<Self.E> {
         return try makeQuery()
             .filter(entity, field, .equals, value)
@@ -39,7 +39,7 @@ extension QueryRepresentable {
     public func filter(
         _ field: String,
         _ comparison: Filter.Comparison,
-        _ value: NodeRepresentable
+        _ value: NodeRepresentable?
     ) throws -> Query<Self.E> {
         return try makeQuery()
             .filter(E.self, field, comparison, value)
@@ -49,7 +49,7 @@ extension QueryRepresentable {
     @discardableResult
     public func filter(
         _ field: String,
-        _ value: NodeRepresentable
+        _ value: NodeRepresentable?
     ) throws -> Query<Self.E> {
         return try makeQuery()
             .filter(field, .equals, value)

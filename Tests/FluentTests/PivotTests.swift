@@ -22,15 +22,17 @@ class PivotTests: XCTestCase {
 
         try atom.compounds.add(compound)
 
-        guard let (sql, _) = lqd.lastQuery else {
+        guard let (sql, values) = lqd.lastQuery else {
             XCTFail("No query recorded")
             return
         }
 
         XCTAssertEqual(
             sql,
-            "INSERT INTO `atom_compound` (`\(Atom.foreignIdKey)`, `\(Compound.foreignIdKey)`) VALUES (?, ?)"
+            "INSERT INTO `atom_compound` (`\(Pivot<Atom, Compound>.idKey)`, `\(Atom.foreignIdKey)`, `\(Compound.foreignIdKey)`) VALUES (?, ?, ?)"
         )
+
+        XCTAssertEqual(values.count, 3)
     }
 
     static let allTests = [
