@@ -24,6 +24,7 @@ class QueryFiltersTests: XCTestCase {
         XCTAssert(query.filters.count == 0, "Filters should be empty")
         XCTAssert(query.data.isEmpty == true, "Data should be empty")
         XCTAssert(query.limits.isEmpty == true, "Limit should be empty")
+        XCTAssert(query.distinct == false, "Distinct should be false")
     }
 
     func testBasicQuery() throws {
@@ -98,4 +99,8 @@ class QueryFiltersTests: XCTestCase {
         XCTAssertEqual(query.limits.first?.wrapped?.count, 5)
     }
 
+    func testDistinctQuery() throws {
+        let query = try DummyModel.query().distinct()
+        XCTAssert(query.distinct)
+    }
 }
