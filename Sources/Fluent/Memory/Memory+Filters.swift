@@ -119,9 +119,7 @@ extension Node {
                 }
                 return false
             case .notEquals:
-                if let value = self[key]?.string,
-                    let val = val.string,
-                    value != val {
+                if self[key] != val {
                     return true
                 }
                 return false
