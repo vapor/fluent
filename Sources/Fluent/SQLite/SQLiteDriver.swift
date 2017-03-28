@@ -53,6 +53,14 @@ extension SQLiteDriverProtocol {
     /// Executes the query.
     @discardableResult
     public func query<E: Entity>(_ query: Query<E>) throws -> Node {
+        if
+            case .schema(let schema) = query.action,
+            case .modify(let add, let drop) = schema,
+            (add.count + drop.count) > 1
+        {
+            throw SQLiteDriverError.unsupported("SQLite does not support more than one ADD/DROP action per ALTER. Try splitting your modifications into separate queries. Attempted to ADD \(add.count) columns and DROP \(drop.count) columns.")
+        }
+
         let serializer = SQLiteSerializer(query)
         let (statement, values) = serializer.serialize()
         let results = try database.execute(statement) { statement in
