@@ -14,7 +14,7 @@ class LastQueryDriver: Driver {
 }
 
 struct LastQueryConnection: Connection {
-    public var closed: Bool = false
+    public var isClosed: Bool = false
     
     var driver: LastQueryDriver
     
