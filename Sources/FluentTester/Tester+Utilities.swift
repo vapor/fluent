@@ -18,7 +18,7 @@ extension Tester {
 
         for a2 in a2 {
             if !a1_ids.contains(a2.id ?? -1) {
-                throw Error.failed("\(E.self) array does not contain entity with id: \(a2.id)")
+                throw Error.failed("\(E.self) array does not contain entity with id: \(String(describing: a2.id))")
             }
         }
     }
