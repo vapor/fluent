@@ -2,7 +2,7 @@
 
 # Fluent
 
-![Swift](http://img.shields.io/badge/swift-3.0-brightgreen.svg)
+![Swift](http://img.shields.io/badge/swift-3.1-brightgreen.svg)
 [![Build Status](https://travis-ci.org/vapor/fluent.svg?branch=master)](https://travis-ci.org/vapor/fluent)
 [![CircleCI](https://circleci.com/gh/vapor/fluent.svg?style=shield)](https://circleci.com/gh/vapor/fluent)
 [![Code Coverage](https://codecov.io/gh/vapor/fluent/branch/master/graph/badge.svg)](https://codecov.io/gh/vapor/fluent)
@@ -15,7 +15,7 @@ This repository is the framework's source code. To view a sample project, check 
 
 Clone the [Example](https://github.com/vapor/fluent-example) project to start making your application. If you are also looking for a web server, check out [Vapor](https://github.com/vapor/vapor). It was built to work well with Fluent.
 
-You must have Swift 3 or later installed. You can learn more about Swift 3 at [Swift.org](http://swift.org).
+You must have Swift 3.1 or later installed. You can learn more about Swift 3.1 at [Swift.org](http://swift.org).
 
 ## 📖 Documentation
 
