@@ -111,7 +111,7 @@ public final class ThreadConnectionPool {
 
     private func clearClosedConnections() {
         connections.forEach { thread, connection in
-            guard connection.closed else { return }
+            guard connection.isClosed else { return }
             connections[thread] = nil
         }
     }

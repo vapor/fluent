@@ -189,7 +189,7 @@ class TestSchemaDriver: Driver {
 }
 
 struct TestSchemaConnection: Connection {
-    public var closed: Bool = false
+    public var isClosed: Bool = false
     
     var driver: TestSchemaDriver
     

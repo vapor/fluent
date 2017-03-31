@@ -45,7 +45,7 @@ extension SQLiteDriverProtocol {
         return .snake_case
     }
 
-    public var closed: Bool {
+    public var isClosed: Bool {
         // TODO: FIXME
         return false
     }

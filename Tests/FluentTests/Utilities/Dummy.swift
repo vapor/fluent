@@ -29,7 +29,7 @@ class DummyDriver: Driver {
 }
 
 class DummyConnection: Connection {
-    public var closed: Bool = false
+    public var isClosed: Bool = false
 
     func query<E: Entity>(_ query: Query<E>) throws -> Node {
         if query.action == .count {
