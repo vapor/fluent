@@ -1,8 +1,8 @@
 extension QueryRepresentable where E: Paginatable {
     public func paginate(
         page: Int,
-        count: Int = E.pageSize,
-        _ sorts: [Sort] = E.pageSorts
+        count: Int = E.defaultPageSize,
+        _ sorts: [Sort] = E.defaultPageSorts
     ) throws -> Page<E> {
         guard page > 0 else {
             throw PaginationError.invalidPageNumber(page)

@@ -35,11 +35,11 @@ public final class Compound: Entity {
 }
 
 extension Compound: Paginatable {
-    public static var pageSize: Int {
+    public static var defaultPageSize: Int {
         return 2
     }
 
-    public static var pageSorts: [Sort] {
+    public static var defaultPageSorts: [Sort] {
         return [
             Sort(self, "name", .ascending)
         ]
