@@ -87,6 +87,7 @@ public final class ThreadConnectionPool {
                 connection = existing
                 return
             }
+            connections[threadId] = nil
 
             // Attempt to make space if possible
             if connections.keys.count >= maxConnections { clearClosedConnections() }
