@@ -59,6 +59,8 @@ class JoinTests: XCTestCase {
 
         do {
             _ = try atom.compounds.all()
+        } catch {
+            // pass
         }
 
         if let (sql, values) = lqd.lastQuery {

@@ -468,9 +468,16 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
             statement += placeholders(subValues)
             values += subValues
         case .group(let relation, let f):
-            let (clause, subvals) = filters(f, relation)
-            statement += "(\(clause))"
-            values += subvals
+            if f.count == 0 {
+                // empty subqueries should result
+                // to false to protect unfiltered data
+                // from being returned
+                statement += "false"
+            } else {
+                let (clause, subvals) = filters(f, relation)
+                statement += "(\(clause))"
+                values += subvals
+            }
         }
 
         return (

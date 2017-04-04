@@ -36,9 +36,10 @@ extension Parent: QueryRepresentable {
 
 extension Entity {
     public func parent<P: Entity>(
-        id parentId: Identifier,
+        id parentId: Identifier?,
         type parentType: P.Type = P.self
     ) -> Parent<Self, P> {
-        return Parent(from: self, withId: parentId)
+        let id = parentId ?? Identifier(.null)
+        return Parent(from: self, withId: id)
     }
 }
