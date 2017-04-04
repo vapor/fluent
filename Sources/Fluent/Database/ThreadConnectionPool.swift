@@ -65,7 +65,10 @@ public final class ThreadConnectionPool {
         //
         //  It shouldn't happen that two calls come on same thread anyways, but
         //  in the interest of 'just in case'
-        guard let existing = connections[ThreadConnectionPool.threadId] else { return try makeNewConnection() }
+        guard
+            let existing = connections[ThreadConnectionPool.threadId],
+            !existing.isClosed
+            else { return try makeNewConnection() }
         return existing
     }
 
@@ -80,10 +83,11 @@ public final class ThreadConnectionPool {
             //
             //  Likely redundant, but beneficial for safety.
             //
-            if let existing = connections[threadId] {
+            if let existing = connections[threadId], !existing.isClosed {
                 connection = existing
                 return
             }
+            connections[threadId] = nil
 
             // Attempt to make space if possible
             if connections.keys.count >= maxConnections { clearClosedConnections() }
