@@ -107,18 +107,18 @@ extension Entity {
     }
 
     /// Returns all entities for this `Model`.
-    public static func all(_ executor: Executor? = nil) throws -> [Self] {
-        return try Self.makeQuery(executor).all()
+    public static func all() throws -> [Self] {
+        return try Self.makeQuery().all()
     }
 
     /// Returns all entities for this `Model`.
-    public static func count(_ executor: Executor? = nil) throws -> Int {
-        return try Self.makeQuery(executor).count()
+    public static func count() throws -> Int {
+        return try Self.makeQuery().count()
     }
 
     /// Finds the entity with the given `id`.
-    public static func find(_ id: NodeRepresentable, _ executor: Executor? = nil) throws -> Self? {
-        return try Self.makeQuery(executor).find(id)
+    public static func find(_ id: NodeRepresentable) throws -> Self? {
+        return try Self.makeQuery().find(id)
     }
 }
 
