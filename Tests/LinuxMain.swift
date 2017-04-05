@@ -14,6 +14,7 @@ XCTMain([
     testCase(SQLSerializerTests.allTests),
     testCase(JoinTests.allTests),
     testCase(MemoryBenchmarkTests.allTests)
+    testCase(SQLiteTests.allTests)
 ])
 
 #endif
