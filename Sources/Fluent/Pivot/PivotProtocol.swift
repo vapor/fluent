@@ -29,7 +29,7 @@ extension PivotProtocol where Self: Entity {
         let leftId = try left.assertExists()
         let rightId = try right.assertExists()
 
-        let results = try query()
+        let results = try makeQuery()
             .filter(type(of: left).foreignIdKey, leftId)
             .filter(type(of: right).foreignIdKey, rightId)
             .first()
@@ -58,7 +58,7 @@ extension PivotProtocol where Self: Entity {
         let leftId = try left.assertExists()
         let rightId = try right.assertExists()
 
-        try query()
+        try makeQuery()
             .filter(Left.foreignIdKey, leftId)
             .filter(Right.foreignIdKey, rightId)
             .delete()

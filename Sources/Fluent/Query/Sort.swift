@@ -23,7 +23,7 @@ public struct Sort {
     }
 }
 
-extension QueryRepresentable {
+extension QueryRepresentable where Self: ExecutorRepresentable {
     /// Add a Sort to the Query.
     /// See Sort for more information.
     @discardableResult

@@ -1,6 +1,6 @@
 public typealias QueryClosure<E: Entity> = (Query<E>) throws -> ()
 
-extension QueryRepresentable {
+extension QueryRepresentable where Self: ExecutorRepresentable {
     /// Grouped filter closure with specified relation.
     @discardableResult
     public func group(
@@ -9,7 +9,7 @@ extension QueryRepresentable {
     ) throws -> Query<E> {
         let main = try makeQuery()
 
-        let sub = Query<E>(main.database)
+        let sub = Query<E>(main.executor)
         try closure(sub)
 
         let group = Filter(E.self, .group(relation, sub.filters))

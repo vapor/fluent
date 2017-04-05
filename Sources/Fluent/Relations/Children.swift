@@ -19,12 +19,18 @@ public final class Children<
 }
 
 extension Children: QueryRepresentable {
-    public func makeQuery() throws -> Query<Child> {
+    public func makeQuery(_ executor: Executor) throws -> Query<Child> {
         guard let parentId = parent.id else {
             throw RelationError.idRequired(parent)
         }
 
-        return try Child.query().filter(Parent.foreignIdKey == parentId)
+        return try Child.makeQuery().filter(Parent.foreignIdKey == parentId)
+    }
+}
+
+extension Children: ExecutorRepresentable {
+    public func makeExecutor() throws -> Executor {
+        return try Child.makeExecutor()
     }
 }
 

@@ -15,7 +15,7 @@ public struct Limit {
     }
 }
 
-extension QueryRepresentable {
+extension QueryRepresentable where Self: ExecutorRepresentable {
     /// Limits the count of results returned
     /// by the `Query`.
     @discardableResult

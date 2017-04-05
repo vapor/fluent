@@ -65,6 +65,21 @@ public protocol Entity: class, RowConvertible, Storable {
     func didDelete()
 }
 
+extension Entity {
+    //// Creates a `Query` instance for this `Model`.
+    public static func makeQuery(_ executor: Executor? = nil) throws -> Query<Self> {
+        let executor = try executor ?? makeExecutor()
+        return Query(executor)
+    }
+    
+    public static func makeExecutor() throws -> Executor {
+        guard let db = database else {
+            throw EntityError.noDatabase(self)
+        }
+        return db
+    }
+}
+
 // MARK: Optional
 
 extension Entity {
@@ -81,37 +96,29 @@ extension Entity {
 extension Entity {
     /// Persists the entity into the
     /// data store and sets the `id` property.
-    public func save() throws {
-        try Self.query().save(self)
+    public func save(_ executor: Executor? = nil) throws {
+        try Self.makeQuery(executor).save(self)
     }
 
     /// Deletes the entity from the data
     /// store if the `id` property is set.
-    public func delete() throws {
-        try Self.query().delete(self)
+    public func delete(_ executor: Executor? = nil) throws {
+        try Self.makeQuery(executor).delete(self)
     }
 
     /// Returns all entities for this `Model`.
     public static func all() throws -> [Self] {
-        return try Self.query().all()
+        return try Self.makeQuery().all()
     }
 
     /// Returns all entities for this `Model`.
     public static func count() throws -> Int {
-        return try Self.query().count()
+        return try Self.makeQuery().count()
     }
 
     /// Finds the entity with the given `id`.
     public static func find(_ id: NodeRepresentable) throws -> Self? {
-        return try Self.query().find(id)
-    }
-
-    //// Creates a `Query` instance for this `Model`.
-    public static func query() throws -> Query<Self> {
-        guard let db = database else {
-            throw EntityError.noDatabase(self)
-        }
-        return Query(db)
+        return try Self.makeQuery().find(id)
     }
 }
 

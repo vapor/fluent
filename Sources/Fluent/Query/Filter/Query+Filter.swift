@@ -1,4 +1,4 @@
-extension QueryRepresentable {
+extension QueryRepresentable where Self: ExecutorRepresentable {
     /// Manually create and append filter
     @discardableResult
     public func filter(

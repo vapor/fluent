@@ -36,7 +36,7 @@ extension Tester {
             throw Error.failed("Soft deleted should be fetchable by id")
         }
 
-        guard try Compound.query().filter("name", "Water").all().count == 0 else {
+        guard try Compound.makeQuery().filter("name", "Water").all().count == 0 else {
             throw Error.failed("Soft deleted should not be fetchable by query")
         }
 

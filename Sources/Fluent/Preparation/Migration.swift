@@ -29,3 +29,5 @@ final class Migration: Entity {
         try database.delete(self)
     }
 }
+
+extension Migration: Timestampable {}

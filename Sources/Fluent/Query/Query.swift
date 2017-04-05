@@ -31,7 +31,7 @@ public final class Query<E: Entity> {
 
     private(set) lazy var context: RowContext = {
         let context = RowContext()
-        context.database = self.database
+        // context.database = self.database
         return context
     }()
 
@@ -46,10 +46,10 @@ public final class Query<E: Entity> {
 
     /// Creates a new `Query` with the
     /// `Model`'s database.
-    public init(_ database: Database) {
+    public init(_ executor: Executor) {
         filters = []
         action = .fetch
-        self.database = database
+        self.executor = executor
         joins = []
         limits = []
         sorts = []
@@ -63,19 +63,25 @@ public final class Query<E: Entity> {
     /// Node data from the driver.
     @discardableResult
     public func raw() throws -> Node {
-        return try database.query(.some(self))
+        return try executor.query(.some(self))
     }
+    
+    public let executor: Executor
 
     //MARK: Internal
 
     /// The database to which the query
     /// should be sent.
-    internal let database: Database
+    // internal let database: Database
 }
 
-extension Query: QueryRepresentable {
+extension Query: QueryRepresentable, ExecutorRepresentable {
     /// Conformance to `QueryRepresentable`
-    public func makeQuery() -> Query<E> {
+    public func makeQuery(_ executor: Executor) -> Query<E> {
         return self
+    }
+    
+    public func makeExecutor() -> Executor {
+        return executor
     }
 }

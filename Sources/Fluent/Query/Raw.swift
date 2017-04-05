@@ -49,7 +49,7 @@ extension Node {
 
 // MARK: Filter
 
-extension QueryRepresentable {
+extension QueryRepresentable where Self: ExecutorRepresentable {
     @discardableResult
     public func filter(
         raw string: String,
@@ -80,7 +80,7 @@ extension Array where Element == RawOr<Filter> {
 
 // MARK: Join
 
-extension QueryRepresentable {
+extension QueryRepresentable where Self: ExecutorRepresentable {
     @discardableResult
     public func join(
         raw string: String
@@ -110,7 +110,7 @@ extension RawOr: CustomStringConvertible {
 
 // MARK: Key
 
-extension QueryRepresentable {
+extension QueryRepresentable where Self: ExecutorRepresentable {
     @discardableResult
     public func set(raw rawKey: String, equals rawValue: String) throws -> Query<E> {
         let query = try makeQuery()
@@ -128,7 +128,7 @@ extension QueryRepresentable {
 
 // MARK: Sort
 
-extension QueryRepresentable {
+extension QueryRepresentable where Self: ExecutorRepresentable {
     @discardableResult
     public func sort(raw: String) throws -> Query<E> {
         let query = try makeQuery()
@@ -139,7 +139,7 @@ extension QueryRepresentable {
 
 // MARK: Limit
 
-extension QueryRepresentable {
+extension QueryRepresentable where Self: ExecutorRepresentable {
     @discardableResult
     public func limit(raw: String) throws -> Query<E> {
         let query = try makeQuery()

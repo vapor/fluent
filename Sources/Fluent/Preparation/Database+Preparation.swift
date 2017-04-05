@@ -8,7 +8,7 @@ extension Database {
 
         do {
             // check to see if this preparation has already run
-            if let _ = try Migration.query().filter("name", preparation.name).first() {
+            if let _ = try Migration.makeQuery().filter("name", preparation.name).first() {
                 // already prepared, set entity db
                 if let model = preparation as? Entity.Type {
                     model.database = self

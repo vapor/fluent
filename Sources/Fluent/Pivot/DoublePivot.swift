@@ -14,7 +14,7 @@ extension PivotProtocol where Left: PivotProtocol, Self: Entity {
         let rightId = try right.assertExists()
 
         let result = try Left
-            .query()
+            .makeQuery()
             .join(self)
             .filter(Left.self, Left.Left.foreignIdKey == leftId)
             .filter(Left.self, Left.Right.foreignIdKey, middleId)
@@ -38,7 +38,7 @@ extension PivotProtocol where Right: PivotProtocol, Self: Entity {
         let rightId = try right.assertExists()
         
         let result = try Right
-            .query()
+            .makeQuery()
             .join(self)
             .filter(self, Left.foreignIdKey, leftId)
             .filter(Right.self, Right.Left.foreignIdKey, middleId)
