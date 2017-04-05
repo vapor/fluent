@@ -14,36 +14,6 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
     }
 }
 
-extension Query {
-    /// Performs the Query returning the raw
-    /// Node data from the driver.
-    fileprivate func rawWithSoftDeleteFilter() throws -> Node {
-        let query = try makeQuery()
-        // if this is a soft deletable entity,
-        // and soft deleted rows should not be included,
-        // then filter them out
-        if
-            let S = E.self as? SoftDeletable.Type,
-            !query.includeSoftDeleted
-        {
-            // require that all entities have deletedAt = null
-            // or to some date in the future (not deleted yet)
-            try query.or { subquery in
-                try subquery.filter(S.deletedAtKey, Node.null)
-                try subquery.filter(S.deletedAtKey, .greaterThan, Date())
-            }
-            
-            let results = try raw()
-            
-            _ = query.filters.popLast()
-            
-            return results
-        } else {
-            return try raw()
-        }
-    }
-}
-
 // MARK: Fetch
 extension QueryRepresentable where Self: ExecutorRepresentable {    
     /// Returns all entities retrieved by the query.
@@ -51,7 +21,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
         let query = try makeQuery()
         query.action = .fetch
 
-        guard let array = try query.rawWithSoftDeleteFilter().array else {
+        guard let array = try query.raw().array else {
             throw QueryError.invalidDriverResponse("Array required.")
         }
         
@@ -109,7 +79,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
         let query = try makeQuery()
         query.action = .count
 
-        let raw = try query.rawWithSoftDeleteFilter()
+        let raw = try query.raw()
 
         let count: Int
 

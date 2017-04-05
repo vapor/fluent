@@ -48,7 +48,7 @@ extension SoftDeletable {
         try assertExists()
         try willRestore()
         deletedAt = nil
-        try save()
+        try makeQuery().withSoftDeleted().save()
         didRestore()
     }
 }
