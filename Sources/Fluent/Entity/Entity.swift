@@ -67,12 +67,9 @@ public protocol Entity: class, RowConvertible, Storable {
 
 extension Entity {
     //// Creates a `Query` instance for this `Model`.
-    public static func makeQuery(_ executor: Executor) throws -> Query<Self> {
+    public static func makeQuery(_ executor: Executor? = nil) throws -> Query<Self> {
+        let executor = try executor ?? makeExecutor()
         return Query(executor)
-    }
-    
-    public static func makeQuery() throws -> Query<Self> {
-        return try makeQuery(makeExecutor())
     }
     
     public static func makeExecutor() throws -> Executor {
@@ -99,29 +96,29 @@ extension Entity {
 extension Entity {
     /// Persists the entity into the
     /// data store and sets the `id` property.
-    public func save(_ ) throws {
-        try Self.makeQuery().save(self)
+    public func save(_ executor: Executor? = nil) throws {
+        try Self.makeQuery(executor).save(self)
     }
 
     /// Deletes the entity from the data
     /// store if the `id` property is set.
-    public func delete() throws {
-        try Self.makeQuery().delete(self)
+    public func delete(_ executor: Executor? = nil) throws {
+        try Self.makeQuery(executor).delete(self)
     }
 
     /// Returns all entities for this `Model`.
-    public static func all() throws -> [Self] {
-        return try Self.makeQuery().all()
+    public static func all(_ executor: Executor? = nil) throws -> [Self] {
+        return try Self.makeQuery(executor).all()
     }
 
     /// Returns all entities for this `Model`.
-    public static func count() throws -> Int {
-        return try Self.makeQuery().count()
+    public static func count(_ executor: Executor? = nil) throws -> Int {
+        return try Self.makeQuery(executor).count()
     }
 
     /// Finds the entity with the given `id`.
-    public static func find(_ id: NodeRepresentable) throws -> Self? {
-        return try Self.makeQuery().find(id)
+    public static func find(_ id: NodeRepresentable, _ executor: Executor? = nil) throws -> Self? {
+        return try Self.makeQuery(executor).find(id)
     }
 }
 
