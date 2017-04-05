@@ -83,6 +83,7 @@ public final class Query<E: Entity> {
             
             let results = try executor.query(.some(self))
             
+            // remove the soft delete filter
             _ = self.filters.popLast()
             
             return results
