@@ -147,3 +147,9 @@ extension QueryRepresentable {
         return query
     }
 }
+
+public final class Raw: Entity {
+    public let storage = Storage()
+    public init(row: Row) throws {}
+    public func makeRow() throws -> Row { return Row() }
+}

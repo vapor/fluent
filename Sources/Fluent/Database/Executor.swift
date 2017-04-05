@@ -14,9 +14,7 @@ public protocol Executor {
     /// Executes a `Query` from and
     /// returns an array of results fetched,
     /// created, or updated by the action.
-    @discardableResult
-    func query<E: Entity>(_ query: Query<E>) throws -> Node
-    
+    ///
     /// Drivers that support raw querying
     /// accept string queries and parameterized values.
     ///
@@ -27,7 +25,7 @@ public protocol Executor {
     ///         instead of interpolating them into the raw string
     ///         can help prevent SQL injection.
     @discardableResult
-    func raw(_ raw: String, _ values: [Node]) throws -> Node
+    func query<E: Entity>(_ query: RawOr<Query<E>>) throws -> Node
 }
 
 // MARK: Convenience
@@ -36,6 +34,11 @@ extension Executor {
     @discardableResult
     public func raw(_ raw: String, _ values: [NodeRepresentable] = []) throws -> Node {
         let nodes = try values.map { try $0.makeNode(in: rowContext) }
-        return try self.raw(raw, nodes)
+        return try self.query(RawOr<Query<Raw>>.raw(raw, nodes))
+    }
+    
+    @discardableResult
+    public func query<E: Entity>(_ query: Query<E>) throws -> Node {
+        return try self.query(.some(query))
     }
 }

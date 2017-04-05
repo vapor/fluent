@@ -2,7 +2,7 @@
 /// and returns an array of results.
 /// It is responsible for interfacing
 /// with the data store powering Fluent.
-public protocol Driver: Executor {
+public protocol Driver: QueryLogger {
     /// The string value for the
     /// default identifier key.
     ///
@@ -31,7 +31,7 @@ public protocol Driver: Executor {
     /// automatically create a connection
     /// if any Executor methods are called on
     /// the Driver.
-    func makeConnection() throws -> Connection
+    func makeConnection(_ type: ConnectionType) throws -> Connection
 }
 
 // MARK: Executor
@@ -39,13 +39,17 @@ public protocol Driver: Executor {
 extension Driver {
     /// See Executor protocol.
     @discardableResult
-    public func query<E: Entity>(_ query: Query<E>) throws -> Node {
-        return try makeConnection().query(query)
-    }
-
-    /// See Executor protocol.
-    @discardableResult
-    public func raw(_ raw: String, _ values: [Node]) throws -> Node {
-        return try makeConnection().raw(raw, values)
+    public func query<E: Entity>(_ query: RawOr<Query<E>>) throws -> Node {
+        let type: ConnectionType
+        switch query {
+        case .raw:
+            type = .readWrite
+        case .some(let q):
+            type = q.connectionType
+        }
+        
+        let connection = try makeConnection(type)
+        connection.log = log
+        return try connection.query(query)
     }
 }

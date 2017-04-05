@@ -63,7 +63,7 @@ public final class Query<E: Entity> {
     /// Node data from the driver.
     @discardableResult
     public func raw() throws -> Node {
-        return try database.query(self)
+        return try database.query(.some(self))
     }
 
     //MARK: Internal
