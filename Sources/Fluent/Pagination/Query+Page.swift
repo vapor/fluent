@@ -1,4 +1,4 @@
-extension QueryRepresentable where E: Paginatable {
+extension QueryRepresentable where E: Paginatable, Self: ExecutorRepresentable {
     public func paginate(
         page: Int,
         count: Int = E.defaultPageSize,

@@ -28,9 +28,15 @@ public final class Parent<
 }
 
 extension Parent: QueryRepresentable {
-    public func makeQuery() throws -> Query<Parent> {
-        let query = try Parent.query()
+    public func makeQuery(_ executor: Executor) throws -> Query<Parent> {
+        let query = try Parent.makeQuery()
         return try query.filter(Parent.idKey, parentId)
+    }
+}
+
+extension Parent: ExecutorRepresentable {
+    public func makeExecutor() throws -> Executor {
+        return try Parent.makeExecutor()
     }
 }
 

@@ -18,7 +18,7 @@ class QueryFiltersTests: XCTestCase {
     var database: Database!
 
     func testBasalQuery() throws {
-        let query = try DummyModel.query()
+        let query = try DummyModel.makeQuery()
 
         XCTAssert(query.action == .fetch, "Default action should be fetch")
         XCTAssert(query.filters.count == 0, "Filters should be empty")
@@ -28,7 +28,7 @@ class QueryFiltersTests: XCTestCase {
     }
 
     func testBasicQuery() throws {
-        let query = try DummyModel.query().filter("name", "Vapor")
+        let query = try DummyModel.makeQuery().filter("name", "Vapor")
 
         guard
             let filter = query.filters.first?.wrapped,
@@ -49,7 +49,7 @@ class QueryFiltersTests: XCTestCase {
     }
 
     func testLikeQuery() throws {
-        let query = try DummyModel.query().filter("name", .hasPrefix, "Vap")
+        let query = try DummyModel.makeQuery().filter("name", .hasPrefix, "Vap")
 
         guard
             let filter = query.filters.first?.wrapped,
@@ -70,7 +70,7 @@ class QueryFiltersTests: XCTestCase {
     }
  
     func testCountQuery() throws {
-        let query = try DummyModel.query().filter(DummyModel.idKey, 5)
+        let query = try DummyModel.makeQuery().filter(DummyModel.idKey, 5)
 
         do {
             let numberOfResults = try query.count()
@@ -83,7 +83,7 @@ class QueryFiltersTests: XCTestCase {
     }
 
     func testDeleteQuery() throws {
-        let query = try DummyModel.query().filter(DummyModel.idKey, 5)
+        let query = try DummyModel.makeQuery().filter(DummyModel.idKey, 5)
 
         do {
             try query.delete()
@@ -95,12 +95,12 @@ class QueryFiltersTests: XCTestCase {
     }
   
     func testLimitQuery() throws {
-        let query = try DummyModel.query().limit(5)
+        let query = try DummyModel.makeQuery().limit(5)
         XCTAssertEqual(query.limits.first?.wrapped?.count, 5)
     }
 
     func testDistinctQuery() throws {
-        let query = try DummyModel.query().distinct()
+        let query = try DummyModel.makeQuery().distinct()
         XCTAssert(query.distinct)
     }
 }

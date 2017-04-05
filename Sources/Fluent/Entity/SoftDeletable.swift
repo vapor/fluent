@@ -84,7 +84,7 @@ extension SoftDeletable {
 
 // MARK: Query
 
-extension QueryRepresentable where E: SoftDeletable {
+extension QueryRepresentable where E: SoftDeletable, Self: ExecutorRepresentable {
     /// Include soft deleted entities in the query
     public func withSoftDeleted() throws -> Query<E> {
         let query = try makeQuery()
@@ -99,7 +99,7 @@ extension Entity where Self: SoftDeletable {
     /// Includes soft deleted entities in
     /// the results
     public static func withSoftDeleted() throws -> Query<Self> {
-        return try query().withSoftDeleted()
+        return try makeQuery().withSoftDeleted()
     }
 
     /// If true, calls to `model.delete()`

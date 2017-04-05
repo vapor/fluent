@@ -1,10 +1,21 @@
 public protocol QueryRepresentable {
     associatedtype E: Entity
-    func makeQuery() throws -> Query<E>
+    func makeQuery(_ executor: Executor) throws -> Query<E>
+}
+
+public protocol ExecutorRepresentable {
+    func makeExecutor() throws -> Executor
+}
+
+
+extension QueryRepresentable where Self: ExecutorRepresentable {
+    public func makeQuery() throws -> Query<E> {
+        return try makeQuery(makeExecutor())
+    }
 }
 
 // MARK: Fetch
-extension QueryRepresentable {
+extension QueryRepresentable where Self: ExecutorRepresentable {
     /// Returns all entities retrieved by the query.
     public func all() throws -> [E] {
         let query = try makeQuery()
@@ -108,7 +119,7 @@ extension QueryRepresentable {
 }
 
 // MARK: Create
-extension QueryRepresentable {
+extension QueryRepresentable where Self: ExecutorRepresentable {
     /// Attempts the create action for the supplied
     /// serialized data.
     /// Returns the new entity's identifier.
@@ -192,7 +203,7 @@ extension QueryRepresentable {
 }
 
 // MARK: Delete
-extension QueryRepresentable {
+extension QueryRepresentable where Self: ExecutorRepresentable {
     /// Attempts to delete all entities
     /// in the model's collection.
     public func delete() throws {
@@ -230,7 +241,7 @@ extension QueryRepresentable {
 }
 
 // MARK: Update
-extension QueryRepresentable {
+extension QueryRepresentable where Self: ExecutorRepresentable {
     /// Attempts to modify model's collection with
     /// the supplied serialized data.
     public func modify(_ row: Row?) throws {

@@ -43,17 +43,23 @@ extension Siblings
 extension Siblings: QueryRepresentable {
     /// Creates a Query from the Siblings relation.
     /// This includes a pivot, join, and filter.
-    public func makeQuery() throws -> Query<Foreign> {
+    public func makeQuery(_ executor: Executor) throws -> Query<Foreign> {
         guard let localId = local.id else {
             throw RelationError.idRequired(local)
         }
 
-        let query = try Foreign.query()
+        let query = try Foreign.makeQuery()
 
         try query.join(Through.self)
         try query.filter(Through.self, Local.foreignIdKey, localId)
 
         return query
+    }
+}
+
+extension Siblings: ExecutorRepresentable {
+    public func makeExecutor() throws -> Executor {
+        return try Foreign.makeExecutor()
     }
 }
 

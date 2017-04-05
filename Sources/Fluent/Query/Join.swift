@@ -51,7 +51,7 @@ public struct Join {
     }
 }
 
-extension QueryRepresentable {
+extension QueryRepresentable where Self: ExecutorRepresentable {
     /// Create and add a Join to this Query.
     /// See Join for more information.
     @discardableResult

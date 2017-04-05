@@ -17,7 +17,7 @@ extension Tester {
         try water.save()
 
         let page = try Compound
-            .query()
+            .makeQuery()
             .paginate(page: 2)
 
         guard page.data.count == 2 else {
