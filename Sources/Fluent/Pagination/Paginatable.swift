@@ -1,8 +1,9 @@
 // Conforming to this protocol allows the entity
 // to be paginated using `query.paginate()`
 public protocol Paginatable: Entity {
-    static var pageSize: Int { get }
-    static var pageSorts: [Sort] { get }
+    static var defaultPageSize: Int { get }
+    static var maxPageSize: Int? { get }
+    static var defaultPageSorts: [Sort] { get }
 }
 
 // MARK: Optional
@@ -10,13 +11,19 @@ public protocol Paginatable: Entity {
 public var defaultPageSize: Int = 10
 
 extension Paginatable {
-    public static var pageSize: Int {
-        return defaultPageSize
+    public static var defaultPageSize: Int {
+        return Fluent.defaultPageSize
     }
+    
+    public static var maxPageSize: Int? {
+        return nil
+    }
+}
 
-    public static var pageSorts: [Sort] {
+extension Paginatable where Self: Timestampable {
+    public static var defaultPageSorts: [Sort] {
         return [
-            Sort(self, "createdAt", .descending)
+            Sort(self, Self.createdAtKey, .descending)
         ]
     }
 }

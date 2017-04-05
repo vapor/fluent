@@ -25,6 +25,7 @@ class ModelFindTests: XCTestCase {
         var keyNamingConvention: KeyNamingConvention = .snake_case
 
         var idType: IdentifierType = .int
+        var log: QueryLogCallback?
         
         var idKey: String {
             return "foo"
@@ -34,21 +35,26 @@ class ModelFindTests: XCTestCase {
             case broken
         }
         
-        func makeConnection() throws -> Connection {
+        public func makeConnection(_ type: ConnectionType) throws -> Connection {
             return DummyConnection(driver: self)
         }
     }
     
     class DummyConnection: Connection {
-        public var closed: Bool = false
+        public var isClosed: Bool = false
         
         var driver: DummyDriver
+        var log: QueryLogCallback?
         
         init(driver: DummyDriver) {
             self.driver = driver
         }
         
-        func query<E: Entity>(_ query: Query<E>) throws -> Node {
+        func query<E: Entity>(_ query: RawOr<Query<E>>) throws -> Node {
+            guard case .some(let query) = query else {
+                return .null
+            }
+            
             if
                 let filter = query.filters.first?.wrapped,
                 case .compare(let key, let comparison, let value) = filter.method,
@@ -67,10 +73,6 @@ class ModelFindTests: XCTestCase {
             }
             
             return .array([])
-        }
-
-        func raw(_ raw: String, _ values: [Node]) throws -> Node {
-            return .null
         }
     }
 

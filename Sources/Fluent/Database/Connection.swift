@@ -1,8 +1,24 @@
 /// The lowest level executor. All
 /// calls to higher level executors
 /// eventually end up here.
-public protocol Connection: Executor {
+public protocol Connection: Executor, QueryLogger {
     /// Indicates whether the connection has
     /// closed permanently and should be discarded.
-    var closed: Bool { get }
+    var isClosed: Bool { get }
+}
+
+public enum ConnectionType {
+    case read
+    case readWrite
+}
+
+extension Query {
+    public var connectionType: ConnectionType {
+        switch action {
+        case .count, .fetch:
+            return .read
+        case .create, .modify, .delete, .schema:
+            return .readWrite
+        }
+    }
 }

@@ -24,13 +24,13 @@ class RawTests: XCTestCase {
     }
 
     func testBasic() throws {
-        try db.driver.raw("custom string action")
+        try db.raw("custom string action")
         XCTAssertEqual(lqd.lastRaw?.0, "custom string action")
         XCTAssertEqual(lqd.lastRaw?.1.count, 0)
     }
 
     func testWithValues() throws {
-        try db.driver.raw("custom action string", [1, "hello"])
+        try db.raw("custom action string", [1, "hello"])
         XCTAssertEqual(lqd.lastRaw?.0, "custom action string")
         XCTAssertEqual(lqd.lastRaw?.1.count, 2)
     }

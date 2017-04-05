@@ -32,33 +32,29 @@ extension QueryRepresentable {
         var models: [E] = []
 
         for result in array {
-            do {
-                let row = Row(node: result)
-                let model = try E(row: row)
-                model.id = try row.get(E.idKey)
-                model.exists = true
+            let row = Row(node: result)
+            let model = try E(row: row)
+            model.id = try row.get(E.idKey)
+            model.exists = true
 
-                // timestampable
-                if
-                    let T = E.self as? Timestampable.Type,
-                    let t = model as? Timestampable
-                {
-                    t.createdAt = try row.get(T.createdAtKey)
-                    t.updatedAt = try row.get(T.updatedAtKey)
-                }
-
-                // soft deletable
-                if
-                    let S = E.self as? SoftDeletable.Type,
-                    let s = model as? SoftDeletable
-                {
-                    s.deletedAt = try row.get(S.deletedAtKey)
-                }
-
-                models.append(model)
-            } catch {
-                print("Could not initialize \(E.self), skipping: \(error)")
+            // timestampable
+            if
+                let T = E.self as? Timestampable.Type,
+                let t = model as? Timestampable
+            {
+                t.createdAt = try row.get(T.createdAtKey)
+                t.updatedAt = try row.get(T.updatedAtKey)
             }
+
+            // soft deletable
+            if
+                let S = E.self as? SoftDeletable.Type,
+                let s = model as? SoftDeletable
+            {
+                s.deletedAt = try row.get(S.deletedAtKey)
+            }
+
+            models.append(model)
         }
 
         return models

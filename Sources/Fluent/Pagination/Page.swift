@@ -10,7 +10,7 @@ public struct Page<T: Entity & Paginatable> {
     public init(
         number: Int,
         data: [T],
-        size: Int = T.pageSize,
+        size: Int = T.defaultPageSize,
         total: Int
     ) throws {
         guard number > 0 else {

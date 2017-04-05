@@ -22,7 +22,7 @@ class JoinTests: XCTestCase {
 
     func testBasic() throws {
         let query = try Query<Atom>(db).join(Compound.self)
-        try lqd.query(query)
+        try db.query(query)
 
         if let (sql, _) = lqd.lastQuery {
             XCTAssertEqual(sql, "SELECT `atoms`.* FROM `atoms` JOIN `compounds` ON `atoms`.`#id` = `compounds`.`atom_#id`")
@@ -37,7 +37,7 @@ class JoinTests: XCTestCase {
             .filter("protons", .greaterThan, 5)
             .filter(Compound.self, "atoms", .lessThan, 128)
 
-        try lqd.query(query)
+        try db.query(query)
 
         if let (sql, values) = lqd.lastQuery {
             XCTAssertEqual(sql, "SELECT `atoms`.* FROM `atoms` JOIN `compounds` ON `atoms`.`#id` = `compounds`.`atom_#id` WHERE `atoms`.`protons` > ? AND `compounds`.`atoms` < ?")
@@ -59,6 +59,8 @@ class JoinTests: XCTestCase {
 
         do {
             _ = try atom.compounds.all()
+        } catch {
+            // pass
         }
 
         if let (sql, values) = lqd.lastQuery {
