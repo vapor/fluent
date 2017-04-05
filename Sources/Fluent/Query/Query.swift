@@ -62,7 +62,7 @@ public final class Query<E: Entity> {
         data = [:]
         keys = []
     }
-
+    
     /// Performs the Query returning the raw
     /// Node data from the driver.
     @discardableResult
