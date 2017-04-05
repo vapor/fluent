@@ -177,19 +177,21 @@ class TestSchemaDriver: Driver {
     var keyNamingConvention: KeyNamingConvention = .snake_case
     var idType: IdentifierType = .int
     var idKey: String = "id"
+    var log: QueryLogCallback?
 
     var testClosure: (Schema) -> ()
     init(testClosure: @escaping (Schema) -> ()) {
         self.testClosure = testClosure
     }
     
-    func makeConnection() throws -> Connection {
+    public func makeConnection(_ type: ConnectionType) throws -> Connection {
         return TestSchemaConnection(driver: self)
     }
 }
 
-struct TestSchemaConnection: Connection {
+class TestSchemaConnection: Connection {
     public var isClosed: Bool = false
+    var log: QueryLogCallback?
     
     var driver: TestSchemaDriver
     
@@ -198,13 +200,10 @@ struct TestSchemaConnection: Connection {
     }
     
     @discardableResult
-    func query<T: Entity>(_ query: Query<T>) throws -> Node { return .null }
+    func query<T: Entity>(_ query: RawOr<Query<T>>) throws -> Node { return .null }
 
 
     func schema(_ schema: Schema) throws {
         driver.testClosure(schema)
     }
-
-
-    func raw(_ raw: String, _ values: [Node]) throws -> Node { return .null }
 }

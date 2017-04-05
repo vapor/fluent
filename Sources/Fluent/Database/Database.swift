@@ -1,6 +1,6 @@
 /// References a database with a single `Driver`.
 /// Statically maps `Model`s to `Database`s.
-public final class Database: Executor {
+public final class Database: Executor, QueryLogger {
     /// Maps `Model` names to their respective
     /// `Database`. This allows multiple models
     /// in the same application to use different
@@ -41,12 +41,16 @@ public final class Database: Executor {
     /// ex: snake_case vs. camelCase.
     public var keyNamingConvention: KeyNamingConvention
 
-    /// A closure for handling database logs
-    public typealias LogCallback = (Log) -> ()
-
     /// All queries performed by the database will be
     /// sent here right before they are run.
-    public var log: LogCallback?
+    public var log: QueryLogCallback? {
+        get {
+            return driver.log
+        }
+        set {
+            driver.log = newValue
+        }
+    }
 
     /// Creates a `Database` with the supplied
     /// `Driver`. This cannot be changed later.
@@ -56,9 +60,10 @@ public final class Database: Executor {
         keyNamingConvention = driver.keyNamingConvention
 
         threadConnectionPool = ThreadConnectionPool(
-            makeConnection: driver.makeConnection,
+            driver,
             maxConnections: maxConnections // some number larger than the max threads
         )
+        
         self.driver = driver
     }
 }
@@ -68,16 +73,8 @@ public final class Database: Executor {
 extension Database {
     /// See Executor protocol.
     @discardableResult
-    public func query<E: Entity>(_ query: Query<E>) throws -> Node {
-        log?(Log(query))
-        return try threadConnectionPool.connection().query(query)
-    }
-    
-    /// See Executor protocol.
-    @discardableResult
-    public func raw(_ raw: String, _ values: [Node]) throws -> Node {
-        log?(Log(raw: raw))
-        return try threadConnectionPool.connection().raw(raw, values)
+    public func query<E: Entity>(_ query: RawOr<Query<E>>) throws -> Node {
+        return try threadConnectionPool.query(query)
     }
 }
 

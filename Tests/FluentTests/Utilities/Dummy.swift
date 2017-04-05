@@ -12,6 +12,7 @@ final class DummyModel: Entity {
 
 class DummyDriver: Driver {
     var keyNamingConvention: KeyNamingConvention = .snake_case
+    var log: QueryLogCallback?
     
     var idType: IdentifierType = .int
 
@@ -23,23 +24,25 @@ class DummyDriver: Driver {
         case broken
     }
     
-    func makeConnection() throws -> Connection {
+    public func makeConnection(_ type: ConnectionType) throws -> Connection {
         return DummyConnection()
     }
 }
 
 class DummyConnection: Connection {
     public var isClosed: Bool = false
+    public var log: QueryLogCallback?
 
-    func query<E: Entity>(_ query: Query<E>) throws -> Node {
-        if query.action == .count {
-            return 0
+    func query<E: Entity>(_ query: RawOr<Query<E>>) throws -> Node {
+        switch query {
+        case .raw:
+            return .array([])
+        case .some(let query):
+            if query.action == .count {
+                return 0
+            }
+            
+            return .array([])
         }
-        
-        return .array([])
-    }
-
-    func raw(_ raw: String, _ values: [Node]) throws -> Node {
-        return .null
     }
 }

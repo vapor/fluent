@@ -1,39 +1,46 @@
 import Foundation
 
-public struct Log {
+public struct QueryLog {
     /// The time the query was logged
     public var time: Date
-
+    
     /// Output of the log
     public var log: String
-
+    
     /// Create a log from a raw log string.
-    init(raw: String) {
+    init(_ raw: String) {
         time = Date()
         log = raw
     }
-
+    
     /// Create a log from raw sql and values.
-    init(sql: String, values: [Node] = []) {
-        var log = sql
+    init(_ statement: String, _ values: [Node] = []) {
+        var log = statement
         if values.count > 0 {
             let valuesString = values.map({ $0.string ?? "" }).joined(separator: ", ")
             log += " [\(valuesString)]"
         }
-
-        self.init(raw: log)
-    }
-
-    /// Create a log from a Query
-    init<E: Entity>(_ query: Query<E>) {
-        let serializer = GeneralSQLSerializer(query)
-        let (sql, values) = serializer.serialize()
-        self.init(sql: sql, values: values)
+        self.init(log)
     }
 }
 
-extension Log: CustomStringConvertible {
+extension QueryLog: CustomStringConvertible {
     public var description: String {
         return "[\(time)] \(log)"
+    }
+}
+
+/// A closure for handling database logs
+public typealias QueryLogCallback = (QueryLog) -> ()
+
+public protocol QueryLogger: class {
+    var log: QueryLogCallback? { get set }
+}
+
+extension QueryLogger {
+    public func log(_ statement: String, _ values: [Node]) {
+        if let log = self.log {
+            log(QueryLog(statement, values))
+        }
     }
 }

@@ -4,6 +4,7 @@ import SQLite
 /// built on top of SQLiteDriver
 public final class MemoryDriver: SQLiteDriverProtocol {
     public let database: SQLite
+    public var log: QueryLogCallback?
 
     public init() throws {
         database = try SQLite(path: ":memory:")
@@ -18,6 +19,7 @@ public final class MemoryDriver: SQLiteDriverProtocol {
 /// we do not recommend using it in Production
 public final class SQLiteDriver: SQLiteDriverProtocol {
     public let database: SQLite
+    public var log: QueryLogCallback?
 
     /// Creates a new SQLiteDriver pointing
     /// to the database at the supplied path.
@@ -52,28 +54,29 @@ extension SQLiteDriverProtocol {
 
     /// Executes the query.
     @discardableResult
-    public func query<E: Entity>(_ query: Query<E>) throws -> Node {
-        let serializer = SQLiteSerializer(query)
-        let (statement, values) = serializer.serialize()
-        let results = try database.execute(statement) { statement in
-            try self.bind(statement: statement, to: values)
-        }
-
-        if let id = database.lastId, query.action == .create {
-            return id.makeNode(in: query.context)
-        } else {
+    public func query<E: Entity>(_ query: RawOr<Query<E>>) throws -> Node {
+        switch query {
+        case .some(let query):
+            let serializer = SQLiteSerializer(query)
+            let (statement, values) = serializer.serialize()
+            log(statement, values)
+            let results = try database.execute(statement) { statement in
+                try self.bind(statement: statement, to: values)
+            }
+            
+            if let id = database.lastId, query.action == .create {
+                return id.makeNode(in: query.context)
+            } else {
+                return map(results: results)
+            }
+        case .raw(let statement, let values):
+            log(statement, values)
+            let results = try database.execute(statement) { statement in
+                try self.bind(statement: statement, to: values)
+            }
             return map(results: results)
         }
-    }
 
-    /// Executes a raw query with an
-    /// optional array of paramterized
-    /// values and returns the results.
-    public func raw(_ statement: String, _ values: [Node] = []) throws -> Node {
-        let results = try database.execute(statement) { statement in
-            try self.bind(statement: statement, to: values)
-        }
-        return map(results: results)
     }
 
     /// Binds an array of values to the
@@ -120,7 +123,7 @@ extension SQLiteDriverProtocol {
         return .array(res)
     }
 
-    public func makeConnection() throws -> Connection {
+    public func makeConnection(_ type: ConnectionType) throws -> Connection {
         // SQLite must be configured with 
         // SQLITE_OPEN_FULLMUTEX for this to work
         return self

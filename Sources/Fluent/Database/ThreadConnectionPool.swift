@@ -22,10 +22,6 @@ public final class ThreadConnectionPool {
         case unspecified(Swift.Error)
     }
 
-    /// The constructor used by the factory to create new connections
-    public typealias ConnectionFactory = () throws -> Connection
-
-
     private static var threadId: pthread_t {
         // must run every time, do not assign
         return pthread_self()
@@ -41,21 +37,30 @@ public final class ThreadConnectionPool {
     /// default is 10 seconds.
     public var connectionPendingTimeoutSeconds: Int = 10
 
-    private var connections: [pthread_t: Connection]
+    private var connections: [String: Connection]
     private let connectionsLock: NSLock
-    private let makeConnection: ConnectionFactory
+    private let driver: Driver
 
     /// Initializes a thread pool with a connectionFactory intended to construct
     /// new connections when appropriate and an Integer defining the maximum
     /// number of connections the pool is allowed to make
-    public init(makeConnection: @escaping ConnectionFactory, maxConnections: Int) {
-        self.makeConnection = makeConnection
+    public init(_ driver: Driver, maxConnections: Int) {
+        self.driver = driver
         self.maxConnections = maxConnections
         connections = [:]
         connectionsLock = NSLock()
     }
     
-    internal func connection() throws -> Connection {
+    internal func connection(_ type: ConnectionType) throws -> Connection {
+        let typeString: String
+        switch type {
+        case .readWrite:
+            typeString = "rw"
+        case .read:
+            typeString = "r"
+        }
+        let id = "\(typeString)_\(ThreadConnectionPool.threadId.hashValue)"
+        
         //  Because we might wait inside of the makeNewConnection function,
         //  do NOT attempt to wrap this within connectionLock or it may
         //  be blocked from other threads
@@ -65,43 +70,36 @@ public final class ThreadConnectionPool {
         //
         //  It shouldn't happen that two calls come on same thread anyways, but
         //  in the interest of 'just in case'
-        guard
-            let existing = connections[ThreadConnectionPool.threadId],
-            !existing.isClosed
-            else { return try makeNewConnection() }
-        return existing
-    }
-
-    private func makeNewConnection() throws -> Connection {
-        // MUST capture threadID OUTSIDE of lock to ensure appropriate thread id is received
-        let threadId = ThreadConnectionPool.threadId
-
-        var connection: Connection?
-        try connectionsLock.locked {
-            //  Just in case our first attempt to access failed in a non thread safe manner
-            //  to prevent duplicates, we do a quick check here.
-            //
-            //  Likely redundant, but beneficial for safety.
-            //
-            if let existing = connections[threadId], !existing.isClosed {
-                connection = existing
-                return
+        guard let existing = connections[id], !existing.isClosed else {
+            var connection: Connection?
+            try connectionsLock.locked {
+                //  Just in case our first attempt to access failed in a non thread safe manner
+                //  to prevent duplicates, we do a quick check here.
+                //
+                //  Likely redundant, but beneficial for safety.
+                //
+                if let existing = connections[id], !existing.isClosed {
+                    connection = existing
+                    return
+                }
+                connections[id] = nil
+                
+                // Attempt to make space if possible
+                if connections.keys.count >= maxConnections { clearClosedConnections() }
+                // If space hasn't been created, attempt to wait for space
+                if connections.keys.count >= maxConnections { waitForSpace() }
+                // the maximum number of connections has been created, even after attempting to clear out closed connections
+                if connections.keys.count >= maxConnections { throw Error.maxConnectionsReached(max: maxConnections) }
+                let c = try driver.makeConnection(type)
+                connections[id] = c
+                connection = c
             }
-            connections[threadId] = nil
-
-            // Attempt to make space if possible
-            if connections.keys.count >= maxConnections { clearClosedConnections() }
-            // If space hasn't been created, attempt to wait for space
-            if connections.keys.count >= maxConnections { waitForSpace() }
-            // the maximum number of connections has been created, even after attempting to clear out closed connections
-            if connections.keys.count >= maxConnections { throw Error.maxConnectionsReached(max: maxConnections) }
-            let c = try makeConnection()
-            connections[threadId] = c
-            connection = c
+            
+            guard let c = connection else { throw Error.lockFailure }
+            return c
         }
-
-        guard let c = connection else { throw Error.lockFailure }
-        return c
+        
+        return existing
     }
 
     private func waitForSpace() {
@@ -117,6 +115,27 @@ public final class ThreadConnectionPool {
         connections.forEach { thread, connection in
             guard connection.isClosed else { return }
             connections[thread] = nil
+        }
+    }
+}
+
+extension ThreadConnectionPool: Executor {
+    public func query<E: Entity>(_ query: RawOr<Query<E>>) throws -> Node {
+        let type: ConnectionType
+        switch query {
+        case .raw:
+            type = .readWrite
+        case .some(let q):
+            type = q.connectionType
+        }
+        
+        do {
+            return try connection(type)
+                .query(query)
+        } catch QueryError.connectionClosed {
+            // try again for closed connections
+            return try connection(type)
+                .query(query)
         }
     }
 }
