@@ -2,7 +2,7 @@
 /// and returns an array of results.
 /// It is responsible for interfacing
 /// with the data store powering Fluent.
-public protocol Driver: QueryLogger {
+public protocol Driver: Executor, QueryLogger {
     /// The string value for the
     /// default identifier key.
     ///
