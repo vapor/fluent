@@ -134,21 +134,29 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
         let raw = try query.raw()
         return Identifier(raw)
     }
+    
+    public func save() throws {
+        let query = try makeQuery()
+        guard let entity = query.entity else {
+            throw QueryError.entityRequired
+        }
+        try save(entity)
+    }
 
     /// Attempts to save a supplied entity
     /// and updates its identifier if successful.
-    public func save(_ model: E) throws {
+    public func save(_ entity: E) throws {
         let query = try makeQuery()
 
-        if let _ = model.id, model.exists {
-            try model.willUpdate()
-            var row = try model.makeRow()
-            try row.set(E.idKey, model.id)
+        if let _ = entity.id, entity.exists {
+            try entity.willUpdate()
+            var row = try entity.makeRow()
+            try row.set(E.idKey, entity.id)
 
             // timestampable
             if
                 let T = E.self as? Timestampable.Type,
-                let t = model as? Timestampable
+                let t = entity as? Timestampable
             {
                 let now = Date()
                 try row.set(T.updatedAtKey, now)
@@ -158,7 +166,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
             // soft deletable
             if
                 let S = E.self as? SoftDeletable.Type,
-                let s = model as? SoftDeletable
+                let s = entity as? SoftDeletable
             {
                 if let deletedAt = s.deletedAt {
                     try row.set(S.deletedAtKey, deletedAt)
@@ -168,21 +176,21 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
             }
 
             try modify(row)
-            model.didUpdate()
+            entity.didUpdate()
         } else {
-            if model.id == nil, case .uuid = E.idType {
+            if entity.id == nil, case .uuid = E.idType {
                 // automatically generates uuids
                 // for models without them
-                model.id = Identifier(UUID.random())
+                entity.id = Identifier(UUID.random())
             }
-            try model.willCreate()
-            var row = try model.makeRow()
-            try row.set(E.idKey, model.id)
+            try entity.willCreate()
+            var row = try entity.makeRow()
+            try row.set(E.idKey, entity.id)
 
             // timestampable
             if
                 let T = E.self as? Timestampable.Type,
-                let t = model as? Timestampable
+                let t = entity as? Timestampable
             {
                 let now = Date()
                 try row.set(T.createdAtKey, now)
@@ -193,12 +201,12 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
 
             let id = try query.create(row)
             if id != nil, id != .null, id != 0 {
-                model.id = id
+                entity.id = id
             }
 
-            model.didCreate()
+            entity.didCreate()
         }
-        model.exists = true
+        entity.exists = true
     }
 }
 
@@ -208,21 +216,25 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
     /// in the model's collection.
     public func delete() throws {
         let query = try makeQuery()
-        query.action = .delete
-        try query.raw()
+        if let entity = query.entity {
+            try query.delete(entity)
+        } else {
+            query.action = .delete
+            try query.raw()
+        }
     }
 
     /// Attempts to delete the supplied entity
     /// if its identifier is set.
-    public func delete(_ model: E) throws {
-        let id = try model.assertExists()
+    public func delete(_ entity: E) throws {
+        let id = try entity.assertExists()
         let query = try makeQuery()
 
         // if the model is soft deletable and
         // does not have the force delete flag set,
         // then soft delete it.
         if
-            let s = model as? SoftDeletable,
+            let s = entity as? SoftDeletable,
             !s.shouldForceDelete
         {
             // soft delete the model
@@ -232,10 +244,10 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
             // permenantly delete the model
             query.action = .delete
             try query.filter(E.idKey, id)
-            try model.willDelete()
+            try entity.willDelete()
             try query.raw()
-            model.didDelete()
-            model.exists = false
+            entity.didDelete()
+            entity.exists = false
         }
     }
 }

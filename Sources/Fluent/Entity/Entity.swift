@@ -80,6 +80,22 @@ extension Entity {
     }
 }
 
+extension Entity {
+    public func makeQuery(_ executor: Executor) throws -> Query<Self> {
+        let query = try Self.makeQuery(executor)
+        query.entity = self
+        return query
+    }
+    
+    public func makeQuery() throws -> Query<Self> {
+        return try makeQuery(makeExecutor())
+    }
+    
+    public func makeExecutor() throws -> Executor {
+        return try Self.makeExecutor()
+    }
+}
+
 // MARK: Optional
 
 extension Entity {
@@ -96,14 +112,14 @@ extension Entity {
 extension Entity {
     /// Persists the entity into the
     /// data store and sets the `id` property.
-    public func save(_ executor: Executor? = nil) throws {
-        try Self.makeQuery(executor).save(self)
+    public func save() throws {
+        try makeQuery().save()
     }
 
     /// Deletes the entity from the data
     /// store if the `id` property is set.
-    public func delete(_ executor: Executor? = nil) throws {
-        try Self.makeQuery(executor).delete(self)
+    public func delete() throws {
+        try makeQuery().delete()
     }
 
     /// Returns all entities for this `Model`.

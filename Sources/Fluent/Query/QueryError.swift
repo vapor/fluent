@@ -2,6 +2,7 @@ public enum QueryError: Error {
     case notSupported(String)
     case invalidDriverResponse(String)
     case connectionClosed(Error)
+    case entityRequired
     case unspecified(Error)
 }
 
@@ -14,6 +15,8 @@ extension QueryError: Debuggable {
             return "invalidDriverResponse"
         case .connectionClosed(_):
             return "connectionClosed"
+        case .entityRequired:
+            return "entityRequired"
         case .unspecified(_):
             return "unspecified"
         }
@@ -27,6 +30,8 @@ extension QueryError: Debuggable {
             return "Invalid driver response: \(string)"
         case .connectionClosed(let error):
             return "Connection is closed: \(error)"
+        case .entityRequired:
+            return "Entity required to save"
         case .unspecified(let error):
             return "\(error)"
         }

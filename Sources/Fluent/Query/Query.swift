@@ -28,6 +28,10 @@ public final class Query<E: Entity> {
     /// that will be queried during this query's
     /// execution.
     public var joins: [RawOr<Join>]
+    
+    /// An optional entity used for delete
+    /// and save queries
+    public var entity: E?
 
     private(set) lazy var context: RowContext = {
         let context = RowContext()
