@@ -62,12 +62,34 @@ public final class Query<E: Entity> {
         data = [:]
         keys = []
     }
-
+    
     /// Performs the Query returning the raw
     /// Node data from the driver.
     @discardableResult
     public func raw() throws -> Node {
-        return try executor.query(.some(self))
+        // if this is a soft deletable entity,
+        // and soft deleted rows should not be included,
+        // then filter them out
+        if
+            let S = E.self as? SoftDeletable.Type,
+            !self.includeSoftDeleted
+        {
+            // require that all entities have deletedAt = null
+            // or to some date in the future (not deleted yet)
+            try self.or { subquery in
+                try subquery.filter(S.deletedAtKey, Node.null)
+                try subquery.filter(S.deletedAtKey, .greaterThan, Date())
+            }
+            
+            let results = try executor.query(.some(self))
+            
+            // remove the soft delete filter
+            _ = self.filters.popLast()
+            
+            return results
+        } else {
+            return try executor.query(.some(self))
+        }
     }
     
     public let executor: Executor

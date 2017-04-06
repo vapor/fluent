@@ -21,5 +21,6 @@ public final class Tester {
         try test(testPaginate, "Pagination")
         try test(testTimestamps, "Timestamps")
         try test(testSoftDelete, "Soft Delete")
+        try test(testChunk, "Chunking")
     }
 }

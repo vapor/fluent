@@ -29,7 +29,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
     @discardableResult
     public func limit(_ limit: Limit) throws -> Query<E> {
         let query = try makeQuery()
-        query.limits.append(.some(limit))
+        query.limits = [.some(limit)]
         return query
     }
 }

@@ -15,31 +15,16 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
 }
 
 // MARK: Fetch
-extension QueryRepresentable where Self: ExecutorRepresentable {
+extension QueryRepresentable where Self: ExecutorRepresentable {    
     /// Returns all entities retrieved by the query.
     public func all() throws -> [E] {
         let query = try makeQuery()
         query.action = .fetch
 
-        // if this is a soft deletable entity,
-        // and soft deleted rows should not be included,
-        // then filter them out
-        if
-            let S = E.self as? SoftDeletable.Type,
-            !query.includeSoftDeleted
-        {
-            // require that all entities have deletedAt = null
-            // or to some date in the future (not deleted yet)
-            try query.or { subquery in
-                try subquery.filter(S.deletedAtKey, Node.null)
-                try subquery.filter(S.deletedAtKey, .greaterThan, Date())
-            }
-        }
-
         guard let array = try query.raw().array else {
             throw QueryError.invalidDriverResponse("Array required.")
         }
-
+        
         var models: [E] = []
 
         for result in array {
@@ -93,14 +78,6 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
     public func count() throws -> Int {
         let query = try makeQuery()
         query.action = .count
-
-        // soft deletable
-        if let S = E.self as? SoftDeletable.Type {
-            try query.or { subquery in
-                try subquery.filter(S.deletedAtKey, Node.null)
-                try subquery.filter(S.deletedAtKey, .greaterThan, Date())
-            }
-        }
 
         let raw = try query.raw()
 

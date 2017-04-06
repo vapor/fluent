@@ -136,6 +136,10 @@ extension Entity {
     public static func find(_ id: NodeRepresentable) throws -> Self? {
         return try Self.makeQuery().find(id)
     }
+    
+    public static func chunk(_ size: Int, _ closure: ([Self]) throws -> ()) throws {
+        return try Self.makeQuery().chunk(size, closure)
+    }
 }
 
 // MARK: Relatable
