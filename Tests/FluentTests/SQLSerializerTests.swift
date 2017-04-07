@@ -270,6 +270,23 @@ class SQLSerializerTests: XCTestCase {
         XCTAssertEqual(statement, "SELECT `compounds`.* FROM `compounds` WHERE `compounds`.`foo` IS NULL")
         XCTAssertEqual(values.count, 0)
     }
+    
+    func testDirty() throws {
+        let atom = Atom(name: "Hydrogen", id: 42)
+        atom.exists = true
+        
+        do {
+            atom.storage.fetchedRow = try Row(node: ["name": "Foo"])
+            let dirty = try atom.makeDirtyRow()
+            XCTAssertEqual(dirty["name"]?.string, "Hydrogen")
+        }
+        
+        do {
+            atom.storage.fetchedRow = try Row(node: ["name": "Hydrogen"])
+            let dirty = try atom.makeDirtyRow()
+            XCTAssertNil(dirty["name"]?.string)
+        }
+    }
 }
 
 

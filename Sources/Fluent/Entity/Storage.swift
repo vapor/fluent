@@ -12,6 +12,9 @@ public final class Storage {
     // SoftDeletable
     internal var deletedAt: Date? = nil
     internal var shouldForceDelete: Bool = false
+    
+    // Dirty key updates
+    internal var fetchedRow: Row? = nil
 }
 
 public protocol Storable: class {

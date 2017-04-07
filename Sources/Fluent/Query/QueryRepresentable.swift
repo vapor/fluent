@@ -126,8 +126,9 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
         let query = try makeQuery()
 
         if let _ = entity.id, entity.exists {
+            // update
             try entity.willUpdate()
-            var row = try entity.makeRow()
+            var row = try entity.makeDirtyRow()
             try row.set(E.idKey, entity.id)
 
             // timestampable
@@ -155,6 +156,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
             try modify(row)
             entity.didUpdate()
         } else {
+            // create
             if entity.id == nil, case .uuid = E.idType {
                 // automatically generates uuids
                 // for models without them

@@ -1,7 +1,7 @@
 // Represents a page of results for the entity
-public struct Page<T: Entity & Paginatable> {
+public struct Page<E: Entity & Paginatable> {
     public let number: Int
-    public let data: [T]
+    public let data: [E]
     public let size: Int
     public let total: Int
 
@@ -9,8 +9,8 @@ public struct Page<T: Entity & Paginatable> {
     // pagination and ready for `.all()` call
     public init(
         number: Int,
-        data: [T],
-        size: Int = T.defaultPageSize,
+        data: [E],
+        size: Int = E.defaultPageSize,
         total: Int
     ) throws {
         guard number > 0 else {
