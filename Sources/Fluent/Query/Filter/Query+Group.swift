@@ -8,22 +8,22 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
         _ closure: QueryClosure<E>
     ) throws -> Query<E> {
         let main = try makeQuery()
-
+        
         let sub = Query<E>(main.executor)
         try closure(sub)
-
+        
         let group = Filter(E.self, .group(relation, sub.filters))
-        try filter(group)
-
+        try main.filter(group)
+        
         return main
     }
-
+    
     /// Grouped `and` filter subquery
     @discardableResult
     public func and(_ closure: QueryClosure<E>) throws -> Query<E> {
         return try group(.and, closure)
     }
-
+    
     /// Grouped `or` filter subquery
     @discardableResult
     public func or(_ closure: QueryClosure<E>) throws -> Query<E> {
