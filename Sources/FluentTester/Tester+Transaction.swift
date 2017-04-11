@@ -1,3 +1,5 @@
+private enum _Error: Error { case test }
+
 extension Tester {
     public func testTransaction() throws {
         guard let driver = database.driver as? Transactable else {
@@ -15,17 +17,21 @@ extension Tester {
         let compound = Compound(name: "Test 0")
         try compound.save()
         
-        try driver.transaction { conn in
-            for i in 1...128 {
-                let compound = Compound(name: "Test \(i)")
-                try compound.makeQuery(conn).save()
+        do {
+            try driver.transaction { conn in
+                for i in 1...128 {
+                    let compound = Compound(name: "Test \(i)")
+                    try compound.makeQuery(conn).save()
+                }
+                let count = try Compound.makeQuery(conn).count()
+                guard count == 129 else {
+                    throw Error.failed("Count \(count) did not equal 129")
+                }
+                throw _Error.test
             }
-            let count = try Compound.makeQuery(conn).count()
-            guard count == 129 else {
-                throw Error.failed("Count \(count) did not equal 129")
-            }
-            throw Error.failed("simulate failure")
-        }
+            throw Error.failed("No error thrown")
+        } catch _Error.test {}
+
         
         let count = try Compound.count()
         guard count == 1 else {

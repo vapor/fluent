@@ -154,6 +154,7 @@ extension SQLiteDriverProtocol {
             try conn.raw("RELEASE SAVEPOINT \(name)")
         } catch {
             try conn.raw("ROLLBACK TO SAVEPOINT \(name)")
+            throw error
         }
     }
 }
