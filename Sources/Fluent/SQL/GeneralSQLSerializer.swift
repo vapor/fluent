@@ -1,3 +1,5 @@
+import Random
+
 /// Serializers a Query into general SQL
 open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
     public let query: Query<E>
@@ -19,8 +21,8 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
             return modify()
         case .schema(let schema):
             switch schema {
-            case .create(let fields):
-                return create(fields)
+            case .create(let fields, let foreignKeys):
+                return create(fields, foreignKeys)
             case .modify(let add, let remove):
                 return alter(add: add, drop: remove)
             case .delete:
@@ -218,12 +220,14 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
     // MARK: Schema
 
 
-    open func create(_ add: [RawOr<Field>]) -> (String, [Node]) {
+    open func create(_ fields: [RawOr<Field>], _ fkeys: [RawOr<ForeignKey>]) -> (String, [Node]) {
         var statement: [String] = []
 
         statement += "CREATE TABLE"
         statement += escape(E.entity)
-        statement += columns(add)
+        
+        let items: [String] = columns(fields) + foreignKeys(fkeys)
+        statement += "(" + items.joined(separator: ", ") + ")"
 
         return (
             concatenate(statement),
@@ -273,11 +277,22 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
             []
         )
     }
+    
+    open func foreignKeys(_ foreignKeys: [RawOr<ForeignKey>]) -> [String] {
+        return foreignKeys.map(foreignKey)
+    }
+    
+    open func foreignKey(_ foreignKey: RawOr<ForeignKey>) -> String {
+        switch foreignKey {
+        case .raw(let string, _):
+            return string
+        case .some(let foreignKey):
+            return "CONSTRAINT `_fluent_foreignkey_\(random(bytes: 3))` FOREIGN KEY (`\(foreignKey.field)`) REFERENCES `\(foreignKey.foreignEntity)` (`\(foreignKey.foreignField)`)"
+        }
+    }
 
-    open func columns(_ fields: [RawOr<Field>]) -> String {
-        let parsed: [String] = fields.map(column)
-            
-        return "(" + parsed.joined(separator: ", ") + ")"
+    open func columns(_ fields: [RawOr<Field>]) -> [String] {
+        return fields.map(column)
     }
 
     open func column(_ field: RawOr<Field>) -> String {
@@ -665,6 +680,13 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
 
     open func escape(_ string: String) -> String {
         return "`\(string)`"
+    }
+    
+    open func random(bytes: Int) -> String {
+        return OSRandom()
+            .bytes(count: bytes)
+            .hexEncoded
+            .makeString()
     }
 }
 

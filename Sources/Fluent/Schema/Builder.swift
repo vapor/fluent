@@ -1,5 +1,7 @@
+/// Represents any type of schema builder
 public protocol Builder: class {
     var fields: [RawOr<Field>] { get set }
+    var foreignKeys: [RawOr<ForeignKey>] { get set }
 }
 
 extension Builder {
@@ -176,6 +178,40 @@ extension Builder {
             default: `default`
         )
         addField(field)
+    }
+    
+    // MARK: Foreign Key
+    
+    public func addForeignKey(_ foreignKey: ForeignKey) {
+        foreignKeys.append(.some(foreignKey))
+    }
+    
+    /// Adds a foreign key constraint from a local
+    /// column to a column on the foreign entity.
+    public func foreignKey<E: Entity>(
+        _ field: String,
+        references foreignField: String,
+        on foreignEntity: E.Type = E.self
+    ) {
+        let foreignKey = ForeignKey(
+            field: field,
+            foreignField: foreignField,
+            foreignEntity: foreignEntity
+        )
+        addForeignKey(foreignKey)
+    }
+    
+    /// Adds a foreign key constraint from a local
+    /// column to a column on the foreign entity.
+    public func foreignKey<E: Entity>(
+        for: E.Type = E.self
+    ) {
+        let foreignKey = ForeignKey(
+            field: E.foreignIdKey,
+            foreignField: E.idKey,
+            foreignEntity: E.self
+        )
+        addForeignKey(foreignKey)
     }
 
     // MARK: Raw

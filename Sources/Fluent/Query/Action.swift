@@ -11,7 +11,10 @@ public enum Action {
 }
 
 public enum Schema {
-    case create([RawOr<Field>])
+    case create(
+        fields: [RawOr<Field>],
+        foreignKeys: [RawOr<ForeignKey>]
+    )
     case modify(add: [RawOr<Field>], remove: [RawOr<Field>])
     case delete
 }
@@ -36,8 +39,8 @@ extension Action: Equatable {
 extension Schema: Equatable {
     public static func ==(lhs: Schema, rhs: Schema) -> Bool {
         switch (lhs, rhs) {
-        case (.create(let a), .create(let b)):
-            return a == b
+        case (.create(let af, let afk), .create(let bf, let bfk)):
+            return af == bf && afk == bfk
         case (.modify(let addA, let removeA), .modify(let addB, let removeB)):
             return addA == addB && removeA == removeB
         case (.delete, .delete):

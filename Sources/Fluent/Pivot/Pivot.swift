@@ -77,6 +77,8 @@ extension Pivot: Preparation {
             builder.id(for: self)
             builder.foreignId(for: Left.self)
             builder.foreignId(for: Right.self)
+            builder.foreignKey(for: Left.self)
+            builder.foreignKey(for: Right.self)
         }
     }
 
