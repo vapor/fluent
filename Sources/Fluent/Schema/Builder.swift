@@ -6,7 +6,7 @@ extension Builder {
     public func addField(_ field: Field) {
         fields.append(.some(field))
     }
-    
+
     public func id<E: Entity>(for entityType: E.Type) {
         let field = Field(
             name: E.idKey,
@@ -16,10 +16,16 @@ extension Builder {
         addField(field)
     }
 
-    public func foreignId<E: Entity>(for entityType: E.Type) {
+    public func foreignId<E: Entity>(
+        for entityType: E.Type,
+        optional: Bool = false,
+        unique: Bool = false
+    ) {
         let field = Field(
             name: E.foreignIdKey,
-            type: .id(type: E.idType)
+            type: .id(type: E.idType),
+            optional: optional,
+            unique: unique
         )
         addField(field)
     }
@@ -139,7 +145,7 @@ extension Builder {
     }
 
     // MARK: Relations
-    
+
     public func parent<E: Entity>(
         _ entity: E.Type = E.self,
         optional: Bool = false,
@@ -171,9 +177,9 @@ extension Builder {
         )
         addField(field)
     }
-    
+
     // MARK: Raw
-    
+
     public func raw(_ string: String) {
         fields.append(.raw(string, []))
     }
