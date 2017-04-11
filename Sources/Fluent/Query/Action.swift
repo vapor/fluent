@@ -48,8 +48,8 @@ extension Schema: Equatable {
         switch (lhs, rhs) {
         case (.create(let af, let afk), .create(let bf, let bfk)):
             return af == bf && afk == bfk
-        case (.modify(let addfA, let addfkA, let removefA, let removefkA), .modify(let addfB, let addfkB, let removefB, let removefkB)):
-            return addfA == addfB && removefA == removefB && addfkA == addfkB && removefkA == removefkB
+        case (.modify(let aa, let ab, let ac, let ad), .modify(let ba, let bb, let bc, let bd)):
+            return aa == ba && ab == bb && ac == bc && ad == bd
         case (.delete, .delete):
             return true
         case (.createIndex(let a), .createIndex(let b)):
