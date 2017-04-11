@@ -1,4 +1,5 @@
 import SQLite
+import Random
 
 /// An in memory driver that can be used for debugging and testing
 /// built on top of SQLiteDriver
@@ -30,7 +31,7 @@ public final class SQLiteDriver: SQLiteDriverProtocol {
     }
 }
 
-public protocol SQLiteDriverProtocol: Fluent.Driver, Connection {
+public protocol SQLiteDriverProtocol: Fluent.Driver, Connection, Transactable {
     var database: SQLite { get }
 }
 
@@ -135,6 +136,25 @@ extension SQLiteDriverProtocol {
         // SQLite must be configured with 
         // SQLITE_OPEN_FULLMUTEX for this to work
         return self
+    }
+    
+    public func transaction(_ closure: (Connection) throws -> ()) throws {
+        let conn = try makeConnection(.readWrite)
+        
+        let rand = OSRandom()
+            .bytes(count: 2)
+            .hexEncoded
+            .makeString()
+        
+        let name = "`_fluent_savepoint_\(rand)`"
+        
+        try conn.raw("SAVEPOINT \(name)")
+        do {
+            try closure(conn)
+            try conn.raw("RELEASE SAVEPOINT \(name)")
+        } catch {
+            try conn.raw("ROLLBACK TO SAVEPOINT \(name)")
+        }
     }
 }
 

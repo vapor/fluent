@@ -22,5 +22,6 @@ public final class Tester {
         try test(testTimestamps, "Timestamps")
         try test(testSoftDelete, "Soft Delete")
         try test(testChunk, "Chunking")
+        try test(testTransaction, "Transaction")
     }
 }
