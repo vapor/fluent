@@ -2,11 +2,7 @@ extension Tester {
     public func testForeignKeys() throws {
         UserFK.database = database
         PetFK.database = database
-        
-        database.log = { query in
-            print(query)
-        }
-        
+
         try UserFK.prepare(database)
         try PetFK.prepare(database)
         defer {

@@ -33,13 +33,13 @@ extension Database {
     /// Adds an index to one field
     public func index<E: Entity>(_ field: String, for e: E.Type) throws {
         let index = Index(fields: [field])
-        try createIndex(index, for: e)
+        try self.index(index, for: e)
     }
     
     /// Adds an index to multiple fields
     public func index<E: Entity>(_ fields: [String], for e: E.Type) throws {
         let index = Index(fields: fields)
-        try createIndex(index, for: e)
+        try self.index(index, for: e)
     }
     
     // MARK: Delete

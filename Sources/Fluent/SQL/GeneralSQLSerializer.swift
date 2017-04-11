@@ -270,7 +270,7 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         case .raw(let string, _):
             statement += string
         case .some(let idx):
-            statement += escape(E.entity) + "." + escape(idx.name)
+            statement += escape(idx.name)
         }
         
         return (
