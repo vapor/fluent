@@ -1,5 +1,5 @@
 final class Migration: Entity {
-    static var entity = "fluent"
+    static var entity = fluentTableName
     let storage = Storage()
     var name: String
     var batch: Int
@@ -38,3 +38,5 @@ extension Migration: Preparation {
 }
 
 extension Migration: Timestampable {}
+
+public var fluentTableName: String = "fluent"
