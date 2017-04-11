@@ -9,6 +9,7 @@ public final class MemoryDriver: SQLiteDriverProtocol {
 
     public init() throws {
         database = try SQLite(path: ":memory:")
+        try enableForeignKeys()
     }
 }
 
@@ -28,6 +29,7 @@ public final class SQLiteDriver: SQLiteDriverProtocol {
         database = try SQLite(path: 
             path ?? "Database/main.sqlite"
         )
+        try enableForeignKeys()
     }
 }
 
@@ -60,10 +62,10 @@ extension SQLiteDriverProtocol {
         case .some(let query):
             if
                 case .schema(let schema) = query.action,
-                case .modify(let add, let drop) = schema,
-                (add.count + drop.count) > 1
+                case .modify(let fields, let fks, let deleteFields, let deleteFks) = schema,
+                (fields.count + fks.count + deleteFields.count + deleteFks.count) > 1
             {
-                throw SQLiteDriverError.unsupported("SQLite does not support more than one ADD/DROP action per ALTER. Try splitting your modifications into separate queries. Attempted to ADD \(add.count) columns and DROP \(drop.count) columns.")
+                throw SQLiteDriverError.unsupported("SQLite does not support more than one ADD/DROP action per ALTER. Try splitting your modifications into separate queries. Attempted to ADD \(fields.count) columns, DROP \(deleteFields.count) columns, ADD \(fks.count) foreign keys, DROP \(fks.count) foreign keys.")
             }
           
             let serializer = SQLiteSerializer(query)
@@ -136,6 +138,14 @@ extension SQLiteDriverProtocol {
         // SQLite must be configured with 
         // SQLITE_OPEN_FULLMUTEX for this to work
         return self
+    }
+    
+    public func enableForeignKeys() throws {
+        try raw("PRAGMA foreign_keys = ON")
+    }
+    
+    public func disableForeignKeys() throws {
+        try raw("PRAGMA foreign_keys = ON")
     }
     
     public func transaction(_ closure: (Connection) throws -> ()) throws {

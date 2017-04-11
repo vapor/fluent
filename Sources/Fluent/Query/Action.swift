@@ -15,7 +15,14 @@ public enum Schema {
         fields: [RawOr<Field>],
         foreignKeys: [RawOr<ForeignKey>]
     )
-    case modify(add: [RawOr<Field>], remove: [RawOr<Field>])
+    case modify(
+        fields: [RawOr<Field>],
+        foreignKeys: [RawOr<ForeignKey>],
+        deleteFields: [RawOr<Field>],
+        deleteForeignKeys: [RawOr<ForeignKey>]
+    )
+    case createIndex(RawOr<Index>)
+    case deleteIndex(RawOr<Index>)
     case delete
 }
 
@@ -41,10 +48,14 @@ extension Schema: Equatable {
         switch (lhs, rhs) {
         case (.create(let af, let afk), .create(let bf, let bfk)):
             return af == bf && afk == bfk
-        case (.modify(let addA, let removeA), .modify(let addB, let removeB)):
-            return addA == addB && removeA == removeB
+        case (.modify(let addfA, let addfkA, let removefA, let removefkA), .modify(let addfB, let addfkB, let removefB, let removefkB)):
+            return addfA == addfB && removefA == removefB && addfkA == addfkB && removefkA == removefkB
         case (.delete, .delete):
             return true
+        case (.createIndex(let a), .createIndex(let b)):
+            return a == b
+        case (.deleteIndex(let a), .deleteIndex(let b)):
+            return a == b
         default:
             return false
         }

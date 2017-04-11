@@ -31,7 +31,7 @@ class RelationTests: XCTestCase {
     }
 
     override func tearDown() {
-        try! ents.forEach { ent in try ent.revert(database) }
+        try? ents.forEach { ent in try ent.revert(database) }
     }
 
     func testHasMany() throws {
@@ -52,14 +52,12 @@ class RelationTests: XCTestCase {
             "name": "Hydrogen",
             "group_id": 1337
         ])
-        try hydrogen.save()
         hydrogen.id = 42
         try hydrogen.save()
 
         let water = try Compound(row: [
             "name": "Water"
         ])
-        try water.save()
         water.id = 1337
         try water.save()
 

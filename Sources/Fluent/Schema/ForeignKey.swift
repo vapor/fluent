@@ -8,6 +8,10 @@ public struct ForeignKey {
     /// The entity type of the field being referenced
     public let foreignEntity: Entity.Type
     
+    public var name: String {
+        return "_fluent_fk_\(field)_\(foreignEntity.entity).\(foreignField)"
+    }
+    
     /// Creates a new ForeignKey
     public init(field: String, foreignField: String, foreignEntity: Entity.Type) {
         self.field = field

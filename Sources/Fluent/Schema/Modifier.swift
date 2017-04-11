@@ -22,13 +22,24 @@ public final class Modifier: Builder {
     }
 
     /// Delete a field with the given name
-    public func delete(_ name: String) {
+    public func delete(_ field: String) {
         let field = Field(
-            name: name,
+            name: field,
             type: .custom(type: "delete")
         )
         deleteFields.append(.some(field))
     }
+    
+    /// Delete a foreign key
+    public func deleteForeignKey<E: Entity>(_ field: String, referencing: String, on: E.Type) {
+        let fk = ForeignKey(
+            field: field,
+            foreignField: referencing,
+            foreignEntity: on
+        )
+        deleteForeignKeys.append(.some(fk))
+    }
+
 
     /// Delete a field with the given name
     public func delete(raw: String) {

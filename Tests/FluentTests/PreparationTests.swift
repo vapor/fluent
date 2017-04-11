@@ -8,7 +8,7 @@ class PreparationTests: XCTestCase {
 
     func testManualPreparation() {
         let driver = TestSchemaDriver { schema in
-            guard case .create(let fields) = schema else {
+            guard case .create(let fields, _) = schema else {
                 XCTFail("Invalid schema")
                 return
             }
@@ -56,7 +56,7 @@ class PreparationTests: XCTestCase {
     
     func testStringIdentifiedModelPreparation() {
         let driver = TestSchemaDriver { schema in
-            guard case .create(let fields) = schema else {
+            guard case .create(let fields, _) = schema else {
                 XCTFail("Invalid schema")
                 return
             }
@@ -88,7 +88,7 @@ class PreparationTests: XCTestCase {
 
     func testModelPreparation() {
         let driver = TestSchemaDriver { schema in
-            guard case .create(let fields) = schema else {
+            guard case .create(let fields, _) = schema else {
                 XCTFail("Invalid schema")
                 return
             }
