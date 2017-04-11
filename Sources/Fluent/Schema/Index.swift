@@ -18,13 +18,13 @@ public struct Index {
 extension Database {
     // MARK: Create
     
-    public func createIndex<E: Entity>(raw: String, for e: E.Type) throws {
+    public func index<E: Entity>(raw: String, for e: E.Type) throws {
         let query = Query<E>(self)
         query.action = .schema(.createIndex(.raw(raw, [])))
         try self.query(.some(query))
     }
     
-    public func createIndex<E: Entity>(_ index: Index, for e: E.Type) throws {
+    public func index<E: Entity>(_ index: Index, for e: E.Type) throws {
         let query = Query<E>(self)
         query.action = .schema(.createIndex(.some(index)))
         try self.query(.some(query))

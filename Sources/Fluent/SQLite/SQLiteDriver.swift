@@ -145,7 +145,7 @@ extension SQLiteDriverProtocol {
     }
     
     public func disableForeignKeys() throws {
-        try raw("PRAGMA foreign_keys = ON")
+        try raw("PRAGMA foreign_keys = OFF")
     }
     
     public func transaction(_ closure: (Connection) throws -> ()) throws {
