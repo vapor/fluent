@@ -53,7 +53,9 @@ public final class Database: Executor, QueryLogger {
             maxConnections: maxConnections // some number larger than the max threads
         )
         
+        var driver = driver
         self.driver = driver
+        driver.queryLogger = self
     }
     
     // MARK: Log
