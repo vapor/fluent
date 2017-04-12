@@ -37,7 +37,7 @@ final class Student: Entity {
     
     static func prepare(_ database: Database) throws {
         try database.create(self) { students in
-            students.id(for: self)
+            students.id()
             students.string("name", length: 64)
             students.int("age")
             students.string("ssn", unique: true)

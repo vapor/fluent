@@ -9,7 +9,7 @@ final class CustomIdKey: Entity {
     
     static func prepare(_ database: Fluent.Database) throws {
         try database.create(self) { builder in
-            builder.id(for: CustomIdKey.self)
+            builder.foreignId(for: CustomIdKey.self)
             builder.string("label")
         }
     }

@@ -17,7 +17,7 @@ class SchemaCreateTests: XCTestCase {
     }
 
     func testCreate() throws {
-        let builder = Creator()
+        let builder = Creator(Atom.self)
 
         builder.int("id")
         builder.string("name")
@@ -39,9 +39,9 @@ class SchemaCreateTests: XCTestCase {
     
     
     func testStringIdentifiedEntity() throws {
-        let builder = Creator()
+        let builder = Creator(StringIdentifiedThing.self)
         
-        builder.id(for: StringIdentifiedThing.self)
+        builder.id()
 
         let query = Query<StringIdentifiedThing>(db)
         query.action = .schema(.create(
@@ -58,9 +58,9 @@ class SchemaCreateTests: XCTestCase {
  
     
     func testCustomIdentifiedEntity() throws {
-        let builder = Creator()
+        let builder = Creator(CustomIdentifiedThing.self)
         
-        builder.id(for: CustomIdentifiedThing.self)
+        builder.id()
         
         let query = Query<CustomIdentifiedThing>(db)
         query.action = .schema(.create(
@@ -76,7 +76,7 @@ class SchemaCreateTests: XCTestCase {
     }
     
     func testStringDefault() throws {
-        let builder = Creator()
+        let builder = Creator(Atom.self)
         
         builder.string("string", default: "default")
         
@@ -94,7 +94,7 @@ class SchemaCreateTests: XCTestCase {
     }
 
     func testModify() throws {
-        let builder = Modifier()
+        let builder = Modifier(Atom.self)
 
         builder.int("id")
         builder.string("name")

@@ -26,7 +26,7 @@ final class Migration: Entity {
 extension Migration: Preparation {
     static func prepare(_ database: Database) throws {
         try database.create(self) { builder in
-            builder.id(for: self)
+            builder.id()
             builder.string("name")
             builder.int("batch")
         }

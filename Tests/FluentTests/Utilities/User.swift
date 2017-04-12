@@ -5,7 +5,7 @@ final class User: Entity {
     
     static func prepare(_ database: Fluent.Database) throws {
         try database.create(self) { builder in
-            builder.id(for: self)
+            builder.id()
             builder.string("name")
             builder.string("email")
         }

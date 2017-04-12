@@ -74,7 +74,7 @@ public final class Pivot<
 extension Pivot: Preparation {
     public static func prepare(_ database: Database) throws {
         try database.create(self) { builder in
-            builder.id(for: self)
+            builder.id()
             builder.foreignId(for: Left.self)
             builder.foreignId(for: Right.self)
         }

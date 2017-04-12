@@ -32,7 +32,7 @@ public final class Atom: Entity {
 
     public static func prepare(_ database: Database) throws {
         try database.create(self) { atoms in
-            atoms.id(for: self)
+            atoms.id()
             atoms.string("name")
             atoms.int("protons")
             atoms.double("weight")

@@ -4,7 +4,7 @@ extension Database {
     public func create<E: Entity>(_ e: E.Type, closure: (Creator) throws -> ()) throws {
         if e.database == nil { e.database = self }
 
-        let creator = Creator()
+        let creator = Creator(E.self)
         try closure(creator)
 
         // add timestamps
@@ -31,7 +31,7 @@ extension Database {
     public func modify<E: Entity>(_ e: E.Type, closure: (Modifier) throws -> ()) throws {
         if e.database == nil { e.database = self }
 
-        let modifier = Modifier()
+        let modifier = Modifier(E.self)
         try closure(modifier)
 
         let query = Query<E>(self)

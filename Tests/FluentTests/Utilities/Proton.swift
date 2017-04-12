@@ -9,7 +9,7 @@ final class Proton: Entity {
 extension Proton: Preparation {
     static func prepare(_ database: Database) throws {
         try database.create(self) { protons in
-            protons.id(for: self)
+            protons.id()
             protons.foreignId(for: Atom.self)
         }
     }

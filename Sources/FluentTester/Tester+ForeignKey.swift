@@ -68,7 +68,7 @@ final class UserFK: Entity, Preparation {
     
     static func prepare(_ database: Database) throws {
         try database.create(self) { userfk in
-            userfk.id(for: self)
+            userfk.id()
             userfk.string("name")
         }
     }
@@ -103,7 +103,7 @@ final class PetFK: Entity {
     
     static func prepare(_ database: Database) throws {
         try database.create(self) { petfk in
-            petfk.id(for: self)
+            petfk.id()
             petfk.string("name")
             petfk.foreignId(for: UserFK.self)
             petfk.foreignKey(for: UserFK.self)

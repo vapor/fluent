@@ -9,7 +9,7 @@ final class Group: Entity {
 extension Group: Preparation {
     static func prepare(_ database: Database) throws {
         try database.create(self) { groups in
-            groups.id(for: self)
+            groups.id()
         }
     }
     static func revert(_ database: Database) throws {

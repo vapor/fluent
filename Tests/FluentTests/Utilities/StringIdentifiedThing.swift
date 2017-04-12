@@ -30,7 +30,7 @@ final class StringIdentifiedThing: Entity {
     
     static func prepare(_ database: Database) throws {
         try database.create(self) { creator throws in
-            creator.id(for: self)
+            creator.id()
         }
     }
     

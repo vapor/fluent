@@ -1,5 +1,6 @@
 /// Represents any type of schema builder
 public protocol Builder: class {
+    var entity: Entity.Type { get} 
     var fields: [RawOr<Field>] { get set }
     var foreignKeys: [RawOr<ForeignKey>] { get set }
 }
@@ -9,10 +10,10 @@ extension Builder {
         fields.append(.some(field))
     }
 
-    public func id<E: Entity>(for entityType: E.Type) {
+    public func id() {
         let field = Field(
-            name: E.idKey,
-            type: .id(type: E.idType),
+            name: entity.idKey,
+            type: .id(type: entity.idType),
             primaryKey: true
         )
         self.field(field)
@@ -198,6 +199,7 @@ extension Builder {
         on foreignEntity: E.Type = E.self
     ) {
         let foreignKey = ForeignKey(
+            entity: entity,
             field: field,
             foreignField: foreignField,
             foreignEntity: foreignEntity
@@ -210,12 +212,11 @@ extension Builder {
     public func foreignKey<E: Entity>(
         for: E.Type = E.self
     ) {
-        let foreignKey = ForeignKey(
-            field: E.foreignIdKey,
-            foreignField: E.idKey,
-            foreignEntity: E.self
+        self.foreignKey(
+            E.foreignIdKey,
+            references: E.idKey,
+            on: E.self
         )
-        self.foreignKey(foreignKey)
     }
 
     // MARK: Raw
