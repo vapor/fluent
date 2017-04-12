@@ -1,9 +1,11 @@
+/// Represents any type of schema builder
 public protocol Builder: class {
     var fields: [RawOr<Field>] { get set }
+    var foreignKeys: [RawOr<ForeignKey>] { get set }
 }
 
 extension Builder {
-    public func addField(_ field: Field) {
+    public func field(_ field: Field) {
         fields.append(.some(field))
     }
 
@@ -13,7 +15,7 @@ extension Builder {
             type: .id(type: E.idType),
             primaryKey: true
         )
-        addField(field)
+        self.field(field)
     }
 
     public func foreignId<E: Entity>(
@@ -27,7 +29,11 @@ extension Builder {
             optional: optional,
             unique: unique
         )
-        addField(field)
+        self.field(field)
+        
+        if autoForeignKeys {
+            self.foreignKey(for: E.self)
+        }
     }
 
     public func int(
@@ -43,7 +49,7 @@ extension Builder {
             unique: unique,
             default: `default`
         )
-        addField(field)
+        self.field(field)
     }
 
     public func string(
@@ -60,7 +66,7 @@ extension Builder {
             unique: unique,
             default: `default`
         )
-        addField(field)
+        self.field(field)
     }
 
     public func double(
@@ -76,7 +82,7 @@ extension Builder {
             unique: unique,
             default: `default`
         )
-        addField(field)
+        self.field(field)
     }
 
     public func bool(
@@ -92,7 +98,7 @@ extension Builder {
             unique: unique,
             default: `default`
         )
-        addField(field)
+        self.field(field)
     }
 
     public func bytes(
@@ -108,7 +114,7 @@ extension Builder {
             unique: unique,
             default: `default`
         )
-        addField(field)
+        self.field(field)
     }
 
     public func date(
@@ -124,7 +130,7 @@ extension Builder {
             unique: unique,
             default: `default`
         )
-        addField(field)
+        self.field(field)
     }
 
     public func custom(
@@ -141,7 +147,7 @@ extension Builder {
             unique: unique,
             default: `default`
         )
-        addField(field)
+        self.field(field)
     }
 
     // MARK: Relations
@@ -175,7 +181,41 @@ extension Builder {
             unique: unique,
             default: `default`
         )
-        addField(field)
+        self.field(field)
+    }
+    
+    // MARK: Foreign Key
+    
+    public func foreignKey(_ foreignKey: ForeignKey) {
+        foreignKeys.append(.some(foreignKey))
+    }
+    
+    /// Adds a foreign key constraint from a local
+    /// column to a column on the foreign entity.
+    public func foreignKey<E: Entity>(
+        _ field: String,
+        references foreignField: String,
+        on foreignEntity: E.Type = E.self
+    ) {
+        let foreignKey = ForeignKey(
+            field: field,
+            foreignField: foreignField,
+            foreignEntity: foreignEntity
+        )
+        self.foreignKey(foreignKey)
+    }
+    
+    /// Adds a foreign key constraint from a local
+    /// column to a column on the foreign entity.
+    public func foreignKey<E: Entity>(
+        for: E.Type = E.self
+    ) {
+        let foreignKey = ForeignKey(
+            field: E.foreignIdKey,
+            foreignField: E.idKey,
+            foreignEntity: E.self
+        )
+        self.foreignKey(foreignKey)
     }
 
     // MARK: Raw
@@ -184,3 +224,5 @@ extension Builder {
         fields.append(.raw(string, []))
     }
 }
+
+public var autoForeignKeys = true

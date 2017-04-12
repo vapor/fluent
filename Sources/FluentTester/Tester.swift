@@ -23,5 +23,7 @@ public final class Tester {
         try test(testSoftDelete, "Soft Delete")
         try test(testChunk, "Chunking")
         try test(testTransaction, "Transaction")
+        try test(testForeignKeys, "Foreign Keys")
+        try test(testIndex, "Index")
     }
 }

@@ -11,8 +11,18 @@ public enum Action {
 }
 
 public enum Schema {
-    case create([RawOr<Field>])
-    case modify(add: [RawOr<Field>], remove: [RawOr<Field>])
+    case create(
+        fields: [RawOr<Field>],
+        foreignKeys: [RawOr<ForeignKey>]
+    )
+    case modify(
+        fields: [RawOr<Field>],
+        foreignKeys: [RawOr<ForeignKey>],
+        deleteFields: [RawOr<Field>],
+        deleteForeignKeys: [RawOr<ForeignKey>]
+    )
+    case createIndex(RawOr<Index>)
+    case deleteIndex(RawOr<Index>)
     case delete
 }
 
@@ -36,12 +46,16 @@ extension Action: Equatable {
 extension Schema: Equatable {
     public static func ==(lhs: Schema, rhs: Schema) -> Bool {
         switch (lhs, rhs) {
-        case (.create(let a), .create(let b)):
-            return a == b
-        case (.modify(let addA, let removeA), .modify(let addB, let removeB)):
-            return addA == addB && removeA == removeB
+        case (.create(let af, let afk), .create(let bf, let bfk)):
+            return af == bf && afk == bfk
+        case (.modify(let aa, let ab, let ac, let ad), .modify(let ba, let bb, let bc, let bd)):
+            return aa == ba && ab == bb && ac == bc && ad == bd
         case (.delete, .delete):
             return true
+        case (.createIndex(let a), .createIndex(let b)):
+            return a == b
+        case (.deleteIndex(let a), .deleteIndex(let b)):
+            return a == b
         default:
             return false
         }

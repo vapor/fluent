@@ -25,7 +25,10 @@ class SchemaCreateTests: XCTestCase {
         builder.custom("profile", type: "JSON")
 
         let query = Query<Atom>(db)
-        query.action = .schema(.create(builder.fields))
+        query.action = .schema(.create(
+            fields: builder.fields,
+            foreignKeys: []
+        ))
 
         let serializer = GeneralSQLSerializer(query)
         let (statement, values) = serializer.serialize()
@@ -41,7 +44,10 @@ class SchemaCreateTests: XCTestCase {
         builder.id(for: StringIdentifiedThing.self)
 
         let query = Query<StringIdentifiedThing>(db)
-        query.action = .schema(.create(builder.fields))
+        query.action = .schema(.create(
+            fields: builder.fields,
+            foreignKeys: []
+        ))
         let serializer = GeneralSQLSerializer(query)
         
         let (statement, values) = serializer.serialize()
@@ -57,7 +63,10 @@ class SchemaCreateTests: XCTestCase {
         builder.id(for: CustomIdentifiedThing.self)
         
         let query = Query<CustomIdentifiedThing>(db)
-        query.action = .schema(.create(builder.fields))
+        query.action = .schema(.create(
+            fields: builder.fields,
+            foreignKeys: []
+        ))
         let serializer = GeneralSQLSerializer(query)
         
         let (statement, values) = serializer.serialize()
@@ -72,7 +81,10 @@ class SchemaCreateTests: XCTestCase {
         builder.string("string", default: "default")
         
         let query = Query<Atom>(db)
-        query.action = .schema(.create(builder.fields))
+        query.action = .schema(.create(
+            fields: builder.fields,
+            foreignKeys: []
+        ))
         let serializer = GeneralSQLSerializer(query)
         
         let (statement, values) = serializer.serialize()
@@ -90,7 +102,12 @@ class SchemaCreateTests: XCTestCase {
         builder.delete("age")
 
         let query = Query<Atom>(db)
-        query.action = .schema(.modify(add: builder.fields, remove: builder.delete))
+        query.action = .schema(.modify(
+            fields: builder.fields,
+            foreignKeys: [],
+            deleteFields: builder.deleteFields,
+            deleteForeignKeys: []
+        ))
         let serializer = GeneralSQLSerializer(query)
 
         let (statement, values) = serializer.serialize()

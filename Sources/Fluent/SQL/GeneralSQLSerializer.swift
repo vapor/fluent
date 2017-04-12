@@ -19,10 +19,24 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
             return modify()
         case .schema(let schema):
             switch schema {
-            case .create(let fields):
-                return create(fields)
-            case .modify(let add, let remove):
-                return alter(add: add, drop: remove)
+            case .create(let fields, let foreignKeys):
+                return create(fields, foreignKeys)
+            case .createIndex(let index):
+                return createIndex(index)
+            case .deleteIndex(let index):
+                return deleteIndex(index)
+            case .modify(
+                let fields,
+                let foreignKeys,
+                let deleteFields,
+                let deleteForeignKeys
+            ):
+                return alter(
+                    add: fields,
+                    foreignKeys,
+                    delete: deleteFields,
+                    deleteForeignKeys
+                )
             case .delete:
                 return drop()
             }
@@ -218,20 +232,59 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
     // MARK: Schema
 
 
-    open func create(_ add: [RawOr<Field>]) -> (String, [Node]) {
+    open func create(
+        _ fields: [RawOr<Field>],
+        _ fkeys: [RawOr<ForeignKey>]
+    ) -> (String, [Node]) {
         var statement: [String] = []
 
         statement += "CREATE TABLE"
         statement += escape(E.entity)
-        statement += columns(add)
+        
+        let items: [String] = columns(fields) + foreignKeys(fkeys)
+        statement += "(" + items.joined(separator: ", ") + ")"
 
         return (
             concatenate(statement),
             []
         )
     }
+    
+    open func createIndex(_ idx: RawOr<Index>) -> (String, [Node]) {
+        var statement: [String] = []
+        
+        statement += "CREATE"
+        statement += index(idx)
+        
+        return (
+            concatenate(statement),
+            []
+        )
+    }
+    
+    open func deleteIndex(_ idx: RawOr<Index>) -> (String, [Node]) {
+        var statement: [String] = []
+        
+        statement += "DROP INDEX"
+        switch idx {
+        case .raw(let string, _):
+            statement += string
+        case .some(let idx):
+            statement += escape(idx.name)
+        }
+        
+        return (
+            concatenate(statement),
+            []
+        )
+    }
 
-    open func alter(add: [RawOr<Field>], drop: [RawOr<Field>]) -> (String, [Node]) {
+    open func alter(
+        add fs: [RawOr<Field>],
+        _ fks: [RawOr<ForeignKey>],
+        delete dfs: [RawOr<Field>],
+        _ dfks: [RawOr<ForeignKey>]
+    ) -> (String, [Node]) {
         var statement: [String] = []
 
         statement += "ALTER TABLE"
@@ -239,11 +292,15 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
 
         var subclause: [String] = []
 
-        for field in add {
+        for field in fs {
             subclause += "ADD " + column(field)
         }
+        
+        for fk in fks {
+            subclause += "ADD " + foreignKey(fk)
+        }
 
-        for field in drop {
+        for field in dfs {
             let name: String
             switch field {
             case .raw(let raw, _):
@@ -252,6 +309,15 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
                 name = some.name
             }
             subclause += "DROP " + escape(name)
+        }
+        
+        for fk in dfks {
+            switch fk {
+            case .raw(let raw, _):
+                subclause += "DROP " + raw
+            case .some(let some):
+                subclause += "DROP " + escape(some.name)
+            }
         }
 
         statement += subclause.joined(separator: ", ")
@@ -273,11 +339,33 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
             []
         )
     }
+    
+    open func index(_ idx: RawOr<Index>) -> String {
+        switch idx {
+        case .raw(let string, _):
+            return string
+        case .some(let idx):
+            let list = idx.fields.joined(separator: ", ")
+            return "INDEX `\(idx.name)` ON `\(E.entity)` (`\(list)`)"
+        }
+    }
 
-    open func columns(_ fields: [RawOr<Field>]) -> String {
-        let parsed: [String] = fields.map(column)
-            
-        return "(" + parsed.joined(separator: ", ") + ")"
+    
+    open func foreignKeys(_ foreignKeys: [RawOr<ForeignKey>]) -> [String] {
+        return foreignKeys.map(foreignKey)
+    }
+    
+    open func foreignKey(_ foreignKey: RawOr<ForeignKey>) -> String {
+        switch foreignKey {
+        case .raw(let string, _):
+            return string
+        case .some(let foreignKey):
+            return "CONSTRAINT `\(foreignKey.name)` FOREIGN KEY (`\(foreignKey.field)`) REFERENCES `\(foreignKey.foreignEntity.entity)` (`\(foreignKey.foreignField)`)"
+        }
+    }
+
+    open func columns(_ fields: [RawOr<Field>]) -> [String] {
+        return fields.map(column)
     }
 
     open func column(_ field: RawOr<Field>) -> String {

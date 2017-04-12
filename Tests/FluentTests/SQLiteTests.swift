@@ -8,12 +8,20 @@ class SQLiteTests: XCTestCase {
 
         let create = Query<User>(database)
         let id = Field(name: "id", type: .string(length: nil))
-        create.action = .schema(.create([.some(id)]))
+        create.action = .schema(.create(
+            fields: [.some(id)],
+            foreignKeys: []
+        ))
         try memory.query(create)
 
         let modify = Query<User>(database)
         let foo = Field(name: "foo", type: .string(length: nil))
-        modify.action = .schema(.modify(add: [.some(foo), .some(foo)], remove: []))
+        modify.action = .schema(.modify(
+            fields: [.some(foo), .some(foo)],
+            foreignKeys: [],
+            deleteFields: [],
+            deleteForeignKeys: []
+        ))
         do {
             try memory.query(modify)
             XCTFail("Multiple add/remove columns should have thrown")

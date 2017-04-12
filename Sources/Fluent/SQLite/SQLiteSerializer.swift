@@ -40,4 +40,13 @@ public class SQLiteSerializer<E: Entity>: GeneralSQLSerializer<E> {
             return type
         }
     }
+    
+    public override func foreignKey(_ foreignKey: RawOr<ForeignKey>) -> String {
+        switch foreignKey {
+        case .raw(let string, _):
+            return string
+        case .some(let foreignKey):
+            return "FOREIGN KEY (`\(foreignKey.field)`) REFERENCES `\(foreignKey.foreignEntity.entity)` (`\(foreignKey.foreignField)`)"
+        }
+    }
 }

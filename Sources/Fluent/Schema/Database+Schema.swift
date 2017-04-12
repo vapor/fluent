@@ -19,7 +19,10 @@ extension Database {
         }
 
         let query = Query<E>(self)
-        query.action = .schema(.create(creator.fields))
+        query.action = .schema(.create(
+            fields: creator.fields,
+            foreignKeys: creator.foreignKeys
+        ))
         try self.query(.some(query))
     }
 
@@ -33,8 +36,10 @@ extension Database {
 
         let query = Query<E>(self)
         query.action = .schema(.modify(
-            add: modifier.fields,
-            remove: modifier.delete
+            fields: modifier.fields,
+            foreignKeys: modifier.foreignKeys,
+            deleteFields: modifier.deleteFields,
+            deleteForeignKeys: modifier.deleteForeignKeys
         ))
         try self.query(.some(query))
     }
