@@ -120,6 +120,13 @@ public final class ThreadConnectionPool {
 }
 
 extension ThreadConnectionPool: Executor {
+    public var queryLogger: QueryLogger? {
+        // connection is responsible for
+        // query logging
+        get { return nil }
+        set { }
+    }
+    
     public func query<E: Entity>(_ query: RawOr<Query<E>>) throws -> Node {
         let type: ConnectionType
         switch query {

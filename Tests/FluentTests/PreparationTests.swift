@@ -177,7 +177,7 @@ class TestSchemaDriver: Driver {
     var keyNamingConvention: KeyNamingConvention = .snake_case
     var idType: IdentifierType = .int
     var idKey: String = "id"
-    var log: QueryLogCallback?
+    var queryLogger: QueryLogger?
 
     var testClosure: (Schema) -> ()
     init(testClosure: @escaping (Schema) -> ()) {
@@ -191,7 +191,7 @@ class TestSchemaDriver: Driver {
 
 class TestSchemaConnection: Connection {
     public var isClosed: Bool = false
-    var log: QueryLogCallback?
+    var queryLogger: QueryLogger?
     
     var driver: TestSchemaDriver
     

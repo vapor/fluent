@@ -26,6 +26,10 @@ public protocol Executor {
     ///         can help prevent SQL injection.
     @discardableResult
     func query<E: Entity>(_ query: RawOr<Query<E>>) throws -> Node
+    
+    // Any queries executed by this executor
+    // should be logged to the query logger
+    var queryLogger: QueryLogger? { get set }
 }
 
 // MARK: Convenience

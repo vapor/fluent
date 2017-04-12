@@ -30,17 +30,6 @@ extension QueryLog: CustomStringConvertible {
     }
 }
 
-/// A closure for handling database logs
-public typealias QueryLogCallback = (QueryLog) -> ()
-
 public protocol QueryLogger: class {
-    var log: QueryLogCallback? { get set }
-}
-
-extension QueryLogger {
-    public func log(_ statement: String, _ values: [Node]) {
-        if let log = self.log {
-            log(QueryLog(statement, values))
-        }
-    }
+    func log(_ statement: String, _ values: [Node])
 }

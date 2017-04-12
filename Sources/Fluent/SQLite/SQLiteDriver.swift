@@ -7,7 +7,7 @@
     /// built on top of SQLiteDriver
     public final class MemoryDriver: SQLiteDriverProtocol {
         public let database: SQLite
-        public var log: QueryLogCallback?
+        public var queryLogger: QueryLogger?
 
         public init() throws {
             database = try SQLite(path: ":memory:")
@@ -23,7 +23,7 @@
     /// we do not recommend using it in Production
     public final class SQLiteDriver: SQLiteDriverProtocol {
         public let database: SQLite
-        public var log: QueryLogCallback?
+        public var queryLogger: QueryLogger?
 
         /// Creates a new SQLiteDriver pointing
         /// to the database at the supplied path.
@@ -72,7 +72,7 @@
 
                 let serializer = SQLiteSerializer(query)
                 let (statement, values) = serializer.serialize()
-                log(statement, values)
+                queryLogger?.log(statement, values)
                 let results = try database.execute(statement) { statement in
                     try self.bind(statement: statement, to: values)
                 }
@@ -83,7 +83,7 @@
                     return map(results: results)
                 }
             case .raw(let statement, let values):
-                log(statement, values)
+                queryLogger?.log(statement, values)
                 let results = try database.execute(statement) { statement in
                     try self.bind(statement: statement, to: values)
                 }

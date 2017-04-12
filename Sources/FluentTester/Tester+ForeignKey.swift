@@ -1,13 +1,22 @@
 extension Tester {
     public func testForeignKeys() throws {
+        // want to ensure this is disable just for this test
+        let og = Fluent.autoForeignKeys
+        Fluent.autoForeignKeys = false
+        defer {
+            Fluent.autoForeignKeys = og
+        }
+        
         UserFK.database = database
         PetFK.database = database
 
         try UserFK.prepare(database)
+        defer {
+            try! UserFK.revert(database)
+        }
         try PetFK.prepare(database)
         defer {
             try! PetFK.revert(database)
-            try! UserFK.revert(database)
         }
 
         

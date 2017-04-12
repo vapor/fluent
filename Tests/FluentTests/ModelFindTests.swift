@@ -25,7 +25,7 @@ class ModelFindTests: XCTestCase {
         var keyNamingConvention: KeyNamingConvention = .snake_case
 
         var idType: IdentifierType = .int
-        var log: QueryLogCallback?
+        var queryLogger: QueryLogger?
         
         var idKey: String {
             return "foo"
@@ -44,7 +44,7 @@ class ModelFindTests: XCTestCase {
         public var isClosed: Bool = false
         
         var driver: DummyDriver
-        var log: QueryLogCallback?
+        var queryLogger: QueryLogger?
         
         init(driver: DummyDriver) {
             self.driver = driver

@@ -12,7 +12,7 @@ final class DummyModel: Entity {
 
 class DummyDriver: Driver {
     var keyNamingConvention: KeyNamingConvention = .snake_case
-    var log: QueryLogCallback?
+    var queryLogger: QueryLogger?
     
     var idType: IdentifierType = .int
 
@@ -31,7 +31,7 @@ class DummyDriver: Driver {
 
 class DummyConnection: Connection {
     public var isClosed: Bool = false
-    public var log: QueryLogCallback?
+    var queryLogger: QueryLogger?
 
     func query<E: Entity>(_ query: RawOr<Query<E>>) throws -> Node {
         switch query {

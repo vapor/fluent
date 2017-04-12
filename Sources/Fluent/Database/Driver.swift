@@ -2,7 +2,7 @@
 /// and returns an array of results.
 /// It is responsible for interfacing
 /// with the data store powering Fluent.
-public protocol Driver: Executor, QueryLogger {
+public protocol Driver: Executor {
     /// The string value for the
     /// default identifier key.
     ///
@@ -25,6 +25,9 @@ public protocol Driver: Executor, QueryLogger {
     /// id keys, table names, etc.
     /// ex: snake_case vs. camelCase.
     var keyNamingConvention: KeyNamingConvention { get }
+    
+    // Object to log queries to
+    var queryLogger: QueryLogger? { get set }
 
     /// Creates a connection for executing
     /// queries. This method is used to
@@ -48,8 +51,8 @@ extension Driver {
             type = q.connectionType
         }
         
-        let connection = try makeConnection(type)
-        connection.log = log
+        var connection = try makeConnection(type)
+        connection.queryLogger = self.queryLogger
         return try connection.query(query)
     }
 }

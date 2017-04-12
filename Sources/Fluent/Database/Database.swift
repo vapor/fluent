@@ -41,17 +41,6 @@ public final class Database: Executor, QueryLogger {
     /// ex: snake_case vs. camelCase.
     public var keyNamingConvention: KeyNamingConvention
 
-    /// All queries performed by the database will be
-    /// sent here right before they are run.
-    public var log: QueryLogCallback? {
-        get {
-            return driver.log
-        }
-        set {
-            driver.log = newValue
-        }
-    }
-
     /// Creates a `Database` with the supplied
     /// `Driver`. This cannot be changed later.
     public init(_ driver: Driver, maxConnections: Int = 128) {
@@ -66,11 +55,31 @@ public final class Database: Executor, QueryLogger {
         
         self.driver = driver
     }
+    
+    // MARK: Log
+    
+    /// A closure for handling database logs
+    public typealias QueryLogCallback = (QueryLog) -> ()
+    
+    /// All queries performed by the database will be
+    /// sent here right before they are run.
+    public var log: QueryLogCallback?
+    
+    /// QueryLogger protocol
+    public func log(_ statement: String, _ values: [Node]) {
+        log?(QueryLog(statement, values))
+    }
 }
 
 // MARK: Executor
 
 extension Database {
+    /// The database is the query logger, not settable
+    public var queryLogger: QueryLogger? {
+        get { return self }
+        set { }
+    }
+    
     /// See Executor protocol.
     @discardableResult
     public func query<E: Entity>(_ query: RawOr<Query<E>>) throws -> Node {

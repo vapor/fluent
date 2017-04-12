@@ -4,7 +4,7 @@ class LastQueryDriver: Driver {
     var keyNamingConvention: KeyNamingConvention = .snake_case
     var idType: IdentifierType = .int
     let idKey: String = "#id"
-    var log: QueryLogCallback?
+    var queryLogger: QueryLogger?
 
     var lastQuery: (String, [Node])?
     var lastRaw: (String, [Node])?
@@ -18,7 +18,7 @@ class LastQueryConnection: Connection {
     public var isClosed: Bool = false
     
     var driver: LastQueryDriver
-    var log: QueryLogCallback?
+    var queryLogger: QueryLogger?
     
     init(driver: LastQueryDriver) {
         self.driver = driver
