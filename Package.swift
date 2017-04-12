@@ -16,7 +16,7 @@ let package = Package(
         .Package(url: "https://github.com/vapor/core.git", beta2),
         
         // Random number generation
-        .Package(url: "https://github.com/vapor/random", beta1),
+        .Package(url: "https://github.com/vapor/random.git", beta1),
 
         // In memory Database
         .Package(url: "https://github.com/vapor/sqlite.git", beta2)
