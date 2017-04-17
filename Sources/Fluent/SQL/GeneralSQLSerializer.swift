@@ -78,7 +78,7 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         var columns: [String] = ["\(table).*"]
         
         statement += "SELECT"
-        if query.distinct {
+        if query.isDistinct {
             statement += "DISTINCT"
         }
         
@@ -124,7 +124,7 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         var values: [Node] = []
 
         statement += "SELECT"
-        if query.distinct {
+        if query.isDistinct {
             statement += "DISTINCT"
         }
         statement += "COUNT(*) as _fluent_count FROM"
