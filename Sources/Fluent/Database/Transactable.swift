@@ -1,7 +1,7 @@
 /// Drivers that can perform data transactions should
 /// conform to this protocol.
 public protocol Transactable {
-    func transaction(_ closure: (Connection) throws -> ()) throws
+    func transaction<R>(_ closure: (Connection) throws -> R) throws -> R
 }
 
 extension Database: Transactable {
@@ -11,12 +11,12 @@ extension Database: Transactable {
     /// be rolled back.
     ///
     /// note: the underlying driver must support transactions
-    public func transaction(_ closure: (Connection) throws -> ()) throws {
+    public func transaction<R>(_ closure: (Connection) throws -> R) throws -> R {
         guard let t = driver as? Transactable else {
             throw TransactionError.unsupported(type(of: driver))
         }
         
-        try t.transaction(closure)
+        return try t.transaction(closure)
     }
 }
 

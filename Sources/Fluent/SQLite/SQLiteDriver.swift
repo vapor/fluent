@@ -150,7 +150,7 @@
             try raw("PRAGMA foreign_keys = OFF")
         }
 
-        public func transaction(_ closure: (Connection) throws -> ()) throws {
+        public func transaction<R>(_ closure: (Connection) throws -> R) throws -> R {
             let conn = try makeConnection(.readWrite)
 
             let rand = OSRandom()
@@ -162,8 +162,9 @@
 
             try conn.raw("SAVEPOINT \(name)")
             do {
-                try closure(conn)
+                let value = try closure(conn)
                 try conn.raw("RELEASE SAVEPOINT \(name)")
+                return value
             } catch {
                 try conn.raw("ROLLBACK TO SAVEPOINT \(name)")
                 throw error
