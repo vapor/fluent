@@ -9,16 +9,21 @@ public struct ForeignKey {
     public let foreignField: String
     /// The entity type of the foreign field being referenced
     public let foreignEntity: Entity.Type
-    
-    public var name: String {
-        return "_fluent_fk_\(entity.entity).\(field)_\(foreignEntity.entity).\(foreignField)"
-    }
+    /// The unique identifying name of this foreign key
+    public var name: String
     
     /// Creates a new ForeignKey
-    public init(entity: Entity.Type, field: String, foreignField: String, foreignEntity: Entity.Type) {
+    public init(
+        entity: Entity.Type,
+        field: String,
+        foreignField: String,
+        foreignEntity: Entity.Type,
+        name: String? = nil
+    ) {
         self.entity = entity
         self.field = field
         self.foreignField = foreignField
         self.foreignEntity = foreignEntity
+        self.name = name ?? "_fluent_fk_\(entity.entity).\(field)-\(foreignEntity.entity).\(foreignField)"
     }
 }

@@ -10,14 +10,6 @@ public final class Pivot<
     public typealias Left = L
     public typealias Right = R
 
-    public static var entity: String {
-        if Left.name < Right.name {
-            return "\(Left.name)\(pivotNameConnector)\(Right.name)"
-        } else {
-            return "\(Right.name)\(pivotNameConnector)\(Left.name)"
-        }
-    }
-
     public static var identifier: String {
         if Left.name < Right.name {
             return "Pivot<\(Left.identifier),\(Right.identifier)>"
@@ -27,7 +19,13 @@ public final class Pivot<
     }
 
     public static var name: String {
-        return entity
+        get { return _names[identifier] ?? _defaultName }
+        set { _names[identifier] = newValue }
+    }
+    
+    public static var entity: String {
+        get { return _entities[identifier] ?? _defaultEntity }
+        set { _entities[identifier] = newValue }
     }
 
     public var leftId: Identifier
@@ -86,3 +84,22 @@ extension Pivot: Preparation {
 }
 
 public var pivotNameConnector: String = "_"
+
+// MARK: Entity / Name
+
+private var _names: [String: String] = [:]
+private var _entities: [String: String] = [:]
+
+extension Pivot {
+    internal static var _defaultName: String {
+        if Left.name < Right.name {
+            return "\(Left.name)\(pivotNameConnector)\(Right.name)"
+        } else {
+            return "\(Right.name)\(pivotNameConnector)\(Left.name)"
+        }
+    }
+    
+    internal static var _defaultEntity: String {
+        return name
+    }
+}
