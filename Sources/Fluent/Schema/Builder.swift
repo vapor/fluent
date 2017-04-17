@@ -21,11 +21,12 @@ extension Builder {
 
     public func foreignId<E: Entity>(
         for entityType: E.Type,
+        name: String = E.foreignIdKey,
         optional: Bool = false,
         unique: Bool = false
     ) {
         let field = Field(
-            name: E.foreignIdKey,
+            name: name,
             type: .id(type: E.idType),
             optional: optional,
             unique: unique
@@ -33,7 +34,7 @@ extension Builder {
         self.field(field)
         
         if autoForeignKeys {
-            self.foreignKey(for: E.self)
+            self.foreignKey(for: E.self, name: name)
         }
     }
 
@@ -155,11 +156,13 @@ extension Builder {
 
     public func parent<E: Entity>(
         _ entity: E.Type = E.self,
+        name: String = E.foreignIdKey,
         optional: Bool = false,
         unique: Bool = false
     ) {
         foreignId(
             for: E.self,
+            name: name,
             optional: optional,
             unique: unique
         )
@@ -190,10 +193,11 @@ extension Builder {
     /// Adds a foreign key constraint from a local
     /// column to a column on the foreign entity.
     public func foreignKey<E: Entity>(
-        for: E.Type = E.self
+        for: E.Type = E.self,
+        name: String = E.foreignIdKey
     ) {
         self.foreignKey(
-            E.foreignIdKey,
+            name,
             references: E.idKey,
             on: E.self
         )
