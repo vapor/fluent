@@ -156,33 +156,13 @@ extension Builder {
     public func parent<E: Entity>(
         _ entity: E.Type = E.self,
         optional: Bool = false,
-        unique: Bool = false,
-        default: NodeRepresentable? = nil
+        unique: Bool = false
     ) {
-        parent(
-            idKey: E.idKey,
-            idType: E.idType,
+        foreignId(
+            for: E.self,
             optional: optional,
-            unique: unique,
-            default: `default`
+            unique: unique
         )
-    }
-
-    public func parent(
-        idKey: String,
-        idType: IdentifierType,
-        optional: Bool = false,
-        unique: Bool = false,
-        default: NodeRepresentable? = nil
-    ) {
-        let field = Field(
-            name: idKey,
-            type: .id(type: idType),
-            optional: optional,
-            unique: unique,
-            default: `default`
-        )
-        self.field(field)
     }
     
     // MARK: Foreign Key

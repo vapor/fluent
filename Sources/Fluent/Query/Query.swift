@@ -46,7 +46,7 @@ public final class Query<E: Entity> {
     /// If true, uses appropriate distinct modifiers
     /// on fetch and counts to return only distinct
     /// results for this query.
-    public var distinct: Bool
+    public var isDistinct: Bool
 
     /// Creates a new `Query` with the
     /// `Model`'s database.
@@ -57,7 +57,7 @@ public final class Query<E: Entity> {
         joins = []
         limits = []
         sorts = []
-        distinct = false
+        isDistinct = false
         includeSoftDeleted = false
         data = [:]
         keys = []
