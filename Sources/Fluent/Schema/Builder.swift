@@ -179,13 +179,15 @@ extension Builder {
     public func foreignKey<E: Entity>(
         _ field: String,
         references foreignField: String,
-        on foreignEntity: E.Type = E.self
+        on foreignEntity: E.Type = E.self,
+        name: String? = nil
     ) {
         let foreignKey = ForeignKey(
             entity: entity,
             field: field,
             foreignField: foreignField,
-            foreignEntity: foreignEntity
+            foreignEntity: foreignEntity,
+            name: name
         )
         self.foreignKey(foreignKey)
     }

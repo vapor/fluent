@@ -7,6 +7,9 @@ extension Tester {
         Student.database = database
         try Student.prepare(database)
 
+        // avoid foreign key name getting too long
+        Pivot<Atom, Compound>.name = "ac"
+
         Pivot<Atom, Compound>.database = database
         try Pivot<Atom, Compound>.prepare(database)
         Pivot<Pivot<Atom, Compound>, Student>.database = database
