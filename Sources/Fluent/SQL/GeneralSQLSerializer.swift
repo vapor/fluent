@@ -535,7 +535,7 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
             else {
                 statement += escape(filter.entity.entity) + "." + escape(key)
                 statement += comparison(c)
-                statement += "?"
+                statement += placeholder(value)
 
                 /// `.like` comparison operator requires additional
                 /// processing of `value`
