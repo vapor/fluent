@@ -13,6 +13,7 @@ extension Database {
     
     public func revertAll(_ preparations: [Preparation.Type]) throws {
         try prepareMetadata()
+        let preparations: ReversedCollection<[Preparation.Type]> = preparations.reversed()
         for preparation in preparations {
             if let migration = try migration(for: preparation) {
                 try preparation.revert(self)
@@ -25,6 +26,7 @@ extension Database {
         try prepareMetadata()
         let batch = try latestBatch()
         var toBeReverted: [Preparation.Type] = []
+        let preparations: ReversedCollection<[Preparation.Type]> = preparations.reversed()
         for preparation in preparations {
             if let migration = try migration(for: preparation), migration.batch == batch {
                 toBeReverted.append(preparation)
@@ -37,6 +39,7 @@ extension Database {
     public func revertBatch(_ preparations: [Preparation.Type]) throws {
         try prepareMetadata()
         let batch = try latestBatch()
+        let preparations: ReversedCollection<[Preparation.Type]> = preparations.reversed()
         for preparation in preparations {
             if let migration = try migration(for: preparation), migration.batch == batch {
                 try preparation.revert(self)
