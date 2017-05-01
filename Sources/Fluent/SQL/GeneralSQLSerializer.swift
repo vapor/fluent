@@ -345,8 +345,8 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         case .raw(let string, _):
             return string
         case .some(let idx):
-            let list = idx.fields.joined(separator: ", ")
-            return "INDEX `\(idx.name)` ON `\(E.entity)` (`\(list)`)"
+            let list = idx.fields.map(escape).joined(separator: ", ")
+            return "INDEX \(escape(idx.name)) ON \(escape(E.entity)) (\(list))"
         }
     }
 
@@ -360,7 +360,7 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         case .raw(let string, _):
             return string
         case .some(let foreignKey):
-            return "CONSTRAINT `\(foreignKey.name)` FOREIGN KEY (`\(foreignKey.field)`) REFERENCES `\(foreignKey.foreignEntity.entity)` (`\(foreignKey.foreignField)`)"
+            return "CONSTRAINT \(escape(foreignKey.name)) FOREIGN KEY (\(escape(foreignKey.field))) REFERENCES \(escape(foreignKey.foreignEntity.entity)) (\(escape(foreignKey.foreignField)))"
         }
     }
 
@@ -535,7 +535,7 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
             else {
                 statement += escape(filter.entity.entity) + "." + escape(key)
                 statement += comparison(c)
-                statement += "?"
+                statement += placeholder(value)
 
                 /// `.like` comparison operator requires additional
                 /// processing of `value`
