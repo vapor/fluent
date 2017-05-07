@@ -51,7 +51,7 @@ extension Siblings: QueryRepresentable {
         let query = try Foreign.makeQuery()
 
         try query.join(Through.self)
-        try query.filter(Through.self, Local.foreignIdKey, localId)
+        try query.filter(Through.self, pivotLeftIdKey, localId)
 
         return query
     }
