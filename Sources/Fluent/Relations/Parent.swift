@@ -4,6 +4,10 @@
 public final class Parent<
     Child: Entity, Parent: Entity
 > {
+    /// The parent id key. This is used
+    /// to search the ID
+    public let parentIdKey: String
+    
     /// The parent entity id. This
     /// will be used to find the parent.
     public let parentId: Identifier
@@ -20,17 +24,19 @@ public final class Parent<
     public init(
         from child: Child,
         to parentType: Parent.Type = Parent.self,
-        withId parentId: Identifier
+        withId parentId: Identifier,
+        on parentIdKey: String = Parent.idKey
     ) {
         self.child = child
         self.parentId = parentId
+        self.parentIdKey = parentIdKey
     }
 }
 
 extension Parent: QueryRepresentable {
     public func makeQuery(_ executor: Executor) throws -> Query<Parent> {
         let query = try Parent.makeQuery()
-        return try query.filter(Parent.idKey, parentId)
+        return try query.filter(parentIdKey, parentId)
     }
 }
 
@@ -43,9 +49,41 @@ extension Parent: ExecutorRepresentable {
 extension Entity {
     public func parent<P: Entity>(
         id parentId: Identifier?,
-        type parentType: P.Type = P.self
+        type parentType: P.Type = P.self,
+        on parentIdKey: String = P.idKey
     ) -> Parent<Self, P> {
         let id = parentId ?? Identifier(.null)
-        return Parent(from: self, withId: id)
+        return Parent(from: self, withId: id, on: parentIdKey)
     }
+
+    public func parent<P: Entity>(
+        id parentId: Identifier?,
+        type parentType: P.Type = P.self,
+        on parentIdKey: String = P.idKey
+        ) throws -> P? {
+        return try parent(id: parentId, type: parentType, on: parentIdKey).get()
+    }
+    
+    public func owner<O: Entity>(
+        id ownerId: Identifier?,
+        type ownerType: O.Type = O.self
+        ) throws -> O? {
+        return try parent(id: ownerId, type: ownerType)
+    }
+    
+    public func lookup<L: Entity>(
+        id lookupId: Identifier?,
+        type lookupType: L.Type = L.self,
+        idKey lookupIdKey: String = L.idKey
+        ) throws -> L? {
+        return try parent(id: lookupId, type: lookupType, on: lookupIdKey)
+    }
+    
+    public func ancestor<A: Entity>(
+        id ancestorId: Identifier?,
+        type ancestorType: A.Type = A.self
+        ) throws -> A? {
+        return try parent(id: ancestorId, type: ancestorType)
+    }
+    
 }
