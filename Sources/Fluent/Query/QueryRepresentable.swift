@@ -93,6 +93,62 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
 
         return count
     }
+    
+    /// Returns the sum of the given field.
+    public func sum(_ field: String) throws -> Node {
+        return try sum([field])
+    }
+    
+    /// Returns the sum of the given fields.
+    public func sum(_ fields: [String], operator op: Operator = .add) throws -> Node {
+        let query = try makeQuery()
+        query.action = .sum(fields, op)
+        
+        let raw = try query.raw()
+        return raw[0, "_fluent_sum"] ?? raw
+    }
+    
+    /// Returns the average of the given field.
+    public func average(_ field: String) throws -> Node {
+        return try average([field])
+    }
+    
+    /// Returns the average of the given fields.
+    public func average(_ fields: [String], operator op: Operator = .add) throws -> Node {
+        let query = try makeQuery()
+        query.action = .average(fields, op)
+        
+        let raw = try query.raw()
+        return raw[0, "_fluent_average"] ?? raw
+    }
+    
+    /// Returns the min of the given field.
+    public func min(_ field: String) throws -> Node {
+        return try min([field])
+    }
+    
+    /// Returns the min of the given fields.
+    public func min(_ fields: [String], operator op: Operator = .add) throws -> Node {
+        let query = try makeQuery()
+        query.action = .min(fields, op)
+        
+        let raw = try query.raw()
+        return raw[0, "_fluent_min"] ?? raw
+    }
+    
+    /// Returns the max of the given field.
+    public func max(_ field: String) throws -> Node {
+        return try max([field])
+    }
+    
+    /// Returns the max of the given fields.
+    public func max(_ fields: [String], operator op: Operator = .add) throws -> Node {
+        let query = try makeQuery()
+        query.action = .max(fields, op)
+        
+        let raw = try query.raw()
+        return raw[0, "_fluent_max"] ?? raw
+    }
 }
 
 // MARK: Create

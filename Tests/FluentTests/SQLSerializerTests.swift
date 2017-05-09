@@ -143,6 +143,34 @@ class SQLSerializerTests: XCTestCase {
         XCTAssertEqual(values.count, 1)
     }
 
+    func testReqularSum() throws {
+        let query = Query<User>(db)
+        query.action = .sum(["age"], .add)
+        let (statement, values) = serialize(query)
+        
+        XCTAssertEqual(statement, "SELECT SUM(`users`.`age`) as _fluent_sum FROM `users`")
+        XCTAssertEqual(values.count, 0)
+    }
+    
+    func testDistinctSum() throws {
+        let query = Query<User>(db)
+        query.action = .sum(["age"], .add)
+        query.isDistinct = true
+        let (statement, values) = serialize(query)
+        
+        XCTAssertEqual(statement, "SELECT SUM(DISTINCT(`users`.`age`)) as _fluent_sum FROM `users`")
+        XCTAssertEqual(values.count, 0)
+    }
+    
+    func testMultipleFieldsSum() throws {
+        let query = Query<User>(db)
+        query.action = .sum(["age", "heightInCM"], .add)
+        let (statement, values) = serialize(query)
+        
+        XCTAssertEqual(statement, "SELECT SUM(`users`.`age`+`users`.`heightInCM`) as _fluent_sum FROM `users`")
+        XCTAssertEqual(values.count, 0)
+    }
+    
     func testFilterEqualsNullSelect() throws {
         let query = Query<User>(db)
         try query.filter("name", .equals, Node.null)

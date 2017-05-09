@@ -13,6 +13,14 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
             return select()
         case .count:
             return count()
+        case .sum(let fields, let op):
+            return sum(fields, op)
+        case .average(let fields, let op):
+            return average(fields, op)
+        case .min(let fields, let op):
+            return min(fields, op)
+        case .max(let fields, let op):
+            return max(fields, op)
         case .delete:
             return delete()
         case .modify:
@@ -146,6 +154,57 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         )
     }
 
+    open func sum(_ fields: [String], _ op: Operator) -> (String, [Node]) {
+        return serializeAggregate("SUM", alias: "sum", fields: fields, operator: op)
+    }
+    
+    open func average(_ fields: [String], _ op: Operator) -> (String, [Node]) {
+        return serializeAggregate("AVG", alias: "average", fields: fields, operator: op)
+    }
+    
+    open func min(_ fields: [String], _ op: Operator) -> (String, [Node]) {
+        return serializeAggregate("MIN", alias: "min", fields: fields, operator: op)
+    }
+    
+    open func max(_ fields: [String], _ op: Operator) -> (String, [Node]) {
+        return serializeAggregate("MAX", alias: "max", fields: fields, operator: op)
+    }
+    
+    private func serializeAggregate(
+        _ function: String,
+        alias: String,
+        fields: [String],
+        operator op: Operator
+    ) -> (String, [Node]){
+        let fields = fields.map {
+            "\(escape(E.entity)).\(escape($0))"
+        }.joined(separator: op.description)
+        var statement: [String] = []
+        var values: [Node] = []
+        
+        statement += "SELECT"
+        
+        let fieldQuery = query.isDistinct ? "DISTINCT(\(fields))" : fields
+        
+        statement += "\(function)(\(fieldQuery)) as _fluent_\(alias) FROM"
+        statement += escape(E.entity)
+        
+        if !query.joins.isEmpty {
+            statement += joins(query.joins)
+        }
+        
+        if !query.filters.isEmpty {
+            let (filtersClause, filtersValues) = filters(query.filters)
+            statement += filtersClause
+            values += filtersValues
+        }
+        
+        return (
+            concatenate(statement),
+            values
+        )
+    }
+    
     open func delete() -> (String, [Node]) {
         var statement: [String] = []
         var values: [Node] = []

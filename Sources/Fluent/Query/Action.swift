@@ -4,10 +4,32 @@
 public enum Action {
     case fetch
     case count
+    case sum([String], Operator)
+    case min([String], Operator)
+    case max([String], Operator)
+    case average([String], Operator)
     case delete
     case create
     case modify
     case schema(Schema)
+}
+
+public enum Operator: CustomStringConvertible {
+    case add
+    case subtract
+    case multiply
+    case divide
+    case other(string: String)
+    
+    public var description: String {
+        switch self {
+        case .add: return "+"
+        case .subtract: return "-"
+        case .multiply: return "*"
+        case .divide: return "/"
+        case .other(let string): return string
+        }
+    }
 }
 
 public enum Schema {
@@ -31,6 +53,9 @@ extension Action: Equatable {
         switch (lhs, rhs) {
         case (.fetch, .fetch),
              (.count, .count),
+             (.min, .min),
+             (.max, .max),
+             (.average, .average),
              (.delete, .delete),
              (.create, .create),
              (.modify, .modify):
