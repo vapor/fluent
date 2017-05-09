@@ -14,6 +14,8 @@ class SQLSerializerTests: XCTestCase {
         ("testRegularCount", testRegularCount),
         ("testFilterCompareCount", testFilterCompareCount),
         ("testFilterLikeCount", testFilterLikeCount),
+        ("testReqularSum", testReqularSum),
+        ("testcustomAggregate", testcustomAggregate),
         ("testFilterEqualsNullSelect", testFilterEqualsNullSelect),
         ("testFilterNotEqualsNullSelect", testFilterNotEqualsNullSelect),
         ("testFilterCompareUpdate", testFilterCompareUpdate),
@@ -149,6 +151,15 @@ class SQLSerializerTests: XCTestCase {
         let (statement, values) = serialize(query)
         
         XCTAssertEqual(statement, "SELECT SUM(`users`.`age`) as _fluent_aggregate FROM `users`")
+        XCTAssertEqual(values.count, 0)
+    }
+    
+    func testCustomAggregate() throws {
+        let query = Query<User>(db)
+        query.action = .aggregate("job", .custom(string: "NOTHING"))
+        let (statement, values) = serialize(query)
+        
+        XCTAssertEqual(statement, "SELECT NOTHING(`users`.`job`) as _fluent_aggregate FROM `users`")
         XCTAssertEqual(values.count, 0)
     }
     

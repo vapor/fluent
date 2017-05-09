@@ -19,25 +19,6 @@ public enum Aggregate {
     case custom(string: String)
 }
 
-extension Aggregate: Equatable {
-    public static func ==(lhs: Aggregate, rhs: Aggregate) -> Bool {
-        switch (lhs, rhs) {
-        case (.count, .count),
-             (.sum, .sum),
-             (.average, .average),
-             (.min, .min),
-             (.max, .max):
-            return true
-            
-        case (.custom(let a), .custom(let b)):
-            return a == b
-            
-        default:
-            return false
-        }
-    }
-}
-
 public enum Schema {
     case create(
         fields: [RawOr<Field>],
@@ -68,6 +49,25 @@ extension Action: Equatable {
             
         case (.schema(let a), .schema(let b)):
             return a == b
+        default:
+            return false
+        }
+    }
+}
+
+extension Aggregate: Equatable {
+    public static func ==(lhs: Aggregate, rhs: Aggregate) -> Bool {
+        switch (lhs, rhs) {
+        case (.count, .count),
+             (.sum, .sum),
+             (.average, .average),
+             (.min, .min),
+             (.max, .max):
+            return true
+            
+        case (.custom(let a), .custom(let b)):
+            return a == b
+            
         default:
             return false
         }
