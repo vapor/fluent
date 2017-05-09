@@ -15,7 +15,7 @@ class SQLSerializerTests: XCTestCase {
         ("testFilterCompareCount", testFilterCompareCount),
         ("testFilterLikeCount", testFilterLikeCount),
         ("testReqularSum", testReqularSum),
-        ("testcustomAggregate", testcustomAggregate),
+        ("testcustomAggregate", testCustomAggregate),
         ("testFilterEqualsNullSelect", testFilterEqualsNullSelect),
         ("testFilterNotEqualsNullSelect", testFilterNotEqualsNullSelect),
         ("testFilterCompareUpdate", testFilterCompareUpdate),
