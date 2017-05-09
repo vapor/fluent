@@ -129,7 +129,7 @@ extension Entity {
 
     /// Returns all entities for this `Model`.
     public static func count() throws -> Int {
-        return try Self.makeQuery().count()
+        return try Self.makeQuery().aggregate(.count).int ?? 0
     }
 
     /// Finds the entity with the given `id`.

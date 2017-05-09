@@ -15,7 +15,7 @@ public enum ConnectionType {
 extension Query {
     public var connectionType: ConnectionType {
         switch action {
-        case .count, .sum, .average, .min, .max, .fetch:
+        case .aggregate, .fetch:
             return .read
         case .create, .modify, .delete, .schema:
             return .readWrite

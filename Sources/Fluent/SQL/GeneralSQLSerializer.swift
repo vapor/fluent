@@ -11,16 +11,8 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
             return insert()
         case .fetch:
             return select()
-        case .count:
-            return count()
-        case .sum(let fields, let op):
-            return sum(fields, op)
-        case .average(let fields, let op):
-            return average(fields, op)
-        case .min(let fields, let op):
-            return min(fields, op)
-        case .max(let fields, let op):
-            return max(fields, op)
+        case .aggregate(let field, let agg):
+            return aggregate(field, agg)
         case .delete:
             return delete()
         case .modify:
@@ -127,7 +119,18 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         )
     }
 
-    open func count() -> (String, [Node]) {
+    open func aggregate(_ field: String, _ aggregate: Aggregate) -> (String, [Node]) {
+        let fieldEscaped: String
+        switch field {
+        case "*":
+            fieldEscaped = field
+            
+        default:
+            let e = escape(E.entity)
+            let f = escape(field)
+            fieldEscaped = "\(e).\(f)"
+        }
+        
         var statement: [String] = []
         var values: [Node] = []
 
@@ -135,7 +138,18 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         if query.isDistinct {
             statement += "DISTINCT"
         }
-        statement += "COUNT(*) as _fluent_count FROM"
+        
+        let function: String
+        switch aggregate {
+        case .average: function = "AVG"
+        case .count: function = "COUNT"
+        case .min: function = "MIN"
+        case .max: function = "MAX"
+        case .sum: function = "SUM"
+        case .custom(let string): function = string
+        }
+        
+        statement += "\(function)(\(fieldEscaped)) as _fluent_aggregate FROM"
         statement += escape(E.entity)
 
         if !query.joins.isEmpty {
@@ -148,57 +162,6 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
             values += filtersValues
         }
 
-        return (
-            concatenate(statement),
-            values
-        )
-    }
-
-    open func sum(_ fields: [String], _ op: Operator) -> (String, [Node]) {
-        return serializeAggregate("SUM", alias: "sum", fields: fields, operator: op)
-    }
-    
-    open func average(_ fields: [String], _ op: Operator) -> (String, [Node]) {
-        return serializeAggregate("AVG", alias: "average", fields: fields, operator: op)
-    }
-    
-    open func min(_ fields: [String], _ op: Operator) -> (String, [Node]) {
-        return serializeAggregate("MIN", alias: "min", fields: fields, operator: op)
-    }
-    
-    open func max(_ fields: [String], _ op: Operator) -> (String, [Node]) {
-        return serializeAggregate("MAX", alias: "max", fields: fields, operator: op)
-    }
-    
-    private func serializeAggregate(
-        _ function: String,
-        alias: String,
-        fields: [String],
-        operator op: Operator
-    ) -> (String, [Node]){
-        let fields = fields.map {
-            "\(escape(E.entity)).\(escape($0))"
-        }.joined(separator: op.description)
-        var statement: [String] = []
-        var values: [Node] = []
-        
-        statement += "SELECT"
-        
-        let fieldQuery = query.isDistinct ? "DISTINCT(\(fields))" : fields
-        
-        statement += "\(function)(\(fieldQuery)) as _fluent_\(alias) FROM"
-        statement += escape(E.entity)
-        
-        if !query.joins.isEmpty {
-            statement += joins(query.joins)
-        }
-        
-        if !query.filters.isEmpty {
-            let (filtersClause, filtersValues) = filters(query.filters)
-            statement += filtersClause
-            values += filtersValues
-        }
-        
         return (
             concatenate(statement),
             values

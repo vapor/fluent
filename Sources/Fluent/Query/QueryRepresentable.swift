@@ -73,82 +73,35 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
             .filter(E.idKey, id)
             .first()
     }
-
-    /// Returns the number of results for the query.
-    public func count() throws -> Int {
-        let query = try makeQuery()
-        query.action = .count
-
-        let raw = try query.raw()
-
-        let count: Int
-
-        if let c = raw.int {
-            count = c
-        } else if let c = raw[0, "_fluent_count"]?.int {
-            count = c
-        } else {
-            throw QueryError.notSupported("Count not supported.")
-        }
-
-        return count
-    }
     
-    /// Returns the sum of the given field.
-    public func sum(_ field: String) throws -> Node {
-        return try sum([field])
+    /// Aggregates all fields of a query
+    public func aggregate(_ agg: Aggregate) throws -> Node {
+        return try aggregate("*", agg)
     }
-    
-    /// Returns the sum of the given fields.
-    public func sum(_ fields: [String], operator op: Operator = .add) throws -> Node {
+
+    /// Aggregates the query on a single field, performing a specified operation.
+    ///
+    /// - Parameters:
+    ///     - field: field to aggregate
+    ///     - aggregate: the action to perform
+    ///
+    ///
+    /// ```
+    /// // find the sum of the age of all users
+    /// User.aggregate("age", .sum)
+    /// ```
+    public func aggregate(_ field: String, _ aggregate: Aggregate) throws -> Node {
         let query = try makeQuery()
-        query.action = .sum(fields, op)
+        query.action = .aggregate(field, aggregate)
         
         let raw = try query.raw()
-        return raw[0, "_fluent_sum"] ?? raw
+        return raw[0, "_fluent_aggregate"] ?? raw
     }
     
-    /// Returns the average of the given field.
-    public func average(_ field: String) throws -> Node {
-        return try average([field])
+    public func aggregate(_ field: String, raw: String) throws -> Node {
+        return try aggregate(field, .custom(string: raw))
     }
-    
-    /// Returns the average of the given fields.
-    public func average(_ fields: [String], operator op: Operator = .add) throws -> Node {
-        let query = try makeQuery()
-        query.action = .average(fields, op)
-        
-        let raw = try query.raw()
-        return raw[0, "_fluent_average"] ?? raw
-    }
-    
-    /// Returns the min of the given field.
-    public func min(_ field: String) throws -> Node {
-        return try min([field])
-    }
-    
-    /// Returns the min of the given fields.
-    public func min(_ fields: [String], operator op: Operator = .add) throws -> Node {
-        let query = try makeQuery()
-        query.action = .min(fields, op)
-        
-        let raw = try query.raw()
-        return raw[0, "_fluent_min"] ?? raw
-    }
-    
-    /// Returns the max of the given field.
-    public func max(_ field: String) throws -> Node {
-        return try max([field])
-    }
-    
-    /// Returns the max of the given fields.
-    public func max(_ fields: [String], operator op: Operator = .add) throws -> Node {
-        let query = try makeQuery()
-        query.action = .max(fields, op)
-        
-        let raw = try query.raw()
-        return raw[0, "_fluent_max"] ?? raw
-    }
+
 }
 
 // MARK: Create

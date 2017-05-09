@@ -38,7 +38,7 @@ class DummyConnection: Connection {
         case .raw:
             return .array([])
         case .some(let query):
-            if query.action == .count {
+            if case .aggregate(_, .count) = query.action {
                 return 0
             }
             

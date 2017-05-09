@@ -23,7 +23,7 @@ extension Tester {
                     let compound = Compound(name: "Test \(i)")
                     try compound.makeQuery(conn).save()
                 }
-                let count = try Compound.makeQuery(conn).count()
+                let count = try Compound.makeQuery(conn).aggregate(.count).int ?? 0
                 guard count == 129 else {
                     throw Error.failed("Count \(count) did not equal 129")
                 }
