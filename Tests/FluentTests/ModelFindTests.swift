@@ -58,7 +58,7 @@ class ModelFindTests: XCTestCase {
             if
                 let filter = query.filters.first?.wrapped,
                 case .compare(let key, let comparison, let value) = filter.method,
-                query.action == .fetch &&
+                query.action == .fetch([]) &&
                     query.filters.count == 1 &&
                     key == driver.idKey &&
                     comparison == .equals

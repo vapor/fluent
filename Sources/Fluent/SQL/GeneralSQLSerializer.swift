@@ -9,8 +9,8 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         switch query.action {
         case .create:
             return insert()
-        case .fetch:
-            return select()
+        case .fetch(let computedFields):
+            return select(computedFields)
         case .aggregate(let field, let agg):
             return aggregate(field ?? "*", agg)
         case .delete:
@@ -69,7 +69,7 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         )
     }
 
-    open func select() -> (String, [Node]) {
+    open func select(_ computedFields: [RawOr<ComputedField>]) -> (String, [Node]) {
         var statement: [String] = []
         var values: [Node] = []
 
@@ -82,13 +82,8 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
             statement += "DISTINCT"
         }
         
-        for key in query.keys {
-            switch key {
-            case .raw(let raw, _):
-                columns.append(raw)
-            case .some(let some):
-                columns.append(escape(some))
-            }
+        for c in computedFields {
+            columns += computedField(c)
         }
         
         statement += columns.joined(separator: ", ")
@@ -725,7 +720,28 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
 
         return concatenate(fragments)
     }
+    
+    open func computedField(_ computedField: RawOr<ComputedField>) -> String {
+        switch computedField {
+        case .raw(let raw, _):
+            return raw
+        case .some(let some):
+            return self.computedField(some)
+        }
+    }
 
+    open func computedField(_ computedField: ComputedField) -> String {
+        var fragments: [String] = []
+        
+        fragments += computedField.function
+        fragments += "("
+        fragments += computedField.fields.map(escape).joined(separator: ", ")
+        fragments += ") as "
+        fragments += escape(computedField.key)
+        
+        return fragments.joined(separator: "")
+    }
+    
     // MARK: Convenience
 
     open func concatenate(_ fragments: [String]) -> String {

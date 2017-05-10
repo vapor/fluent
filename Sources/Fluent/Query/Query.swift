@@ -11,10 +11,6 @@ public final class Query<E: Entity> {
     /// Optional data to be used during
     ///`.create` or `.modify` actions.
     public var data: [RawOr<String>: RawOr<Node>]
-    
-    /// Optional keys to access during
-    /// `.fetch` actions
-    public var keys: [RawOr<String>]
 
     /// Optionally limit the amount of
     /// entities affected by the action.
@@ -52,7 +48,7 @@ public final class Query<E: Entity> {
     /// `Model`'s database.
     public init(_ executor: Executor) {
         filters = []
-        action = .fetch
+        action = .fetch(E.computedFields)
         self.executor = executor
         joins = []
         limits = []
@@ -60,7 +56,6 @@ public final class Query<E: Entity> {
         isDistinct = false
         includeSoftDeleted = false
         data = [:]
-        keys = []
     }
     
     /// Performs the Query returning the raw

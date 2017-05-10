@@ -71,9 +71,11 @@ class RawTests: XCTestCase {
     
     func testRawGet() throws {
         let query = Query<Compound>(db)
-        try query.get(raw: "UUID() as test")
+        query.action = .fetch([
+            .some(ComputedField(function: "UUID", key: "test"))
+        ])
         let (statement, values) = serialize(query)
-        XCTAssertEqual(statement, "SELECT `compounds`.*, UUID() as test FROM `compounds`")
+        XCTAssertEqual(statement, "SELECT `compounds`.*, UUID() as `test` FROM `compounds`")
         XCTAssertEqual(values.count, 0)
     }
     

@@ -20,7 +20,7 @@ class QueryFiltersTests: XCTestCase {
     func testBasalQuery() throws {
         let query = try DummyModel.makeQuery()
 
-        XCTAssert(query.action == .fetch, "Default action should be fetch")
+        XCTAssert(query.action == .fetch([]), "Default action should be fetch")
         XCTAssert(query.filters.count == 0, "Filters should be empty")
         XCTAssert(query.data.isEmpty == true, "Data should be empty")
         XCTAssert(query.limits.isEmpty == true, "Limit should be empty")

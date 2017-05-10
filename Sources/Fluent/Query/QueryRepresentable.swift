@@ -17,9 +17,9 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
 // MARK: Fetch
 extension QueryRepresentable where Self: ExecutorRepresentable {    
     /// Returns all entities retrieved by the query.
-    public func all() throws -> [E] {
+    public func all(_ computedFields: [RawOr<ComputedField>] = []) throws -> [E] {
         let query = try makeQuery()
-        query.action = .fetch
+        query.action = .fetch(computedFields + E.computedFields)
 
         guard let array = try query.raw().array else {
             throw QueryError.invalidDriverResponse("Array required.")
@@ -57,9 +57,9 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
     }
 
     /// Returns the first entity retrieved by the query.
-    public func first() throws -> E? {
+    public func first(_ computedFields: [RawOr<ComputedField>] = []) throws -> E? {
         let query = try makeQuery()
-        query.action = .fetch
+        query.action = .fetch(computedFields + E.computedFields)
         try query.limit(1)
 
         let model = try query.all().first
