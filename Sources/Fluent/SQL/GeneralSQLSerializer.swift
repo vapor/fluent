@@ -11,8 +11,8 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
             return insert()
         case .fetch:
             return select()
-        case .count:
-            return count()
+        case .aggregate(let field, let agg):
+            return aggregate(field, agg)
         case .delete:
             return delete()
         case .modify:
@@ -119,7 +119,18 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         )
     }
 
-    open func count() -> (String, [Node]) {
+    open func aggregate(_ field: String, _ aggregate: Aggregate) -> (String, [Node]) {
+        let fieldEscaped: String
+        switch field {
+        case "*":
+            fieldEscaped = field
+            
+        default:
+            let e = escape(E.entity)
+            let f = escape(field)
+            fieldEscaped = "\(e).\(f)"
+        }
+        
         var statement: [String] = []
         var values: [Node] = []
 
@@ -127,7 +138,18 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         if query.isDistinct {
             statement += "DISTINCT"
         }
-        statement += "COUNT(*) as _fluent_count FROM"
+        
+        let function: String
+        switch aggregate {
+        case .average: function = "AVG"
+        case .count: function = "COUNT"
+        case .min: function = "MIN"
+        case .max: function = "MAX"
+        case .sum: function = "SUM"
+        case .custom(let string): function = string
+        }
+        
+        statement += "\(function)(\(fieldEscaped)) as _fluent_aggregate FROM"
         statement += escape(E.entity)
 
         if !query.joins.isEmpty {
@@ -145,7 +167,7 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
             values
         )
     }
-
+    
     open func delete() -> (String, [Node]) {
         var statement: [String] = []
         var values: [Node] = []

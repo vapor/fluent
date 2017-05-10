@@ -73,13 +73,13 @@ class QueryFiltersTests: XCTestCase {
         let query = try DummyModel.makeQuery().filter(DummyModel.idKey, 5)
 
         do {
-            let numberOfResults = try query.count()
+            let numberOfResults = try query.aggregate(.count).int
             XCTAssertEqual(numberOfResults, 0)
         } catch {
             XCTFail("Count should not have failed")
         }
-
-        XCTAssert(query.action == .count)
+        
+        XCTAssert(query.action == .aggregate(field: "*", .count))
     }
 
     func testDeleteQuery() throws {

@@ -14,6 +14,8 @@ class SQLSerializerTests: XCTestCase {
         ("testRegularCount", testRegularCount),
         ("testFilterCompareCount", testFilterCompareCount),
         ("testFilterLikeCount", testFilterLikeCount),
+        ("testReqularSum", testReqularSum),
+        ("testcustomAggregate", testCustomAggregate),
         ("testFilterEqualsNullSelect", testFilterEqualsNullSelect),
         ("testFilterNotEqualsNullSelect", testFilterNotEqualsNullSelect),
         ("testFilterCompareUpdate", testFilterCompareUpdate),
@@ -93,56 +95,74 @@ class SQLSerializerTests: XCTestCase {
 
     func testBasicCount() {
         let query = Query<User>(db)
-        query.action = .count
+        query.action = .aggregate(field: "*", .count)
         let (statement, values) = serialize(query)
 
-        XCTAssertEqual(statement, "SELECT COUNT(*) as _fluent_count FROM `users`")
+        XCTAssertEqual(statement, "SELECT COUNT(*) as _fluent_aggregate FROM `users`")
         XCTAssert(values.isEmpty)
     }
     
     func testDistinctCount() {
         let query = Query<User>(db)
-        query.action = .count
+        query.action = .aggregate(field: "*", .count)
         query.isDistinct = true
         let (statement, values) = serialize(query)
         
-        XCTAssertEqual(statement, "SELECT DISTINCT COUNT(*) as _fluent_count FROM `users`")
+        XCTAssertEqual(statement, "SELECT DISTINCT COUNT(*) as _fluent_aggregate FROM `users`")
         XCTAssert(values.isEmpty)
     }
 
     func testRegularCount() throws {
         let query = Query<User>(db)
-        query.action = .count
+        query.action = .aggregate(field: "*", .count)
         try query.filter("age", .greaterThanOrEquals, 21)
         let (statement, values) = serialize(query)
 
-        XCTAssertEqual(statement, "SELECT COUNT(*) as _fluent_count FROM `users` WHERE `users`.`age` >= ?")
+        XCTAssertEqual(statement, "SELECT COUNT(*) as _fluent_aggregate FROM `users` WHERE `users`.`age` >= ?")
         XCTAssertEqual(values.first?.int, 21)
         XCTAssertEqual(values.count, 1)
     }
 
     func testFilterCompareCount() throws {
         let query = Query<User>(db)
-        query.action = .count
+        query.action = .aggregate(field: "*", .count)
         try query.filter("name", .notEquals, "duck")
         let (statement, values) = serialize(query)
 
-        XCTAssertEqual(statement, "SELECT COUNT(*) as _fluent_count FROM `users` WHERE `users`.`name` != ?")
+        XCTAssertEqual(statement, "SELECT COUNT(*) as _fluent_aggregate FROM `users` WHERE `users`.`name` != ?")
         XCTAssertEqual(values.first?.string, "duck")
         XCTAssertEqual(values.count, 1)
     }
 
     func testFilterLikeCount() throws {
         let query = Query<User>(db)
-        query.action = .count
+        query.action = .aggregate(field: "*", .count)
         try query.filter("name", .hasPrefix, "duc")
         let (statement, values) = serialize(query)
 
-        XCTAssertEqual(statement, "SELECT COUNT(*) as _fluent_count FROM `users` WHERE `users`.`name` LIKE ?")
+        XCTAssertEqual(statement, "SELECT COUNT(*) as _fluent_aggregate FROM `users` WHERE `users`.`name` LIKE ?")
         XCTAssertEqual(values.first?.string, "duc%")
         XCTAssertEqual(values.count, 1)
     }
 
+    func testReqularSum() throws {
+        let query = Query<User>(db)
+        query.action = .aggregate(field: "age", .sum)
+        let (statement, values) = serialize(query)
+        
+        XCTAssertEqual(statement, "SELECT SUM(`users`.`age`) as _fluent_aggregate FROM `users`")
+        XCTAssertEqual(values.count, 0)
+    }
+    
+    func testCustomAggregate() throws {
+        let query = Query<User>(db)
+        query.action = .aggregate(field: "job", .custom(string: "NOTHING"))
+        let (statement, values) = serialize(query)
+        
+        XCTAssertEqual(statement, "SELECT NOTHING(`users`.`job`) as _fluent_aggregate FROM `users`")
+        XCTAssertEqual(values.count, 0)
+    }
+    
     func testFilterEqualsNullSelect() throws {
         let query = Query<User>(db)
         try query.filter("name", .equals, Node.null)
