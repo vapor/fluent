@@ -10,7 +10,6 @@ public final class Parent<
 
     /// The child requesting its parent
     public let child: Child
-
     /// Returns the parent.
     public func get() throws -> Parent? {
         return try first()

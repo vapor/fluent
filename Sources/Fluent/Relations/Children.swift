@@ -8,13 +8,19 @@ public final class Children<
     /// will be used to filter the children
     /// entities.
     public let parent: Parent
+    
+    /// The parent entity's foreign id key.
+    /// Usually Parent.foreignIdKey.
+    public let foreignIdKey: String
 
     /// Create a new Children relation.
     public init(
         from parent: Parent,
-        to childType: Child.Type = Child.self
+        to childType: Child.Type = Child.self,
+        foreignIdKey: String = Parent.foreignIdKey
     ) {
         self.parent = parent
+        self.foreignIdKey = foreignIdKey
     }
 }
 
@@ -24,7 +30,7 @@ extension Children: QueryRepresentable {
             throw RelationError.idRequired(parent)
         }
 
-        return try Child.makeQuery().filter(Parent.foreignIdKey == parentId)
+        return try Child.makeQuery().filter(foreignIdKey == parentId)
     }
 }
 
@@ -36,8 +42,9 @@ extension Children: ExecutorRepresentable {
 
 extension Entity {
     public func children<Child: Entity>(
-        type childType: Child.Type = Child.self
+        type childType: Child.Type = Child.self,
+        foreignIdKey: String = Self.foreignIdKey
     ) -> Children<Self, Child> {
-        return Children(from: self)
+        return Children(from: self, foreignIdKey: foreignIdKey)
     }
 }

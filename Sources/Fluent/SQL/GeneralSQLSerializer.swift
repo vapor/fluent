@@ -12,7 +12,7 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         case .fetch:
             return select()
         case .aggregate(let field, let agg):
-            return aggregate(field, agg)
+            return aggregate(field ?? "*", agg)
         case .delete:
             return delete()
         case .modify:

@@ -8,15 +8,27 @@ public final class Siblings<
     /// collection of foreign entities related
     /// to the local entity type.
     let local: Local
+    
+    /// The local entity's foreign id key.
+    /// This is usually Local.foreignIdKey.
+    let localIdKey: String
+    
+    /// The foreign entity's foreign id key.
+    /// This is usually Foreign.foreignIdKey.
+    let foreignIdKey: String
 
     /// Create a new Siblings relationsip using 
     /// a Local and Foreign entity.
     public init(
         from local: Local,
         to foreignType: Foreign.Type = Foreign.self,
-        through pivotType: Through.Type = Through.self
+        through pivotType: Through.Type = Through.self,
+        localIdKey: String = Local.foreignIdKey,
+        foreignIdKey: String = Foreign.foreignIdKey
     ) {
         self.local = local
+        self.localIdKey = localIdKey
+        self.foreignIdKey = foreignIdKey
     }
 }
 
@@ -50,8 +62,8 @@ extension Siblings: QueryRepresentable {
 
         let query = try Foreign.makeQuery()
 
-        try query.join(Through.self)
-        try query.filter(Through.self, Local.foreignIdKey, localId)
+        try query.join(Through.self, joinedKey: foreignIdKey)
+        try query.filter(Through.self, localIdKey, localId)
 
         return query
     }
@@ -70,8 +82,14 @@ extension Entity {
         Foreign: Entity, Through: Entity
     > (
         to foreignType: Foreign.Type = Foreign.self,
-        through pivotType: Through.Type = Through.self
+        through pivotType: Through.Type = Through.self,
+        localIdKey: String = Self.foreignIdKey,
+        foreignIdKey: String = Foreign.foreignIdKey
     ) -> Siblings<Self, Foreign, Through> {
-        return Siblings(from: self)
+        return Siblings(
+            from: self,
+            localIdKey: localIdKey,
+            foreignIdKey: foreignIdKey
+        )
     }
 }
