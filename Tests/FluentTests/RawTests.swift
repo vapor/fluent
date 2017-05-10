@@ -56,7 +56,7 @@ class RawTests: XCTestCase {
         
         let (statement, values) = serialize(query)
         
-        XCTAssertEqual(statement, "SELECT `compounds`.* FROM `compounds` JOIN `atoms` ON `compounds`.`#id` = `atoms`.`compound_#id` JOIN `foo` ON `users`.BAR !~ `foo`.🚀 WHERE `atoms`.`size` = ? AND `foo`.aGe ~~ ?")
+        XCTAssertEqual(statement, "SELECT `compounds`.* FROM `compounds` INNER JOIN `atoms` ON `compounds`.`#id` = `atoms`.`compound_#id` JOIN `foo` ON `users`.BAR !~ `foo`.🚀 WHERE `atoms`.`size` = ? AND `foo`.aGe ~~ ?")
         XCTAssertEqual(values.count, 2)
     }
     
