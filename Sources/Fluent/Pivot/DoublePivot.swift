@@ -16,9 +16,9 @@ extension PivotProtocol where Left: PivotProtocol, Self: Entity {
         let result = try Left
             .makeQuery()
             .join(self)
-            .filter(Left.self, Left.Left.foreignIdKey == leftId)
-            .filter(Left.self, Left.Right.foreignIdKey, middleId)
-            .filter(self, Right.foreignIdKey, rightId)
+            .filter(Left.self, pivotLeftIdKey == leftId)
+            .filter(Left.self, pivotRightIdKey, middleId)
+            .filter(self, pivotRightIdKey, rightId)
             .first()
 
         return result != nil
@@ -40,9 +40,9 @@ extension PivotProtocol where Right: PivotProtocol, Self: Entity {
         let result = try Right
             .makeQuery()
             .join(self)
-            .filter(self, Left.foreignIdKey, leftId)
-            .filter(Right.self, Right.Left.foreignIdKey, middleId)
-            .filter(Right.self, Right.Right.foreignIdKey, rightId)
+            .filter(self, pivotLeftIdKey, leftId)
+            .filter(Right.self, pivotLeftIdKey, middleId)
+            .filter(Right.self, pivotRightIdKey, rightId)
             .first()
 
         return result != nil

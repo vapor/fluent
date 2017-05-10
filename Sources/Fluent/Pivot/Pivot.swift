@@ -54,8 +54,8 @@ public final class Pivot<
     }
 
     public init(row: Row) throws {
-        leftId = try row.get(Left.foreignIdKey)
-        rightId = try row.get(Right.foreignIdKey)
+        leftId = try row.get(pivotLeftIdKey)
+        rightId = try row.get(pivotRightIdKey)
 
         id = try row.get(idKey)
     }
@@ -63,8 +63,8 @@ public final class Pivot<
     public func makeRow() throws -> Row {
         var row = Row()
         try row.set(idKey, id)
-        try row.set(Left.foreignIdKey, leftId)
-        try row.set(Right.foreignIdKey, rightId)
+        try row.set(pivotLeftIdKey, leftId)
+        try row.set(pivotRightIdKey, rightId)
         return row
     }
 }
@@ -73,8 +73,8 @@ extension Pivot: Preparation {
     public static func prepare(_ database: Database) throws {
         try database.create(self) { builder in
             builder.id()
-            builder.foreignId(for: Left.self)
-            builder.foreignId(for: Right.self)
+            builder.foreignId(pivotLeftIdKey, for: Left.self)
+            builder.foreignId(pivotRightIdKey, for: Right.self)
         }
     }
 
