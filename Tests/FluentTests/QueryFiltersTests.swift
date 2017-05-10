@@ -79,7 +79,7 @@ class QueryFiltersTests: XCTestCase {
             XCTFail("Count should not have failed")
         }
         
-        XCTAssert(query.action == .aggregate("*", .count))
+        XCTAssert(query.action == .aggregate(field: "*", .count))
     }
 
     func testDeleteQuery() throws {

@@ -73,12 +73,11 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
             .filter(E.idKey, id)
             .first()
     }
-    
-    /// Aggregates all fields of a query
+
     public func aggregate(_ agg: Aggregate) throws -> Node {
         return try aggregate("*", agg)
     }
-
+    
     /// Aggregates the query on a single field, performing a specified operation.
     ///
     /// - Parameters:
@@ -92,7 +91,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
     /// ```
     public func aggregate(_ field: String, _ aggregate: Aggregate) throws -> Node {
         let query = try makeQuery()
-        query.action = .aggregate(field, aggregate)
+        query.action = Action.aggregate(field: field, aggregate)
         
         let raw = try query.raw()
         return raw[0, "_fluent_aggregate"] ?? raw
