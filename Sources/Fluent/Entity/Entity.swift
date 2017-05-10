@@ -42,6 +42,10 @@ public protocol Entity: class, RowConvertible, Storable {
     /// but types with Left/Right generics (like pivots)
     /// must implement a custom identifier.
     static var identifier: String { get }
+    
+    /// Defines special fields that should be
+    /// computed with every request for this type of entity.
+    static var computedFields: [RawOr<ComputedField>] { get }
 
     /// Called before the entity will be created.
     /// Throwing will cancel the creation.
@@ -99,6 +103,10 @@ extension Entity {
 // MARK: Optional
 
 extension Entity {
+    public static var computedFields: [RawOr<ComputedField>] {
+        return []
+    }
+    
     public func willCreate() {}
     public func didCreate() {}
     public func willUpdate() {}

@@ -2,7 +2,7 @@
 /// on database entities, such as fetching, deleting,
 /// creating, and updating.
 public enum Action {
-    case fetch
+    case fetch([RawOr<ComputedField>])
     case aggregate(field: String?, Aggregate)
     case delete
     case create
@@ -38,12 +38,12 @@ public enum Schema {
 extension Action: Equatable {
     public static func ==(lhs: Action, rhs: Action) -> Bool {
         switch (lhs, rhs) {
-        case (.fetch, .fetch),
-             (.delete, .delete),
+        case (.delete, .delete),
              (.create, .create),
              (.modify, .modify):
             return true
-            
+        case (.fetch(let a), .fetch(let b)):
+             return a == b
         case (.aggregate(let a1, let a2), .aggregate(let b1, let b2)):
             return a1 == b1 && a2 == b2
             

@@ -117,13 +117,6 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
         query.data[.raw(rawKey, [])] = .raw(rawValue, [])
         return query
     }
-    
-    @discardableResult
-    public func get(raw rawKey: String) throws -> Query<E> {
-        let query = try makeQuery()
-        query.keys.append(.raw(rawKey, []))
-        return query
-    }
 }
 
 // MARK: Sort
