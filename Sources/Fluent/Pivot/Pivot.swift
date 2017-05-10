@@ -10,6 +10,8 @@ public final class Pivot<
     public typealias Left = L
     public typealias Right = R
 
+    // MARK: Overridable
+    
     public static var identifier: String {
         if Left.name < Right.name {
             return "Pivot<\(Left.identifier),\(Right.identifier)>"
@@ -27,6 +29,18 @@ public final class Pivot<
         get { return _entities[identifier] ?? _defaultEntity }
         set { _entities[identifier] = newValue }
     }
+    
+    public static var rightIdKey: String {
+        get { return _rightIdKeys[identifier] ?? Right.foreignIdKey }
+        set { _rightIdKeys[identifier] = newValue }
+    }
+    
+    public static var leftIdKey: String {
+        get { return _leftIdKeys[identifier] ?? Left.foreignIdKey }
+        set { _leftIdKeys[identifier] = newValue }
+    }
+    
+    // MARK: Instance
 
     public var leftId: Identifier
     public var rightId: Identifier
@@ -54,8 +68,8 @@ public final class Pivot<
     }
 
     public init(row: Row) throws {
-        leftId = try row.get(Left.foreignIdKey)
-        rightId = try row.get(Right.foreignIdKey)
+        leftId = try row.get(type(of: self).leftIdKey)
+        rightId = try row.get(type(of: self).rightIdKey)
 
         id = try row.get(idKey)
     }
@@ -63,8 +77,8 @@ public final class Pivot<
     public func makeRow() throws -> Row {
         var row = Row()
         try row.set(idKey, id)
-        try row.set(Left.foreignIdKey, leftId)
-        try row.set(Right.foreignIdKey, rightId)
+        try row.set(type(of: self).leftIdKey, leftId)
+        try row.set(type(of: self).rightIdKey, rightId)
         return row
     }
 }
@@ -73,8 +87,8 @@ extension Pivot: Preparation {
     public static func prepare(_ database: Database) throws {
         try database.create(self) { builder in
             builder.id()
-            builder.foreignId(for: Left.self)
-            builder.foreignId(for: Right.self)
+            builder.foreignId(for: Left.self, foreignIdKey: leftIdKey)
+            builder.foreignId(for: Right.self, foreignIdKey: rightIdKey)
         }
     }
 
@@ -89,6 +103,8 @@ public var pivotNameConnector: String = "_"
 
 private var _names: [String: String] = [:]
 private var _entities: [String: String] = [:]
+private var _leftIdKeys: [String: String] = [:]
+private var _rightIdKeys: [String: String] = [:]
 
 extension Pivot {
     internal static var _defaultName: String {

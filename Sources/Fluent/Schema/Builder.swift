@@ -22,10 +22,12 @@ extension Builder {
     public func foreignId<E: Entity>(
         for entityType: E.Type,
         optional: Bool = false,
-        unique: Bool = false
+        unique: Bool = false,
+        foreignIdKey: String = E.foreignIdKey,
+        foreignKeyName: String? = nil
     ) {
         let field = Field(
-            name: E.foreignIdKey,
+            name: foreignIdKey,
             type: .id(type: E.idType),
             optional: optional,
             unique: unique
@@ -33,7 +35,12 @@ extension Builder {
         self.field(field)
         
         if autoForeignKeys {
-            self.foreignKey(for: E.self)
+            self.foreignKey(
+                foreignIdKey: foreignIdKey,
+                referencesIdKey: E.idKey,
+                on: E.self,
+                name: foreignKeyName
+            )
         }
     }
 
@@ -156,12 +163,14 @@ extension Builder {
     public func parent<E: Entity>(
         _ entity: E.Type = E.self,
         optional: Bool = false,
-        unique: Bool = false
+        unique: Bool = false,
+        foreignIdKey: String = E.foreignIdKey
     ) {
         foreignId(
             for: E.self,
             optional: optional,
-            unique: unique
+            unique: unique,
+            foreignIdKey: foreignIdKey
         )
     }
     
@@ -174,15 +183,15 @@ extension Builder {
     /// Adds a foreign key constraint from a local
     /// column to a column on the foreign entity.
     public func foreignKey<E: Entity>(
-        _ field: String,
-        references foreignField: String,
+        foreignIdKey: String = E.foreignIdKey,
+        referencesIdKey idKey: String = E.idKey,
         on foreignEntity: E.Type = E.self,
         name: String? = nil
     ) {
         let foreignKey = ForeignKey(
             entity: entity,
-            field: field,
-            foreignField: foreignField,
+            field: foreignIdKey,
+            foreignField: idKey,
             foreignEntity: foreignEntity,
             name: name
         )
@@ -195,8 +204,6 @@ extension Builder {
         for: E.Type = E.self
     ) {
         self.foreignKey(
-            E.foreignIdKey,
-            references: E.idKey,
             on: E.self
         )
     }

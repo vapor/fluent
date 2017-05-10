@@ -1,5 +1,5 @@
 extension Tester {
-    func setup() throws {
+    private func setup() throws {
         Atom.database = database
         try Atom.prepare(database)
         Compound.database = database
@@ -16,7 +16,7 @@ extension Tester {
         try Pivot<Pivot<Atom, Compound>, Student>.prepare(database)
     }
 
-    func teardown() throws {
+    private func teardown() throws {
         try Pivot<Pivot<Atom, Compound>, Student>.revert(database)
         try Pivot<Atom, Compound>.revert(database)
         

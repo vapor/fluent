@@ -3,7 +3,7 @@
 /// creating, and updating.
 public enum Action {
     case fetch
-    case aggregate(field: String, Aggregate)
+    case aggregate(field: String?, Aggregate)
     case delete
     case create
     case modify

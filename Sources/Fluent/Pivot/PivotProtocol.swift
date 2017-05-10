@@ -7,6 +7,10 @@
 public protocol PivotProtocol {
     associatedtype Left: Entity
     associatedtype Right: Entity
+    
+    /// Custom left/right id keys
+    static var leftIdKey: String { get }
+    static var rightIdKey: String { get }
 
     /// Returns true if the two entities are related
     static func related(_ left: Left, _ right: Right) throws -> Bool
@@ -30,8 +34,8 @@ extension PivotProtocol where Self: Entity {
         let rightId = try right.assertExists()
 
         let results = try makeQuery()
-            .filter(type(of: left).foreignIdKey, leftId)
-            .filter(type(of: right).foreignIdKey, rightId)
+            .filter(leftIdKey, leftId)
+            .filter(rightIdKey, rightId)
             .first()
 
         return results != nil
@@ -44,9 +48,10 @@ extension PivotProtocol where Self: Entity {
         let rightId = try right.assertExists()
 
         var row = Row()
-        try row.set(Left.foreignIdKey, leftId)
-        try row.set(Right.foreignIdKey, rightId)
+        try row.set(leftIdKey, leftId)
+        try row.set(rightIdKey, rightId)
 
+        print(row)
         let pivot = try self.init(row: row)
         try pivot.save()
 
@@ -59,8 +64,8 @@ extension PivotProtocol where Self: Entity {
         let rightId = try right.assertExists()
 
         try makeQuery()
-            .filter(Left.foreignIdKey, leftId)
-            .filter(Right.foreignIdKey, rightId)
+            .filter(leftIdKey, leftId)
+            .filter(rightIdKey, rightId)
             .delete()
     }
 }
