@@ -252,7 +252,7 @@ class SQLSerializerTests: XCTestCase {
         try query.delete()
         
         let (statement, values) = serialize(query)
-        XCTAssertEqual(statement, "DELETE `compounds` FROM `compounds` JOIN `atoms` ON `compounds`.`id` = `atoms`.`compound_id` WHERE `atoms`.`name` = ?")
+        XCTAssertEqual(statement, "DELETE `compounds` FROM `compounds` INNER JOIN `atoms` ON `compounds`.`id` = `atoms`.`compound_id` WHERE `atoms`.`name` = ?")
         XCTAssertEqual(values.count, 1)
     }
 

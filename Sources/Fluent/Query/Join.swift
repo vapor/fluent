@@ -17,7 +17,18 @@ public struct Join {
     /// Entity that will be joining
     /// the base data
     public let joined: Entity.Type
+    
+    public enum Kind {
+        // returns only rows that
+        // appear in both sets
+        case inner
+        // returns all matching rows
+        // from the queried table _and_
+        // all rows that appear in both sets
+        case outer
+    }
 
+    public let kind: Kind
 
     /// The key from the base table that will
     /// be compared to the key from the joined
@@ -39,11 +50,13 @@ public struct Join {
 
     /// Create a new Join
     public init<Base: Entity, Joined: Entity>(
+        kind: Kind,
         base: Base.Type,
         joined: Joined.Type,
         baseKey: String = Base.idKey,
         joinedKey: String = Base.foreignIdKey
     ) {
+        self.kind = kind
         self.base = base
         self.joined = joined
         self.baseKey = baseKey
@@ -56,11 +69,13 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
     /// See Join for more information.
     @discardableResult
     public func join<Joined: Entity>(
+        kind: Join.Kind = .inner,
         _ joined: Joined.Type,
         baseKey: String = E.idKey,
         joinedKey: String = E.foreignIdKey
     ) throws -> Query<Self.E> {
         let join = Join(
+            kind: kind,
             base: E.self,
             joined: joined,
             baseKey: baseKey,

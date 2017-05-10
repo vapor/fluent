@@ -25,7 +25,7 @@ class JoinTests: XCTestCase {
         try db.query(query)
 
         if let (sql, _) = lqd.lastQuery {
-            XCTAssertEqual(sql, "SELECT `atoms`.* FROM `atoms` JOIN `compounds` ON `atoms`.`#id` = `compounds`.`atom_#id`")
+            XCTAssertEqual(sql, "SELECT `atoms`.* FROM `atoms` INNER JOIN `compounds` ON `atoms`.`#id` = `compounds`.`atom_#id`")
         } else {
             XCTFail("No last query.")
         }
@@ -40,7 +40,7 @@ class JoinTests: XCTestCase {
         try db.query(query)
 
         if let (sql, values) = lqd.lastQuery {
-            XCTAssertEqual(sql, "SELECT `atoms`.* FROM `atoms` JOIN `compounds` ON `atoms`.`#id` = `compounds`.`atom_#id` WHERE `atoms`.`protons` > ? AND `compounds`.`atoms` < ?")
+            XCTAssertEqual(sql, "SELECT `atoms`.* FROM `atoms` INNER JOIN `compounds` ON `atoms`.`#id` = `compounds`.`atom_#id` WHERE `atoms`.`protons` > ? AND `compounds`.`atoms` < ?")
             if values.count == 2 {
                 XCTAssertEqual(values[0].int, 5)
                 XCTAssertEqual(values[1].int, 128)
@@ -66,10 +66,25 @@ class JoinTests: XCTestCase {
         if let (sql, values) = lqd.lastQuery {
             XCTAssertEqual(
                 sql,
-                "SELECT `compounds`.* FROM `compounds` JOIN `atom_compound` ON `compounds`.`#id` = `atom_compound`.`compound_#id` WHERE `atom_compound`.`atom_#id` = ?"
+                "SELECT `compounds`.* FROM `compounds` INNER JOIN `atom_compound` ON `compounds`.`#id` = `atom_compound`.`compound_#id` WHERE `atom_compound`.`atom_#id` = ?"
             )
             XCTAssertEqual(values.count, 1)
             XCTAssertEqual(values.first?.int, 42)
+        }
+    }
+    
+    func testOuter() throws {
+        let query = try Atom.makeQuery()
+        try query.join(kind: .outer, Compound.self)
+        try query.filter(Compound.self, "name" == "foo")
+        try lqd.query(query)
+        if let (sql, values) = lqd.lastQuery {
+            XCTAssertEqual(
+                sql,
+                "SELECT `atoms`.* FROM `atoms` LEFT OUTER JOIN `compounds` ON `atoms`.`#id` = `compounds`.`atom_#id` WHERE `compounds`.`name` = ?"
+            )
+            XCTAssertEqual(values.count, 1)
+            XCTAssertEqual(values.first?.string, "foo")
         }
     }
 }

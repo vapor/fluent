@@ -710,7 +710,12 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
     open func join(_ join: Join) -> String {
         var fragments: [String] = []
 
-        fragments += "JOIN"
+        switch join.kind {
+        case .inner:
+            fragments += "INNER JOIN"
+        case .outer:
+            fragments += "LEFT OUTER JOIN"
+        }
         fragments += escape(join.joined.entity)
         fragments += "ON"
 
