@@ -18,13 +18,15 @@ public struct Join {
     /// the base data
     public let joined: Entity.Type
     
+    /// An exhaustive list of 
+    /// possible join types.
     public enum Kind {
-        // returns only rows that
-        // appear in both sets
+        /// returns only rows that
+        /// appear in both sets
         case inner
-        // returns all matching rows
-        // from the queried table _and_
-        // all rows that appear in both sets
+        /// returns all matching rows
+        /// from the queried table _and_
+        /// all rows that appear in both sets
         case outer
     }
 
