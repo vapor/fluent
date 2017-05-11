@@ -141,7 +141,7 @@ extension Entity {
     }
 
     /// Finds the entity with the given `id`.
-    public static func find(_ id: NodeRepresentable) throws -> Self? {
+    public static func find(_ id: NodeRepresentable?) throws -> Self? {
         return try Self.makeQuery().find(id)
     }
     

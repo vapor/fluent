@@ -68,7 +68,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
     }
 
     /// Returns the first entity with the given `id`.
-    public func find(_ id: NodeRepresentable) throws -> E? {
+    public func find(_ id: NodeRepresentable?) throws -> E? {
         return try makeQuery()
             .filter(E.idKey, id)
             .first()
@@ -84,7 +84,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
         let query = try makeQuery()
 
         query.action = .create
-        try row.makeNode(in: query.context).rawOrObject?.forEach { (key, value) in
+        row?.makeNode(in: query.context).rawOrObject?.forEach { (key, value) in
             query.data[key] = value
         }
 
@@ -219,7 +219,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
         let query = try makeQuery()
 
         query.action = .modify
-        try row.makeNode(in: query.context).rawOrObject?.forEach { (key, value) in
+        row?.makeNode(in: query.context).rawOrObject?.forEach { (key, value) in
             query.data[key] = value
         }
 

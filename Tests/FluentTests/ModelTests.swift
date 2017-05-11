@@ -10,6 +10,7 @@ class ModelTests: XCTestCase {
     var db: Database!
 
     override func setUp() {
+        Node.fuzzy = [Node.self]
         lqd = LastQueryDriver()
         db = Database(lqd)
     }

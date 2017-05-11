@@ -8,6 +8,7 @@ class MemoryBenchmarkTests: XCTestCase {
     ]
     
     func makeTestModels() -> (MemoryDriver, Database) {
+        Node.fuzzy = [Node.self]
         let driver = try! MemoryDriver()
         let database = Database(driver)
         

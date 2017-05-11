@@ -33,11 +33,11 @@ class LastQueryConnection: Connection {
         case .some(let query):
             let serializer = GeneralSQLSerializer(query)
             driver.lastQuery = serializer.serialize()
-            return try Node(node: [
-                [
-                    E.idKey: 5
-                ]
-            ], in: nil)
+            return Node(.array([
+                .object([
+                    E.idKey: .number(.int(5))
+                ])
+            ]), in: nil)
         }
     }
 }
