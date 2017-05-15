@@ -122,7 +122,7 @@ final class Bloguser: Entity, Preparation {
     }
     
     var updatedPosts: Children<Bloguser, Blogpost> {
-        return children(foreignIdKey: "updatedby")
+        return children(foreignIdKey: "updatedBy")
     }
     
     var followers: Siblings<Bloguser, Bloguser, BloguserFollowersPivot> {
