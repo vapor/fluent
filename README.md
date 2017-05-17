@@ -2,7 +2,7 @@
     <img src="https://cloud.githubusercontent.com/assets/1342803/24703810/2ec45636-1a05-11e7-9c75-3f26eae65c07.png" width="320" alt="Fluent">
     <br>
     <br>
-    <a href="http://beta.docs.vapor.codes/fluent/package/">
+    <a href="http://docs.vapor.codes/2.0/fluent/package/">
         <img src="http://img.shields.io/badge/read_the-docs-92A8D1.svg" alt="Documentation">
     </a>
     <a href="http://vapor.team">
@@ -17,4 +17,4 @@
     <a href="https://swift.org">
         <img src="http://img.shields.io/badge/swift-3.1-brightgreen.svg" alt="Swift 3.1">
     </a>
-</center>
+</p>
