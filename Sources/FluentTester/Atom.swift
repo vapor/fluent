@@ -2,6 +2,7 @@ public final class Atom: Entity {
     public var name: String
     public var protons: Int
     public var weight: Double
+    public static let idType: IdentifierType = .uuid
 
     public let storage = Storage()
 
