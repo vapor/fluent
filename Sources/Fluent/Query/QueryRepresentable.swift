@@ -159,7 +159,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
             }
 
             let id = try query.create(row)
-            if id != nil, id != .null, id != 0 {
+            if case .int = E.idType, id != nil, id != .null, id != 0 {
                 entity.id = id
             }
 
