@@ -6,14 +6,15 @@ extension Tester {
             try! Atom.revert(database)
         }
 
-        let hydrogen = Atom(id: "asdf", name: "Hydrogen", protons: 1, weight: 1.007)
+        let uuid = UUID()
+        let hydrogen = Atom(id: Identifier(uuid.uuidString), name: "Hydrogen", protons: 1, weight: 1.007)
 
         guard hydrogen.exists == false else {
             throw Error.failed("Exists should be false since not yet saved.")
         }
         try hydrogen.save()
         
-        guard hydrogen.id?.string == "asdf" else {
+        guard hydrogen.id?.string?.lowercased() == uuid.uuidString.lowercased() else {
             throw Error.failed("Saved ID not equal to set id.")
         }
         
@@ -44,6 +45,5 @@ extension Tester {
         guard hydrogen.weight == found.weight else {
             throw Error.failed("Weight retrieved different than what was saved.")
         }
-        
     }
 }
