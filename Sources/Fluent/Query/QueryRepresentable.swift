@@ -180,8 +180,8 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
                 softDeletbleEntity.shouldForceDelete = shouldForceDelete
             }
             try query.delete(entity)
-        } else if let softDeletableEntityType = E.self as? SoftDeletable, shouldForceDelete == false {
-            let deletedAtKey = type(of: softDeletableEntityType).deletedAtKey
+        } else if let S = E.self as? SoftDeletable.Type, shouldForceDelete == false {
+            let deletedAtKey = S.deletedAtKey
             var row = Row()
             try row.set(deletedAtKey, Date())
             try query.modify(row)
