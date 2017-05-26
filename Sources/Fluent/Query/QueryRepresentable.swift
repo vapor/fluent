@@ -107,6 +107,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
 
         if let _ = entity.id, entity.exists {
             // update
+            try type(of: entity).willUpdate(entity: entity)
             try entity.willUpdate()
             var row = try entity.makeDirtyRow()
             try row.set(E.idKey, entity.id)
@@ -134,6 +135,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
             }
 
             try modify(row)
+            type(of: entity).didUpdate(entity: entity)
             entity.didUpdate()
         } else {
             // create
@@ -142,6 +144,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
                 // for models without them
                 entity.id = Identifier(UUID.random())
             }
+            try type(of: entity).willCreate(entity: entity)
             try entity.willCreate()
             var row = try entity.makeRow()
             try row.set(E.idKey, entity.id)
@@ -163,6 +166,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
                 entity.id = id
             }
 
+            type(of: entity).didCreate(entity: entity)
             entity.didCreate()
         }
         entity.exists = true
@@ -203,8 +207,10 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
             // permenantly delete the model
             query.action = .delete
             try query.filter(E.idKey, id)
+            try type(of: entity).willDelete(entity: entity)
             try entity.willDelete()
             try query.raw()
+            type(of: entity).didDelete(entity: entity)
             entity.didDelete()
             entity.exists = false
         }
