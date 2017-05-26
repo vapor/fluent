@@ -56,23 +56,15 @@ extension Tester {
             throw Error.failed("Water was not forced deleted")
         }
 
-        try ethanol.save()
-
-        guard try Compound.count() == 1 else {
-          throw Error.failed("Compound count did not equal 4.")
-        }
-
         try Compound.makeQuery().delete()
 
         guard try Compound.count() == 0 else {
           throw Error.failed("Compound count did not equal 0 after delete.")
         }
 
-        guard try Compound.withSoftDeleted().count() == 1 else {
+        guard try Compound.withSoftDeleted().count() == 3 else {
           throw Error.failed("Water was not soft deleted")
         }
-
-        try water.restore()
 
         try Compound.makeQuery().forceDelete()
 
