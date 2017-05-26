@@ -107,7 +107,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
 
         if let _ = entity.id, entity.exists {
             // update
-            try type(of: entity).willUpdate(entity: entity)
+            try E.willUpdate(entity: entity)
             try entity.willUpdate()
             var row = try entity.makeDirtyRow()
             try row.set(E.idKey, entity.id)
