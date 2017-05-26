@@ -92,10 +92,10 @@ extension QueryRepresentable where E: SoftDeletable, Self: ExecutorRepresentable
         return query
     }
 
-    public func forceDelete() throws -> Query<E> {
+    public func forceDelete() throws {
         let query = try makeQuery()
         query.action = .delete
-        return query
+        try query.raw()
     }
 }
 
