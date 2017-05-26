@@ -173,14 +173,11 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
 extension QueryRepresentable where Self: ExecutorRepresentable {
     /// Attempts to delete all entities
     /// in the model's collection.
-    public func delete(shouldForceDelete: Bool = true) throws {
+    public func delete() throws {
         let query = try makeQuery()
         if let entity = query.entity {
-            if let softDeletbleEntity = entity as? SoftDeletable {
-                softDeletbleEntity.shouldForceDelete = shouldForceDelete
-            }
             try query.delete(entity)
-        } else if let S = E.self as? SoftDeletable.Type, shouldForceDelete == false {
+        } else if let S = E.self as? SoftDeletable.Type {
             let deletedAtKey = S.deletedAtKey
             var row = Row()
             try row.set(deletedAtKey, Date())
