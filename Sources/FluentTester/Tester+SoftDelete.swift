@@ -59,17 +59,17 @@ extension Tester {
         try Compound.makeQuery().delete()
 
         guard try Compound.count() == 0 else {
-          throw Error.failed("Compound count did not equal 0 after delete.")
+            throw Error.failed("Compound count did not equal 0 after delete.")
         }
 
         guard try Compound.withSoftDeleted().count() == 3 else {
-          throw Error.failed("Water was not soft deleted")
+            throw Error.failed("Water was not soft deleted")
         }
 
         try Compound.makeQuery().forceDelete()
 
         guard try Compound.withSoftDeleted().count() == 0 else {
-          throw Error.failed("Water was not force deleted")
+            throw Error.failed("Water was not force deleted")
         }
     }
 }
