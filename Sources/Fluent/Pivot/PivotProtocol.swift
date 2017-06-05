@@ -7,7 +7,7 @@
 public protocol PivotProtocol {
     associatedtype Left: Entity
     associatedtype Right: Entity
-    
+
     /// Custom left/right id keys
     static var leftIdKey: String { get }
     static var rightIdKey: String { get }
@@ -51,7 +51,6 @@ extension PivotProtocol where Self: Entity {
         try row.set(leftIdKey, leftId)
         try row.set(rightIdKey, rightId)
 
-        print(row)
         let pivot = try self.init(row: row)
         try pivot.save()
 
