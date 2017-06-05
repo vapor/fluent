@@ -289,7 +289,15 @@ class SQLSerializerTests: XCTestCase {
         XCTAssertEqual(statement, "SELECT `compounds`.* FROM `compounds` WHERE `compounds`.`foo` IS NULL")
         XCTAssertEqual(values.count, 0)
     }
-    
+
+    func testEmptyIn() throws {
+        let query = Query<Compound>(db)
+        try query.filter(.subset("foo", .in, []))
+        let (statement, values) = serialize(query)
+        XCTAssertEqual(statement, "SELECT `compounds`.* FROM `compounds` WHERE false")
+        XCTAssertEqual(values.count, 0)
+    }
+
     func testDirty() throws {
         let atom = Atom(name: "Hydrogen", id: 42)
         atom.exists = true

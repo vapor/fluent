@@ -568,10 +568,14 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
                 }
             }
         case .subset(let key, let s, let subValues):
-            statement += escape(filter.entity.entity) + "." + escape(key)
-            statement += scope(s)
-            statement += placeholders(subValues)
-            values += subValues
+            if subValues.count == 0 {
+                statement += "false"
+            } else {
+                statement += escape(filter.entity.entity) + "." + escape(key)
+                statement += scope(s)
+                statement += placeholders(subValues)
+                values += subValues
+            }
         case .group(let relation, let f):
             if f.count == 0 {
                 // empty subqueries should result
