@@ -1,4 +1,5 @@
 import Fluent
+import NodeFuzzy
 
 class LastQueryDriver: Driver {
     var keyNamingConvention: KeyNamingConvention = .snake_case
