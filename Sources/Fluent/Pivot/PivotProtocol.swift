@@ -7,7 +7,7 @@
 public protocol PivotProtocol {
     associatedtype Left: Entity
     associatedtype Right: Entity
-    
+
     /// Custom left/right id keys
     static var leftIdKey: String { get }
     static var rightIdKey: String { get }
