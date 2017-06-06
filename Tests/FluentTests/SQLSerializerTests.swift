@@ -2,29 +2,6 @@ import XCTest
 @testable import Fluent
 
 class SQLSerializerTests: XCTestCase {
-    static let allTests = [
-        ("testBasicSelect", testBasicSelect),
-        ("testDistinctSelect", testDistinctSelect),
-        ("testRegularSelect", testRegularSelect),
-        ("testOffsetSelect", testOffsetSelect),
-        ("testFilterCompareSelect", testFilterCompareSelect),
-        ("testFilterLikeSelect", testFilterLikeSelect),
-        ("testBasicCount", testBasicCount),
-        ("testDistinctCount", testDistinctCount),
-        ("testRegularCount", testRegularCount),
-        ("testFilterCompareCount", testFilterCompareCount),
-        ("testFilterLikeCount", testFilterLikeCount),
-        ("testReqularSum", testReqularSum),
-        ("testcustomAggregate", testCustomAggregate),
-        ("testFilterEqualsNullSelect", testFilterEqualsNullSelect),
-        ("testFilterNotEqualsNullSelect", testFilterNotEqualsNullSelect),
-        ("testFilterCompareUpdate", testFilterCompareUpdate),
-        ("testFilterCompareDelete", testFilterCompareDelete),
-        ("testFilterGroup", testFilterGroup),
-        ("testSort", testSort),
-        ("testSortMultiple", testSortMultiple),
-    ]
-
     var db: Database!
 
     override func setUp() {
@@ -298,6 +275,14 @@ class SQLSerializerTests: XCTestCase {
         XCTAssertEqual(values.count, 0)
     }
 
+    func testEmptyNotIn() throws {
+        let query = Query<Compound>(db)
+        try query.filter(.subset("foo", .notIn, []))
+        let (statement, values) = serialize(query)
+        XCTAssertEqual(statement, "SELECT `compounds`.* FROM `compounds` WHERE true")
+        XCTAssertEqual(values.count, 0)
+    }
+
     func testDirty() throws {
         let atom = Atom(name: "Hydrogen", id: 42)
         atom.exists = true
@@ -314,6 +299,37 @@ class SQLSerializerTests: XCTestCase {
             XCTAssertNil(dirty["name"]?.string)
         }
     }
+
+    static let allTests = [
+        ("testBasicSelect", testBasicSelect),
+        ("testDistinctSelect", testDistinctSelect),
+        ("testRegularSelect", testRegularSelect),
+        ("testOffsetSelect", testOffsetSelect),
+        ("testFilterCompareSelect", testFilterCompareSelect),
+        ("testFilterLikeSelect", testFilterLikeSelect),
+        ("testBasicCount", testBasicCount),
+        ("testDistinctCount", testDistinctCount),
+        ("testRegularCount", testRegularCount),
+        ("testFilterCompareCount", testFilterCompareCount),
+        ("testFilterLikeCount", testFilterLikeCount),
+        ("testReqularSum", testReqularSum),
+        ("testcustomAggregate", testCustomAggregate),
+        ("testFilterEqualsNullSelect", testFilterEqualsNullSelect),
+        ("testFilterNotEqualsNullSelect", testFilterNotEqualsNullSelect),
+        ("testFilterCompareUpdate", testFilterCompareUpdate),
+        ("testFilterCompareDelete", testFilterCompareDelete),
+        ("testFilterGroup", testFilterGroup),
+        ("testSort", testSort),
+        ("testSortMultiple", testSortMultiple),
+        ("testJoinedDelete", testJoinedDelete),
+        ("testNull", testNull),
+        ("testNotNull", testNotNull),
+        ("testNodeNull", testNodeNull),
+        ("testPlainNil", testPlainNil),
+        ("testEmptyIn", testEmptyIn),
+        ("testEmptyNotIn", testEmptyNotIn),
+        ("testDirty", testDirty)
+    ]
 }
 
 

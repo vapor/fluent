@@ -569,7 +569,16 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
             }
         case .subset(let key, let s, let subValues):
             if subValues.count == 0 {
-                statement += "false"
+                switch s {
+                case .in:
+                    // where in empty set should
+                    // not match any rows
+                    statement += "false"
+                case .notIn:
+                    // where not in empty set should
+                    // match all rows
+                    statement += "true"
+                }
             } else {
                 statement += escape(filter.entity.entity) + "." + escape(key)
                 statement += scope(s)
