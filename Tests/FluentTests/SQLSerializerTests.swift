@@ -6,7 +6,7 @@ class SQLSerializerTests: XCTestCase {
 
     override func setUp() {
         let lqd = LastQueryDriver()
-        db = Database(lqd)
+        db = DatabaseImpl(lqd)
     }
 
     func testBasicSelect() {

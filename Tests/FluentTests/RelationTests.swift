@@ -22,7 +22,7 @@ class RelationTests: XCTestCase {
 
     override func setUp() {
         memory = try! MemoryDriver()
-        database = Database(memory)
+        database = DatabaseImpl(memory)
 
         try! ents.forEach { ent in
             ent.database = database

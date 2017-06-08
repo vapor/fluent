@@ -4,7 +4,7 @@ import XCTest
 class SQLiteTests: XCTestCase {
     func testMultipleColumnModify() throws {
         let memory = try SQLiteDriver(path: ":memory:")
-        let database = Database(memory)
+        let database = DatabaseImpl(memory)
 
         let create = Query<User>(database)
         let id = Field(name: "id", type: .string(length: nil))

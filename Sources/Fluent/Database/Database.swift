@@ -1,23 +1,24 @@
-/// References a database with a single `Driver`.
-/// Statically maps `Model`s to `Database`s.
-public final class Database: Executor, QueryLogger {
+public final class DatabaseRefs {
     /// Maps `Model` names to their respective
     /// `Database`. This allows multiple models
     /// in the same application to use different
     /// methods of data persistence.
     public static var map: [String: Database] = [:]
-
+    
     /// The default database for all `Model` types.
     public static var `default`: Database?
+}
 
+public protocol Database: Executor, QueryLogger, Schemable, Preparable, Revertable, Transactable {
+    
     /// The `Driver` powering this database.
     /// Responsible for executing queries.
-    public let driver: Driver
+    var driver: Driver  { get }
     
     /// Maintains a pool of connections
     /// one for each thread
-    public let threadConnectionPool: ThreadConnectionPool
-
+    var threadConnectionPool: ThreadConnectionPool  { get }
+    
     /// The string value for the
     /// default identifier key.
     ///
@@ -28,30 +29,69 @@ public final class Database: Executor, QueryLogger {
     /// This value is overriden by
     /// entities that implement the
     /// `Entity.idKey` static property.
-    public var idKey: String
-
+    var idKey: String  { get }
+    
     /// The default type for values stored against the identifier key.
     ///
     /// The `idType` will be accessed by those Entity implementations
     /// which do not themselves implement `Entity.idType`.
-    public var idType: IdentifierType
-
+    var idType: IdentifierType  { get }
+    
     /// The naming convetion to use for foreign
     /// id keys, table names, etc.
     /// ex: snake_case vs. camelCase.
-    public var keyNamingConvention: KeyNamingConvention
+    var keyNamingConvention: KeyNamingConvention  { get }
+    
+    /// A closure for handling database logs
+    typealias QueryLogCallback = (QueryLog) -> ()
+    
+    /// All queries performed by the database will be
+    /// sent here right before they are run.
+    var log: QueryLogCallback?   { get set }
+    
+    
+}
 
+/// References a database with a single `Driver`.
+/// Statically maps `Model`s to `Database`s.
+public final class DatabaseImpl : Database {
+    
+    public let driver: Driver
+    
+    public let threadConnectionPool: ThreadConnectionPool
+
+    public let idKey: String
+
+    public let idType: IdentifierType
+    
+    public var log: QueryLogCallback?
+    
+    public let keyNamingConvention: KeyNamingConvention
+    
     /// Creates a `Database` with the supplied
     /// `Driver`. This cannot be changed later.
-    public init(_ driver: Driver, maxConnections: Int = 128) {
-        idKey = driver.idKey
-        idType = driver.idType
-        keyNamingConvention = driver.keyNamingConvention
-
-        threadConnectionPool = ThreadConnectionPool(
+    public convenience init(_ driver: Driver, maxConnections: Int = 128) {
+        
+        let threadConnectionPool = ThreadConnectionPool(
             driver,
             maxConnections: maxConnections // some number larger than the max threads
         )
+        self.init(driver, threadConnectionPool,
+                  driver.idKey,
+                  driver.idType,
+                  driver.keyNamingConvention)
+    }
+    
+    public init(_ driver: Driver,
+                _ threadConnectionPool : ThreadConnectionPool,
+                _ idKey: String,
+                _ idType: IdentifierType,
+                _ keyNamingConvention: KeyNamingConvention) {
+        
+        self.idKey = idKey
+        self.idType = driver.idType
+        self.keyNamingConvention = driver.keyNamingConvention
+        self.threadConnectionPool = threadConnectionPool
         
         var driver = driver
         self.driver = driver
@@ -59,13 +99,6 @@ public final class Database: Executor, QueryLogger {
     }
     
     // MARK: Log
-    
-    /// A closure for handling database logs
-    public typealias QueryLogCallback = (QueryLog) -> ()
-    
-    /// All queries performed by the database will be
-    /// sent here right before they are run.
-    public var log: QueryLogCallback?
     
     /// QueryLogger protocol
     public func log(_ statement: String, _ values: [Node]) {

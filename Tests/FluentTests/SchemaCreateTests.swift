@@ -13,7 +13,7 @@ class SchemaCreateTests: XCTestCase {
 
     override func setUp() {
         let lqd = LastQueryDriver()
-        db = Database(lqd)
+        db = DatabaseImpl(lqd)
     }
 
     func testCreate() throws {
