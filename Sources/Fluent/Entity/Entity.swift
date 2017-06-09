@@ -67,6 +67,8 @@ public protocol Entity: class, RowConvertible, Storable {
 
     /// Called after the entity has been deleted.
     func didDelete()
+    
+    func generateId(`for` custom: String) throws -> Identifier?
 }
 
 extension Entity {
@@ -113,6 +115,10 @@ extension Entity {
     public func didUpdate() {}
     public func willDelete() {}
     public func didDelete() {}
+    
+    public func generateId(`for` custom: String) throws -> Identifier? {
+        return nil
+    }
 }
 
 // MARK: CRUD
