@@ -10,6 +10,7 @@ XCTMain([
     testCase(QueryFiltersTests.allTests),
     testCase(RawTests.allTests),
     testCase(RelationTests.allTests),
+    testCase(RowTests.allTests),
     testCase(SchemaCreateTests.allTests),
     testCase(SQLSerializerTests.allTests),
     testCase(JoinTests.allTests),
