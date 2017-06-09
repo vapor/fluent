@@ -36,10 +36,10 @@ extension Builder {
         
         if autoForeignKeys {
             self.foreignKey(
-                foreignIdKey: foreignIdKey,
-                referencesIdKey: E.idKey,
+                foreignIdKey,
+                references: E.idKey,
                 on: E.self,
-                name: foreignKeyName
+                named: foreignKeyName
             )
         }
     }
@@ -183,10 +183,10 @@ extension Builder {
     /// Adds a foreign key constraint from a local
     /// column to a column on the foreign entity.
     public func foreignKey<E: Entity>(
-        foreignIdKey: String = E.foreignIdKey,
-        referencesIdKey idKey: String = E.idKey,
+        _ foreignIdKey: String,
+        references idKey: String,
         on foreignEntity: E.Type = E.self,
-        name: String? = nil
+        named name: String? = nil
     ) {
         let foreignKey = ForeignKey(
             entity: entity,
@@ -204,6 +204,8 @@ extension Builder {
         for: E.Type = E.self
     ) {
         self.foreignKey(
+            E.foreignIdKey,
+            references: E.idKey,
             on: E.self
         )
     }
@@ -216,3 +218,23 @@ extension Builder {
 }
 
 public var autoForeignKeys = true
+
+
+// MARK: Deprecated
+
+extension Builder {
+    @available(*, deprecated, message: "Please use foreignKey(_: String, references: String, on: Entity, named: String)")
+    public func foreignKey<E: Entity>(
+        foreignIdKey: String = E.foreignIdKey,
+        referencesIdKey: String = E.idKey,
+        on foreignEntity: E.Type = E.self,
+        name: String? = nil
+    ) {
+        self.foreignKey(
+            foreignIdKey,
+            references: referencesIdKey,
+            on: foreignEntity,
+            named: name
+        )
+    }
+}

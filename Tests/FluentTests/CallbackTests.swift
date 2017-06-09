@@ -1,6 +1,13 @@
 import XCTest
 @testable import Fluent
 
+extension Entity {
+    static func willCreate(entity: Entity) {
+        guard let dummyModel = entity as? CallbacksTests.DummyModel else { return }
+        dummyModel.staticWasModifiedOnCreate = true
+    }
+}
+
 class CallbacksTests: XCTestCase {
 
     /// Dummy Model implementation for testing.
@@ -8,6 +15,9 @@ class CallbacksTests: XCTestCase {
         let storage = Storage()
         var wasModifiedOnCreate: Bool = false
         var wasModifiedOnUpdate: Bool = false
+        
+        var staticWasModifiedOnCreate: Bool = false
+        var staticWasModifiedOnUpdate: Bool = false
 
         init() {
             
@@ -19,6 +29,11 @@ class CallbacksTests: XCTestCase {
 
         func makeRow() -> Row {
             return .null
+        }
+        
+        static func willUpdate(entity: Entity) {
+            guard let dummyModel = entity as? DummyModel else { return }
+            dummyModel.staticWasModifiedOnUpdate = true
         }
         
         func willCreate() {
@@ -42,6 +57,26 @@ class CallbacksTests: XCTestCase {
     }
 
     var database: Database!
+    
+    func testStaticCreateCallbacksCanMutateProperties() {
+        let result = DummyModel()
+        XCTAssertFalse(result.staticWasModifiedOnCreate, "Result should not have been modified yet")
+        
+        try? result.save()
+        XCTAssertTrue(result.staticWasModifiedOnCreate, "Result should have been modified by now")
+    }
+    
+    func testStaticUpdateCallbacksCanMutateProperties() {
+        let result = DummyModel()
+        XCTAssertFalse(result.staticWasModifiedOnUpdate, "Result should not have been modified yet")
+        
+        try? result.save()
+        XCTAssertFalse(result.staticWasModifiedOnUpdate, "Result should not have been modified yet")
+        
+        // Save the object once more to trigger the update callback
+        try? result.save()
+        XCTAssertTrue(result.staticWasModifiedOnUpdate, "Result should have been modified by now")
+    }
 
     func testCreateCallbacksCanMutateProperties() {
         let result = DummyModel()
