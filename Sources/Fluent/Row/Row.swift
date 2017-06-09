@@ -2,7 +2,7 @@
 /// Fluent parses Rows from fetch queries and serializes
 /// Rows to create and update queries.
 public struct Row: StructuredDataWrapper {
-    public static let defaultContext = rowContext
+    public static let defaultContext: Context? = rowContext
     public var wrapped: StructuredData
     public let context: Context
 
