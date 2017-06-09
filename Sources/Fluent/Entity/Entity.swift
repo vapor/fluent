@@ -47,6 +47,27 @@ public protocol Entity: class, RowConvertible, Storable {
     /// computed with every request for this type of entity.
     static var computedFields: [RawOr<ComputedField>] { get }
 
+    /// Called before any entity will be created.
+    /// Throwing will cancel the creation.
+    static func willCreate(entity: Entity) throws
+
+    /// Called after any entity has been created.
+    static func didCreate(entity: Entity)
+
+    /// Called before any entity will be updated.
+    /// Throwing will cancel the update.
+    static func willUpdate(entity: Entity) throws
+
+    /// Called after any entity has been updated.
+    static func didUpdate(entity: Entity)
+
+    /// Called before any entity will be deleted.
+    /// Throwing will cancel the deletion.
+    static func willDelete(entity: Entity) throws
+
+    /// Called after any entity has been deleted.
+    static func didDelete(entity: Entity)
+
     /// Called before the entity will be created.
     /// Throwing will cancel the creation.
     func willCreate() throws
@@ -107,6 +128,13 @@ extension Entity {
         return []
     }
     
+    public static func willCreate(entity: Entity) {}
+    public static func didCreate(entity: Entity) {}
+    public static func willUpdate(entity: Entity) {}
+    public static func didUpdate(entity: Entity) {}
+    public static func willDelete(entity: Entity) {}
+    public static func didDelete(entity: Entity) {}
+
     public func willCreate() {}
     public func didCreate() {}
     public func willUpdate() {}
