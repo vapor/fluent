@@ -28,7 +28,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
         var models: [E] = []
 
         for result in array {
-            let row = Row(node: result)
+            let row = Row(result.wrapped)
             let model = try E(row: row)
             model.id = try row.get(E.idKey)
             model.exists = true
