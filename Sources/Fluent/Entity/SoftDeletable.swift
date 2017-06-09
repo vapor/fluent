@@ -91,6 +91,12 @@ extension QueryRepresentable where E: SoftDeletable, Self: ExecutorRepresentable
         query.includeSoftDeleted = true
         return query
     }
+
+    public func forceDelete() throws {
+        let query = try makeQuery().withSoftDeleted()
+        query.action = .delete
+        try query.raw()
+    }
 }
 
 // MARK: Entity

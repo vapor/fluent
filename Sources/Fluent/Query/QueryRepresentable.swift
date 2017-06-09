@@ -177,6 +177,11 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
         let query = try makeQuery()
         if let entity = query.entity {
             try query.delete(entity)
+        } else if let S = E.self as? SoftDeletable.Type {
+            let deletedAtKey = S.deletedAtKey
+            var row = Row()
+            try row.set(deletedAtKey, Date())
+            try query.modify(row)
         } else {
             query.action = .delete
             try query.raw()
