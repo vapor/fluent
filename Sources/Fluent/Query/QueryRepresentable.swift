@@ -143,11 +143,11 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
                     // automatically generates uuids
                     // for models without them
                     entity.id = Identifier(UUID.random())
-                case .custom(let custom):
+                case .string(let closure), .custom(_, let closure):
                     // generate a custom id
                     // for models without them
-                    entity.id = try entity.generateId(for: custom)
-                default: ()
+                    entity.id = try closure()
+                case .int: ()
                 }
             }
             try entity.willCreate()

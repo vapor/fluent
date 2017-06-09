@@ -436,9 +436,9 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
             switch type {
             case .int:
                 typeString = "INTEGER"
-            case .uuid:
+            case .uuid, .string:
                 typeString = "STRING"
-            case .custom(let dataType):
+            case .custom(let dataType, _):
                 typeString = dataType
             }
             if primaryKey {
