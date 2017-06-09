@@ -77,11 +77,24 @@
                     try self.bind(statement: statement, to: values)
                 }
 
-                if let id = database.lastId, query.action == .create {
-                    return id.makeNode(in: query.context)
-                } else {
-                    return map(results: results)
+                if query.action == .create {
+                    switch E.idType {
+                    case .int:
+                        if let id = database.lastId {
+                            return Node(id)
+                        }
+                    case .uuid, .custom:
+                        // sqlite annoyingly doesn't support anything
+                        // besides integers for getting last ID.
+                        // so we must manually pull the id from the data
+                        // that was _provided_
+                        return query.data[.some(E.idKey)]?.wrapped
+                            ?? database.lastId?.makeNode(in: query.context)
+                            ?? Node.null
+                    }
                 }
+                
+                return map(results: results)
             case .raw(let statement, let values):
                 queryLogger?.log(statement, values)
                 let results = try database.execute(statement) { statement in

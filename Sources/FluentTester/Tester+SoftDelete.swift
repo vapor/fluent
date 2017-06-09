@@ -55,6 +55,22 @@ extension Tester {
         guard try Compound.withSoftDeleted().find(water.id) == nil else {
             throw Error.failed("Water was not forced deleted")
         }
+
+        try Compound.makeQuery().delete()
+
+        guard try Compound.count() == 0 else {
+            throw Error.failed("Compound count did not equal 0 after delete.")
+        }
+
+        guard try Compound.withSoftDeleted().count() == 3 else {
+            throw Error.failed("Water was not soft deleted")
+        }
+
+        try Compound.makeQuery().forceDelete()
+
+        guard try Compound.withSoftDeleted().count() == 0 else {
+            throw Error.failed("Water was not force deleted")
+        }
     }
 }
 
