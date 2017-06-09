@@ -28,7 +28,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
         var models: [E] = []
 
         for result in array {
-            let row = Row(node: result)
+            let row = Row(result.wrapped)
             let model = try E(row: row)
             model.id = try row.get(E.idKey)
             model.exists = true
@@ -107,6 +107,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
 
         if let _ = entity.id, entity.exists {
             // update
+            try E.willUpdate(entity: entity)
             try entity.willUpdate()
             var row = try entity.makeDirtyRow()
             try row.set(E.idKey, entity.id)
@@ -134,6 +135,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
             }
 
             try modify(row)
+            E.didUpdate(entity: entity)
             entity.didUpdate()
         } else {
             // create
@@ -150,6 +152,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
                 case .int: ()
                 }
             }
+            try E.willCreate(entity: entity)
             try entity.willCreate()
             var row = try entity.makeRow()
             try row.set(E.idKey, entity.id)
@@ -171,6 +174,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
                 entity.id = id
             }
 
+            E.didCreate(entity: entity)
             entity.didCreate()
         }
         entity.exists = true
@@ -185,6 +189,11 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
         let query = try makeQuery()
         if let entity = query.entity {
             try query.delete(entity)
+        } else if let S = E.self as? SoftDeletable.Type {
+            let deletedAtKey = S.deletedAtKey
+            var row = Row()
+            try row.set(deletedAtKey, Date())
+            try query.modify(row)
         } else {
             query.action = .delete
             try query.raw()
@@ -211,8 +220,10 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
             // permenantly delete the model
             query.action = .delete
             try query.filter(E.idKey, id)
+            try E.willDelete(entity: entity)
             try entity.willDelete()
             try query.raw()
+            E.didDelete(entity: entity)
             entity.didDelete()
             entity.exists = false
         }
