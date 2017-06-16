@@ -60,7 +60,7 @@ extension Siblings: QueryRepresentable {
             throw RelationError.idRequired(local)
         }
 
-        let query = try Foreign.makeQuery()
+        let query = try Foreign.makeQuery(executor)
 
         try query.join(Through.self, joinedKey: foreignIdKey)
         try query.filter(Through.self, localIdKey, localId)
