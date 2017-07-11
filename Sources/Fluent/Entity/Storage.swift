@@ -17,7 +17,7 @@ public final class Storage {
     internal var fetchedRow: Row? = nil
 }
 
-public protocol Storable: class {
+public protocol Storable {
     /// General implementation should just be `let storage = Storage()`
     var storage: Storage { get }
 }
@@ -32,7 +32,7 @@ extension Storable {
         get {
             return storage.exists
         }
-        set {
+        nonmutating set {
             storage.exists = newValue
         }
     }
@@ -43,7 +43,7 @@ extension Storable {
         get {
             return storage.id
         }
-        set {
+        nonmutating set {
             storage.id = newValue
         }
     }
