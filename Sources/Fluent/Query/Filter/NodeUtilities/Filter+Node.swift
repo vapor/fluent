@@ -1,5 +1,4 @@
 import Foundation
-import Node
 
 /// Conforms Filter to NodeRepresentable and adds a Node Initializer
 extension Filter: NodeConvertible {
@@ -15,7 +14,11 @@ extension Filter: NodeConvertible {
     }
 
     public func makeNode(in context: Context?) throws -> Node {
-        return try self.method.makeNode(in: context)
+        var node = Node([:])
+        let entityName = String(reflecting: entity).components(separatedBy: ".Type")[0]
+        try node.set("entity", entityName)
+        try node.set("method", try self.method.makeNode(in: context))
+        return node
     }
 }
 
@@ -26,3 +29,4 @@ enum FilterSerializationError: Error {
     case undefinedRelation(String)
     case undefinedMethodType(String)
 }
+
