@@ -1,5 +1,5 @@
 /// Conforms Filter.Method to NodeRepresentable and adds a Node Initializer
-extension Filter.Method: NodeRepresentable {
+extension Filter.Method: NodeConvertible {
     var string: String {
         switch self {
         case .compare(_, _, _): return "compare"
@@ -8,7 +8,7 @@ extension Filter.Method: NodeRepresentable {
         }
     }
 
-    public init(_ entity: Entity.Type, _ node: Node) throws {
+    public init(node: Node) throws {
         let type: String = try node.get("type")
 
         if(type == "compare") {
@@ -30,7 +30,7 @@ extension Filter.Method: NodeRepresentable {
         if(type == "group") {
             let relation = try Filter.Relation(try node.get("relation"))
             let filters = try (try node.get("filters") as [Node]).map {
-                RawOr<Filter>.some(try Filter(entity, $0))
+                RawOr<Filter>.some(try Filter(node: $0))
             }
 
             self = .group(relation, filters); return
