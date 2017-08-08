@@ -1,4 +1,3 @@
-/// Conforms Filter.Method to NodeRepresentable and adds a Node Initializer
 extension Filter.Method: NodeConvertible {
     var string: String {
         switch self {

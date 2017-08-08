@@ -1,6 +1,5 @@
 import Foundation
 
-/// Conforms Filter to NodeRepresentable and adds a Node Initializer
 extension Filter: NodeConvertible {
     public init(node: Node) throws {
         let entityName: String = try node.get("entity")
