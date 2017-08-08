@@ -3,8 +3,8 @@ import Node
 import XCTest
 @testable import Fluent
 
-class NodeConvertibleTestEntity: Entity {
-    static let fullClassName = "FluentTests.NodeConvertibleTestEntity"
+class FilterNodeConvertibleTestEntity: Entity {
+    static let fullClassName = "FluentTests.FilterNodeConvertibleTestEntity"
 
     let storage = Storage()
 
@@ -31,7 +31,7 @@ class NodeConvertibleTestEntity: Entity {
     }
 }
 
-class NodeConvertibleTests: XCTestCase {
+class FilterNodeConvertibleTests: XCTestCase {
 
     static var allTests = [
         ("testCompare", testCompare),
@@ -41,7 +41,7 @@ class NodeConvertibleTests: XCTestCase {
 
     static func makeCompare() throws -> Node {
         var compare = Node([:])
-        try compare.set("entity", NodeConvertibleTestEntity.fullClassName)
+        try compare.set("entity", FilterNodeConvertibleTestEntity.fullClassName)
         var method = Node([:])
         try method.set("type", "compare")
         try method.set("field", "string0")
@@ -53,7 +53,7 @@ class NodeConvertibleTests: XCTestCase {
 
     static func makeSubset() throws -> Node {
         var subset = Node([:])
-        try subset.set("entity", NodeConvertibleTestEntity.fullClassName)
+        try subset.set("entity", FilterNodeConvertibleTestEntity.fullClassName)
         var method = Node([:])
         try method.set("type", "subset")
         try method.set("field", "string0")
@@ -65,7 +65,7 @@ class NodeConvertibleTests: XCTestCase {
 
     static func makeGroup() throws -> Node {
         var group = Node([:])
-        try group.set("entity", NodeConvertibleTestEntity.fullClassName)
+        try group.set("entity", FilterNodeConvertibleTestEntity.fullClassName)
         var method = Node([:])
         try method.set("type", "group")
         try method.set("relation", "and")
@@ -75,7 +75,7 @@ class NodeConvertibleTests: XCTestCase {
     }
 
     func testCompare() throws {
-        let _compare = try NodeConvertibleTests.makeCompare()
+        let _compare = try FilterNodeConvertibleTests.makeCompare()
         let compare = try Filter(node: _compare)
         XCTAssert(try compare.makeNode(in: nil) == _compare)
 
@@ -90,7 +90,7 @@ class NodeConvertibleTests: XCTestCase {
     }
 
     func testSubset() throws {
-        let _subset = try NodeConvertibleTests.makeSubset()
+        let _subset = try FilterNodeConvertibleTests.makeSubset()
         let subset = try Filter(node: _subset)
 
         XCTAssert(try subset.makeNode(in: nil) == _subset)
@@ -106,13 +106,13 @@ class NodeConvertibleTests: XCTestCase {
     }
 
     func testGroup() throws {
-        let _group = try NodeConvertibleTests.makeGroup()
+        let _group = try FilterNodeConvertibleTests.makeGroup()
         let group = try Filter(node: _group)
 
         XCTAssert(try group.makeNode(in: nil) == _group)
 
-        let _compare = try NodeConvertibleTests.makeCompare()
-        let _subset = try NodeConvertibleTests.makeSubset()
+        let _compare = try FilterNodeConvertibleTests.makeCompare()
+        let _subset = try FilterNodeConvertibleTests.makeSubset()
 
         switch(group.method) {
         case .group(let relation, let filters):
