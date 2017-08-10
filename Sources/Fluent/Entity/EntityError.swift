@@ -66,7 +66,8 @@ extension EntityError: Debuggable {
         switch self {
         case .noDatabase(let e):
             return [
-                "make sure to call `database.prepare(\(e).self)` or ensure that it's added to your Droplet's `preparations` with `drop.preprations.append(\(e).self)"
+                "make sure to call `database.prepare(\(e).self)` or ensure that it's added to your Droplet's `preparations` with `drop.preprations.append(\(e).self)",
+                "you can also set the `.database` property on `\(e)` manually: `\(e).database = db"
             ]
         case .noId(_):
             return [
