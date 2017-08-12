@@ -120,7 +120,7 @@ extension Database {
 
 extension Preparation {
     fileprivate static var name: String {
-        let type = "\(type(of: self))"
-        return type.components(separatedBy: ".Type").first ?? type
+        let _type = "\(type(of: self))"
+        return _type.components(separatedBy: ".Type").first ?? _type
     }
 }

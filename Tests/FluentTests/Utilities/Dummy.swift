@@ -33,7 +33,7 @@ class DummyConnection: Connection {
     public var isClosed: Bool = false
     var queryLogger: QueryLogger?
 
-    func query<E: Entity>(_ query: RawOr<Query<E>>) throws -> Node {
+    func query<E>(_ query: RawOr<Query<E>>) throws -> Node {
         switch query {
         case .raw:
             return .array([])

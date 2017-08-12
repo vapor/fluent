@@ -6,7 +6,7 @@ extension Filter.Scope {
         case .notIn: return "notIn"
         }
     }
-
+    
     public init(_ string: String) throws {
         switch(string) {
         case "in": self = .`in`
