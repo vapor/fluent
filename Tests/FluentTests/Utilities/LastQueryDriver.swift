@@ -25,7 +25,7 @@ class LastQueryConnection: Connection {
     }
     
     @discardableResult
-    func query<E: Entity>(_ query: RawOr<Query<E>>) throws -> Node {
+    func query<E>(_ query: RawOr<Query<E>>) throws -> Node {
         switch query {
         case .raw(let raw, let values):
             driver.lastRaw = (raw, values)

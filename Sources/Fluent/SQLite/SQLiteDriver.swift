@@ -59,7 +59,7 @@
 
         /// Executes the query.
         @discardableResult
-        public func query<E: Entity>(_ query: RawOr<Query<E>>) throws -> Node {
+        public func query<E>(_ query: RawOr<Query<E>>) throws -> Node {
             switch query {
             case .some(let query):
                 if

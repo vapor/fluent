@@ -22,7 +22,7 @@ extension Filter.Comparison {
         }
         let start = string.index(string.startIndex, offsetBy: 7)
         let end = string.index(string.endIndex, offsetBy: -1)
-        return .custom(string.substring(with: start..<end))
+        return .custom(String(string[start..<end]))
     }
 
     public init(_ string: String) throws {
