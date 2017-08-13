@@ -130,7 +130,7 @@
                 case .bool(let bool):
                     try statement.bind(bool)
                 case .bytes(let data):
-                    try statement.bind(String(describing: data))
+                    try statement.bind(data)
                 case .date(let date):
                     try statement.bind(date.makeNode(in: nil).string ?? "")
                 }
