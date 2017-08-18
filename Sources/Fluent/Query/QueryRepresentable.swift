@@ -166,10 +166,10 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
                 entity.id = id
             }
 
+            entity.exists = true
             E.didCreate(entity: entity)
             entity.didCreate()
         }
-        entity.exists = true
     }
 }
 

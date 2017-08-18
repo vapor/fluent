@@ -43,6 +43,14 @@ class CallbacksTests: XCTestCase {
         func willUpdate() {
             wasModifiedOnUpdate = true
         }
+
+        func didCreate() {
+            do {
+                try assertExists()
+            } catch let error {
+                XCTFail("Should exist. Error: \(error)")
+            }
+        }
     }
 
     static let allTests = [
