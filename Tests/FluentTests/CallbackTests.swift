@@ -51,6 +51,16 @@ class CallbacksTests: XCTestCase {
                 XCTFail("Should exist. Error: \(error)")
             }
         }
+
+        func didDelete() {
+            XCTAssertThrowsError(try assertExists()) { error in
+                XCTAssertTrue(error is EntityError)
+                if case .doesntExist = error as! EntityError {
+                } else {
+                    XCTFail()
+                }
+            }
+        }
     }
 
     static let allTests = [
@@ -104,5 +114,11 @@ class CallbacksTests: XCTestCase {
         // Save the object once more to trigger the update callback
         try? result.save()
         XCTAssertTrue(result.wasModifiedOnUpdate, "Result should have been modified by now")
+    }
+
+    func testDelete() {
+        let result = DummyModel()
+        try? result.save()
+        try? result.delete()
     }
 }
