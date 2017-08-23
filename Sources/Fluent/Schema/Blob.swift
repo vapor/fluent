@@ -1,5 +1,5 @@
 /// Box struct, use this type for blob columns in Models
-struct Blob {
+public struct Blob {
     var bytes: [UInt8]
 }
 
