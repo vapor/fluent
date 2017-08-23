@@ -4,13 +4,13 @@ public struct Blob {
 }
 
 extension Blob: NodeRepresentable {
-    func makeNode(in context: Context?) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return Node.bytes(bytes, in: context)
     }
 }
 
 extension Blob: NodeInitializable {
-    init(node: Node) throws {
+    public init(node: Node) throws {
         guard let bytes = node.bytes else {
             throw NodeError.unableToConvert(input: node, expectation: "[UInt8]", path: [])
         }
