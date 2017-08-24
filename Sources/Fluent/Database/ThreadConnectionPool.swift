@@ -127,7 +127,7 @@ extension ThreadConnectionPool: Executor {
         set { }
     }
     
-    public func query<E: Entity>(_ query: RawOr<Query<E>>) throws -> Node {
+    public func query<E>(_ query: RawOr<Query<E>>) throws -> Node {
         let type: ConnectionType
         switch query {
         case .raw:

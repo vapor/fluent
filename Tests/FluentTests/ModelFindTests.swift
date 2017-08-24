@@ -50,7 +50,7 @@ class ModelFindTests: XCTestCase {
             self.driver = driver
         }
         
-        func query<E: Entity>(_ query: RawOr<Query<E>>) throws -> Node {
+        func query<E>(_ query: RawOr<Query<E>>) throws -> Node {
             guard case .some(let query) = query else {
                 return .null
             }

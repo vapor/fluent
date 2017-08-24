@@ -25,7 +25,7 @@ public protocol Executor {
     ///         instead of interpolating them into the raw string
     ///         can help prevent SQL injection.
     @discardableResult
-    func query<E: Entity>(_ query: RawOr<Query<E>>) throws -> Node
+    func query<E>(_ query: RawOr<Query<E>>) throws -> Node
     
     // Any queries executed by this executor
     // should be logged to the query logger
@@ -42,7 +42,7 @@ extension Executor {
     }
     
     @discardableResult
-    public func query<E: Entity>(_ query: Query<E>) throws -> Node {
+    public func query<E>(_ query: Query<E>) throws -> Node {
         return try self.query(.some(query))
     }
 }
