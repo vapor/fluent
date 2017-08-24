@@ -180,6 +180,7 @@
                 return value
             } catch {
                 try conn.raw("ROLLBACK TO SAVEPOINT \(name)")
+                try conn.raw("RELEASE SAVEPOINT \(name)")
                 throw error
             }
         }
