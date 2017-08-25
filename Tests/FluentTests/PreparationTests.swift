@@ -200,7 +200,7 @@ class TestSchemaConnection: Connection {
     }
     
     @discardableResult
-    func query<T: Entity>(_ query: RawOr<Query<T>>) throws -> Node { return .null }
+    func query<T>(_ query: RawOr<Query<T>>) throws -> Node { return .null }
 
 
     func schema(_ schema: Schema) throws {

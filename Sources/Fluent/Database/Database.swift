@@ -84,7 +84,7 @@ extension Database {
     
     /// See Executor protocol.
     @discardableResult
-    public func query<E: Entity>(_ query: RawOr<Query<E>>) throws -> Node {
+    public func query<E>(_ query: RawOr<Query<E>>) throws -> Node {
         return try threadConnectionPool.query(query)
     }
 }
