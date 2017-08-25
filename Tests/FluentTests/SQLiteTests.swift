@@ -32,7 +32,50 @@ class SQLiteTests: XCTestCase {
         }
     }
 
+    func testBlobColumnType() throws {
+        final class BlobModel: Entity {
+            let storage = Storage()
+
+            var data: Blob
+
+            init(data: [UInt8]) {
+                self.data = Blob(bytes: data)
+            }
+
+            init(row: Row) throws {
+                data = try row.get("data")
+            }
+
+            func makeRow() throws -> Row {
+                var row = Row()
+                try row.set("data", Node.bytes(data.bytes))
+                return row
+            }
+        }
+
+        let memory = try SQLiteDriver(path: ":memory:")
+        let database = Database(memory)
+        BlobModel.database = database
+
+        try database.create(BlobModel.self) { builder in
+            builder.id()
+            builder.bytes("data")
+        }
+
+        let data: [UInt8] = [0, 1, 2, 3]
+        let entity = BlobModel(data: data)
+        try entity.save()
+
+        guard let fetchedEntity = try BlobModel.all().first else {
+            XCTFail("Entity not saved")
+            return
+        }
+
+        XCTAssertEqual(fetchedEntity.data.bytes, data)
+    }
+
     static let allTests = [
-        ("testMultipleColumnModify", testMultipleColumnModify)
+        ("testMultipleColumnModify", testMultipleColumnModify),
+        ("testBlobColumnType", testBlobColumnType),
     ]
 }
