@@ -166,10 +166,10 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
                 entity.id = id
             }
 
+            entity.exists = true
             E.didCreate(entity: entity)
             entity.didCreate()
         }
-        entity.exists = true
     }
 }
 
@@ -215,9 +215,9 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
             try E.willDelete(entity: entity)
             try entity.willDelete()
             try query.raw()
+            entity.exists = false
             E.didDelete(entity: entity)
             entity.didDelete()
-            entity.exists = false
         }
     }
 }
