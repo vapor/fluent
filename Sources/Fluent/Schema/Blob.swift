@@ -1,6 +1,10 @@
 /// Box struct, use this type for blob columns in Models
 public struct Blob {
-    var bytes: [UInt8]
+    public var bytes: [UInt8]
+
+    public init(bytes: [UInt8]) {
+        self.bytes = bytes
+    }
 }
 
 extension Blob: NodeRepresentable {
