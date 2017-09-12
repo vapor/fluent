@@ -23,7 +23,6 @@ let package = Package(
     targets: [
         .target(name: "Fluent", dependencies: ["Core", "Node", "Random", "SQLite"]),
         .testTarget(name: "FluentTests", dependencies: ["Fluent"]),
-
         .target(name: "FluentTester", dependencies: ["Fluent"]),
         .testTarget(name: "FluentTesterTests", dependencies: ["FluentTester"]),
     ]
