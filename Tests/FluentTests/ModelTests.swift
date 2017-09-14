@@ -98,6 +98,63 @@ class ModelTests: XCTestCase {
         XCTAssert(test.id != nil)
     }
 
+    final class Box : Entity, Preparation {
+        
+        var name: String
+        var weight: Int
+        let storage = Storage()
+        
+        init(name: String, weight: Int) {
+            self.name = name
+            self.weight = weight
+        }
+        
+        init(row: Row) throws {
+            name = try row.get("name")
+            weight = try row.get("weight")
+        }
+        
+        func makeRow() throws -> Row {
+            var row = Row()
+            try row.set("name", name)
+            try row.set("weight", weight)
+            return row
+        }
+        
+        static func prepare(_ database: Database) throws {
+            try database.create(self) {
+                builder in
+                builder.id()
+                builder.string("name")
+                builder.int("weight")
+            }
+        }
+        
+        static func revert(_ database: Database) throws {
+            try database.delete(self)
+        }
+    }
+    
+    func testSaveOnlyUpdatesDirty() {
+        Box.database = db
+        do {
+            let boxA = Box(name: "Box A", weight: 10)
+            try boxA.save()
+            
+            boxA.weight = 11
+            try boxA.save()
+            
+            if let (sql, values) = lqd.lastQuery {
+                XCTAssertEqual(sql, "UPDATE `boxs` SET `#id` = ?, `weight` = ? WHERE `boxs`.`#id` = ?")
+                XCTAssertEqual(values.count, 3)
+                XCTAssertEqual(values[1], 11)
+            } else {
+                XCTFail("No last query")
+            }
+        } catch {
+            XCTFail("\(error)")
+        }
+    }
 
     func testKeyNamingConvention() throws {
         Database.default = nil
