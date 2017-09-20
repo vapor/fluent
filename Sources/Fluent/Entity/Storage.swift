@@ -15,6 +15,11 @@ public final class Storage {
     
     // Dirty key updates
     internal var fetchedRow: Row? = nil
+
+    // Confirmable
+    internal var confirmedAt: Date? = nil
+    internal var confirmationSentAt: Date? = nil
+    internal var confirmationToken: String? = nil 
 }
 
 public protocol Storable {
