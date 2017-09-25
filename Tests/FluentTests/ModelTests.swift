@@ -97,7 +97,27 @@ class ModelTests: XCTestCase {
         do { try test.save() } catch {}
         XCTAssert(test.id != nil)
     }
-
+    
+    func testSaveOnlyUpdatesDirty() {
+        Box.database = db
+        do {
+            let boxA = Box(name: "Box A", weight: 10)
+            try boxA.save()
+            
+            boxA.weight = 11
+            try boxA.save()
+            
+            if let (sql, values) = lqd.lastQuery {
+                XCTAssertEqual(sql, "UPDATE `boxs` SET `#id` = ?, `weight` = ? WHERE `boxs`.`#id` = ?")
+                XCTAssertEqual(values.count, 3)
+                XCTAssertEqual(values[1], 11)
+            } else {
+                XCTFail("No last query")
+            }
+        } catch {
+            XCTFail("\(error)")
+        }
+    }
 
     func testKeyNamingConvention() throws {
         Database.default = nil
