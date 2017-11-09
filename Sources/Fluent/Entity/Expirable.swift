@@ -19,12 +19,12 @@ public extension Entity where Self: Expirable {
     }
 }
 
-extension Fluent.Query where E: Expirable {
-    func filterExpired() throws -> Fluent.Query<E> {
+extension Query where E: Expirable {
+    func filterExpired() throws -> Query<E> {
         return try self.filter(E.createdAtKey, .lessThanOrEquals, Date(timeIntervalSinceNow: -E.expirationTime))
     }
     
-    func filterNotExpired() throws -> Fluent.Query<E> {
+    func filterNotExpired() throws -> Query<E> {
         return try self.filter(E.createdAtKey, .greaterThan, Date(timeIntervalSinceNow: -E.expirationTime))
     }
 }
