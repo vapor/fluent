@@ -1,3 +1,5 @@
+import Foundation
+
 fileprivate var _expirationTime: TimeInterval = .infinity
 
 public protocol Expirable: Timestampable {
