@@ -15,7 +15,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
 }
 
 // MARK: Fetch
-extension QueryRepresentable where Self: ExecutorRepresentable {    
+extension QueryRepresentable where Self: ExecutorRepresentable {
     /// Returns all entities retrieved by the query.
     public func all(_ computedFields: [RawOr<ComputedField>] = []) throws -> [E] {
         let query = try makeQuery()
@@ -24,7 +24,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
         guard let array = try query.raw().array else {
             throw QueryError.invalidDriverResponse("Array required.")
         }
-        
+
         var models: [E] = []
 
         for result in array {
@@ -32,6 +32,11 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
             let model = try E(row: row)
             model.id = try row.get(E.idKey)
             model.exists = true
+
+            // This must be bootstrapped from what the model now reports
+            // as its state, vs the raw fetched row, in order to ensure
+            // accurately-typed fields for comparison later.
+            model.storage.fetchedRow = try model.makeRow()
 
             // timestampable
             if
@@ -91,7 +96,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
         let raw = try query.raw()
         return Identifier(raw)
     }
-    
+
     public func save() throws {
         let query = try makeQuery()
         guard let entity = query.entity else {
@@ -170,7 +175,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
             E.didCreate(entity: entity)
             entity.didCreate()
         }
-        
+
         entity.storage.fetchedRow = try entity.makeRow()
     }
 }
@@ -240,7 +245,7 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
         if let id = row?[idKey] {
             _ = try filter(idKey, id)
         }
-        
+
         try query.raw()
     }
 }
