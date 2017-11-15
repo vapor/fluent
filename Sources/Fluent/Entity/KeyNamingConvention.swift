@@ -8,6 +8,42 @@ public enum KeyNamingConvention {
 
 // MARK: Convert PascalCase to snake and camel
 
+#if swift(>=4)
+extension String {
+    internal func snake_case() -> String {
+        let characters = Array(self)
+
+        guard var expanded = characters
+            .first
+            .flatMap({ String($0) })
+            else {
+                return self
+        }
+
+        characters.suffix(from: 1).forEach { char in
+            if char.isUppercase {
+                expanded.append("_")
+            }
+
+            expanded.append(char)
+        }
+
+        return expanded.lowercased()
+    }
+
+    internal func camelCase() -> String {
+        guard count > 0 else {
+            return self
+        }
+
+        return
+            String(prefix(1)).lowercased() +
+                String(dropFirst())
+    }
+}
+
+#else
+
 extension String {
     internal func snake_case() -> String {
         let characters = Array(self.characters)
@@ -40,6 +76,8 @@ extension String {
             String(characters.dropFirst())
     }
 }
+
+#endif
 
 extension Character {
     internal var isUppercase: Bool {
