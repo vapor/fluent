@@ -377,7 +377,7 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
         case .raw(let string, _):
             return string
         case .some(let foreignKey):
-            return "CONSTRAINT \(escape(foreignKey.name)) FOREIGN KEY (\(escape(foreignKey.field))) REFERENCES \(escape(foreignKey.foreignEntity.entity)) (\(escape(foreignKey.foreignField)))"
+            return "CONSTRAINT \(escape(foreignKey.name)) FOREIGN KEY (\(escape(foreignKey.field))) REFERENCES \(escape(foreignKey.foreignEntity.entity)) (\(escape(foreignKey.foreignField))) ON UPDATE \(foreignKey.onUpdate.rawValue) ON DELETE \(foreignKey.onDelete.rawValue)"
         }
     }
 
