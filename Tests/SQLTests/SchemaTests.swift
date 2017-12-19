@@ -23,5 +23,9 @@ final class SchemaTests: XCTestCase {
             "CREATE TABLE `users` (`id` UUID PRIMARY KEY, `name` STRING NOT NULL, `age` INT NOT NULL)"
         )
     }
+
+    static let allTests = [
+        ("testCreate", testCreate),
+    ]
 }
 

@@ -48,4 +48,10 @@ final class DataTests: XCTestCase {
             "SELECT `foo`.* FROM `foo` JOIN `bar` ON `foo`.`id` = `bar`.`foo_id`"
         )
     }
+
+    static let allTests = [
+        ("testBasicSelectStar", testBasicSelectStar),
+        ("testSelectWithPredicates", testSelectWithPredicates),
+        ("testSelectWithJoins", testSelectWithJoins),
+    ]
 }
