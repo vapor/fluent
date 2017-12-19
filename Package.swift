@@ -12,6 +12,12 @@ let package = Package(
     dependencies: [
         // Swift Promises, Futures, and Streams.
         .package(url: "https://github.com/vapor/async.git", .branch("beta")),
+
+        // Core extensions, type-aliases, and functions that facilitate common tasks.
+        .package(url: "https://github.com/vapor/core.git", .branch("beta")),
+
+        // Service container and configuration system.
+        .package(url: "https://github.com/vapor/service.git", .branch("beta")),
     ],
     targets: [
         .target(name: "CSQLite"),
@@ -22,7 +28,7 @@ let package = Package(
         .target(name: "FluentSQLite", dependencies: ["Fluent", "FluentSQL", "SQLite"]),
         .target(name: "SQL"),
         .testTarget(name: "SQLTests", dependencies: ["SQL"]),
-        .target(name: "SQLite", dependencies: ["CSQLite", "Debugging", "Random"]),
+        .target(name: "SQLite", dependencies: ["CodableKit", "CSQLite", "Debugging"]),
         .testTarget(name: "SQLiteTests", dependencies: ["SQLite"]),
     ]
 )

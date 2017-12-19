@@ -195,7 +195,6 @@ extension Model {
     /// Returns the `.defaultDatabase` or throws an error.
     public static func requireDefaultDatabase() throws -> DatabaseIdentifier<Database> {
         guard let dbid = Self.defaultDatabase else {
-            fatalError()
             throw FluentError(
                 identifier: "noDefaultDatabase",
                 reason: "A default database is required if no database ID is passed to `\(Self.self).query(_:on:)` or if `\(Self.self)` is being looked up statically. Set `\(Self.self).defaultDatabase` or to fix this error."
