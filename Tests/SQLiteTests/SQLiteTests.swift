@@ -13,16 +13,6 @@ class SQLiteTests: XCTestCase {
     }
 
     func testTables() throws {
-        try database.query("select * From foo").execute().blockingAwait()!.stream().drain { req in
-            req.request(count: .max)
-        }.output { row in
-            print(row)
-        }.catch { error in
-            print("failed: \(error)")
-        }.finally {
-            // done
-        }
-
         _ = try database.query("DROP TABLE IF EXISTS foo").execute().blockingAwait()
         _ = try database.query("CREATE TABLE foo (bar INT(4), baz VARCHAR(16), biz FLOAT)").execute().blockingAwait()
         _ = try database.query("INSERT INTO foo VALUES (42, 'Life', 0.44)").execute().blockingAwait()
