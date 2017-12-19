@@ -22,7 +22,7 @@ let package = Package(
     ],
     targets: [
         .target(name: "CSQLite"),
-        .target(name: "Fluent", dependencies: ["Async", "Service"]),
+        .target(name: "Fluent", dependencies: ["Async", "CodableKit", "Service"]),
         .testTarget(name: "FluentTests", dependencies: ["FluentBenchmark", "FluentSQLite", "SQLite"]),
         .target(name: "FluentBenchmark", dependencies: ["Fluent"]),
         .target(name: "FluentSQL", dependencies: ["Fluent", "SQL"]),
