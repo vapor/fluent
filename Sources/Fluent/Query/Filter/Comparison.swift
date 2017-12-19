@@ -1,68 +1,209 @@
-extension Filter {
-    /// Describes the various operators for
-    /// comparing values.
-    public enum Comparison {
-        case equals
-        case greaterThan
-        case lessThan
-        case greaterThanOrEquals
-        case lessThanOrEquals
-        case notEquals
-        case hasSuffix
-        case hasPrefix
-        case contains
-        case custom(String)
+// MARK: Equality
+
+/// Comparisons that require an equatable value.
+public enum EqualityComparison {
+    case equals
+    case notEquals
+}
+
+extension Encodable {
+    /// Null
+    public static var null: Optional<Self> {
+        return nil
     }
-    
 }
 
-public func == (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
-    let node = try rhs.makeNode(in: rowContext)
-    return .compare(lhs, .equals, node)
+/// MARK: .equals
+
+/// Model.field == value
+public func == <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable
+{
+    return try ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .equality(.equals), .value(rhs))
+    )
 }
 
-public func > (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
-    let node = try rhs.makeNode(in: rowContext)
-    return .compare(lhs, .greaterThan, node)
+/// field == value
+public func == <
+    Field: QueryFieldRepresentable,
+    Value: Encodable & Equatable
+>(lhs: Field, rhs: Value?) throws -> QueryFilterMethod {
+    return try .compare(lhs.makeQueryField(), .equality(.equals), .value(rhs))
 }
 
-public func < (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
-    let node = try rhs.makeNode(in: rowContext)
-    return .compare(lhs, .lessThan, node)
+/// field == field
+public func == <
+    A: QueryFieldRepresentable,
+    B: QueryFieldRepresentable
+>(lhs: A, rhs: B) throws -> QueryFilterMethod {
+    return try .compare(lhs.makeQueryField(), .equality(.equals), .field(rhs.makeQueryField()))
 }
 
-public func >= (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
-    let node = try rhs.makeNode(in: rowContext)
-    return .compare(lhs, .greaterThanOrEquals, node)
+/// MARK: .notEquals
+
+/// Model.field != value
+public func != <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable
+{
+    return try ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .equality(.notEquals), .value(rhs))
+    )
 }
 
-public func <= (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
-    let node = try rhs.makeNode(in: rowContext)
-    return .compare(lhs, .lessThanOrEquals, node)
+/// field != value
+public func != <
+    Field: QueryFieldRepresentable,
+    Value: Encodable & Equatable
+>(lhs: Field, rhs: Value) throws -> QueryFilterMethod {
+    return try .compare(lhs.makeQueryField(), .equality(.notEquals), .value(rhs))
 }
 
-public func != (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
-    let node = try rhs.makeNode(in: rowContext)
-    return .compare(lhs, .notEquals, node)
+/// field != field
+public func != <
+    A: QueryFieldRepresentable,
+    B: QueryFieldRepresentable
+>(lhs: A, rhs: B) throws -> QueryFilterMethod {
+    return try .compare(lhs.makeQueryField(), .equality(.notEquals), .field(rhs.makeQueryField()))
 }
 
-extension Filter.Comparison: Equatable {
-    public static func ==(lhs: Filter.Comparison, rhs: Filter.Comparison) -> Bool {
-        switch (lhs, rhs) {
-        case (.equals, .equals),
-             (.greaterThan, .greaterThan),
-             (.lessThan, .lessThan),
-             (.greaterThanOrEquals, .greaterThanOrEquals),
-             (.lessThanOrEquals, .lessThanOrEquals),
-             (.notEquals, .notEquals),
-             (.hasSuffix, .hasSuffix),
-             (.hasPrefix, .hasPrefix),
-             (.contains, .contains):
-            return true
-        case (.custom(let a), .custom(let b)):
-            return a == b
-        default:
-            return false
-        }
+// MARK: Sequence
+
+/// Comparisons that require a sequence value.
+public enum SequenceComparison {
+    case hasSuffix
+    case hasPrefix
+    case contains
+}
+
+extension QueryBuilder {
+    /// Add a sequence comparison to the query builder.
+    public func filter<
+        Field: QueryFieldRepresentable,
+        Value: Encodable & Sequence
+    >(
+        _ field: Field,
+        _ comparison: SequenceComparison,
+        _ value: Value
+    ) throws -> Self {
+        return try filter(.compare(field.makeQueryField(), .sequence(comparison), .value(value)))
     }
+}
+
+// MARK: Ordered
+
+/// Comparisons that require an ordered value.
+public enum OrderedComparison {
+    case greaterThan
+    case lessThan
+    case greaterThanOrEquals
+    case lessThanOrEquals
+}
+
+/// .greaterThan
+
+/// Model.field > value
+public func > <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable
+{
+    return try ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .order(.greaterThan), .value(rhs))
+    )
+}
+
+/// field > value
+public func > <
+    Field: QueryFieldRepresentable,
+    Value: Encodable & Comparable
+>(lhs: Field, rhs: Value) throws -> QueryFilterMethod {
+    return try .compare(lhs.makeQueryField(), .order(.greaterThan), .value(rhs))
+}
+
+/// field > field
+public func > <
+    A: QueryFieldRepresentable,
+    B: QueryFieldRepresentable
+>(lhs: A, rhs: B) throws -> QueryFilterMethod {
+    return try .compare(lhs.makeQueryField(), .order(.greaterThan), .field(rhs.makeQueryField()))
+}
+
+/// .lessThan
+
+/// Model.field > value
+public func < <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable
+{
+    return try ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .order(.lessThan), .value(rhs))
+    )
+}
+
+/// field < value
+public func < <
+    Field: QueryFieldRepresentable,
+    Value: Encodable & Comparable
+>(lhs: Field, rhs: Value) throws -> QueryFilterMethod {
+    return try .compare(lhs.makeQueryField(), .order(.lessThan), .value(rhs))
+}
+
+/// field > field
+public func < <
+    A: QueryFieldRepresentable,
+    B: QueryFieldRepresentable
+>(lhs: A, rhs: B) throws -> QueryFilterMethod {
+    return try .compare(lhs.makeQueryField(), .order(.lessThan), .field(rhs.makeQueryField()))
+}
+
+/// .greaterThanOrEquals
+
+/// Model.field >= value
+public func >= <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable
+{
+    return try ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .order(.greaterThanOrEquals), .value(rhs))
+    )
+}
+
+/// field >= value
+public func >= <
+    Field: QueryFieldRepresentable,
+    Value: Encodable & Comparable
+>(lhs: Field, rhs: Value) throws -> QueryFilterMethod {
+    return try .compare(lhs.makeQueryField(), .order(.greaterThanOrEquals), .value(rhs))
+}
+
+/// field >= field
+public func >= <
+    A: QueryFieldRepresentable,
+    B: QueryFieldRepresentable
+>(lhs: A, rhs: B) throws -> QueryFilterMethod {
+    return try .compare(lhs.makeQueryField(), .order(.greaterThanOrEquals), .field(rhs.makeQueryField()))
+}
+
+/// .lessThanOrEquals
+
+/// Model.field <= value
+public func <= <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable
+{
+    return try ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .order(.lessThanOrEquals), .value(rhs))
+    )
+}
+
+/// field <= value
+public func <= <
+    Field: QueryFieldRepresentable,
+    Value: Encodable & Comparable
+>(lhs: Field, rhs: Value) throws -> QueryFilterMethod {
+    return try .compare(lhs.makeQueryField(), .order(.lessThanOrEquals), .value(rhs))
+}
+
+/// field <= field
+public func <= <
+    A: QueryFieldRepresentable,
+    B: QueryFieldRepresentable
+    >(lhs: A, rhs: B) throws -> QueryFilterMethod {
+    return try .compare(lhs.makeQueryField(), .order(.lessThanOrEquals), .field(rhs.makeQueryField()))
 }

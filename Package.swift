@@ -1,41 +1,28 @@
+// swift-tools-version:4.0
 import PackageDescription
-#if os(Linux)
-    import Glibc
-#else
-    import Darwin.C
-#endif
-
-public enum Env {
-    public static func get(_ name: String) -> String? {
-        guard let out = getenv(name) else { return nil }
-        return String(validatingUTF8: out)
-    }
-}
-
-var dependencies: [Package.Dependency] = [
-    // Data structure for converting between multiple representations
-    .Package(url: "https://github.com/vapor/node.git", majorVersion: 2),
-
-    // Core Components
-    .Package(url: "https://github.com/vapor/core.git", majorVersion: 2),
-
-    // Random number generation
-    .Package(url: "https://github.com/vapor/random.git", majorVersion: 1),
-]
-
-let includeSQLite = Env.get("FLUENT_NO_SQLITE")?.lowercased() != "true"
-if includeSQLite {
-    dependencies += [
-        // In memory Database
-        .Package(url: "https://github.com/vapor/sqlite.git", majorVersion: 2)
-    ]
-}
 
 let package = Package(
     name: "Fluent",
-    targets: [
-        Target(name: "Fluent"),
-        Target(name: "FluentTester", dependencies: ["Fluent"]),
+    products: [
+        .library(name: "Fluent", targets: ["Fluent"]),
+        .library(name: "FluentSQLite", targets: ["FluentSQLite"]),
+        .library(name: "SQL", targets: ["SQL"]),
+        .library(name: "SQLite", targets: ["SQLite"]),
     ],
-    dependencies: dependencies
+    dependencies: [
+        // Swift Promises, Futures, and Streams.
+        .package(url: "https://github.com/vapor/async.git", .branch("beta")),
+    ],
+    targets: [
+        .target(name: "CSQLite"),
+        .target(name: "Fluent", dependencies: ["Async", "Service"]),
+        .testTarget(name: "FluentTests", dependencies: ["FluentBenchmark", "FluentSQLite", "SQLite"]),
+        .target(name: "FluentBenchmark", dependencies: ["Fluent"]),
+        .target(name: "FluentSQL", dependencies: ["Fluent", "SQL"]),
+        .target(name: "FluentSQLite", dependencies: ["Fluent", "FluentSQL", "SQLite"]),
+        .target(name: "SQL"),
+        .testTarget(name: "SQLTests", dependencies: ["SQL"]),
+        .target(name: "SQLite", dependencies: ["CSQLite", "Debugging", "Random"]),
+        .testTarget(name: "SQLiteTests", dependencies: ["SQLite"]),
+    ]
 )

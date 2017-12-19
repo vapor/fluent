@@ -1,50 +1,48 @@
-/// Represents a one-to-many relationship
-/// from a parent entity to many children entities.
-/// ex: child entities have a "parent_id"
-public final class Children<
-    Parent: Entity, Child: Entity
-> {
-    /// The parent entity id. This
-    /// will be used to filter the children
-    /// entities.
-    public let parent: Parent
-    
-    /// The parent entity's foreign id key.
-    /// Usually Parent.foreignIdKey.
-    public let foreignIdKey: String
+/// The children relation is one side of a
+/// one-to-many database relation.
+///
+/// The children relation will return all the
+/// models that contain a reference to the parent's identifier.
+///
+/// The opposite side of this relation is called `Parent`.
+public struct Children<Parent: Model, Child: Model>
+    where Parent.Database == Child.Database
+{
+    /// Reference to the parent's ID
+    public var parent: Parent
 
-    /// Create a new Children relation.
-    public init(
-        from parent: Parent,
-        to childType: Child.Type = Child.self,
-        foreignIdKey: String = Parent.foreignIdKey
-    ) {
+    /// Key referencing property storing parent's ID
+    public typealias ParentForeignIDKey = KeyPath<Child, Parent.ID>
+
+    /// Reference to the foreign key on the child.
+    public var parentForeignIDKey: ParentForeignIDKey
+
+    /// Creates a new children relationship.
+    public init(parent: Parent, parentForeignIDKey: ParentForeignIDKey) {
         self.parent = parent
-        self.foreignIdKey = foreignIdKey
+        self.parentForeignIDKey = parentForeignIDKey
+    }
+
+    /// Create a query for all children.
+    public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Child> {
+        return try Child.query(on: conn)
+            .filter(parentForeignIDKey.makeQueryField() == parent.requireID())
     }
 }
 
-extension Children: QueryRepresentable {
-    public func makeQuery(_ executor: Executor) throws -> Query<Child> {
-        guard let parentId = parent.id else {
-            throw RelationError.idRequired(parent)
-        }
+// MARK: Model
 
-        return try Child.makeQuery(executor).filter(foreignIdKey == parentId)
-    }
-}
-
-extension Children: ExecutorRepresentable {
-    public func makeExecutor() throws -> Executor {
-        return try Child.makeExecutor()
-    }
-}
-
-extension Entity {
-    public func children<Child: Entity>(
-        type childType: Child.Type = Child.self,
-        foreignIdKey: String = Self.foreignIdKey
+extension Model {
+    /// Create a children relation for this model.
+    ///
+    /// The `foreignField` should refer to the field
+    /// on the child entity that contains the parent's ID.
+    public func children<Child: Model>(
+        _ parentForeignIDKey: Children<Self, Child>.ParentForeignIDKey
     ) -> Children<Self, Child> {
-        return Children(from: self, foreignIdKey: foreignIdKey)
+        return Children(
+            parent: self,
+            parentForeignIDKey: parentForeignIDKey
+        )
     }
 }
