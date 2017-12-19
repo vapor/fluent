@@ -29,7 +29,7 @@ let package = Package(
         .target(name: "FluentSQLite", dependencies: ["Fluent", "FluentSQL", "SQLite"]),
         .target(name: "SQL"),
         .testTarget(name: "SQLTests", dependencies: ["SQL"]),
-        .target(name: "SQLite", dependencies: ["CodableKit", "CSQLite", "Debugging"]),
+        .target(name: "SQLite", dependencies: ["Bits", "CodableKit", "CSQLite", "Debugging"]),
         .testTarget(name: "SQLiteTests", dependencies: ["SQLite"]),
     ]
 )

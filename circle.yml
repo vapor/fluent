@@ -5,7 +5,6 @@ jobs:
     macos:
       xcode: "9.0"
     steps:
-      - run: brew install vapor/tap/vapor
       - checkout
       - run: swift build
       - run: swift test
@@ -19,21 +18,9 @@ jobs:
       - run: swift build
       - run: swift test
 
-  # 3.1 backward compat checks
-
-  linux-3:
-    docker:
-      - image: swift:3.1
-    steps:
-      - run: apt-get install -y libssl-dev
-      - checkout
-      - run: swift build
-      - run: swift test
-
 workflows:
   version: 2
   tests:
     jobs:
       - linux
-      - linux-3
       - macos
