@@ -5,6 +5,7 @@ let package = Package(
     name: "Fluent",
     products: [
         .library(name: "Fluent", targets: ["Fluent"]),
+        .library(name: "FluentBenchmark", targets: ["FluentBenchmark"]),
         .library(name: "FluentSQL", targets: ["FluentSQL"]),
         .library(name: "FluentSQLite", targets: ["FluentSQLite"]),
         .library(name: "SQL", targets: ["SQL"]),
