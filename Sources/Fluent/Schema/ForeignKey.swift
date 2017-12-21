@@ -24,19 +24,19 @@ public struct ForeignKey {
         self.field = field
         self.foreignField = foreignField
         self.foreignEntity = foreignEntity
-if  "_fluent_fk_\(entity.entity).\(field)-\(foreignEntity.entity).\(foreignField)".characters.count < 64{
-			self.name = name ?? "_fluent_fk_\(entity.entity).\(field)-\(foreignEntity.entity).\(foreignField)"
-		}else{
+        if  "_fluent_fk_\(entity.entity).\(field)-\(foreignEntity.entity).\(foreignField)".characters.count < 64{
+		self.name = name ?? "_fluent_fk_\(entity.entity).\(field)-\(foreignEntity.entity).\(foreignField)"
+	}else{
 			
-			/// we have "_fluent_fk_" + "." + "_" + "." = 14 characters
-			/// so the reset must be less then 50 characters long
-			/// 50 characters divided by 4 variables is 12 characters per variable
-			
-			let e1 = String("\(entity.entity)".characters.prefix(12))
-			let e2 = String("\(foreignEntity.entity)".characters.prefix(12))
-			let f1 = String("\(field)".characters.prefix(12))
-			let f2 = String("\(foreignField)".characters.prefix(12))
-			self.name = name ?? "\(e1).\(f1)-\(e2).\(f2)"
-		}
+		/// we have "_fluent_fk_" + "." + "_" + "." = 14 characters
+		/// so the reset must be less then 50 characters long
+		/// 50 characters divided by 4 variables is 12 characters per variable
+
+		let e1 = String("\(entity.entity)".characters.prefix(12))
+		let e2 = String("\(foreignEntity.entity)".characters.prefix(12))
+		let f1 = String("\(field)".characters.prefix(12))
+		let f2 = String("\(foreignField)".characters.prefix(12))
+		self.name = name ?? "\(e1).\(f1)-\(e2).\(f2)"
+	}
     }
 }
