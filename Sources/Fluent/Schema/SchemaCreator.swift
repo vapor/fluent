@@ -2,9 +2,12 @@ import Async
 
 /// A schema builder specifically for creating
 /// new tables and collections.
-public final class SchemaCreator<Model>: SchemaBuilder
-    where Model: Fluent.Model, Model.Database: SchemaSupporting
+public final class SchemaCreator<M>: SchemaBuilder
+    where M: Fluent.Model, M.Database: SchemaSupporting
 {
+    /// See SchemaBuilder.Model
+    public typealias Model = M
+
     /// See SchemaBuilder.schema
     public var schema: DatabaseSchema<Model.Database>
 
