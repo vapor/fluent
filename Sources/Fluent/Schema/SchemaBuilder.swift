@@ -4,7 +4,7 @@ import Async
 public protocol SchemaBuilder: class {
     /// The associated model type.
     associatedtype Model: Fluent.Model
-        where Model.Database: SchemaSupporting
+        where Self.Model.Database: SchemaSupporting
 
     /// The schema being built.
     var schema: DatabaseSchema<Model.Database> { get set }

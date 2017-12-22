@@ -9,7 +9,7 @@ public final class SchemaCreator<M>: SchemaBuilder
     public typealias Model = M
 
     /// See SchemaBuilder.schema
-    public var schema: DatabaseSchema<Model.Database>
+    public var schema: DatabaseSchema<M.Database>
 
     /// See SchemaBuilder.executor
     public let connection: Model.Database.Connection
