@@ -22,12 +22,22 @@ extension QueryBuilder {
         return connection.flatMap(to: Void.self) { conn in
             if model.fluentID == nil {
                 // generate an id
-                switch Model.ID.identifierType {
-                case .autoincrementing: break
-                case .generated(let factory):
-                    model.fluentID = factory()
-                case .supplied:
-                    throw FluentError(identifier: "no-id-supplied", reason: "model id type is `supplied`, but no id was supplied")
+                switch Model.Database.idType(for: Model.ID.self) {
+                case .driver: break
+                case .fluent:
+                    if let type = Model.ID.self as? FluentGeneratableID.Type {
+                        model.fluentID = type.generate() as? Model.ID
+                    } else {
+                        throw FluentError(
+                            identifier: "idGenerate",
+                            reason: "\(Model.self)'s ID type \(Model.ID.self) is not `FluentGeneratableID`."
+                        )
+                    }
+                case .user:
+                    throw FluentError(
+                        identifier: "idRequired",
+                        reason: "\(Model.self) requires an ID to be set before saving."
+                    )
                 }
             }
 

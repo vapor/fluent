@@ -2,7 +2,7 @@ import Async
 import Fluent
 import Foundation
 
-final class KitchenSink<D: Database>: Model {
+final class KitchenSink<D>: Model where D: QuerySupporting {
     /// See Model.Database
     typealias Database = D
 
@@ -16,9 +16,7 @@ final class KitchenSink<D: Database>: Model {
     var id: String?
 }
 
-internal struct KitchenSinkSchema<
-    D: Database
->: Migration where D.Connection: SchemaSupporting {
+internal struct KitchenSinkSchema<D>: Migration where D: QuerySupporting & SchemaSupporting {
     /// See Migration.Database
     typealias Database = D
 
@@ -26,23 +24,23 @@ internal struct KitchenSinkSchema<
     static func prepare(on connection: D.Connection) -> Future<Void> {
         return connection.create(KitchenSink<Database>.self) { builder in
             try builder.addField(
-                type: Database.Connection.FieldType.requireSchemaFieldType(for: UUID.self),
+                type: Database.fieldType(for: UUID.self),
                 name: "id"
             )
             try builder.addField(
-                type: Database.Connection.FieldType.requireSchemaFieldType(for: String.self),
+                type: Database.fieldType(for: String.self),
                 name: "string"
             )
             try builder.addField(
-                type: Database.Connection.FieldType.requireSchemaFieldType(for: Int.self),
+                type: Database.fieldType(for: Int.self),
                 name: "int"
             )
             try builder.addField(
-                type: Database.Connection.FieldType.requireSchemaFieldType(for: Double.self),
+                type: Database.fieldType(for: Double.self),
                 name: "double"
             )
             try builder.addField(
-                type: Database.Connection.FieldType.requireSchemaFieldType(for: Date.self),
+                type: Database.fieldType(for: Date.self),
                 name: "date"
             )
         }

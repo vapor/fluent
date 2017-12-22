@@ -2,7 +2,7 @@ import Async
 import Fluent
 import Foundation
 
-internal final class Foo<D: Database>: Model {
+internal final class Foo<D>: Model where D: QuerySupporting {
     /// See Model.Database
     typealias Database = D
 
@@ -37,7 +37,7 @@ internal final class Foo<D: Database>: Model {
     }
 }
 
-internal struct FooMigration<D: Database>: Migration where D.Connection: SchemaSupporting {
+internal struct FooMigration<D>: Migration where D: QuerySupporting & SchemaSupporting {
     /// See Migration.database
     typealias Database = D
 

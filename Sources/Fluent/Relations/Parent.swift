@@ -24,7 +24,9 @@ public struct Parent<Child: Model, Parent: Model>
         self.child = child
         self.parentForeignIDKey = parentForeignIDKey
     }
+}
 
+extension Parent where Child.Database: QuerySupporting {
     /// Create a query for the parent.
     public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Parent> {
         return try Parent.query(on: conn)
@@ -34,7 +36,7 @@ public struct Parent<Child: Model, Parent: Model>
     /// Convenience for getting the parent.
     public func get(
         on conn: DatabaseConnectable
-    ) -> Future<Parent> {
+        ) -> Future<Parent> {
         return Future {
             try self.query(on: conn).first().map(to: Parent.self) { first in
                 guard let parent = first else {

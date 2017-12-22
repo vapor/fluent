@@ -4,16 +4,14 @@ import Async
 public protocol SchemaBuilder: class {
     /// The associated model type.
     associatedtype Model: Fluent.Model
-
-    /// The associated connection type (must support schemas!)
-    associatedtype Connection: SchemaSupporting
+        where Model.Database: SchemaSupporting
 
     /// The schema being built.
-    var schema: DatabaseSchema { get set }
+    var schema: DatabaseSchema<Model.Database> { get set }
 
     /// The connection this schema builder will execute on.
-    var connection: Connection { get }
+    var connection: Model.Database.Connection { get }
 
     /// Create a new schema builder.
-    init(_ model: Model.Type, on connection: Connection)
+    init(_ model: Model.Type, on connection: Model.Database.Connection)
 }

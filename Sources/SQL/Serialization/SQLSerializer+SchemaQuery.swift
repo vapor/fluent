@@ -44,15 +44,7 @@ extension SQLSerializer {
 
         let name = makeEscapedString(from: column.name)
         sql.append(name)
-
         sql.append(column.dataType)
-
-        if column.isPrimaryKey {
-            sql.append("PRIMARY KEY")
-        } else if column.isNotNull {
-            sql.append("NOT NULL")
-        }
-
         return sql.joined(separator: " ")
     }
 

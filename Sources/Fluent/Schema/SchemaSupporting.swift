@@ -3,48 +3,39 @@ import Foundation
 
 // MARK: Protocols
 
-/// Capable of executing a database schema query.
-public protocol SchemaSupporting: DatabaseConnection {
-    /// See SchemaFieldType
-    associatedtype FieldType: SchemaFieldType
-
+public protocol SchemaExecuting: DatabaseConnection {
     /// Executes the supplied schema on the database connection.
-    func execute(schema: DatabaseSchema) -> Future<Void>
+    func execute<D>(schema: DatabaseSchema<D>) -> Future<Void>
 }
 
-/// Capable of being a schema field type.
-public protocol SchemaFieldType {
-    /// Convert to a string representation of
-    /// the schema field type.
-    func makeSchemaFieldTypeString() -> String
+/// Capable of executing a database schema query.
+public protocol SchemaSupporting: Database
+    where Self.Connection: SchemaExecuting
+{
+    /// See SchemaFieldType
+    associatedtype FieldType
+
+    /// Serializes the schema field to a string.
+    static func dataType(for field: SchemaField<Self>) -> String
 
     /// Default schema field types Fluent must know
     /// how to make for migrations and tests.
-    static func makeSchemaFieldType(for type: Any.Type) -> Self?
-}
+    static func fieldType(for type: Any.Type) throws -> FieldType
 
-extension SchemaFieldType {
-    /// Returns the schema field type for a given type or throws and error
-    public static func requireSchemaFieldType(for type: Any.Type) throws -> Self {
-        guard let res = makeSchemaFieldType(for: type) else {
-            throw FluentError(
-                identifier: "scema-type-not-supported",
-                reason: "Type for \(type) required, a matching database type could not be found"
-            )
-        }
-        return res
-    }
 }
 
 // MARK: Convenience
 
-extension SchemaSupporting {
+extension SchemaExecuting {
     /// Closure for accepting a schema creator.
-    public typealias CreateClosure<Model: Fluent.Model> = (SchemaCreator<Model, Self>) throws -> ()
+    public typealias CreateClosure<Model> = (SchemaCreator<Model>) throws -> ()
+        where Model: Fluent.Model, Model.Database: SchemaSupporting
 
     /// Convenience for creating a closure that accepts a schema creator
     /// for the supplied model type on this schema executor.
-    public func create<Model>(_ model: Model.Type, closure: @escaping CreateClosure<Model>) -> Future<Void> {
+    public func create<Model>(_ model: Model.Type, closure: @escaping CreateClosure<Model>) -> Future<Void>
+        where Model.Database.Connection == Self
+    {
         let creator = SchemaCreator(Model.self, on: self)
         return Future {
             try closure(creator)
@@ -53,11 +44,14 @@ extension SchemaSupporting {
     }
 
     /// Closure for accepting a schema updater.
-    public typealias UpdateClosure<Model: Fluent.Model> = (SchemaUpdater<Model, Self>) throws -> ()
+    public typealias UpdateClosure<Model> = (SchemaUpdater<Model>) throws -> ()
+        where Model: Fluent.Model, Model.Database: SchemaSupporting
 
     /// Convenience for creating a closure that accepts a schema updater
     /// for the supplied model type on this schema executor.
-    public func update<Model>(_ model: Model.Type, closure: @escaping UpdateClosure<Model>) -> Future<Void> {
+    public func update<Model>(_ model: Model.Type, closure: @escaping UpdateClosure<Model>) -> Future<Void>
+        where Model.Database.Connection == Self
+    {
         let updater = SchemaUpdater(Model.self, on: self)
         return Future {
             try closure(updater)
@@ -66,8 +60,10 @@ extension SchemaSupporting {
     }
 
     /// Convenience for deleting the schema for the supplied model type.
-    public func delete<Model: Fluent.Model>(_ model: Model.Type) -> Future<Void> {
-        var schema = DatabaseSchema(entity: Model.entity)
+    public func delete<Model>(_ model: Model.Type) -> Future<Void>
+        where Model: Fluent.Model, Model.Database: SchemaSupporting, Model.Database.Connection == Self
+    {
+        var schema = DatabaseSchema<Model.Database>(entity: Model.entity)
         schema.action = .delete
         return execute(schema: schema)
     }

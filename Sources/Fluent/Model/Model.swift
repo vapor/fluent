@@ -2,6 +2,9 @@ import Async
 import CodableKit
 import Service
 
+/// A Fluent compatible identifier.
+public typealias ID = Codable & Equatable
+
 /// Fluent database models. These types can be fetched
 /// from a database connection using a query.
 ///
@@ -53,7 +56,7 @@ public protocol AnyModel: class, Codable {
     static var entity: String { get }
 }
 
-extension Model {
+extension Model where Database: QuerySupporting {
     /// Creates a query for this model on the supplied connection.
     public func query(
         on conn: DatabaseConnectable
@@ -139,7 +142,7 @@ extension Model {
 
 /// MARK: CRUD
 
-extension Model {
+extension Model where Database: QuerySupporting {
     /// Saves the supplied model.
     /// Calls `create` if the ID is `nil`, and `update` if it exists.
     /// If you need to create a model with a pre-existing ID,
@@ -206,7 +209,7 @@ extension Model {
 
 // MARK: Container Findable
 
-extension Model {
+extension Model where Database: QuerySupporting {
     /// See EphemeralWorkerFindable.find
     public static func find(identifier: String, using container: Container) throws -> Future<Self> {
         guard let idType = ID.self as? StringDecodable.Type else {

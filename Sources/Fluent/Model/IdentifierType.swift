@@ -1,24 +1,32 @@
+import Foundation
+
 /// Supported model identifier types.
-public enum IDType<ID: Fluent.ID> {
-    /// A closure that creates a new identifier
-    /// from an auto incremented int.
-    public typealias IdentifierAutoincrement = (Int) -> ID
+public enum IDType {
     /// The identifier property on the model
     /// should always be `nil` when saving a new model.
     /// The database driver is expected to generate an
     /// autoincremented identifier based on previous
     /// identifiers that exist in the database.
-    case autoincrementing(IdentifierAutoincrement)
+    case driver
 
-    /// A closure that creates a new identifier.
-    public typealias IdentifierFactory = () -> ID
     /// The identifier property on the model should
     /// always be `nil` when saving a new model.
-    /// The supplied `IdentifierFactory` will be used
+    /// The `FluentGeneratableID.generate()` will be used
     /// to generate a new identifier for new items.
-    case generated(IdentifierFactory)
+    case fluent
 
     /// The identifier property on the model should
     /// always be set when saving a new model.
-    case supplied
+    case user
+}
+
+/// A Fluent generatable ID type.
+public protocol FluentGeneratableID {
+    /// Generates a new ID.
+    static func generate() -> Self
+}
+
+extension UUID: FluentGeneratableID {
+    /// FluentGeneratableID.generate
+    public static func generate() -> UUID { return .init() }
 }

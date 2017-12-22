@@ -22,7 +22,9 @@ public struct Children<Parent: Model, Child: Model>
         self.parent = parent
         self.parentForeignIDKey = parentForeignIDKey
     }
+}
 
+extension Children where Parent.Database: QuerySupporting {
     /// Create a query for all children.
     public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Child> {
         return try Child.query(on: conn)

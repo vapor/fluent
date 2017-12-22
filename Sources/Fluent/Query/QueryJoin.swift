@@ -64,7 +64,7 @@ public enum QueryJoinMethod {
 
 // MARK: Support
 
-public protocol JoinSupporting: DatabaseConnection { }
+public protocol JoinSupporting: Database { }
 
 // MARK: Query
 
@@ -78,7 +78,7 @@ extension DatabaseQuery {
 
 // MARK: Query Builder
 
-extension QueryBuilder where Model.Database.Connection: JoinSupporting {
+extension QueryBuilder where Model.Database: JoinSupporting {
     /// Join another model to this query builder.
     public func join<Joined: Fluent.Model>(
         field joinedKey: ReferenceWritableKeyPath<Joined, Model.ID>,

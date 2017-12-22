@@ -24,7 +24,7 @@ extension SoftDeletable {
 
 // MARK: Model
 
-extension Model where Self: SoftDeletable {
+extension Model where Self: SoftDeletable, Database: QuerySupporting {
     /// Permanently deletes a soft deletable model.
     public func forceDelete(on conn: DatabaseConnectable) -> Future<Void> {
         return query(on: conn)._delete(self)

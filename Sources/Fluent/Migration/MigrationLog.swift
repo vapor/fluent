@@ -2,7 +2,7 @@ import Async
 import Foundation
 
 /// Represents a migration that has succesfully ran.
-final class MigrationLog<D: Database>: Model, Timestampable {
+final class MigrationLog<D>: Model, Timestampable where D: QuerySupporting {
     /// See Model.Database
     typealias Database = D
 
@@ -44,14 +44,12 @@ final class MigrationLog<D: Database>: Model, Timestampable {
 }
 
 /// MARK: Migration
-final class MigrationLogMigration<
-    D: Fluent.Database
->: Migration where D.Connection: SchemaSupporting {
+final class MigrationLogMigration<D>: Migration where D: QuerySupporting & SchemaSupporting {
     public typealias Database = D
 
     /// See Migration.prepare
-    static func prepare(on connection: Database.Connection) -> Future<Void> {
-        return connection.create(MigrationLog<Database>.self) { builder in
+    static func prepare(on connection: D.Connection) -> Future<Void> {
+        return connection.create(MigrationLog<D>.self) { builder in
             try builder.field(for: \MigrationLog<D>.id)
             try builder.field(for: \MigrationLog<D>.name)
             try builder.field(for: \MigrationLog<D>.batch)

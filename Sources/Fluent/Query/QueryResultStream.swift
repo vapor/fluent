@@ -2,7 +2,7 @@ import Async
 
 /// A stream of query results.
 public final class QueryResultStream<Model, Database>: Async.Stream
-    where Model: Decodable, Database: Fluent.Database
+    where Model: Decodable, Database: QuerySupporting
 {
     /// See InputStream.Input
     public typealias Input = Model

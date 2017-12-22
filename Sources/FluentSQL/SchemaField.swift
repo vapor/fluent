@@ -6,9 +6,7 @@ extension SchemaField {
     internal func makeSchemaColumn() -> SchemaColumn {
         return SchemaColumn(
             name: name,
-            dataType: type,
-            isNotNull: !isOptional,
-            isPrimaryKey: isIdentifier
+            dataType: Database.dataType(for: self)
         )
     }
 }

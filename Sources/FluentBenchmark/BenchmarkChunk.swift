@@ -4,7 +4,7 @@ import Dispatch
 import Fluent
 import Foundation
 
-extension Benchmarker {
+extension Benchmarker where Database: QuerySupporting {
     /// The actual benchmark.
     fileprivate func _benchmark(on conn: Database.Connection) throws -> Future<Void> {
         var fetched64: [User<Database>] = []
@@ -55,7 +55,7 @@ extension Benchmarker {
     }
 }
 
-extension Benchmarker where Database.Connection: SchemaSupporting {
+extension Benchmarker where Database: SchemaSupporting & QuerySupporting {
     /// Benchmark result chunking
     /// The schema will be prepared first.
     public func benchmarkChunking_withSchema() throws -> Future<Void> {

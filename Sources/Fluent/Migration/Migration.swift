@@ -18,7 +18,7 @@ public protocol Migration {
     static func revert(on connection: Database.Connection) -> Future<Void>
 }
 
-extension Model where Self: Migration, Database.Connection: SchemaSupporting {
+extension Model where Self: Migration, Database: SchemaSupporting {
     /// See Migration.prepare
     public static func prepare(on connection: Database.Connection) -> Future<Void> {
         return connection.create(self) { schema in
@@ -28,7 +28,7 @@ extension Model where Self: Migration, Database.Connection: SchemaSupporting {
                     continue
                 }
                 try schema.addField(
-                    type: Database.Connection.FieldType.requireSchemaFieldType(for: property.type),
+                    type: Database.fieldType(for: property.type),
                     name: property.codingPath[0].stringValue,
                     isOptional: property.isOptional,
                     isIdentifier: property.codingPath.equals(idCodingPath)

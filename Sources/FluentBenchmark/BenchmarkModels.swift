@@ -3,7 +3,7 @@ import Dispatch
 import Fluent
 import Foundation
 
-extension Benchmarker {
+extension Benchmarker where Database: QuerySupporting {
     /// The actual benchmark.
     fileprivate func _benchmark(on conn: Database.Connection) throws -> Future<Void> {
         // create
@@ -51,7 +51,7 @@ extension Benchmarker {
     }
 }
 
-extension Benchmarker where Database.Connection: SchemaSupporting {
+extension Benchmarker where Database: QuerySupporting & SchemaSupporting {
     /// Benchmark the basic model CRUD.
     /// The schema will be prepared first.
     public func benchmarkModels_withSchema() throws -> Future<Void> {

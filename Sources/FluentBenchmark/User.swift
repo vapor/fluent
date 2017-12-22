@@ -2,7 +2,7 @@ import Async
 import Fluent
 import Foundation
 
-public final class User<D: Database>: Model, Timestampable {
+public final class User<D>: Model, Timestampable where D: QuerySupporting {
     /// See Model.Database
     public typealias Database = D
 
@@ -56,8 +56,8 @@ extension User {
 
 // MARK: Migration
 
-internal struct UserMigration<D: Database>: Migration
-    where D.Connection: SchemaSupporting
+internal struct UserMigration<D>: Migration
+    where D: QuerySupporting & SchemaSupporting
 {
     /// See Migration.database
     typealias Database = D

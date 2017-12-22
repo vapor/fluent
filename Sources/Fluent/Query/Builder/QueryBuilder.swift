@@ -2,7 +2,7 @@ import Async
 import Foundation
 
 /// A Fluent database query builder.
-public final class QueryBuilder<Model> where Model: Fluent.Model {
+public final class QueryBuilder<Model> where Model: Fluent.Model, Model.Database: QuerySupporting {
     /// The query we are building
     public var query: DatabaseQuery
 
@@ -65,21 +65,14 @@ public final class QueryBuilder<Model> where Model: Fluent.Model {
     }
 }
 
-extension Model {
+extension Model where Database: QuerySupporting {
     /// Sets the model's id from the connection if it is
     /// of type autoincrementing
     internal func parseID(from conn: Database.Connection) throws {
-        guard fluentID == nil, case .autoincrementing(let convert) = ID.identifierType else {
+        guard fluentID == nil, case .driver = Database.idType(for: ID.self) else {
             return
         }
 
-        guard let lastID = conn.lastAutoincrementID else {
-            throw FluentError(
-                identifier: "noAutoincrementID",
-                reason: "No auto increment ID was returned by the database when decoding \(Self.name) models"
-            )
-        }
-
-        fluentID = convert(lastID)
+        try conn.setID(on: self)
     }
 }

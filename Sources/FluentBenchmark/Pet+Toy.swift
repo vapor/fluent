@@ -3,7 +3,7 @@ import Fluent
 import Foundation
 
 /// A pivot between pet and toy.
-public final class PetToy<D: Database>: ModifiablePivot {
+public final class PetToy<D>: ModifiablePivot where D: QuerySupporting {
     /// See Model.database
     public typealias Database = D
 
@@ -46,7 +46,7 @@ public final class PetToy<D: Database>: ModifiablePivot {
     }
 }
 
-internal struct PetToyMigration<D: Database>: Migration where D.Connection: SchemaSupporting {
+internal struct PetToyMigration<D>: Migration where D: QuerySupporting & SchemaSupporting {
     /// See Migration.database
     typealias Database = D
 
