@@ -5,13 +5,13 @@ final class SchemaTests: XCTestCase {
     func testCreate() {
         var columns: [SchemaColumn] = []
 
-        let id = SchemaColumn(name: "id", dataType: "UUID", isPrimaryKey: true)
+        let id = SchemaColumn(name: "id", dataType: "UUID PRIMARY KEY")
         columns.append(id)
 
-        let name = SchemaColumn(name: "name", dataType: "STRING")
+        let name = SchemaColumn(name: "name", dataType: "STRING NOT NULL")
         columns.append(name)
 
-        let age = SchemaColumn(name: "age", dataType: "INT")
+        let age = SchemaColumn(name: "age", dataType: "INT NOT NULL")
         columns.append(age)
 
         let create = SchemaQuery(

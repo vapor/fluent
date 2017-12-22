@@ -4,7 +4,7 @@ import FluentSQL
 import SQLite
 import SQL
 
-extension SQLiteConnection: QuerySupporting, JoinSupporting {
+extension SQLiteConnection: QueryExecuting {
     /// See QueryExecutor.execute
     public func execute<I: InputStream, D: Decodable>(
         query: DatabaseQuery,
@@ -65,6 +65,10 @@ extension SQLiteConnection: QuerySupporting, JoinSupporting {
             stream.error(error)
             stream.close()
         }
+    }
+
+    public func setID<M>(on model: M) throws where M : Model {
+        model[keyPath: M.idKey] = lastAutoincrementID as? M.ID
     }
 }
 

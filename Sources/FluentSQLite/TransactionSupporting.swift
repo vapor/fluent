@@ -2,7 +2,7 @@ import Async
 import Fluent
 import SQLite
 
-extension SQLiteConnection: TransactionSupporting {
+extension SQLiteConnection: TransactionExecuting {
     /// See TransactionExecutor.execute
     public func execute(transaction: DatabaseTransaction<SQLiteConnection>) -> Future<Void> {
         let promise = Promise(Void.self)

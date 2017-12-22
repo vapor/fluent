@@ -1,7 +1,8 @@
 import Async
+import Debugging
+import Foundation
 import Fluent
 import SQLite
-import Debugging
 
 extension SQLiteDatabase: Database {
     public typealias Connection = SQLiteConnection
@@ -10,6 +11,60 @@ extension SQLiteDatabase: Database {
         return self.makeConnection(on: worker)
     }
 }
+
+extension SQLiteDatabase: QuerySupporting {
+    public static func idType<T>(for type: T.Type) -> IDType where T: Fluent.ID {
+        switch id(type) {
+        case id(Int.self): return .driver
+        case id(UUID.self): return .fluent
+        default: return .user
+        }
+    }
+}
+
+extension SQLiteDatabase: SchemaSupporting {
+    /// See SchemaSupporting.FieldType
+    public typealias FieldType = SQLiteFieldType
+
+    public static func dataType(for field: SchemaField<SQLiteDatabase>) -> String {
+        var sql: [String] = []
+        switch field.type {
+        case .blob: sql.append("BLOB")
+        case .integer: sql.append("INTEGER")
+        case .real: sql.append("REAL")
+        case .text: sql.append("TEXT")
+        case .null: sql.append("NULL")
+        }
+
+        if field.isIdentifier {
+            sql.append("PRIMARY KEY")
+        }
+
+        if !field.isOptional {
+            sql.append("NOT NULL")
+        }
+
+        return sql.joined(separator: " ")
+    }
+
+    public static func fieldType(for type: Any.Type) throws -> SQLiteFieldType {
+        switch id(type) {
+        case id(Date.self), id(Double.self), id(Float.self): return .real
+        case id(Int.self), id(UInt.self): return .integer
+        case id(String.self): return .text
+        case id(UUID.self), id(Data.self): return .blob
+        default: fatalError("Unsupported SQLite field type")
+        }
+    }
+}
+
+fileprivate func id(_ type: Any.Type) -> ObjectIdentifier {
+    return ObjectIdentifier(type)
+}
+
+extension SQLiteDatabase: ReferenceSupporting {}
+extension SQLiteDatabase: JoinSupporting {}
+extension SQLiteDatabase: TransactionSupporting {}
 
 public struct SQLiteConfig {
     public init() {}
@@ -36,12 +91,12 @@ extension SQLiteDatabase: LogSupporting {
 
 extension DatabaseLogger: SQLiteLogger {
     /// See SQLiteLogger.log
-    public func log(query: SQLiteQuery) -> Future<Void> {
+    public func log(query: SQLiteQuery) {
         let log = DatabaseLog(
             query: query.string,
             values: query.binds.map { $0.description }
         )
-        return record(log: log)
+        record(log: log)
     }
 }
 
