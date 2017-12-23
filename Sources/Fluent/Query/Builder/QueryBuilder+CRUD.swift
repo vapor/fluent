@@ -19,6 +19,10 @@ extension QueryBuilder {
     public func create(_ model: Model) -> Future<Void> {
         query.data = model
         query.action = .create
+
+        // This feels very hacky.
+        query.withSoftDeleted = true
+
         return connection.flatMap(to: Void.self) { conn in
             if model.fluentID == nil {
                 // generate an id
