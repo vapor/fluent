@@ -16,13 +16,14 @@ extension Encodable {
 /// MARK: .equals
 
 /// Model.field == value
-public func == <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
-    where Model: Fluent.Model, Value: Encodable & Equatable
-{
-    return try ModelFilterMethod<Model>(
-        method: .compare(lhs.makeQueryField(), .equality(.equals), .value(rhs))
-    )
-}
+/// FIXME: conditional conformance
+//public func == <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
+//    where Model: Fluent.Model, Value: Encodable & Equatable
+//{
+//    return try ModelFilterMethod<Model>(
+//        method: .compare(lhs.makeQueryField(), .equality(.equals), .value(rhs))
+//    )
+//}
 
 /// field == value
 public func == <
@@ -43,13 +44,14 @@ public func == <
 /// MARK: .notEquals
 
 /// Model.field != value
-public func != <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
-    where Model: Fluent.Model, Value: Encodable & Equatable
-{
-    return try ModelFilterMethod<Model>(
-        method: .compare(lhs.makeQueryField(), .equality(.notEquals), .value(rhs))
-    )
-}
+/// FIXME: conditional conformance
+//public func != <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
+//    where Model: Fluent.Model, Value: Encodable & Equatable
+//{
+//    return try ModelFilterMethod<Model>(
+//        method: .compare(lhs.makeQueryField(), .equality(.notEquals), .value(rhs))
+//    )
+//}
 
 /// field != value
 public func != <
@@ -103,13 +105,14 @@ public enum OrderedComparison {
 /// .greaterThan
 
 /// Model.field > value
-public func > <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
-    where Model: Fluent.Model, Value: Encodable & Equatable
-{
-    return try ModelFilterMethod<Model>(
-        method: .compare(lhs.makeQueryField(), .order(.greaterThan), .value(rhs))
-    )
-}
+/// FIXME: conditional conformance
+//public func > <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
+//    where Model: Fluent.Model, Value: Encodable & Equatable
+//{
+//    return try ModelFilterMethod<Model>(
+//        method: .compare(lhs.makeQueryField(), .order(.greaterThan), .value(rhs))
+//    )
+//}
 
 /// field > value
 public func > <
@@ -130,13 +133,14 @@ public func > <
 /// .lessThan
 
 /// Model.field > value
-public func < <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
-    where Model: Fluent.Model, Value: Encodable & Equatable
-{
-    return try ModelFilterMethod<Model>(
-        method: .compare(lhs.makeQueryField(), .order(.lessThan), .value(rhs))
-    )
-}
+/// FIXME: conditional conformance
+//public func < <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
+//    where Model: Fluent.Model, Value: Encodable & Equatable
+//{
+//    return try ModelFilterMethod<Model>(
+//        method: .compare(lhs.makeQueryField(), .order(.lessThan), .value(rhs))
+//    )
+//}
 
 /// field < value
 public func < <
@@ -157,13 +161,14 @@ public func < <
 /// .greaterThanOrEquals
 
 /// Model.field >= value
-public func >= <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
-    where Model: Fluent.Model, Value: Encodable & Equatable
-{
-    return try ModelFilterMethod<Model>(
-        method: .compare(lhs.makeQueryField(), .order(.greaterThanOrEquals), .value(rhs))
-    )
-}
+/// FIXME: conditional conformance
+//public func >= <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
+//    where Model: Fluent.Model, Value: Encodable & Equatable
+//{
+//    return try ModelFilterMethod<Model>(
+//        method: .compare(lhs.makeQueryField(), .order(.greaterThanOrEquals), .value(rhs))
+//    )
+//}
 
 /// field >= value
 public func >= <
@@ -184,13 +189,14 @@ public func >= <
 /// .lessThanOrEquals
 
 /// Model.field <= value
-public func <= <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
-    where Model: Fluent.Model, Value: Encodable & Equatable
-{
-    return try ModelFilterMethod<Model>(
-        method: .compare(lhs.makeQueryField(), .order(.lessThanOrEquals), .value(rhs))
-    )
-}
+/// FIXME: conditional conformance
+//public func <= <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
+//    where Model: Fluent.Model, Value: Encodable & Equatable
+//{
+//    return try ModelFilterMethod<Model>(
+//        method: .compare(lhs.makeQueryField(), .order(.lessThanOrEquals), .value(rhs))
+//    )
+//}
 
 /// field <= value
 public func <= <
