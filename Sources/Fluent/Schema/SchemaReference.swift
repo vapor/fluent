@@ -1,17 +1,13 @@
 import Async
 
-/// Internal type-erasing protocol.
-/// Note: do not use this type externally.
-public protocol ReferenceConfigurable {
+/// Defines database types that support references
+public protocol ReferenceSupporting: SchemaSupporting {
     /// Enables references errors.
-    func enableReferences() -> Future<Void>
+    static func enableReferences(on connection: Connection) -> Future<Void>
 
     /// Disables reference errors.
-    func disableReferences() -> Future<Void>
+    static func disableReferences(on connection: Connection) -> Future<Void>
 }
-
-/// Defines database types that support references
-public protocol ReferenceSupporting: SchemaSupporting where Connection: ReferenceConfigurable { }
 
 /// A reference / foreign key is a field (or collection of fields) in one table
 /// that uniquely identifies a row of another table or the same table.

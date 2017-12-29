@@ -16,7 +16,6 @@ func id(_ type: Any.Type) -> ObjectIdentifier {
     return ObjectIdentifier(type)
 }
 
-extension SQLiteDatabase: ReferenceSupporting {}
 extension SQLiteDatabase: JoinSupporting {}
 
 public struct SQLiteConfig {
