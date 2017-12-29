@@ -3,15 +3,8 @@ import Foundation
 
 // MARK: Protocols
 
-public protocol SchemaExecuting: DatabaseConnection {
-    /// Executes the supplied schema on the database connection.
-    func execute<D>(schema: DatabaseSchema<D>) -> Future<Void>
-}
-
 /// Capable of executing a database schema query.
-public protocol SchemaSupporting: Database
-    where Self.Connection: SchemaExecuting
-{
+public protocol SchemaSupporting: Database {
     /// See SchemaFieldType
     associatedtype FieldType
 
@@ -22,24 +15,26 @@ public protocol SchemaSupporting: Database
     /// how to make for migrations and tests.
     static func fieldType(for type: Any.Type) throws -> FieldType
 
+    /// Executes the supplied schema on the database connection.
+    static func execute(schema: DatabaseSchema<Self>, on connection: Connection) -> Future<Void>
 }
 
 // MARK: Convenience
 
-extension SchemaExecuting {
+extension SchemaSupporting {
     /// Closure for accepting a schema creator.
     public typealias CreateClosure<Model> = (SchemaCreator<Model>) throws -> ()
         where Model: Fluent.Model, Model.Database: SchemaSupporting
 
     /// Convenience for creating a closure that accepts a schema creator
     /// for the supplied model type on this schema executor.
-    public func create<Model>(_ model: Model.Type, closure: @escaping CreateClosure<Model>) -> Future<Void>
-        where Model.Database.Connection == Self
+    public static func create<Model>(_ model: Model.Type, on connection: Connection, closure: @escaping CreateClosure<Model>) -> Future<Void>
+        where Model.Database == Self
     {
-        let creator = SchemaCreator(Model.self, on: self)
+        let creator = SchemaCreator(Model.self)
         return Future {
             try closure(creator)
-            return self.execute(schema: creator.schema)
+            return self.execute(schema: creator.schema, on: connection)
         }
     }
 
@@ -49,22 +44,22 @@ extension SchemaExecuting {
 
     /// Convenience for creating a closure that accepts a schema updater
     /// for the supplied model type on this schema executor.
-    public func update<Model>(_ model: Model.Type, closure: @escaping UpdateClosure<Model>) -> Future<Void>
-        where Model.Database.Connection == Self
+    public static func update<Model>(_ model: Model.Type, on connection: Connection, closure: @escaping UpdateClosure<Model>) -> Future<Void>
+        where Model.Database == Self
     {
-        let updater = SchemaUpdater(Model.self, on: self)
+        let updater = SchemaUpdater(Model.self)
         return Future {
             try closure(updater)
-            return self.execute(schema: updater.schema)
+            return self.execute(schema: updater.schema, on: connection)
         }
     }
 
     /// Convenience for deleting the schema for the supplied model type.
-    public func delete<Model>(_ model: Model.Type) -> Future<Void>
-        where Model: Fluent.Model, Model.Database: SchemaSupporting, Model.Database.Connection == Self
+    public static func delete<Model>(_ model: Model.Type, on connection: Connection) -> Future<Void>
+        where Model: Fluent.Model, Model.Database == Self
     {
         var schema = DatabaseSchema<Model.Database>(entity: Model.entity)
         schema.action = .delete
-        return execute(schema: schema)
+        return execute(schema: schema, on: connection)
     }
 }

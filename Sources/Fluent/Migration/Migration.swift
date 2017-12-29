@@ -21,7 +21,7 @@ public protocol Migration {
 extension Model where Self: Migration, Database: SchemaSupporting {
     /// See Migration.prepare
     public static func prepare(on connection: Database.Connection) -> Future<Void> {
-        return connection.create(self) { schema in
+        return Database.create(self, on: connection) { schema in
             let idCodingPath = Self.codingPath(forKey: idKey)
             for property in Self.properties() {
                 guard property.codingPath.count == 1 else {
@@ -39,7 +39,7 @@ extension Model where Self: Migration, Database: SchemaSupporting {
 
     /// See Migration.revert
     public static func revert(on connection: Database.Connection) -> Future<Void> {
-        return connection.delete(self)
+        return Database.delete(self, on: connection)
     }
 }
 

@@ -8,10 +8,4 @@ public protocol SchemaBuilder: class {
 
     /// The schema being built.
     var schema: DatabaseSchema<Model.Database> { get set }
-
-    /// The connection this schema builder will execute on.
-    var connection: Model.Database.Connection { get }
-
-    /// Create a new schema builder.
-    init(_ model: Model.Type, on connection: Model.Database.Connection)
 }

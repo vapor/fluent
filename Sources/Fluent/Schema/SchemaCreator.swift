@@ -11,15 +11,8 @@ public final class SchemaCreator<M>: SchemaBuilder
     /// See SchemaBuilder.schema
     public var schema: DatabaseSchema<M.Database>
 
-    /// See SchemaBuilder.executor
-    public let connection: Model.Database.Connection
-
     /// Create a new schema creator.
-    public init(
-        _ type: Model.Type = Model.self,
-        on connection: Model.Database.Connection
-    ) {
+    public init(_ type: Model.Type = Model.self) {
         schema = DatabaseSchema(entity: Model.entity)
-        self.connection = connection
     }
 }

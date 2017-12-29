@@ -49,7 +49,7 @@ final class MigrationLogMigration<D>: Migration where D: QuerySupporting & Schem
 
     /// See Migration.prepare
     static func prepare(on connection: D.Connection) -> Future<Void> {
-        return connection.create(MigrationLog<D>.self) { builder in
+        return Database.create(MigrationLog<D>.self, on: connection) { builder in
             try builder.field(for: \MigrationLog<D>.id)
             try builder.field(for: \MigrationLog<D>.name)
             try builder.field(for: \MigrationLog<D>.batch)
@@ -60,7 +60,7 @@ final class MigrationLogMigration<D>: Migration where D: QuerySupporting & Schem
 
     /// See Migration.revert
     static func revert(on connection: Database.Connection) -> Future<Void> {
-        return connection.delete(MigrationLog<Database>.self)
+        return Database.delete(MigrationLog<Database>.self, on: connection)
     }
 
 }

@@ -9,17 +9,10 @@ public final class SchemaUpdater<M>: SchemaBuilder
 
     /// See SchemaBuilder.schema
     public var schema: DatabaseSchema<Model.Database>
-
-    /// See SchemaBuilder.executor
-    public let connection: Model.Database.Connection
-
+    
     /// Create a new schema updater.
-    public init(
-        _ type: Model.Type = Model.self,
-        on executor: Model.Database.Connection
-    ) {
+    public init(_ type: Model.Type = Model.self) {
         schema = DatabaseSchema(entity: Model.entity)
-        self.connection = executor
     }
 
     /// Deletes the field with the supplied name.
