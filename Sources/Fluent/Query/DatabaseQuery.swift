@@ -1,5 +1,5 @@
 /// A query that can be sent to a Fluent database.
-public struct DatabaseQuery {
+public struct DatabaseQuery<Database> where Database: QuerySupporting {
     /// The entity to query
     public let entity: String
 
@@ -7,7 +7,7 @@ public struct DatabaseQuery {
     public var action: QueryAction
 
     /// Result stream will be filtered by these queries.
-    public var filters: [QueryFilter]
+    public var filters: [QueryFilter<Database>]
 
     /// Sorts to be applied to the results.
     public var sorts: [QuerySort]

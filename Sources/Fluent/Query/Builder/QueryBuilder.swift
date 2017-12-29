@@ -4,7 +4,7 @@ import Foundation
 /// A Fluent database query builder.
 public final class QueryBuilder<Model> where Model: Fluent.Model, Model.Database: QuerySupporting {
     /// The query we are building
-    public var query: DatabaseQuery
+    public var query: DatabaseQuery<Model.Database>
 
     /// The connection this query will be excuted on.
     /// note: don't call execute manually or fluent's
@@ -32,8 +32,17 @@ public final class QueryBuilder<Model> where Model: Fluent.Model, Model.Database
             let deletedAtField = QueryField(entity: type.entity, name: deletedAtKey[0].stringValue)
 
             try! self.group(.or) { or in
-                try or.filter(deletedAtField > Date())
-                try or.filter(deletedAtField == Date.null)
+                let notDeleted = QueryFilter<Model.Database>(
+                    entity: type.entity,
+                    method: .compare(deletedAtField, .equality(.equals), .value(Date.null))
+                )
+                or.addFilter(notDeleted)
+
+                let notYetDeleted = QueryFilter<Model.Database>(
+                    entity: type.entity,
+                    method: .compare(deletedAtField, .order(.greaterThan), .value(Date()))
+                )
+                or.addFilter(notYetDeleted)
             }
         }
 

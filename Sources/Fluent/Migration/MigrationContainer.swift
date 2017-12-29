@@ -50,9 +50,12 @@ internal struct MigrationContainer<D> where D: QuerySupporting {
     internal func revertIfNeeded(on connection: Database.Connection) -> Future<Void> {
         return hasPrepared(on: connection).flatMap(to: Void.self) { hasPrepared in
             if hasPrepared {
-                return self.revert(connection).flatMap(to: Void.self) {
+                return self.revert(connection).flatMap(to: Void.self) { _ in 
                     // delete the migration log
-                    return try QueryBuilder(MigrationLog<Database>.self, on: Future(connection))
+                    return try QueryBuilder(
+                        MigrationLog<Database>.self,
+                        on: Future(connection)
+                    )
                         .filter(\MigrationLog<Database>.name == self.name)
                         .delete()
                 }

@@ -26,7 +26,7 @@ public final class QueryResultStream<Model, Database>: Async.Stream
     private var connection: Database.Connection?
 
     /// Use `SQLiteResults.stream()` to create a `SQLiteResultStream`
-    internal init(query: DatabaseQuery, on connection: Future<Database.Connection>) {
+    internal init(query: DatabaseQuery<Database>, on connection: Future<Database.Connection>) {
         connection.do { connection in
             self.connection = connection
             Database.execute(query: query, into: self, on: connection)

@@ -73,7 +73,7 @@ extension MigrationLog {
     internal static func latestBatch(on conn: Database.Connection) -> Future<Int> {
         return Future {
             return try conn.query(MigrationLog<Database>.self)
-                .sort(\MigrationLog.batch, .descending)
+                .sort(\MigrationLog<Database>.batch, .descending)
                 .first()
                 .map(to: Int.self) { $0?.batch ?? 0 }
         }

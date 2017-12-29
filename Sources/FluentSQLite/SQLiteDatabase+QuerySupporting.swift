@@ -1,15 +1,26 @@
 import Async
 import Fluent
 import FluentSQL
+import Foundation
 import SQLite
 import SQL
 
-extension SQLiteConnection: QueryExecuting {
-    /// See QueryExecutor.execute
-    public func execute<I: InputStream, D: Decodable>(
-        query: DatabaseQuery,
-        into stream: I
-    ) where I.Input == D {
+extension SQLiteDatabase: QuerySupporting {
+    /// See QuerySupporting.idType
+    public static func idType<T>(for type: T.Type) -> IDType where T: Fluent.ID {
+        switch id(type) {
+        case id(Int.self): return .driver
+        case id(UUID.self): return .fluent
+        default: return .user
+        }
+    }
+
+    /// See QuerySupporting.execute
+    public static func execute<I, D>(
+        query: DatabaseQuery<SQLiteDatabase>,
+        into stream: I,
+        on connection: SQLiteConnection
+    ) where I: Async.InputStream, D: Decodable, D == I.Input {
         do {
             /// convert fluent query to sql query
             var (dataQuery, binds) = query.makeDataQuery()
@@ -28,7 +39,7 @@ extension SQLiteConnection: QueryExecuting {
 
             /// create sqlite query from string
             let sqlString = SQLiteSQLSerializer().serialize(data: dataQuery)
-            let sqliteQuery = self.query(string: sqlString)
+            let sqliteQuery = connection.query(string: sqlString)
 
             /// bind model data to sqlite query
             if query.data != nil {
@@ -67,8 +78,9 @@ extension SQLiteConnection: QueryExecuting {
         }
     }
 
-    public func setID<M>(on model: M) throws where M : Model {
-        model[keyPath: M.idKey] = lastAutoincrementID as? M.ID
+    /// See QuerySupporting.setID
+    public static func setID<M>(on model: M, for connection: SQLiteConnection) throws where M : Model {
+        model[keyPath: M.idKey] = connection.lastAutoincrementID as? M.ID
     }
 }
 

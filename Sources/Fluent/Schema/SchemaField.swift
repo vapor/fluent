@@ -83,12 +83,10 @@ extension SchemaBuilder {
         return field
     }
 
-    /// Adds a field to the schema.
-    public func removeField<Field>(
-        for field: Field
-    ) throws
-        where Field: QueryFieldRepresentable
-    {
+    /// Removes a field from the schema.
+    public func removeField<T>(
+        for field: ReferenceWritableKeyPath<Model, T>
+    ) throws {
         let name = try field.makeQueryField().name
         schema.removeFields.append(name)
     }

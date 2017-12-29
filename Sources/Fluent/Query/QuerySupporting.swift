@@ -10,7 +10,7 @@ public protocol QuerySupporting: Database {
     /// The returned future will be completed when the query is complete.
     /// Results will be outputed through the query's output stream.
     static func execute<I: InputStream, D: Decodable>(
-        query: DatabaseQuery,
+        query: DatabaseQuery<Self>,
         into stream: I,
         on connection: Connection
     ) where I.Input == D
