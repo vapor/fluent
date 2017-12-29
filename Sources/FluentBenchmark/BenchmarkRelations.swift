@@ -15,7 +15,7 @@ extension Benchmarker where Database: JoinSupporting & ReferenceSupporting & Que
         
         let promise = Promise<Int>()
         
-        conn.enableReferences().flatMap(to: Void.self) {
+        Database.enableReferences(on: conn).flatMap(to: Void.self) {
             return tanner.save(on: conn)
         }.flatMap(to: Void.self) {
             ziz = try Pet<Database>(name: "Ziz", ownerID: tanner.requireID())
@@ -98,7 +98,7 @@ extension Benchmarker where Database: SchemaSupporting & JoinSupporting & Refere
     /// The schema will be prepared first.
     public func benchmarkRelations_withSchema() throws -> Future<Void> {
         return pool.requestConnection().flatMap(to: Void.self) { conn in
-            return conn.enableReferences().flatMap(to: Void.self) {
+            return Database.enableReferences(on: conn).flatMap(to: Void.self) {
                 return UserMigration<Database>.prepare(on: conn)
             }.flatMap(to: Void.self) {
                 return PetMigration<Database>.prepare(on: conn)
