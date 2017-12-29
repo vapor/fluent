@@ -11,7 +11,9 @@ public final class SQLiteProvider: Provider {
 
     /// See Provider.register
     public func register(_ services: inout Services) throws {
-        services.instance(SQLiteConfig())
+        services.register { container in
+            return SQLiteConfig()
+        }
         services.register(SQLiteDatabase.self) { container -> SQLiteDatabase in
             let storage = try container.make(SQLiteStorage.self, for: SQLiteProvider.self)
             return SQLiteDatabase(storage: storage)
