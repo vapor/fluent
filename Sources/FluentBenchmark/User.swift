@@ -2,7 +2,7 @@ import Async
 import Fluent
 import Foundation
 
-public final class User<D: Database>: Model, Timestampable {
+public final class User<D>: Model, Timestampable where D: QuerySupporting {
     /// See Model.Database
     public typealias Database = D
 
@@ -56,15 +56,15 @@ extension User {
 
 // MARK: Migration
 
-internal struct UserMigration<D: Database>: Migration
-    where D.Connection: SchemaSupporting
+internal struct UserMigration<D>: Migration
+    where D: QuerySupporting & SchemaSupporting
 {
     /// See Migration.database
     typealias Database = D
 
     /// See Migration.prepare
     static func prepare(on connection: Database.Connection) -> Future<Void> {
-        return connection.create(User<Database>.self) { builder in
+        return Database.create(User<Database>.self, on: connection) { builder in
             try builder.field(for: \User<Database>.id)
             try builder.field(for: \User<Database>.name)
             try builder.field(for: \User<Database>.age)
@@ -75,6 +75,6 @@ internal struct UserMigration<D: Database>: Migration
 
     /// See Migration.revert
     static func revert(on connection: Database.Connection) -> Future<Void> {
-        return connection.delete(User<Database>.self)
+        return Database.delete(User<Database>.self, on: connection)
     }
 }

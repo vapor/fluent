@@ -11,7 +11,7 @@ jobs:
 
   linux:
     docker:
-      - image: swift:4.0
+      - image: swift:4.0.3
     steps:
       - run: apt-get install -y libssl-dev
       - checkout

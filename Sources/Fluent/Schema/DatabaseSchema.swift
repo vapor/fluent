@@ -1,5 +1,5 @@
 /// A query that can be sent to a Fluent database.
-public struct DatabaseSchema {
+public struct DatabaseSchema<Database> where Database: SchemaSupporting {
     /// The entity to query
     public let entity: String
 
@@ -7,7 +7,7 @@ public struct DatabaseSchema {
     public var action: SchemaAction
 
     /// The fields to add to this schema
-    public var addFields: [SchemaField]
+    public var addFields: [SchemaField<Database>]
 
     /// The fields to be removed from this schema.
     public var removeFields: [String]

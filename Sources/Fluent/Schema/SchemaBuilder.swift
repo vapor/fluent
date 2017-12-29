@@ -1,19 +1,16 @@
 import Async
 
+/// FIXME: move to protocol when swift fixes demangle bug
+
 /// Helps you create and execute a database schema.
-public protocol SchemaBuilder: class {
-    /// The associated model type.
-    associatedtype Model: Fluent.Model
-
-    /// The associated connection type (must support schemas!)
-    associatedtype Connection: SchemaSupporting
-
+public class SchemaBuilder<Model>
+    where Model: Fluent.Model, Model.Database: SchemaSupporting
+{
     /// The schema being built.
-    var schema: DatabaseSchema { get set }
+    public var schema: DatabaseSchema<Model.Database>
 
-    /// The connection this schema builder will execute on.
-    var connection: Connection { get }
-
-    /// Create a new schema builder.
-    init(_ model: Model.Type, on connection: Connection)
+    /// Create a new schema creator.
+    public init(_ type: Model.Type = Model.self) {
+        schema = DatabaseSchema(entity: Model.entity)
+    }
 }

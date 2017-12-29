@@ -1,15 +1,17 @@
 import Async
 import Fluent
 import FluentSQL
+import Foundation
 import SQLite
 import SQL
 
-extension SQLiteConnection: QuerySupporting, JoinSupporting {
-    /// See QueryExecutor.execute
-    public func execute<I: InputStream, D: Decodable>(
-        query: DatabaseQuery,
-        into stream: I
-    ) where I.Input == D {
+extension SQLiteDatabase: QuerySupporting {
+    /// See QuerySupporting.execute
+    public static func execute<I, D>(
+        query: DatabaseQuery<SQLiteDatabase>,
+        into stream: I,
+        on connection: SQLiteConnection
+    ) where I: Async.InputStream, D: Decodable, D == I.Input {
         do {
             /// convert fluent query to sql query
             var (dataQuery, binds) = query.makeDataQuery()
@@ -28,7 +30,7 @@ extension SQLiteConnection: QuerySupporting, JoinSupporting {
 
             /// create sqlite query from string
             let sqlString = SQLiteSQLSerializer().serialize(data: dataQuery)
-            let sqliteQuery = self.query(string: sqlString)
+            let sqliteQuery = connection.query(string: sqlString)
 
             /// bind model data to sqlite query
             if query.data != nil {
@@ -65,6 +67,29 @@ extension SQLiteConnection: QuerySupporting, JoinSupporting {
             stream.error(error)
             stream.close()
         }
+    }
+
+    /// See QuerySupporting.modelEvent
+    public static func modelEvent<M>(
+        event: ModelEvent,
+        model: M,
+        on connection: SQLiteConnection
+    ) -> Future<Void> where SQLiteDatabase == M.Database, M: Model {
+        switch event {
+        case .willCreate:
+            switch id(M.ID.self) {
+            case id(UUID.self): model.fluentID = UUID() as? M.ID
+            default: break
+            }
+        case .didCreate:
+            switch id(M.ID.self) {
+            case id(Int.self): model.fluentID = connection.lastAutoincrementID as? M.ID
+            default: break
+            }
+        default: break
+        }
+
+        return .done
     }
 }
 

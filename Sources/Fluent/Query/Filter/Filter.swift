@@ -2,15 +2,15 @@
 /// added on fetch, delete, and update
 /// operations to limit the set of
 /// data affected.
-public struct QueryFilter {
+public struct QueryFilter<Database> where Database: QuerySupporting {
     /// The entity to filter.
     public var entity: String
 
     /// The method to filter by, comparison, subset, grouped, etc.
-    public var method: QueryFilterMethod
+    public var method: QueryFilterMethod<Database>
 
     /// Create a new filter.
-    public init(entity: String, method: QueryFilterMethod) {
+    public init(entity: String, method: QueryFilterMethod<Database>) {
         self.entity = entity
         self.method = method
     }
@@ -34,7 +34,7 @@ extension QueryBuilder {
     /// Manually create and append filter
     @discardableResult
     public func addFilter(
-        _ filter: QueryFilter
+        _ filter: QueryFilter<Model.Database>
     ) -> Self {
         query.filters.append(filter)
         return self

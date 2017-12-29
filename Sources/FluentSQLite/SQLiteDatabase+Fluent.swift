@@ -1,7 +1,8 @@
 import Async
+import Debugging
+import Foundation
 import Fluent
 import SQLite
-import Debugging
 
 extension SQLiteDatabase: Database {
     public typealias Connection = SQLiteConnection
@@ -10,6 +11,12 @@ extension SQLiteDatabase: Database {
         return self.makeConnection(on: worker)
     }
 }
+
+func id(_ type: Any.Type) -> ObjectIdentifier {
+    return ObjectIdentifier(type)
+}
+
+extension SQLiteDatabase: JoinSupporting {}
 
 public struct SQLiteConfig {
     public init() {}
@@ -36,40 +43,11 @@ extension SQLiteDatabase: LogSupporting {
 
 extension DatabaseLogger: SQLiteLogger {
     /// See SQLiteLogger.log
-    public func log(query: SQLiteQuery) -> Future<Void> {
+    public func log(query: SQLiteQuery) {
         let log = DatabaseLog(
             query: query.string,
             values: query.binds.map { $0.description }
         )
-        return record(log: log)
-    }
-}
-
-/// Errors that can be thrown while working with FluentSQLite.
-public struct FluentSQLiteError: Traceable, Debuggable, Swift.Error, Encodable {
-    public static let readableName = "Fluent Error"
-    public let identifier: String
-    public var reason: String
-    public var file: String
-    public var function: String
-    public var line: UInt
-    public var column: UInt
-    public var stackTrace: [String]
-    
-    init(
-        identifier: String,
-        reason: String,
-        file: String = #file,
-        function: String = #function,
-        line: UInt = #line,
-        column: UInt = #column
-    ) {
-        self.identifier = identifier
-        self.reason = reason
-        self.file = file
-        self.function = function
-        self.line = line
-        self.column = column
-        self.stackTrace = FluentSQLiteError.makeStackTrace()
+        record(log: log)
     }
 }

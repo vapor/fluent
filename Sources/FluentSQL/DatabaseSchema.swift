@@ -10,7 +10,7 @@ extension DatabaseSchema {
         case .create:
             schemaStatement = .create(
                 columns: addFields.map { $0.makeSchemaColumn() },
-                foreignKeys: addReferences.map { $0.makeForeignKey() }
+                foreignKeys: []
             )
         case .update:
             schemaStatement = .alter(

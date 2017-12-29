@@ -10,18 +10,19 @@ public enum QuerySubsetScope {
 /// The subset can be either an array of encodable
 /// values or another query whose purpose
 /// is to yield an array of values.
-public enum QuerySubsetValue {
+public enum QuerySubsetValue<Database> where Database: QuerySupporting {
     case array([Encodable])
-    case subquery(DatabaseQuery)
+    case subquery(DatabaseQuery<Database>)
 }
 
 extension QueryBuilder {
     /// Subset `in` filter.
     @discardableResult
-    public func filter<
-        Field: QueryFieldRepresentable
-    >(_ field: Field, in values: [Encodable?]) throws -> Self {
-        let filter = try QueryFilter(
+    public func filter<T>(
+        _ field: ReferenceWritableKeyPath<Model, T>,
+        in values: [Encodable?]
+    ) throws -> Self {
+        let filter = try QueryFilter<Model.Database>(
             entity: Model.entity,
             method: .subset(field.makeQueryField(), .in, .array(values))
         )
@@ -30,10 +31,11 @@ extension QueryBuilder {
 
     /// Subset `notIn` filter.
     @discardableResult
-    public func filter<
-        Field: QueryFieldRepresentable
-    >(_ field: Field, notIn values: [Encodable?]) throws -> Self {
-        let filter = try QueryFilter(
+    public func filter<T>(
+        _ field: ReferenceWritableKeyPath<Model, T>,
+        notIn values: [Encodable?]
+    ) throws -> Self {
+        let filter = try QueryFilter<Model.Database>(
             entity: Model.entity,
             method: .subset(field.makeQueryField(), .notIn, .array(values))
         )

@@ -33,7 +33,7 @@ public struct Siblings<Base: Model, Related: Model, Through: Pivot>
     where
         Base.Database == Through.Database,
         Related.Database == Through.Database,
-        Through.Database.Connection: JoinSupporting
+        Through.Database: JoinSupporting
 {
     /// The base model which all fetched models
     /// should be related to.
@@ -67,18 +67,20 @@ public struct Siblings<Base: Model, Related: Model, Through: Pivot>
         self.basePivotField = basePivotField
         self.relatedPivotField = relatedPivotField
     }
+}
 
+extension Siblings where Base.Database: QuerySupporting{
     /// Create a query for the parent.
     public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Related> {
         return try Related.query(on: conn)
             .join(field: relatedPivotField)
-            .filter(basePivotField == base.requireID())
+            .filter(joined: basePivotField == base.requireID())
     }
 }
 
 // MARK: ModifiablePivot
 
-extension Siblings {
+extension Siblings where Base.Database: QuerySupporting {
     /// Returns true if the supplied model is attached
     /// to this relationship.
     public func isAttached(_ model: Related, on conn: DatabaseConnectable) -> Future<Bool> {
@@ -104,7 +106,9 @@ extension Siblings {
 }
 
 /// Left-side
-extension Siblings where Through: ModifiablePivot, Through.Left == Base, Through.Right == Related {
+extension Siblings
+    where Through: ModifiablePivot, Through.Left == Base, Through.Right == Related, Through.Database: QuerySupporting
+{
     /// Attaches the model to this relationship.
     public func attach(_ model: Related, on conn: DatabaseConnectable) -> Future<Void> {
         do {
@@ -117,7 +121,9 @@ extension Siblings where Through: ModifiablePivot, Through.Left == Base, Through
 }
 
 /// Right-side
-extension Siblings where Through: ModifiablePivot, Through.Left == Related, Through.Right == Base {
+extension Siblings
+    where Through: ModifiablePivot, Through.Left == Related, Through.Right == Base, Through.Database: QuerySupporting
+{
     /// Attaches the model to this relationship.
     public func attach(_ model: Related, on conn: DatabaseConnectable) -> Future<Void> {
         do {

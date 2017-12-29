@@ -24,35 +24,35 @@ extension QueryBuilder {
     }
 
     /// Returns the sum of the supplied field
-    public func sum<F: QueryFieldRepresentable>(_ field: F) -> Future<Double> {
+    public func sum<T>(_ field: ReferenceWritableKeyPath<Model, T>) -> Future<Double> {
         return aggregate(.sum, field: field)
     }
 
     /// Returns the average of the supplied field
-    public func average<F: QueryFieldRepresentable>(_ field: F) -> Future<Double> {
+    public func average<T>(_ field: ReferenceWritableKeyPath<Model, T>) -> Future<Double> {
         return aggregate(.average, field: field)
     }
 
     /// Returns the min of the supplied field
-    public func min<F: QueryFieldRepresentable>(_ field: F) -> Future<Double> {
+    public func min<T>(_ field: ReferenceWritableKeyPath<Model, T>) -> Future<Double> {
         return aggregate(.min, field: field)
     }
 
     /// Returns the max of the supplied field
-    public func max<F: QueryFieldRepresentable>(_ field: F) -> Future<Double> {
+    public func max<T>(_ field: ReferenceWritableKeyPath<Model, T>) -> Future<Double> {
         return aggregate(.max, field: field)
     }
 
     /// Perform an aggregate action on the supplied field
     /// on the supplied model.
     /// Decode as the supplied type.
-    public func aggregate<D: Decodable, F: QueryFieldRepresentable>(
+    public func aggregate<D, T>(
         _ method: QueryAggregateMethod,
-        field: F?,
+        field: ReferenceWritableKeyPath<Model, T>,
         as type: D.Type = D.self
-    ) -> Future<D> {
+    ) -> Future<D> where D: Decodable {
         return Future {
-            let aggregate = try QueryAggregate(field: field?.makeQueryField(), method: method)
+            let aggregate = try QueryAggregate(field: field.makeQueryField(), method: method)
             return self.aggregate(aggregate)
         }
     }

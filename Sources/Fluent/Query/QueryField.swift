@@ -15,31 +15,27 @@ public struct QueryField {
     }
 }
 
-/// Representable as a Query Field
-public protocol QueryFieldRepresentable {
-    func makeQueryField() throws -> QueryField
-}
+///// Representable as a Query Field
+//public protocol QueryFieldRepresentable {
+//    func makeQueryField() throws -> QueryField
+//}
 
 /// Conform key path's where the root is a model.
 /// FIXME: conditional conformance
-extension KeyPath: QueryFieldRepresentable {
+extension KeyPath where Root: Model {
     /// See QueryFieldRepresentable.makeQueryField()
     public func makeQueryField() throws -> QueryField {
-        guard let model = Root.self as? AnyModel.Type else {
-            throw FluentError(identifier: "invalid-root-type", reason: "`Can't create query field. \(Root.self)` does not conform to `AnyModel`.")
-        }
-
-        let key = model.unsafeCodingPath(forKey: self)
-        return QueryField(entity: model.entity, name: key[0].stringValue)
+        let key = Root.unsafeCodingPath(forKey: self)
+        return QueryField(entity: Root.entity, name: key[0].stringValue)
     }
 }
 
-/// Query fields obviously should get free conformance.
-extension QueryField: QueryFieldRepresentable {
-    public func makeQueryField() -> QueryField {
-        return self
-    }
-}
+///// Query fields obviously should get free conformance.
+//extension QueryField: QueryFieldRepresentable {
+//    public func makeQueryField() -> QueryField {
+//        return self
+//    }
+//}
 
 /// Allow models to easily generate query fields statically.
 extension Model {

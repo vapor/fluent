@@ -64,7 +64,7 @@ public enum QueryJoinMethod {
 
 // MARK: Support
 
-public protocol JoinSupporting: DatabaseConnection { }
+public protocol JoinSupporting: Database { }
 
 // MARK: Query
 
@@ -78,7 +78,7 @@ extension DatabaseQuery {
 
 // MARK: Query Builder
 
-extension QueryBuilder where Model.Database.Connection: JoinSupporting {
+extension QueryBuilder where Model.Database: JoinSupporting {
     /// Join another model to this query builder.
     public func join<Joined: Fluent.Model>(
         field joinedKey: ReferenceWritableKeyPath<Joined, Model.ID>,
@@ -109,3 +109,22 @@ extension QueryBuilder where Model.Database.Connection: JoinSupporting {
         return self
     }
 }
+
+extension QueryBuilder {
+    /// Applies a filter from one of the filter operators (==, !=, etc)
+    @discardableResult
+    public func filter(
+        joined value: QueryFilterMethod<Model.Database>
+    ) -> Self {
+        let filter = QueryFilter<Model.Database>(entity: Model.entity, method: value)
+        return addFilter(filter)
+    }
+}
+
+/// Model.field == value
+public func == <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> QueryFilterMethod<Model.Database>
+    where Model: Fluent.Model, Value: Encodable & Equatable
+{
+    return try .compare(lhs.makeQueryField(), .equality(.equals), .value(rhs))
+}
+

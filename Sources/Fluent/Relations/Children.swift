@@ -12,7 +12,7 @@ public struct Children<Parent: Model, Child: Model>
     public var parent: Parent
 
     /// Key referencing property storing parent's ID
-    public typealias ParentForeignIDKey = KeyPath<Child, Parent.ID>
+    public typealias ParentForeignIDKey = ReferenceWritableKeyPath<Child, Parent.ID>
 
     /// Reference to the foreign key on the child.
     public var parentForeignIDKey: ParentForeignIDKey
@@ -22,11 +22,13 @@ public struct Children<Parent: Model, Child: Model>
         self.parent = parent
         self.parentForeignIDKey = parentForeignIDKey
     }
+}
 
+extension Children where Parent.Database: QuerySupporting {
     /// Create a query for all children.
     public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Child> {
         return try Child.query(on: conn)
-            .filter(parentForeignIDKey.makeQueryField() == parent.requireID())
+            .filter(parentForeignIDKey == parent.requireID())
     }
 }
 

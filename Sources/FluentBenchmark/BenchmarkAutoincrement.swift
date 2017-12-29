@@ -4,7 +4,7 @@ import Dispatch
 import Fluent
 import Foundation
 
-extension Benchmarker  {
+extension Benchmarker where Database: QuerySupporting {
     /// The actual benchmark.
     fileprivate func _benchmark(on conn: Database.Connection) throws -> Future<Void> {
         let message = LogMessage<Database>(message: "hello")
@@ -13,13 +13,15 @@ extension Benchmarker  {
             fail("message ID was incorrectly set")
         }
 
-        return message.save(on: conn).map(to: Void.self) {
-            if conn.lastAutoincrementID == nil {
-                throw FluentBenchmarkError(identifier: "autoincrement", reason: "The last auto increment was not set")
-            }
-            
-            if conn.lastAutoincrementID != message.id {
-                throw FluentBenchmarkError(identifier: "model-autoincrement-mismatch", reason: "The model ID was incorrectly set to \(message.id?.description ?? "nil") instead of \(conn.lastAutoincrementID?.description ?? "nil")")
+        let test = LogMessage<Database>(message: "test")
+        return message.save(on: conn).flatMap(to: Void.self) {
+            return Database.modelEvent(event: .didCreate, model: test, on: conn)
+        }.map(to: Void.self) {
+            if test.id != message.id {
+                throw FluentBenchmarkError(
+                    identifier: "model-autoincrement-mismatch",
+                    reason: "The model ID was incorrectly set to \(message.id?.description ?? "nil") instead of \(test.id?.description ?? "nil")"
+                )
             }
         }
     }
@@ -34,7 +36,7 @@ extension Benchmarker  {
     }
 }
 
-extension Benchmarker where Database.Connection: SchemaSupporting {
+extension Benchmarker where Database: QuerySupporting & SchemaSupporting {
     /// Benchmark the Timestampable protocol
     /// The schema will be prepared first.
     public func benchmarkAutoincrement_withSchema() throws -> Future<Void> {

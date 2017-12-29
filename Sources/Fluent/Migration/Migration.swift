@@ -18,17 +18,17 @@ public protocol Migration {
     static func revert(on connection: Database.Connection) -> Future<Void>
 }
 
-extension Model where Self: Migration, Database.Connection: SchemaSupporting {
+extension Model where Self: Migration, Database: SchemaSupporting {
     /// See Migration.prepare
     public static func prepare(on connection: Database.Connection) -> Future<Void> {
-        return connection.create(self) { schema in
+        return Database.create(self, on: connection) { schema in
             let idCodingPath = Self.codingPath(forKey: idKey)
             for property in Self.properties() {
                 guard property.codingPath.count == 1 else {
                     continue
                 }
                 try schema.addField(
-                    type: Database.Connection.FieldType.requireSchemaFieldType(for: property.type),
+                    type: Database.fieldType(for: property.type),
                     name: property.codingPath[0].stringValue,
                     isOptional: property.isOptional,
                     isIdentifier: property.codingPath.equals(idCodingPath)
@@ -39,7 +39,7 @@ extension Model where Self: Migration, Database.Connection: SchemaSupporting {
 
     /// See Migration.revert
     public static func revert(on connection: Database.Connection) -> Future<Void> {
-        return connection.delete(self)
+        return Database.delete(self, on: connection)
     }
 }
 

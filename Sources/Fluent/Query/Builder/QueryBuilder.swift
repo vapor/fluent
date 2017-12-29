@@ -2,9 +2,9 @@ import Async
 import Foundation
 
 /// A Fluent database query builder.
-public final class QueryBuilder<Model> where Model: Fluent.Model {
+public final class QueryBuilder<Model> where Model: Fluent.Model, Model.Database: QuerySupporting {
     /// The query we are building
-    public var query: DatabaseQuery
+    public var query: DatabaseQuery<Model.Database>
 
     /// The connection this query will be excuted on.
     /// note: don't call execute manually or fluent's
@@ -32,8 +32,17 @@ public final class QueryBuilder<Model> where Model: Fluent.Model {
             let deletedAtField = QueryField(entity: type.entity, name: deletedAtKey[0].stringValue)
 
             try! self.group(.or) { or in
-                try or.filter(deletedAtField > Date())
-                try or.filter(deletedAtField == Date.null)
+                let notDeleted = QueryFilter<Model.Database>(
+                    entity: type.entity,
+                    method: .compare(deletedAtField, .equality(.equals), .value(Date.null))
+                )
+                or.addFilter(notDeleted)
+
+                let notYetDeleted = QueryFilter<Model.Database>(
+                    entity: type.entity,
+                    method: .compare(deletedAtField, .order(.greaterThan), .value(Date()))
+                )
+                or.addFilter(notYetDeleted)
             }
         }
 
@@ -48,12 +57,14 @@ public final class QueryBuilder<Model> where Model: Fluent.Model {
         let stream = self.run(decoding: Model.self)
 
         stream.outputMap = { output, conn in
-            switch self.query.action {
-            case .create:
-                try output.parseID(from: conn)
-            default: break
+            return Model.Database.modelEvent(
+                event: .didRead, model: output, on: conn
+            ).flatMap(to: Void.self) {
+                return try output.didRead(on: conn)
+            }.map(to: Model.self) {
+                return output
             }
-            return output
+
         }
 
         return stream
@@ -62,24 +73,5 @@ public final class QueryBuilder<Model> where Model: Fluent.Model {
     // Create a new query build w/ same connection.
     internal func copy() -> QueryBuilder<Model> {
         return QueryBuilder(on: connection)
-    }
-}
-
-extension Model {
-    /// Sets the model's id from the connection if it is
-    /// of type autoincrementing
-    internal func parseID(from conn: Database.Connection) throws {
-        guard fluentID == nil, case .autoincrementing(let convert) = ID.identifierType else {
-            return
-        }
-
-        guard let lastID = conn.lastAutoincrementID else {
-            throw FluentError(
-                identifier: "noAutoincrementID",
-                reason: "No auto increment ID was returned by the database when decoding \(Self.name) models"
-            )
-        }
-
-        fluentID = convert(lastID)
     }
 }

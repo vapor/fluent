@@ -3,7 +3,7 @@ import Dispatch
 import Fluent
 import Foundation
 
-extension Benchmarker where Database.Connection: JoinSupporting & ReferenceSupporting {
+extension Benchmarker where Database: JoinSupporting & ReferenceSupporting & QuerySupporting {
     /// The actual benchmark.
     fileprivate func _benchmark(on conn: Database.Connection) throws -> Future<Void> {
         // create
@@ -15,7 +15,7 @@ extension Benchmarker where Database.Connection: JoinSupporting & ReferenceSuppo
         
         let promise = Promise<Int>()
         
-        conn.enableReferences().flatMap(to: Void.self) {
+        Database.enableReferences(on: conn).flatMap(to: Void.self) {
             return tanner.save(on: conn)
         }.flatMap(to: Void.self) {
             ziz = try Pet<Database>(name: "Ziz", ownerID: tanner.requireID())
@@ -93,12 +93,12 @@ extension Benchmarker where Database.Connection: JoinSupporting & ReferenceSuppo
     }
 }
 
-extension Benchmarker where Database.Connection: SchemaSupporting & JoinSupporting & ReferenceSupporting {
+extension Benchmarker where Database: SchemaSupporting & JoinSupporting & ReferenceSupporting & QuerySupporting {
     /// Benchmark fluent relations.
     /// The schema will be prepared first.
     public func benchmarkRelations_withSchema() throws -> Future<Void> {
         return pool.requestConnection().flatMap(to: Void.self) { conn in
-            return conn.enableReferences().flatMap(to: Void.self) {
+            return Database.enableReferences(on: conn).flatMap(to: Void.self) {
                 return UserMigration<Database>.prepare(on: conn)
             }.flatMap(to: Void.self) {
                 return PetMigration<Database>.prepare(on: conn)

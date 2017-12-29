@@ -13,12 +13,11 @@ public final class DatabaseLogger {
     public static var print: DatabaseLogger {
         return DatabaseLogger { log in
             Swift.print(log)
-            return .done
         }
     }
 
     /// Closure for handling logs.
-    public typealias LogHandler = (DatabaseLog) -> Future<Void>
+    public typealias LogHandler = (DatabaseLog) -> ()
 
     /// Current database log handler.
     public var handler: LogHandler
@@ -33,7 +32,7 @@ public final class DatabaseLogger {
     }
 
     /// Records a database log to the current handler.
-    public func record(log: DatabaseLog) -> Future<Void> {
+    public func record(log: DatabaseLog) {
         var log = log
         log.dbID = dbID
         return handler(log)

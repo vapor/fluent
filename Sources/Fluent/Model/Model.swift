@@ -2,6 +2,9 @@ import Async
 import CodableKit
 import Service
 
+/// A Fluent compatible identifier.
+public typealias ID = Codable & Equatable
+
 /// Fluent database models. These types can be fetched
 /// from a database connection using a query.
 ///
@@ -30,6 +33,14 @@ public protocol Model: AnyModel, ContainerFindable {
     /// Called after the model is created when saving.
     func didCreate(on connection: Database.Connection) throws -> Future<Void>
 
+    /// Called before a model is fetched.
+    /// Throwing will cancel the fetch.
+    // not possible, since model not yet loaded
+    // func willRead(on connection: Database.Connection)  throws -> Future<Void>
+
+    /// Called after the model is fetched.
+    func didRead(on connection: Database.Connection) throws -> Future<Void>
+
     /// Called before a model is updated when saving.
     /// Throwing will cancel the save.
     func willUpdate(on connection: Database.Connection) throws -> Future<Void>
@@ -53,7 +64,7 @@ public protocol AnyModel: class, Codable {
     static var entity: String { get }
 }
 
-extension Model {
+extension Model where Database: QuerySupporting {
     /// Creates a query for this model on the supplied connection.
     public func query(
         on conn: DatabaseConnectable
@@ -83,7 +94,7 @@ extension Model {
 
 extension Model {
     /// Access the fluent identifier
-    internal var fluentID: ID? {
+    public var fluentID: ID? {
         get { return self[keyPath: Self.idKey] }
         set { self[keyPath: Self.idKey] = newValue }
     }
@@ -112,6 +123,12 @@ extension Model {
     /// See Model.didCreate()
     public func didCreate(on connection: Database.Connection) throws -> Future<Void> { return .done }
 
+    /// Seee Model.willRead()
+    // public func willRead(on connection: Database.Connection) throws -> Future<Void> { return .done }
+    
+    /// See Model.didRead()
+    public func didRead(on connection: Database.Connection) throws -> Future<Void> { return .done }
+
     /// See Model.willUpdate()
     public func willUpdate(on connection: Database.Connection) throws -> Future<Void> { return .done }
     /// See Model.didUpdate()
@@ -139,7 +156,7 @@ extension Model {
 
 /// MARK: CRUD
 
-extension Model {
+extension Model where Database: QuerySupporting {
     /// Saves the supplied model.
     /// Calls `create` if the ID is `nil`, and `update` if it exists.
     /// If you need to create a model with a pre-existing ID,
@@ -206,7 +223,7 @@ extension Model {
 
 // MARK: Container Findable
 
-extension Model {
+extension Model where Database: QuerySupporting {
     /// See EphemeralWorkerFindable.find
     public static func find(identifier: String, using container: Container) throws -> Future<Self> {
         guard let idType = ID.self as? StringDecodable.Type else {

@@ -1,27 +1,17 @@
 import Async
 
 /// Defines database types that support references
-public protocol ReferenceSupporting: SchemaSupporting, _ReferenceSupporting {
+public protocol ReferenceSupporting: SchemaSupporting {
     /// Enables references errors.
-    func enableReferences() -> Future<Void>
+    static func enableReferences(on connection: Connection) -> Future<Void>
 
     /// Disables reference errors.
-    func disableReferences() -> Future<Void>
-}
-
-/// Internal type-erasing protocol.
-/// Note: do not use this type externally.
-public protocol _ReferenceSupporting {
-    /// Enables references errors.
-    func enableReferences() -> Future<Void>
-
-    /// Disables reference errors.
-    func disableReferences() -> Future<Void>
+    static func disableReferences(on connection: Connection) -> Future<Void>
 }
 
 /// A reference / foreign key is a field (or collection of fields) in one table
 /// that uniquely identifies a row of another table or the same table.
-public struct SchemaReference {
+public struct SchemaReference<Database> where Database: ReferenceSupporting & SchemaSupporting {
     /// The base field.
     public let base: QueryField
 
@@ -40,27 +30,27 @@ public struct SchemaReference {
     }
 
     /// Convenience init w/ schema field
-    public init(base: SchemaField, referenced: QueryField) {
+    public init(base: SchemaField<Database>, referenced: QueryField) {
         self.base = QueryField(entity: nil, name: base.name)
         self.referenced = referenced
     }
 }
 
-extension DatabaseSchema {
+extension DatabaseSchema where Database: ReferenceSupporting {
     /// Field to field references for this database schema.
-    public var addReferences: [SchemaReference] {
-        get { return extend["add-references"] as? [SchemaReference] ?? [] }
+    public var addReferences: [SchemaReference<Database>] {
+        get { return extend["add-references"] as? [SchemaReference<Database>] ?? [] }
         set { extend["add-references"] = newValue }
     }
 
     /// Field to field references for this database schema.
-    public var removeReferences: [SchemaReference] {
-        get { return extend["remove-references"] as? [SchemaReference] ?? [] }
+    public var removeReferences: [SchemaReference<Database>] {
+        get { return extend["remove-references"] as? [SchemaReference<Database>] ?? [] }
         set { extend["remove-references"] = newValue }
     }
 }
 
-extension SchemaBuilder where Model.Database.Connection: ReferenceSupporting {
+extension SchemaBuilder where Model.Database: ReferenceSupporting {
     /// Adds a field to the schema and creates a reference.
     /// T : T
     public func field<T, Other>(
@@ -109,7 +99,7 @@ extension SchemaBuilder where Model.Database.Connection: ReferenceSupporting {
         where Other: Fluent.Model
     {
         let base = try field(for: key)
-        let reference = try SchemaReference(base: base, referenced: referencing.makeQueryField())
+        let reference = try SchemaReference<Model.Database>(base: base, referenced: referencing.makeQueryField())
         schema.addReferences.append(reference)
     }
 
@@ -122,29 +112,25 @@ extension SchemaBuilder where Model.Database.Connection: ReferenceSupporting {
         where Other: Fluent.Model
     {
         let base = try field(for: key)
-        let reference = try SchemaReference(base: base, referenced: referencing.makeQueryField())
+        let reference = try SchemaReference<Model.Database>(base: base, referenced: referencing.makeQueryField())
         schema.addReferences.append(reference)
     }
 
     /// Adds a field to the schema.
-    public func removeField<Field, T, Other>(
-        for field: Field,
+    public func removeField<T, Other>(
+        for field: ReferenceWritableKeyPath<Model, T>,
         referencing: KeyPath<Other, Optional<T>>
-    ) throws
-        where Field: QueryFieldRepresentable
-    {
+    ) throws where Other: Fluent.Model {
         try removeField(for: field)
         try removeReference(from: field, to: referencing)
     }
 
     /// Adds a field to the schema.
-    public func removeReference<Field, T, Other>(
-        from field: Field,
+    public func removeReference<T, Other>(
+        from field: ReferenceWritableKeyPath<Model, T>,
         to referencing: KeyPath<Other, Optional<T>>
-    ) throws
-        where Field: QueryFieldRepresentable
-    {
-        let reference = try SchemaReference(
+    ) throws where Other: Fluent.Model {
+        let reference = try SchemaReference<Model.Database>(
             base: field.makeQueryField(),
             referenced: referencing.makeQueryField()
         )

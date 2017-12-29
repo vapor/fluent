@@ -3,9 +3,7 @@ import Service
 
 /// Internal struct containing migrations for a single database.
 /// note: This struct is important for maintaining database connection type info.
-internal struct SchemaMigrationConfig<
-    Database: Fluent.Database
->: MigrationRunnable where Database.Connection: SchemaSupporting {
+internal struct SchemaMigrationConfig<Database>: MigrationRunnable where Database: SchemaSupporting & QuerySupporting {
     /// The database identifier for these migrations.
     internal let database: DatabaseIdentifier<Database>
 

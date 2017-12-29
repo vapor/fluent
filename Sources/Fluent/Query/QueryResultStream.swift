@@ -2,7 +2,7 @@ import Async
 
 /// A stream of query results.
 public final class QueryResultStream<Model, Database>: Async.Stream
-    where Model: Decodable, Database: Fluent.Database
+    where Model: Decodable, Database: QuerySupporting
 {
     /// See InputStream.Input
     public typealias Input = Model
@@ -11,7 +11,7 @@ public final class QueryResultStream<Model, Database>: Async.Stream
     public typealias Output = Model
 
     /// Maps output
-    typealias OutputMap = (Model, Database.Connection) throws -> (Model)
+    typealias OutputMap = (Model, Database.Connection) throws -> (Future<Model>)
 
     /// Use to transform output before it is delivered
     internal var outputMap: OutputMap?
@@ -26,10 +26,10 @@ public final class QueryResultStream<Model, Database>: Async.Stream
     private var connection: Database.Connection?
 
     /// Use `SQLiteResults.stream()` to create a `SQLiteResultStream`
-    internal init(query: DatabaseQuery, on connection: Future<Database.Connection>) {
+    internal init(query: DatabaseQuery<Database>, on connection: Future<Database.Connection>) {
         connection.do { connection in
             self.connection = connection
-            connection.execute(query: query, into: self)
+            Database.execute(query: query, into: self, on: connection)
         }.catch { error in
             self.error(error)
             self.close()
@@ -49,7 +49,7 @@ public final class QueryResultStream<Model, Database>: Async.Stream
             if let map = outputMap, let conn = connection {
                 do {
                     let mapped = try map(input, conn)
-                    downstream?.next(mapped)
+                    mapped.stream(to: downstream!)
                 } catch {
                     downstream?.error(error)
                 }

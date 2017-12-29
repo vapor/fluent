@@ -2,7 +2,7 @@ import Async
 import Fluent
 import Foundation
 
-internal final class Foo<D: Database>: Model {
+internal final class Foo<D>: Model where D: QuerySupporting {
     /// See Model.Database
     typealias Database = D
 
@@ -37,13 +37,13 @@ internal final class Foo<D: Database>: Model {
     }
 }
 
-internal struct FooMigration<D: Database>: Migration where D.Connection: SchemaSupporting {
+internal struct FooMigration<D>: Migration where D: QuerySupporting & SchemaSupporting {
     /// See Migration.database
     typealias Database = D
 
     /// See Migration.prepare
     static func prepare(on connection: Database.Connection) -> Future<Void> {
-        return connection.create(Foo<Database>.self) { builder in
+        return Database.create(Foo<Database>.self, on: connection) { builder in
             try builder.field(for: \Foo<Database>.id)
             try builder.field(for: \Foo<Database>.bar)
             try builder.field(for: \Foo<Database>.baz)
@@ -52,6 +52,6 @@ internal struct FooMigration<D: Database>: Migration where D.Connection: SchemaS
 
     /// See Migration.revert
     static func revert(on connection: Database.Connection) -> Future<Void> {
-        return connection.delete(Foo<Database>.self)
+        return Database.delete(Foo<Database>.self, on: connection)
     }
 }

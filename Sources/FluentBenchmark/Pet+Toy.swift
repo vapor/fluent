@@ -3,7 +3,7 @@ import Fluent
 import Foundation
 
 /// A pivot between pet and toy.
-public final class PetToy<D: Database>: ModifiablePivot {
+public final class PetToy<D>: ModifiablePivot where D: QuerySupporting {
     /// See Model.database
     public typealias Database = D
 
@@ -46,13 +46,13 @@ public final class PetToy<D: Database>: ModifiablePivot {
     }
 }
 
-internal struct PetToyMigration<D: Database>: Migration where D.Connection: SchemaSupporting {
+internal struct PetToyMigration<D>: Migration where D: QuerySupporting & SchemaSupporting {
     /// See Migration.database
     typealias Database = D
 
     /// See Migration.prepare
     static func prepare(on connection: Database.Connection) -> Future<Void> {
-        return connection.create(PetToy<Database>.self) { builder in
+        return Database.create(PetToy<Database>.self, on: connection) { builder in
             try builder.field(for: \PetToy<Database>.id)
             try builder.field(for: \PetToy<Database>.petID)
             try builder.field(for: \PetToy<Database>.toyID)
@@ -61,6 +61,6 @@ internal struct PetToyMigration<D: Database>: Migration where D.Connection: Sche
 
     /// See Migration.revert
     static func revert(on connection: Database.Connection) -> Future<Void> {
-        return connection.delete(PetToy<Database>.self)
+        return Database.delete(PetToy<Database>.self, on: connection)
     }
 }

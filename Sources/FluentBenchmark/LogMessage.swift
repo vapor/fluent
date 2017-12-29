@@ -2,7 +2,7 @@ import Async
 import Fluent
 import Foundation
 
-public final class LogMessage<D: Database>: Model {
+public final class LogMessage<D>: Model where D: QuerySupporting {
     /// See Model.Database
     public typealias Database = D
 
@@ -35,11 +35,11 @@ public final class LogMessage<D: Database>: Model {
     }
 }
 
-internal struct LogMessageMigration<D: Database>: Migration where D.Connection: SchemaSupporting {
+internal struct LogMessageMigration<D>: Migration where D: QuerySupporting & SchemaSupporting {
     typealias Database = D
 
     static func prepare(on connection: D.Connection) -> Future<Void> {
-        return connection.create(LogMessage<D>.self) { builder in
+        return Database.create(LogMessage<D>.self, on: connection) { builder in
             try builder.field(for: \LogMessage<Database>.id)
 
             try builder.field(for: \LogMessage<Database>.message)
@@ -47,6 +47,6 @@ internal struct LogMessageMigration<D: Database>: Migration where D.Connection: 
     }
 
     static func revert(on connection: D.Connection) -> Future<Void> {
-        return connection.delete(LogMessage<Database>.self)
+        return Database.delete(LogMessage<Database>.self, on: connection)
     }
 }

@@ -3,7 +3,7 @@ import Dispatch
 import Fluent
 import Foundation
 
-extension Benchmarker where Database.Connection: SchemaSupporting {
+extension Benchmarker where Database: QuerySupporting & SchemaSupporting {
     /// Benchmark the basic schema creations.
     public func benchmarkSchema() throws -> Future<Void> {
         return pool.requestConnection().flatMap(to: Void.self) { conn in

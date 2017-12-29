@@ -2,7 +2,7 @@ import Async
 import Fluent
 import Foundation
 
-public final class Toy<D: Database>: Model {
+public final class Toy<D>: Model where D: QuerySupporting {
     /// See Model.Database
     public typealias Database = D
 
@@ -44,7 +44,7 @@ public final class Toy<D: Database>: Model {
 
 // MARK: Relations
 
-extension Toy where Database.Connection: JoinSupporting {
+extension Toy where Database: JoinSupporting {
     /// A relation to this toy's pets.
     var pets: Siblings<Toy, Pet<Database>, PetToy<Database>> {
         return siblings()
@@ -53,13 +53,13 @@ extension Toy where Database.Connection: JoinSupporting {
 
 // MARK: Migration
 
-internal struct ToyMigration<D: Database>: Migration where D.Connection: SchemaSupporting {
+internal struct ToyMigration<D>: Migration where D: QuerySupporting & SchemaSupporting {
     /// See Migration.database
     typealias Database = D
 
     /// See Migration.prepare
     static func prepare(on connection: Database.Connection) -> Future<Void> {
-        return connection.create(Toy<Database>.self) { builder in
+        return Database.create(Toy<Database>.self, on: connection) { builder in
             try builder.field(for: \Toy<Database>.id)
             try builder.field(for: \Toy<Database>.name)
         }
@@ -67,6 +67,6 @@ internal struct ToyMigration<D: Database>: Migration where D.Connection: SchemaS
 
     /// See Migration.revert
     static func revert(on connection: Database.Connection) -> Future<Void> {
-        return connection.delete(Toy<Database>.self)
+        return Database.delete(Toy<Database>.self, on: connection)
     }
 }

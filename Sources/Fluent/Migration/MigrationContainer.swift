@@ -2,7 +2,7 @@ import Async
 
 /// Contains a single migration.
 /// note: we need this type for type erasing purposes.
-internal struct MigrationContainer<D: Database> {
+internal struct MigrationContainer<D> where D: QuerySupporting {
     /// static database type info
     /// note: this is important
     typealias Database = D
@@ -17,7 +17,7 @@ internal struct MigrationContainer<D: Database> {
     var name: String
 
     /// creates a new migration container for a given migration type
-    init<M: Migration>(_ migration: M.Type) where M.Database == D {
+    init<M>(_ migration: M.Type) where M: Migration, M.Database == D {
         self.prepare = M.prepare
         self.revert = M.revert
 
@@ -50,9 +50,12 @@ internal struct MigrationContainer<D: Database> {
     internal func revertIfNeeded(on connection: Database.Connection) -> Future<Void> {
         return hasPrepared(on: connection).flatMap(to: Void.self) { hasPrepared in
             if hasPrepared {
-                return self.revert(connection).flatMap(to: Void.self) {
+                return self.revert(connection).flatMap(to: Void.self) { _ in 
                     // delete the migration log
-                    return try QueryBuilder(MigrationLog<Database>.self, on: Future(connection))
+                    return try QueryBuilder(
+                        MigrationLog<Database>.self,
+                        on: Future(connection)
+                    )
                         .filter(\MigrationLog<Database>.name == self.name)
                         .delete()
                 }

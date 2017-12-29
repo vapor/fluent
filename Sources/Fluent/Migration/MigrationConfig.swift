@@ -12,16 +12,16 @@ public struct MigrationConfig {
     }
 
     /// Adds a migration to the config.
-    public mutating func add<Migration, Database> (
+    public mutating func add<Migration> (
         migration: Migration.Type,
-        database: DatabaseIdentifier<Database>
+        database: DatabaseIdentifier<Migration.Database>
     ) where
         Migration: Fluent.Migration,
-        Migration.Database == Database
+        Migration.Database: QuerySupporting
     {
-        var config: QueryMigrationConfig<Database>
+        var config: QueryMigrationConfig<Migration.Database>
 
-        if let existing = storage[database.uid] as? QueryMigrationConfig<Database> {
+        if let existing = storage[database.uid] as? QueryMigrationConfig<Migration.Database> {
             config = existing
         } else {
             config = .init(database: database)
@@ -32,17 +32,16 @@ public struct MigrationConfig {
     }
 
     /// Adds a schema supporting migration to the config.
-    public mutating func add<Migration, Database> (
+    public mutating func add<Migration> (
         migration: Migration.Type,
-        database: DatabaseIdentifier<Database>
+        database: DatabaseIdentifier<Migration.Database>
     ) where
         Migration: Fluent.Migration,
-        Migration.Database == Database,
-        Database.Connection: SchemaSupporting
+        Migration.Database: SchemaSupporting & QuerySupporting
     {
-        var config: SchemaMigrationConfig<Database>
+        var config: SchemaMigrationConfig<Migration.Database>
 
-        if let existing = storage[database.uid] as? SchemaMigrationConfig<Database> {
+        if let existing = storage[database.uid] as? SchemaMigrationConfig<Migration.Database> {
             config = existing
         } else {
             config = .init(database: database)
@@ -53,29 +52,28 @@ public struct MigrationConfig {
     }
 
     /// Adds a migration to the config.
-    public mutating func add<Model, Database> (
+    public mutating func add<Model> (
         model: Model.Type,
-        database: DatabaseIdentifier<Database>
+        database: DatabaseIdentifier<Model.Database>
     ) where
         Model: Fluent.Migration,
         Model: Fluent.Model,
-        Model.Database == Database,
-        Database.Connection: SchemaSupporting
+        Model.Database: SchemaSupporting & QuerySupporting
     {
-        self.add(migration: model, database: database)
+        self.add(migration: Model.self, database: database)
         Model.defaultDatabase = database
     }
 
     /// Adds a migration to the config.
-    public mutating func add<Model, Database> (
+    public mutating func add<Model> (
         model: Model.Type,
-        database: DatabaseIdentifier<Database>
+        database: DatabaseIdentifier<Model.Database>
     ) where
         Model: Fluent.Migration,
         Model: Fluent.Model,
-        Model.Database == Database
+        Model.Database: QuerySupporting
     {
-        self.add(migration: model, database: database)
+        self.add(migration: Model.self, database: database)
         Model.defaultDatabase = database
     }
 }

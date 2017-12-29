@@ -20,17 +20,6 @@ extension QueryBuilder {
         query.data = model
         query.action = .create
         return connection.flatMap(to: Void.self) { conn in
-            if model.fluentID == nil {
-                // generate an id
-                switch Model.ID.identifierType {
-                case .autoincrementing: break
-                case .generated(let factory):
-                    model.fluentID = factory()
-                case .supplied:
-                    throw FluentError(identifier: "no-id-supplied", reason: "model id type is `supplied`, but no id was supplied")
-                }
-            }
-
             // set timestamps
             if var timestampable = model as? Timestampable {
                 let now = Date()
@@ -38,17 +27,17 @@ extension QueryBuilder {
                 timestampable.createdAt = now
             }
 
-            return try model
-                .willCreate(on: conn)
-                .flatMap(to: Void.self) {
-                    return self.execute().flatMap(to: Void.self) {
-                        try model.parseID(from: conn)
-                        return .done
-                    }
-                }
-                .flatMap(to: Void.self) {
-                    try model.didCreate(on: conn)
-                }
+            return Model.Database.modelEvent(
+                event: .willCreate, model: model,on: conn
+            ).flatMap(to: Void.self) {
+                return try model.willCreate(on: conn)
+            }.flatMap(to: Void.self) {
+                return self.execute()
+            }.flatMap(to: Void.self) {
+                return Model.Database.modelEvent(event: .didCreate, model: model, on: conn)
+            }.flatMap(to: Void.self) {
+                return try model.didCreate(on: conn)
+            }
         }
     }
 
@@ -59,7 +48,10 @@ extension QueryBuilder {
             self.query.data = model
 
             guard let id = model.fluentID else {
-                throw FluentError(identifier: "missing-id", reason: "No ID was set on updated model, it is required for updating.")
+                throw FluentError(
+                    identifier: "idRequired",
+                    reason: "No ID was set on updated model, it is required for updating."
+                )
             }
 
             // update record w/ matching id
@@ -71,15 +63,17 @@ extension QueryBuilder {
                 timestampable.updatedAt = Date()
             }
 
-
-            return try model
-                .willUpdate(on: conn)
-                .flatMap(to: Void.self) {
-                    self.execute()
-                }
-                .flatMap(to: Void.self) {
-                    try model.didUpdate(on: conn)
-                }
+            return Model.Database.modelEvent(
+                event: .willUpdate, model: model,on: conn
+            ).flatMap(to: Void.self) {
+                return try model.willUpdate(on: conn)
+            }.flatMap(to: Void.self) {
+                return self.execute()
+            }.flatMap(to: Void.self) {
+                return Model.Database.modelEvent(event: .didUpdate, model: model, on: conn)
+            }.flatMap(to: Void.self) {
+                return try model.didUpdate(on: conn)
+            }
         }
     }
 
@@ -103,16 +97,26 @@ extension QueryBuilder {
     /// note: does NOT respect soft deletable.
     internal func _delete(_ model: Model) -> Future<Void> {
         return connection.flatMap(to: Void.self) { conn in
-            return try model.willDelete(on: conn).flatMap(to: Void.self) {
-                guard let id = model.fluentID else {
-                    throw FluentError(identifier: "missing-id", reason: "Model does not have an identifier, it is necessary for removing it")
-                }
+            guard let id = model.fluentID else {
+                throw FluentError(
+                    identifier: "idRequired",
+                    reason: "No ID was set on updated model, it is required for updating."
+                )
+            }
 
-                try self.filter(Model.idKey == id)
-                self.query.action = .delete
-                return self.execute().flatMap(to: Void.self) {
-                    try model.didDelete(on: conn)
-                }
+            try self.filter(Model.idKey == id)
+            self.query.action = .delete
+
+            return Model.Database.modelEvent(
+                event: .willDelete, model: model,on: conn
+            ).flatMap(to: Void.self) {
+                return try model.willDelete(on: conn)
+            }.flatMap(to: Void.self) {
+                return self.execute()
+            }.flatMap(to: Void.self) {
+                return Model.Database.modelEvent(event: .didDelete, model: model, on: conn)
+            }.flatMap(to: Void.self) {
+                return try model.didDelete(on: conn)
             }
         }
     }
