@@ -135,7 +135,7 @@ extension EphemeralContainer {
             }
 
             /// set the active connection so it is returned next time
-            active.connection = active
+            active.connection = conn
 
             return conn
         }

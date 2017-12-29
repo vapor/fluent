@@ -26,13 +26,19 @@ public final class FluentProvider: Provider {
             return Databases(storage: databases)
         }
 
-        services.register { worker -> ConnectionPoolCache in
+        services.register(isSingleton: true) { worker -> ConnectionPoolCache in
+            let container: Container
+            if let sub = worker as? SubContainer {
+                container = sub.superContainer
+            } else {
+                container = worker
+            }
             return try ConnectionPoolCache(
                 databases: worker.make(for: ConnectionPoolCache.self),
-                on: worker
+                on: container
             )
         }
-        services.register { worker -> ActiveConnectionCache in
+        services.register(isSingleton: true) { worker -> ActiveConnectionCache in
             return ActiveConnectionCache()
         }
     }
