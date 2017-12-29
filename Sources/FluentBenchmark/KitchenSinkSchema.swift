@@ -21,8 +21,8 @@ internal struct KitchenSinkSchema<D>: Migration where D: QuerySupporting & Schem
     typealias Database = D
 
     /// See Migration.prepare
-    static func prepare(on connection: D.Connection) -> Future<Void> {
-        return connection.create(KitchenSink<Database>.self) { builder in
+    static func prepare(on conn: D.Connection) -> Future<Void> {
+        return Database.create(KitchenSink<Database>.self, on: conn) { builder in
             try builder.addField(
                 type: Database.fieldType(for: UUID.self),
                 name: "id"
@@ -47,7 +47,7 @@ internal struct KitchenSinkSchema<D>: Migration where D: QuerySupporting & Schem
     }
 
     /// See Migration.revert
-    static func revert(on connection: D.Connection) -> Future<Void> {
-        return connection.delete(KitchenSink<Database>.self)
+    static func revert(on conn: D.Connection) -> Future<Void> {
+        return Database.delete(KitchenSink<Database>.self, on: conn)
     }
 }

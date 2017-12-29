@@ -15,7 +15,7 @@ extension Benchmarker where Database: QuerySupporting {
 
         return message.save(on: conn).map(to: Void.self) {
             let test = LogMessage<Database>(message: "test")
-            try conn.setID(on: test)
+            try Database.setID(on: test, for: conn)
             if test.id != message.id {
                 throw FluentBenchmarkError(
                     identifier: "model-autoincrement-mismatch",

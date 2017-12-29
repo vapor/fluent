@@ -29,7 +29,7 @@ public final class QueryResultStream<Model, Database>: Async.Stream
     internal init(query: DatabaseQuery, on connection: Future<Database.Connection>) {
         connection.do { connection in
             self.connection = connection
-            connection.execute(query: query, into: self)
+            Database.execute(query: query, into: self, on: connection)
         }.catch { error in
             self.error(error)
             self.close()

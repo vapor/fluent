@@ -1,19 +1,18 @@
 import Async
 
 /// Capable of executing a database transaction.
-public protocol TransactionExecuting: DatabaseConnection {
+public protocol TransactionSupporting: Database {
     /// Executes the supplied transaction on the db connection.
-    func execute(transaction: DatabaseTransaction<Self>) -> Future<Void>
+    static func execute(transaction: DatabaseTransaction<Self>, on connection: Connection) -> Future<Void>
 }
 
-public protocol TransactionSupporting: Database where Connection: TransactionExecuting { }
-
-extension TransactionExecuting {
+extension TransactionSupporting {
     /// Convenience for executing a database transaction closure.
-    public func transaction(
+    public static func transaction(
+        on connection: Connection,
         _ closure: @escaping DatabaseTransaction<Self>.Closure
     ) -> Future<Void> {
-        let transaction = DatabaseTransaction(closure: closure)
-        return execute(transaction: transaction)
+        let transaction = DatabaseTransaction<Self>(closure: closure)
+        return execute(transaction: transaction, on: connection)
     }
 }

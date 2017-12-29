@@ -11,7 +11,7 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
         let promise = Promise<Void>()
         
         tanner.save(on: conn).flatMap(to: Void.self) {
-            return conn.transaction { conn in
+            return Database.transaction(on: conn) { conn in
                 var future = Future<Void>(())
                 
                 /// create 100 users

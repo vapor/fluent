@@ -73,7 +73,7 @@ internal struct PetMigration<D>: Migration
 
     /// See Migration.prepare
     static func prepare(on connection: Database.Connection) -> Future<Void> {
-        return connection.create(Pet<Database>.self) { builder in
+        return Database.create(Pet<Database>.self, on: connection) { builder in
             try builder.field(for: \Pet<Database>.id)
             try builder.field(for: \Pet<Database>.name)
             try builder.field(for: \Pet<Database>.ownerID, referencing: \User<Database>.id)
@@ -82,7 +82,7 @@ internal struct PetMigration<D>: Migration
 
     /// See Migration.revert
     static func revert(on connection: Database.Connection) -> Future<Void> {
-        return connection.delete(Pet<Database>.self)
+        return Database.delete(Pet<Database>.self, on: connection)
     }
 }
 

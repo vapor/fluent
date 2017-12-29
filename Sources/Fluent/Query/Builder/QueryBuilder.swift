@@ -73,6 +73,6 @@ extension Model where Database: QuerySupporting {
             return
         }
 
-        try conn.setID(on: self)
+        try Database.setID(on: self, for: conn)
     }
 }

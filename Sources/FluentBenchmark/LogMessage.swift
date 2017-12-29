@@ -39,7 +39,7 @@ internal struct LogMessageMigration<D>: Migration where D: QuerySupporting & Sch
     typealias Database = D
 
     static func prepare(on connection: D.Connection) -> Future<Void> {
-        return connection.create(LogMessage<D>.self) { builder in
+        return Database.create(LogMessage<D>.self, on: connection) { builder in
             try builder.field(for: \LogMessage<Database>.id)
 
             try builder.field(for: \LogMessage<Database>.message)
@@ -47,6 +47,6 @@ internal struct LogMessageMigration<D>: Migration where D: QuerySupporting & Sch
     }
 
     static func revert(on connection: D.Connection) -> Future<Void> {
-        return connection.delete(LogMessage<Database>.self)
+        return Database.delete(LogMessage<Database>.self, on: connection)
     }
 }

@@ -52,7 +52,7 @@ internal struct PetToyMigration<D>: Migration where D: QuerySupporting & SchemaS
 
     /// See Migration.prepare
     static func prepare(on connection: Database.Connection) -> Future<Void> {
-        return connection.create(PetToy<Database>.self) { builder in
+        return Database.create(PetToy<Database>.self, on: connection) { builder in
             try builder.field(for: \PetToy<Database>.id)
             try builder.field(for: \PetToy<Database>.petID)
             try builder.field(for: \PetToy<Database>.toyID)
@@ -61,6 +61,6 @@ internal struct PetToyMigration<D>: Migration where D: QuerySupporting & SchemaS
 
     /// See Migration.revert
     static func revert(on connection: Database.Connection) -> Future<Void> {
-        return connection.delete(PetToy<Database>.self)
+        return Database.delete(PetToy<Database>.self, on: connection)
     }
 }
