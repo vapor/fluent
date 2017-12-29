@@ -6,15 +6,6 @@ import SQLite
 import SQL
 
 extension SQLiteDatabase: QuerySupporting {
-    /// See QuerySupporting.idType
-    public static func idType<T>(for type: T.Type) -> IDType where T: Fluent.ID {
-        switch id(type) {
-        case id(Int.self): return .driver
-        case id(UUID.self): return .fluent
-        default: return .user
-        }
-    }
-
     /// See QuerySupporting.execute
     public static func execute<I, D>(
         query: DatabaseQuery<SQLiteDatabase>,
@@ -78,9 +69,27 @@ extension SQLiteDatabase: QuerySupporting {
         }
     }
 
-    /// See QuerySupporting.setID
-    public static func setID<M>(on model: M, for connection: SQLiteConnection) throws where M : Model {
-        model[keyPath: M.idKey] = connection.lastAutoincrementID as? M.ID
+    /// See QuerySupporting.modelEvent
+    public static func modelEvent<M>(
+        event: ModelEvent,
+        model: M,
+        on connection: SQLiteConnection
+    ) -> Future<Void> where SQLiteDatabase == M.Database, M: Model {
+        switch event {
+        case .willCreate:
+            switch id(M.ID.self) {
+            case id(UUID.self): model.fluentID = UUID() as? M.ID
+            default: break
+            }
+        case .didCreate:
+            switch id(M.ID.self) {
+            case id(Int.self): model.fluentID = connection.lastAutoincrementID as? M.ID
+            default: break
+            }
+        default: break
+        }
+
+        return .done
     }
 }
 

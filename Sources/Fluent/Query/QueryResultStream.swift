@@ -11,7 +11,7 @@ public final class QueryResultStream<Model, Database>: Async.Stream
     public typealias Output = Model
 
     /// Maps output
-    typealias OutputMap = (Model, Database.Connection) throws -> (Model)
+    typealias OutputMap = (Model, Database.Connection) throws -> (Future<Model>)
 
     /// Use to transform output before it is delivered
     internal var outputMap: OutputMap?
@@ -49,7 +49,7 @@ public final class QueryResultStream<Model, Database>: Async.Stream
             if let map = outputMap, let conn = connection {
                 do {
                     let mapped = try map(input, conn)
-                    downstream?.next(mapped)
+                    mapped.stream(to: downstream!)
                 } catch {
                     downstream?.error(error)
                 }

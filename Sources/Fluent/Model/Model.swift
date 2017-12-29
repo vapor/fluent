@@ -33,6 +33,14 @@ public protocol Model: AnyModel, ContainerFindable {
     /// Called after the model is created when saving.
     func didCreate(on connection: Database.Connection) throws -> Future<Void>
 
+    /// Called before a model is fetched.
+    /// Throwing will cancel the fetch.
+    // not possible, since model not yet loaded
+    // func willRead(on connection: Database.Connection)  throws -> Future<Void>
+
+    /// Called after the model is fetched.
+    func didRead(on connection: Database.Connection) throws -> Future<Void>
+
     /// Called before a model is updated when saving.
     /// Throwing will cancel the save.
     func willUpdate(on connection: Database.Connection) throws -> Future<Void>
@@ -86,7 +94,7 @@ extension Model where Database: QuerySupporting {
 
 extension Model {
     /// Access the fluent identifier
-    internal var fluentID: ID? {
+    public var fluentID: ID? {
         get { return self[keyPath: Self.idKey] }
         set { self[keyPath: Self.idKey] = newValue }
     }
@@ -114,6 +122,12 @@ extension Model {
     public func willCreate(on connection: Database.Connection) throws -> Future<Void> { return .done }
     /// See Model.didCreate()
     public func didCreate(on connection: Database.Connection) throws -> Future<Void> { return .done }
+
+    /// Seee Model.willRead()
+    // public func willRead(on connection: Database.Connection) throws -> Future<Void> { return .done }
+    
+    /// See Model.didRead()
+    public func didRead(on connection: Database.Connection) throws -> Future<Void> { return .done }
 
     /// See Model.willUpdate()
     public func willUpdate(on connection: Database.Connection) throws -> Future<Void> { return .done }

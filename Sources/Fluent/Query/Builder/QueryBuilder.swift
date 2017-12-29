@@ -57,12 +57,14 @@ public final class QueryBuilder<Model> where Model: Fluent.Model, Model.Database
         let stream = self.run(decoding: Model.self)
 
         stream.outputMap = { output, conn in
-            switch self.query.action {
-            case .create:
-                try output.parseID(from: conn)
-            default: break
+            return Model.Database.modelEvent(
+                event: .didRead, model: output, on: conn
+            ).flatMap(to: Void.self) {
+                return try output.didRead(on: conn)
+            }.map(to: Model.self) {
+                return output
             }
-            return output
+
         }
 
         return stream
@@ -71,17 +73,5 @@ public final class QueryBuilder<Model> where Model: Fluent.Model, Model.Database
     // Create a new query build w/ same connection.
     internal func copy() -> QueryBuilder<Model> {
         return QueryBuilder(on: connection)
-    }
-}
-
-extension Model where Database: QuerySupporting {
-    /// Sets the model's id from the connection if it is
-    /// of type autoincrementing
-    internal func parseID(from conn: Database.Connection) throws {
-        guard fluentID == nil, case .driver = Database.idType(for: ID.self) else {
-            return
-        }
-
-        try Database.setID(on: self, for: conn)
     }
 }

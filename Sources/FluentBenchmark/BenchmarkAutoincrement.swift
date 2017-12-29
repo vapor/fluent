@@ -13,9 +13,10 @@ extension Benchmarker where Database: QuerySupporting {
             fail("message ID was incorrectly set")
         }
 
-        return message.save(on: conn).map(to: Void.self) {
-            let test = LogMessage<Database>(message: "test")
-            try Database.setID(on: test, for: conn)
+        let test = LogMessage<Database>(message: "test")
+        return message.save(on: conn).flatMap(to: Void.self) {
+            return Database.modelEvent(event: .didCreate, model: test, on: conn)
+        }.map(to: Void.self) {
             if test.id != message.id {
                 throw FluentBenchmarkError(
                     identifier: "model-autoincrement-mismatch",
