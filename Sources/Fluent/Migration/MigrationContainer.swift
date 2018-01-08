@@ -52,7 +52,7 @@ internal struct MigrationContainer<D> where D: QuerySupporting {
             if hasPrepared {
                 return self.revert(connection).flatMap(to: Void.self) { _ in 
                     // delete the migration log
-                    return try QueryBuilder(
+                    return QueryBuilder(
                         MigrationLog<Database>.self,
                         on: Future(connection)
                     )
@@ -67,11 +67,9 @@ internal struct MigrationContainer<D> where D: QuerySupporting {
 
     /// returns true if the migration has already been prepared.
     internal func hasPrepared(on connection: Database.Connection) -> Future<Bool> {
-        return Future {
-            return try QueryBuilder(MigrationLog<Database>.self, on: Future(connection))
-                .filter(\MigrationLog<Database>.name == self.name)
-                .first()
-                .map(to: Bool.self) { $0 != nil }
-        }
+        return QueryBuilder(MigrationLog<Database>.self, on: Future(connection))
+            .filter(\MigrationLog<Database>.name == self.name)
+            .first()
+            .map(to: Bool.self) { $0 != nil }
     }
 }

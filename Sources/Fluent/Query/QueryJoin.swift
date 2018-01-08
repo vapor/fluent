@@ -84,8 +84,8 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: ReferenceWritableKeyPath<Joined, Model.ID>,
         to baseKey: ReferenceWritableKeyPath<Model, Model.ID?> = Model.idKey,
         method: QueryJoinMethod = .inner
-    ) throws -> Self {
-        let join = try QueryJoin(
+    ) -> Self {
+        let join = QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),
             joined: joinedKey.makeQueryField()
@@ -99,8 +99,8 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: ReferenceWritableKeyPath<Joined, Joined.ID?>,
         to baseKey: ReferenceWritableKeyPath<Model, Joined.ID>,
         method: QueryJoinMethod = .inner
-    ) throws -> Self {
-        let join = try QueryJoin(
+    ) -> Self {
+        let join = QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),
             joined: joinedKey.makeQueryField()
@@ -122,9 +122,9 @@ extension QueryBuilder {
 }
 
 /// Model.field == value
-public func == <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> QueryFilterMethod<Model.Database>
+public func == <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) -> QueryFilterMethod<Model.Database>
     where Model: Fluent.Model, Value: Encodable & Equatable
 {
-    return try .compare(lhs.makeQueryField(), .equality(.equals), .value(rhs))
+    return .compare(lhs.makeQueryField(), .equality(.equals), .value(rhs))
 }
 

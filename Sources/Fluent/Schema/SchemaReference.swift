@@ -56,11 +56,9 @@ extension SchemaBuilder where Model.Database: ReferenceSupporting {
     public func field<T, Other>(
         for key: KeyPath<Model, T>,
         referencing: KeyPath<Other, T>
-    ) throws
-        where Other: Fluent.Model
-    {
+    ) throws where Other: Fluent.Model {
         let base = try field(for: key)
-        let reference = try SchemaReference(base: base, referenced: referencing.makeQueryField())
+        let reference = SchemaReference(base: base, referenced: referencing.makeQueryField())
         schema.addReferences.append(reference)
     }
 
@@ -69,11 +67,9 @@ extension SchemaBuilder where Model.Database: ReferenceSupporting {
     public func field<T, Other>(
         for key: KeyPath<Model, T>,
         referencing: KeyPath<Other, Optional<T>>
-    ) throws
-        where Other: Fluent.Model
-    {
+    ) throws where Other: Fluent.Model {
         let base = try field(for: key)
-        let reference = try SchemaReference(base: base, referenced: referencing.makeQueryField())
+        let reference = SchemaReference(base: base, referenced: referencing.makeQueryField())
         schema.addReferences.append(reference)
     }
 
@@ -82,11 +78,9 @@ extension SchemaBuilder where Model.Database: ReferenceSupporting {
     public func field<T, Other>(
         for key: KeyPath<Model, Optional<T>>,
         referencing: KeyPath<Other, T>
-    ) throws
-        where Other: Fluent.Model
-    {
+    ) throws where Other: Fluent.Model {
         let base = try field(for: key)
-        let reference = try SchemaReference(base: base, referenced: referencing.makeQueryField())
+        let reference = SchemaReference(base: base, referenced: referencing.makeQueryField())
         schema.addReferences.append(reference)
     }
 
@@ -95,11 +89,9 @@ extension SchemaBuilder where Model.Database: ReferenceSupporting {
     public func field<T, Other>(
         for key: KeyPath<Model, Optional<T>>,
         referencing: KeyPath<Other, Optional<T>>
-    ) throws
-        where Other: Fluent.Model
-    {
+    ) throws where Other: Fluent.Model {
         let base = try field(for: key)
-        let reference = try SchemaReference<Model.Database>(base: base, referenced: referencing.makeQueryField())
+        let reference = SchemaReference<Model.Database>(base: base, referenced: referencing.makeQueryField())
         schema.addReferences.append(reference)
     }
 
@@ -108,11 +100,9 @@ extension SchemaBuilder where Model.Database: ReferenceSupporting {
     public func remove<T, Other>(
         for key: KeyPath<Model, Optional<T>>,
         referencing: KeyPath<Other, Optional<T>>
-    ) throws
-        where Other: Fluent.Model
-    {
+    ) throws where Other: Fluent.Model {
         let base = try field(for: key)
-        let reference = try SchemaReference<Model.Database>(base: base, referenced: referencing.makeQueryField())
+        let reference = SchemaReference<Model.Database>(base: base, referenced: referencing.makeQueryField())
         schema.addReferences.append(reference)
     }
 
@@ -121,16 +111,16 @@ extension SchemaBuilder where Model.Database: ReferenceSupporting {
         for field: ReferenceWritableKeyPath<Model, T>,
         referencing: KeyPath<Other, Optional<T>>
     ) throws where Other: Fluent.Model {
-        try removeField(for: field)
-        try removeReference(from: field, to: referencing)
+        removeField(for: field)
+        removeReference(from: field, to: referencing)
     }
 
     /// Adds a field to the schema.
     public func removeReference<T, Other>(
         from field: ReferenceWritableKeyPath<Model, T>,
         to referencing: KeyPath<Other, Optional<T>>
-    ) throws where Other: Fluent.Model {
-        let reference = try SchemaReference<Model.Database>(
+    ) where Other: Fluent.Model {
+        let reference = SchemaReference<Model.Database>(
             base: field.makeQueryField(),
             referenced: referencing.makeQueryField()
         )

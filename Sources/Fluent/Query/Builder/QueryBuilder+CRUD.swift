@@ -55,7 +55,7 @@ extension QueryBuilder {
             }
 
             // update record w/ matching id
-            try self.filter(Model.idKey == id)
+            self.filter(Model.idKey == id)
             self.query.action = .update
 
             // update timestamps if required
@@ -104,7 +104,7 @@ extension QueryBuilder {
                 )
             }
 
-            try self.filter(Model.idKey == id)
+            self.filter(Model.idKey == id)
             self.query.action = .delete
 
             return Model.Database.modelEvent(

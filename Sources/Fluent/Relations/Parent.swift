@@ -28,22 +28,18 @@ public struct Parent<Child: Model, Parent: Model>
 
 extension Parent where Child.Database: QuerySupporting {
     /// Create a query for the parent.
-    public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Parent> {
-        return try Parent.query(on: conn)
+    public func query(on conn: DatabaseConnectable) -> QueryBuilder<Parent> {
+        return Parent.query(on: conn)
             .filter(Parent.idKey == child[keyPath: parentForeignIDKey])
     }
 
     /// Convenience for getting the parent.
-    public func get(
-        on conn: DatabaseConnectable
-        ) -> Future<Parent> {
-        return Future {
-            try self.query(on: conn).first().map(to: Parent.self) { first in
-                guard let parent = first else {
-                    throw FluentError(identifier: "parent-not-found", reason: "This parent relationship could not be resolved")
-                }
-                return parent
+    public func get(on conn: DatabaseConnectable) -> Future<Parent> {
+        return self.query(on: conn).first().map(to: Parent.self) { first in
+            guard let parent = first else {
+                throw FluentError(identifier: "parent-not-found", reason: "This parent relationship could not be resolved")
             }
+            return parent
         }
     }
 }

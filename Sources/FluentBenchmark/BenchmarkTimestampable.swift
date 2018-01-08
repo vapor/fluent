@@ -31,7 +31,7 @@ extension Benchmarker where Database: QuerySupporting {
                 self.fail("new updated at should be greater")
             }
             
-            return try conn.query(User<Database>.self).filter(\User<Database>.name == "Tanner").first()
+            return conn.query(User<Database>.self).filter(\User<Database>.name == "Tanner").first()
         }.map(to: Void.self) { fetched in
             guard let fetched = fetched else {
                 self.fail("could not fetch user")

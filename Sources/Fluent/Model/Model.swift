@@ -187,11 +187,9 @@ extension Model where Database: QuerySupporting {
     /// Attempts to find an instance of this model w/
     /// the supplied identifier.
     public static func find(_ id: Self.ID, on conn: DatabaseConnectable) -> Future<Self?> {
-        return Future {
-            return try query(on: conn)
-                .filter(idKey == id)
-                .first()
-        }
+        return query(on: conn)
+            .filter(idKey == id)
+            .first()
     }
 }
 

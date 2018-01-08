@@ -21,8 +21,8 @@ extension QueryBuilder {
     public func filter<T>(
         _ field: ReferenceWritableKeyPath<Model, T>,
         in values: [Encodable?]
-    ) throws -> Self {
-        let filter = try QueryFilter<Model.Database>(
+    ) -> Self {
+        let filter = QueryFilter<Model.Database>(
             entity: Model.entity,
             method: .subset(field.makeQueryField(), .in, .array(values))
         )
@@ -34,8 +34,8 @@ extension QueryBuilder {
     public func filter<T>(
         _ field: ReferenceWritableKeyPath<Model, T>,
         notIn values: [Encodable?]
-    ) throws -> Self {
-        let filter = try QueryFilter<Model.Database>(
+    ) -> Self {
+        let filter = QueryFilter<Model.Database>(
             entity: Model.entity,
             method: .subset(field.makeQueryField(), .notIn, .array(values))
         )

@@ -31,8 +31,8 @@ extension QueryBuilder {
     public func sort<T>(
         _ field: ReferenceWritableKeyPath<Model, T>,
         _ direction: QuerySortDirection
-    ) throws -> Self {
-        let sort = try QuerySort(
+    ) -> Self {
+        let sort = QuerySort(
             field: field.makeQueryField(),
             direction: direction
         )

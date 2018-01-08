@@ -15,16 +15,11 @@ public struct QueryField {
     }
 }
 
-///// Representable as a Query Field
-//public protocol QueryFieldRepresentable {
-//    func makeQueryField() throws -> QueryField
-//}
-
 /// Conform key path's where the root is a model.
 /// FIXME: conditional conformance
 extension KeyPath where Root: Model {
     /// See QueryFieldRepresentable.makeQueryField()
-    public func makeQueryField() throws -> QueryField {
+    public func makeQueryField() -> QueryField {
         let key = Root.unsafeCodingPath(forKey: self)
         return QueryField(entity: Root.entity, name: key[0].stringValue)
     }
@@ -99,7 +94,7 @@ public struct QueryFieldDecodingContainer<Model: Fluent.Model> {
     
     /// Decodes a model key path to a type.
     public func decode<T: Decodable>(key: KeyPath<Model, T>) throws -> T {
-        let field = try key.makeQueryField()
+        let field = key.makeQueryField()
         return try container.decode(T.self, forKey: field)
     }
 }
@@ -114,7 +109,7 @@ public struct QueryFieldEncodingContainer<Model: Fluent.Model> {
 
     /// Encodes a model key path to the encoder.
     public mutating func encode<T: Encodable>(key: KeyPath<Model, T>) throws {
-        let field = try key.makeQueryField()
+        let field = key.makeQueryField()
         let value: T = model[keyPath: key]
         try container.encode(value, forKey: field)
     }

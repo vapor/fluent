@@ -51,10 +51,8 @@ extension QueryBuilder {
         field: ReferenceWritableKeyPath<Model, T>,
         as type: D.Type = D.self
     ) -> Future<D> where D: Decodable {
-        return Future {
-            let aggregate = try QueryAggregate(field: field.makeQueryField(), method: method)
-            return self.aggregate(aggregate)
-        }
+        let aggregate = QueryAggregate(field: field.makeQueryField(), method: method)
+        return self.aggregate(aggregate)
     }
 
     /// Performs the supplied aggregate struct.
