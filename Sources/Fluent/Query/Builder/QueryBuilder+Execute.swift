@@ -7,7 +7,10 @@ extension QueryBuilder {
     /// The resulting array or an error will be resolved
     /// in the returned future.
     public func all() -> Future<[Model]> {
-        return run().all()
+        let stream = run()
+        let models = stream.all()
+        stream.execute()
+        return models
     }
 
     /// Returns a future with the first result of the query.
@@ -26,7 +29,9 @@ extension QueryBuilder {
     public func execute() -> Future<Void> {
         let promise = Promise(Void.self)
 
-        run().drain { req in
+        let stream = run()
+
+        stream.drain { req in
             /// request fire hose
             req.request(count: .max)
         }.output { model in
@@ -37,6 +42,8 @@ extension QueryBuilder {
             promise.complete()
         }
 
+        stream.execute()
+        
         return promise.future
     }
 }
@@ -65,8 +72,10 @@ extension QueryBuilder {
 
         let promise = Promise(Void.self)
 
+        let stream = run(decoding: T.self)
+
         // drain the stream of results
-        run(decoding: T.self).drain { upstream in
+        stream.drain { upstream in
             upstream.request(count: .max)
         }.output { row in
             partial.append(row)
@@ -86,6 +95,8 @@ extension QueryBuilder {
             }
             promise.complete()
         }
+
+        stream.execute()
 
         return promise.future
     }
