@@ -67,7 +67,9 @@ extension QueryBuilder {
         
         var result: D? = nil
 
-        run(decoding: AggregateResult<D>.self).drain { upstream in
+        let stream = run(decoding: AggregateResult<D>.self)
+
+        stream.drain { upstream in
             upstream.request(count: .max)
         }.output { res in
             result = res.fluentAggregate
@@ -80,6 +82,8 @@ extension QueryBuilder {
                 promise.fail(FluentError(identifier: "driver-error", reason: "The driver closed successfully without a result"))
             }
         }
+
+        stream.execute()
 
         return promise.future
     }

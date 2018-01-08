@@ -30,12 +30,10 @@ public final class SQLiteResults {
     /// background thread.
     public func fetchRow() -> Future<SQLiteRow?> {
         let promise = Promise(SQLiteRow?.self)
-        connection.eventLoop.async {
-            do {
-                try promise.complete(self.blockingFetchRow())
-            } catch {
-                promise.fail(error)
-            }
+        do {
+            try promise.complete(self.blockingFetchRow())
+        } catch {
+            promise.fail(error)
         }
         return promise.future
     }

@@ -70,7 +70,7 @@ public final class QueryBuilder<Model> where Model: Fluent.Model, Model.Database
         return stream
     }
 
-    // Create a new query build w/ same connection.
+    // Create a new query build with the same connection.
     internal func copy() -> QueryBuilder<Model> {
         return QueryBuilder(on: connection)
     }

@@ -23,19 +23,21 @@ public final class QueryResultStream<Model, Database>: Async.Stream
     private var upstream: ConnectionContext?
 
     /// Pointer to the connection
-    private var connection: Database.Connection?
+    private var connection: Future<Database.Connection>
+
+    /// Pointer to the current connection
+    private var currentConnection: Database.Connection?
+
+    /// The query to run
+    private var query: DatabaseQuery<Database>
 
     /// Use `SQLiteResults.stream()` to create a `SQLiteResultStream`
     internal init(query: DatabaseQuery<Database>, on connection: Future<Database.Connection>) {
-        connection.do { connection in
-            self.connection = connection
-            Database.execute(query: query, into: self, on: connection)
-        }.catch { error in
-            self.error(error)
-            self.close()
-        }
+        self.query = query
+        self.connection = connection
     }
 
+    /// See InputStream.input
     public func input(_ event: InputEvent<Model>) {
         switch event {
         case .close:
@@ -46,9 +48,9 @@ public final class QueryResultStream<Model, Database>: Async.Stream
             downstream?.connect(to: upstream)
         case .error(let error): downstream?.error(error)
         case .next(let input):
-            if let map = outputMap, let conn = connection {
+            if let map = outputMap {
                 do {
-                    let mapped = try map(input, conn)
+                    let mapped = try map(input, currentConnection!) // if conn is nil, something is wrong
                     mapped.stream(to: downstream!)
                 } catch {
                     downstream?.error(error)
@@ -64,6 +66,17 @@ public final class QueryResultStream<Model, Database>: Async.Stream
         downstream = AnyInputStream(inputStream)
         /// act as a passthrough stream
         upstream.flatMap(inputStream.connect)
+    }
+
+    /// Executes the stream
+    internal func execute() {
+        connection.do { conn in
+            self.currentConnection = conn
+            Database.execute(query: self.query, into: self, on: conn)
+        }.catch { error in
+            self.error(error)
+            self.close()
+        }
     }
 }
 
