@@ -2,7 +2,7 @@ import Async
 import Service
 
 /// Helper struct for configuring Fluent migrations.
-public struct MigrationConfig {
+public struct MigrationConfig: Service {
     /// Internal storage.
     internal var storage: [String: MigrationRunnable]
 
