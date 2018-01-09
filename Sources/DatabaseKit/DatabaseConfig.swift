@@ -1,14 +1,16 @@
 import Async
 import Service
 
-/// Helper struct for configuring Fluent databases.
+/// Helper struct for configuring databases.
 public struct DatabaseConfig {
     /// Lazy closure for initializing a database.
     public typealias LazyDatabase<D: Database> = (Container) throws -> D
 
-    /// Internal storage.
-    internal var databases: [String: (Container) throws -> Any]
-    internal var logging: [String: DatabaseLogger]
+    /// The configured databases.
+    public var databases: [String: (Container) throws -> Any]
+
+    /// The configured database loggers.
+    public var logging: [String: DatabaseLogger]
 
     /// Create a new database config helper.
     public init() {

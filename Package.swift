@@ -4,6 +4,7 @@ import PackageDescription
 let package = Package(
     name: "Fluent",
     products: [
+        .library(name: "DatabaseKit", targets: ["DatabaseKit"]),
         .library(name: "Fluent", targets: ["Fluent"]),
         .library(name: "FluentBenchmark", targets: ["FluentBenchmark"]),
         .library(name: "FluentSQL", targets: ["FluentSQL"]),
@@ -23,7 +24,8 @@ let package = Package(
     ],
     targets: [
         .target(name: "CSQLite"),
-        .target(name: "Fluent", dependencies: ["Async", "CodableKit", "Service"]),
+        .target(name: "DatabaseKit", dependencies: ["Async", "Service"]),
+        .target(name: "Fluent", dependencies: ["Async", "CodableKit", "DatabaseKit", "Service"]),
         .testTarget(name: "FluentTests", dependencies: ["FluentBenchmark", "FluentSQLite", "SQLite"]),
         .target(name: "FluentBenchmark", dependencies: ["Fluent"]),
         .target(name: "FluentSQL", dependencies: ["Fluent", "SQL"]),

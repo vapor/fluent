@@ -12,35 +12,7 @@ public final class FluentProvider: Provider {
 
     /// See Provider.register()
     public func register(_ services: inout Services) throws {
-        services.register { container -> Databases in
-            let config = try container.make(DatabaseConfig.self, for: FluentProvider.self)
-            var databases: [String: Any] = [:]
-            for (id, lazyDatabase) in config.databases {
-                let db = try lazyDatabase(container)
-                if let supports = db as? LogSupporting, let logger = config.logging[id] {
-                    logger.dbID = id
-                    supports.enableLogging(using: logger)
-                }
-                databases[id] = db
-            }
-            return Databases(storage: databases)
-        }
-
-        services.register(isSingleton: true) { worker -> ConnectionPoolCache in
-            let container: Container
-            if let sub = worker as? SubContainer {
-                container = sub.superContainer
-            } else {
-                container = worker
-            }
-            return try ConnectionPoolCache(
-                databases: worker.make(for: ConnectionPoolCache.self),
-                on: container
-            )
-        }
-        services.register(isSingleton: true) { worker -> ActiveConnectionCache in
-            return ActiveConnectionCache()
-        }
+        try services.register(DatabaseKitProvider())
     }
 
     /// See Provider.boot()

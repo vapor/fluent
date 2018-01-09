@@ -21,7 +21,10 @@ extension DatabaseIdentifier {
 extension SQLiteDatabase: Database {
     public typealias Connection = SQLiteConnection
     
-    public func makeConnection(from config: SQLiteConfig, on worker: Worker) -> Future<SQLiteConnection> {
+    public func makeConnection(
+        using config: SQLiteConfig,
+        on worker: Worker
+    ) -> Future<SQLiteConnection> {
         return self.makeConnection(on: worker)
     }
 }
@@ -38,13 +41,9 @@ public struct SQLiteConfig {
 
 extension SQLiteConnection: DatabaseConnection {
     public typealias Config = SQLiteConfig
-
-    public func existingConnection<D>(to type: D.Type) -> D.Connection? where D: Database {
-        return self as? D.Connection
-    }
     
-    public func connect<D>(to database: DatabaseIdentifier<D>) -> Future<D.Connection> {
-        fatalError("Cannot call `.connect(to:)` on an existing connection. Call `.existingConnection` instead.")
+    public func connect<D>(to database: DatabaseIdentifier<D>?) -> Future<D.Connection> {
+        return Future(self as! D.Connection)
     }
 }
 

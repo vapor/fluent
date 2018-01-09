@@ -69,26 +69,12 @@ extension Model where Database: QuerySupporting {
     public func query(
         on conn: DatabaseConnectable
     ) -> QueryBuilder<Self> {
-        let conn = Future<Database.Connection> {
-            if let existing = conn.existingConnection(to: Self.Database.self) {
-                return Future(existing)
-            } else {
-                return try conn.connect(to: Self.requireDefaultDatabase())
-            }
-        }
-        return .init(on: conn)
+        return .init(on: conn.connect(to: Self.defaultDatabase))
     }
 
     /// Creates a query for this model on the supplied connection.
     public static func query(on conn: DatabaseConnectable) -> QueryBuilder<Self> {
-        let conn = Future<Database.Connection> {
-            if let existing = conn.existingConnection(to: Self.Database.self) {
-                return Future(existing)
-            } else {
-                return try conn.connect(to: Self.requireDefaultDatabase())
-            }
-        }
-        return .init(on: conn)
+        return .init(on: conn.connect(to: Self.defaultDatabase))
     }
 }
 

@@ -19,14 +19,17 @@ internal struct SchemaMigrationConfig<Database>: MigrationRunnable where Databas
     /// See MigrationRunnable.migrate
     internal func migrate(using databases: Databases, using container: Container) -> Future<Void> {
         return Future {
-            guard let database = databases.storage[self.database.uid] as? Database else {
+            guard let database = databases.database(for: self.database) else {
                 throw FluentError(
                     identifier: "no-migration-database",
                     reason: "no database \(self.database.uid) was found for migrations"
                 )
             }
 
-            return try database.makeConnection(from: container.make(for: Database.Connection.self), on: container).flatMap(to: Void.self) { conn in
+            return try database.makeConnection(
+                using: container.make(for: Database.Connection.self),
+                on: container
+            ).flatMap(to: Void.self) { conn in
                 self.prepareForMigration(on: conn)
             }
         }
