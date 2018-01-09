@@ -4,12 +4,10 @@ import PackageDescription
 let package = Package(
     name: "Fluent",
     products: [
-        .library(name: "DatabaseKit", targets: ["DatabaseKit"]),
         .library(name: "Fluent", targets: ["Fluent"]),
         .library(name: "FluentBenchmark", targets: ["FluentBenchmark"]),
         .library(name: "FluentSQL", targets: ["FluentSQL"]),
         .library(name: "FluentSQLite", targets: ["FluentSQLite"]),
-        .library(name: "SQL", targets: ["SQL"]),
         .library(name: "SQLite", targets: ["SQLite"]),
     ],
     dependencies: [
@@ -19,19 +17,19 @@ let package = Package(
         // Core extensions, type-aliases, and functions that facilitate common tasks.
         .package(url: "https://github.com/vapor/core.git", .branch("beta")),
 
+        // Core services for creating database integrations.
+        .package(url: "https://github.com/vapor/database-kit.git", .branch("beta")),
+
         // Service container and configuration system.
         .package(url: "https://github.com/vapor/service.git", .branch("beta")),
     ],
     targets: [
         .target(name: "CSQLite"),
-        .target(name: "DatabaseKit", dependencies: ["Async", "Service"]),
         .target(name: "Fluent", dependencies: ["Async", "CodableKit", "DatabaseKit", "Service"]),
         .testTarget(name: "FluentTests", dependencies: ["FluentBenchmark", "FluentSQLite", "SQLite"]),
         .target(name: "FluentBenchmark", dependencies: ["Fluent"]),
         .target(name: "FluentSQL", dependencies: ["Fluent", "SQL"]),
         .target(name: "FluentSQLite", dependencies: ["Fluent", "FluentSQL", "SQLite"]),
-        .target(name: "SQL"),
-        .testTarget(name: "SQLTests", dependencies: ["SQL"]),
         .target(name: "SQLite", dependencies: ["Bits", "CodableKit", "CSQLite", "Debugging"]),
         .testTarget(name: "SQLiteTests", dependencies: ["SQLite"]),
     ]

@@ -3,7 +3,6 @@
 import XCTest
 @testable import FluentTests
 @testable import SQLiteTests
-@testable import SQLTests
 
 XCTMain([
     // Fluent
@@ -11,10 +10,6 @@ XCTMain([
 
     // SQlite
     testCase(SQLiteTests.allTests),
-
-    // SQL
-    testCase(DataTests.allTests),
-    testCase(SchemaTests.allTests),
 ])
 
 #endif
