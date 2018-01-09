@@ -10,6 +10,9 @@ public final class SQLiteDatabase {
     /// If set, query logs will be sent to the supplied logger.
     public var logger: SQLiteLogger?
 
+    /// Used for in-memory DB.
+    private var cachedConnection: SQLiteConnection?
+
     /// Create a new SQLite database.
     public init(storage: SQLiteStorage) {
         self.storage = storage
@@ -45,21 +48,27 @@ public final class SQLiteDatabase {
                 promise.fail(error)
             }
         case .memory:
-            do {
-                let options = SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_FULLMUTEX
-                var raw: SQLiteConnection.Raw?
-                guard sqlite3_open_v2(":memory:", &raw, options, nil) == SQLITE_OK else {
-                    throw SQLiteError(problem: .error, reason: "Could not open database.")
-                }
+            /// must be FULL MUTEX to re-use between workers
+            if let cached = cachedConnection {
+                promise.complete(cached)
+            } else {
+                do {
+                    let options = SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_FULLMUTEX
+                    var raw: SQLiteConnection.Raw?
+                    guard sqlite3_open_v2(":memory:", &raw, options, nil) == SQLITE_OK else {
+                        throw SQLiteError(problem: .error, reason: "Could not open database.")
+                    }
 
-                guard let r = raw else {
-                    throw SQLiteError(problem: .error, reason: "Unexpected nil database.")
-                }
+                    guard let r = raw else {
+                        throw SQLiteError(problem: .error, reason: "Unexpected nil database.")
+                    }
 
-                let conn = SQLiteConnection(raw: r, database: self, on: worker)
-                promise.complete(conn)
-            } catch {
-                promise.fail(error)
+                    let conn = SQLiteConnection(raw: r, database: self, on: worker)
+                    cachedConnection = conn
+                    promise.complete(conn)
+                } catch {
+                    promise.fail(error)
+                }
             }
         }
         
