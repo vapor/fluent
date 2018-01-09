@@ -2,6 +2,7 @@ import Async
 import Debugging
 import Foundation
 import Fluent
+import Service
 import SQLite
 
 /// A SQLite database model.
@@ -18,7 +19,7 @@ extension DatabaseIdentifier {
     }
 }
 
-extension SQLiteDatabase: Database {
+extension SQLiteDatabase: Database, Service {
     public typealias Connection = SQLiteConnection
     
     public func makeConnection(
@@ -35,7 +36,7 @@ func id(_ type: Any.Type) -> ObjectIdentifier {
 
 extension SQLiteDatabase: JoinSupporting {}
 
-public struct SQLiteConfig {
+public struct SQLiteConfig: Service {
     public init() {}
 }
 
