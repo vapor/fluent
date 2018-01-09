@@ -7,10 +7,7 @@ import XCTest
 extension SQLiteConnection {
     static func makeTestConnection(queue: DispatchEventLoop) -> SQLiteConnection? {
         do {
-            let sqlite = SQLiteDatabase(
-                storage: .file(path: "/tmp/test_database.sqlite")
-            )
-            
+            let sqlite = SQLiteDatabase(storage: .memory)
             return try sqlite.makeConnection(on: queue).blockingAwait()
         } catch {
             XCTFail()

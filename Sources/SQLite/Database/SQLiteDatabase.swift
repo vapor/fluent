@@ -25,22 +25,44 @@ public final class SQLiteDatabase {
         on worker: Worker
     ) -> Future<SQLiteConnection> {
         let promise = Promise(SQLiteConnection.self)
-        do {
-            let options = SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX
-            var raw: SQLiteConnection.Raw?
-            guard sqlite3_open_v2(self.storage.path, &raw, options, nil) == SQLITE_OK else {
-                throw SQLiteError(problem: .error, reason: "Could not open database.")
-            }
 
-            guard let r = raw else {
-                throw SQLiteError(problem: .error, reason: "Unexpected nil database.")
-            }
+        switch storage {
+        case .file(let path):
+            do {
+                let options = SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX
+                var raw: SQLiteConnection.Raw?
+                guard sqlite3_open_v2(path, &raw, options, nil) == SQLITE_OK else {
+                    throw SQLiteError(problem: .error, reason: "Could not open database.")
+                }
 
-            let conn = SQLiteConnection(raw: r, database: self, on: worker)
-            promise.complete(conn)
-        } catch {
-            promise.fail(error)
+                guard let r = raw else {
+                    throw SQLiteError(problem: .error, reason: "Unexpected nil database.")
+                }
+
+                let conn = SQLiteConnection(raw: r, database: self, on: worker)
+                promise.complete(conn)
+            } catch {
+                promise.fail(error)
+            }
+        case .memory:
+            do {
+                let options = SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_FULLMUTEX
+                var raw: SQLiteConnection.Raw?
+                guard sqlite3_open_v2(":memory:", &raw, options, nil) == SQLITE_OK else {
+                    throw SQLiteError(problem: .error, reason: "Could not open database.")
+                }
+
+                guard let r = raw else {
+                    throw SQLiteError(problem: .error, reason: "Unexpected nil database.")
+                }
+
+                let conn = SQLiteConnection(raw: r, database: self, on: worker)
+                promise.complete(conn)
+            } catch {
+                promise.fail(error)
+            }
         }
+        
         return promise.future
     }
 }
