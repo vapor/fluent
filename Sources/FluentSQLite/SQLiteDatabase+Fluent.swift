@@ -4,6 +4,20 @@ import Foundation
 import Fluent
 import SQLite
 
+/// A SQLite database model.
+/// See `Fluent.Model`.
+public protocol SQLiteModel: Model where Database == SQLiteDatabase { }
+extension SQLiteModel {
+    public typealias Database = SQLiteDatabase
+}
+
+extension DatabaseIdentifier {
+    /// The main SQLite database identifier.
+    public static var sqlite: DatabaseIdentifier<SQLiteDatabase> {
+        return .init("sqlite")
+    }
+}
+
 extension SQLiteDatabase: Database {
     public typealias Connection = SQLiteConnection
     
