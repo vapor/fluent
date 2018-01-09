@@ -2,6 +2,7 @@ import Async
 import Debugging
 import Foundation
 import Fluent
+import Service
 import SQLite
 
 /// A SQLite database model.
@@ -18,10 +19,13 @@ extension DatabaseIdentifier {
     }
 }
 
-extension SQLiteDatabase: Database {
+extension SQLiteDatabase: Database, Service {
     public typealias Connection = SQLiteConnection
     
-    public func makeConnection(from config: SQLiteConfig, on worker: Worker) -> Future<SQLiteConnection> {
+    public func makeConnection(
+        using config: SQLiteConfig,
+        on worker: Worker
+    ) -> Future<SQLiteConnection> {
         return self.makeConnection(on: worker)
     }
 }
@@ -32,19 +36,15 @@ func id(_ type: Any.Type) -> ObjectIdentifier {
 
 extension SQLiteDatabase: JoinSupporting {}
 
-public struct SQLiteConfig {
+public struct SQLiteConfig: Service {
     public init() {}
 }
 
 extension SQLiteConnection: DatabaseConnection {
     public typealias Config = SQLiteConfig
-
-    public func existingConnection<D>(to type: D.Type) -> D.Connection? where D: Database {
-        return self as? D.Connection
-    }
     
-    public func connect<D>(to database: DatabaseIdentifier<D>) -> Future<D.Connection> {
-        fatalError("Cannot call `.connect(to:)` on an existing connection. Call `.existingConnection` instead.")
+    public func connect<D>(to database: DatabaseIdentifier<D>?) -> Future<D.Connection> {
+        return Future(self as! D.Connection)
     }
 }
 

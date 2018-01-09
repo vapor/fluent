@@ -69,26 +69,12 @@ extension Model where Database: QuerySupporting {
     public func query(
         on conn: DatabaseConnectable
     ) -> QueryBuilder<Self> {
-        let conn = Future<Database.Connection> {
-            if let existing = conn.existingConnection(to: Self.Database.self) {
-                return Future(existing)
-            } else {
-                return try conn.connect(to: Self.requireDefaultDatabase())
-            }
-        }
-        return .init(on: conn)
+        return .init(on: conn.connect(to: Self.defaultDatabase))
     }
 
     /// Creates a query for this model on the supplied connection.
     public static func query(on conn: DatabaseConnectable) -> QueryBuilder<Self> {
-        let conn = Future<Database.Connection> {
-            if let existing = conn.existingConnection(to: Self.Database.self) {
-                return Future(existing)
-            } else {
-                return try conn.connect(to: Self.requireDefaultDatabase())
-            }
-        }
-        return .init(on: conn)
+        return .init(on: conn.connect(to: Self.defaultDatabase))
     }
 }
 
@@ -222,7 +208,7 @@ extension Model {
 // MARK: Container Findable
 
 extension Model where Database: QuerySupporting {
-    /// See EphemeralWorkerFindable.find
+    /// See ContainerFindable.find
     public static func find(identifier: String, using container: Container) throws -> Future<Self> {
         guard let idType = ID.self as? StringDecodable.Type else {
             throw FluentError(
@@ -239,23 +225,12 @@ extension Model where Database: QuerySupporting {
         }
 
         let dbid = try Self.requireDefaultDatabase()
-        if let ephemeral = container as? EphemeralContainer {
-            return ephemeral.connect(to: dbid).flatMap(to: Self.self) { conn in
-                return self.find(id, on: conn).map(to: Self.self) { model in
-                    guard let model = model else {
-                        throw FluentError(identifier: "entity-not-found", reason: "no model with ID \(id) was found")
-                    }
-                    return model
+        return container.withConnection(to: dbid) { conn in
+            return self.find(id, on: conn).map(to: Self.self) { model in
+                guard let model = model else {
+                    throw FluentError(identifier: "modelNotFound", reason: "No model with ID \(id) was found")
                 }
-            }
-        } else {
-            return container.withConnection(to: dbid) { conn in
-                return self.find(id, on: conn).map(to: Self.self) { model in
-                    guard let model = model else {
-                        throw FluentError(identifier: "entity-not-found", reason: "no model with ID \(id) was found")
-                    }
-                    return model
-                }
+                return model
             }
         }
     }
