@@ -17,6 +17,9 @@ let package = Package(
         // Core extensions, type-aliases, and functions that facilitate common tasks.
         .package(url: "https://github.com/vapor/core.git", .branch("beta")),
 
+        // Swift wrapper for Console I/O
+        .package(url: "https://github.com/vapor/console.git", .branch("beta")),
+
         // Core services for creating database integrations.
         .package(url: "https://github.com/vapor/database-kit.git", .branch("beta")),
 
@@ -25,7 +28,7 @@ let package = Package(
     ],
     targets: [
         .target(name: "CSQLite"),
-        .target(name: "Fluent", dependencies: ["Async", "CodableKit", "DatabaseKit", "Service"]),
+        .target(name: "Fluent", dependencies: ["Async", "CodableKit", "Console", "DatabaseKit", "Service"]),
         .testTarget(name: "FluentTests", dependencies: ["FluentBenchmark", "FluentSQLite", "SQLite"]),
         .target(name: "FluentBenchmark", dependencies: ["Fluent"]),
         .target(name: "FluentSQL", dependencies: ["Fluent", "SQL"]),
