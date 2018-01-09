@@ -12,6 +12,13 @@ extension SQLiteModel {
     public typealias Database = SQLiteDatabase
 }
 
+/// A SQLite database pivot.
+/// See `Fluent.Pivot`.
+public protocol SQLitePivot: Pivot where Database == SQLiteDatabase { }
+extension SQLitePivot {
+    public typealias Database = SQLiteDatabase
+}
+
 extension DatabaseIdentifier {
     /// The main SQLite database identifier.
     public static var sqlite: DatabaseIdentifier<SQLiteDatabase> {
