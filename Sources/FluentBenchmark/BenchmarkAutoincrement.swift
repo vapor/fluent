@@ -14,7 +14,7 @@ extension Benchmarker where Database: QuerySupporting {
         }
 
         let test = LogMessage<Database>(message: "test")
-        return message.save(on: conn).flatMap(to: Void.self) {
+        return message.save(on: conn).flatMap(to: Void.self) { message in
             return Database.modelEvent(event: .didCreate, model: test, on: conn)
         }.map(to: Void.self) {
             if test.id != message.id {

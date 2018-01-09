@@ -16,12 +16,12 @@ extension Benchmarker where Database: JoinSupporting & ReferenceSupporting & Que
         let promise = Promise<Int>()
         
         Database.enableReferences(on: conn).flatMap(to: Void.self) {
-            return tanner.save(on: conn)
+            return tanner.save(on: conn).transform(to: Void())
         }.flatMap(to: Void.self) {
             ziz = try Pet<Database>(name: "Ziz", ownerID: tanner.requireID())
-            return ziz.save(on: conn)
+            return ziz.save(on: conn).transform(to: Void())
         }.flatMap(to: Void.self) {
-            return foo.save(on: conn)
+            return foo.save(on: conn).transform(to: Void())
         }.addAwaiter { response in
             if response.error == nil {
                 self.fail("should not have saved")
@@ -45,13 +45,13 @@ extension Benchmarker where Database: JoinSupporting & ReferenceSupporting & Que
                 self.fail("pet owner's name wrong")
             }
             
-            return plasticBag.save(on: conn)
+            return plasticBag.save(on: conn).transform(to: Void())
         }.flatMap(to: Void.self) {
-            return oldBologna.save(on: conn)
+            return oldBologna.save(on: conn).transform(to: Void())
         }.flatMap(to: Void.self) {
-            return ziz.toys.attach(plasticBag, on: conn)
+            return ziz.toys.attach(plasticBag, on: conn).transform(to: Void())
         }.flatMap(to: Void.self) {
-            return oldBologna.pets.attach(ziz, on: conn)
+            return oldBologna.pets.attach(ziz, on: conn).transform(to: Void())
         }.flatMap(to: Int.self) {
             return try ziz.toys.query(on: conn).count()
         }.flatMap(to: Int.self) { count in

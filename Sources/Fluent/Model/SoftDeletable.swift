@@ -31,7 +31,7 @@ extension Model where Self: SoftDeletable, Database: QuerySupporting {
     }
 
     /// Restores a soft deleted model.
-    public func restore(on connection: DatabaseConnectable) -> Future<Void> {
+    public func restore(on connection: DatabaseConnectable) -> Future<Self> {
         fluentDeletedAt = nil
         return update(on: connection)
     }
