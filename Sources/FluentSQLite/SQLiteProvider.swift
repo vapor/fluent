@@ -14,6 +14,7 @@ public final class FluentSQLiteProvider: Provider {
 
     /// See Provider.register
     public func register(_ services: inout Services) throws {
+        try services.register(FluentProvider())
         services.register { container in
             return SQLiteConfig()
         }
