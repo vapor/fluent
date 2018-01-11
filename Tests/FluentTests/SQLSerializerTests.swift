@@ -85,7 +85,7 @@ class SQLSerializerTests: XCTestCase {
         query.isDistinct = true
         let (statement, values) = serialize(query)
         
-        XCTAssertEqual(statement, "SELECT DISTINCT COUNT(*) as _fluent_aggregate FROM `users`")
+        XCTAssertEqual(statement, "SELECT COUNT(DISTINCT *) as _fluent_aggregate FROM `users`")
         XCTAssert(values.isEmpty)
     }
 
