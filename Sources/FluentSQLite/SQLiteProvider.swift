@@ -20,7 +20,7 @@ public final class FluentSQLiteProvider: Provider {
         }
         services.register(SQLiteDatabase.self) { container -> SQLiteDatabase in
             let storage = try container.make(SQLiteStorage.self, for: FluentSQLiteProvider.self)
-            return SQLiteDatabase(storage: storage)
+            return try SQLiteDatabase(storage: storage)
         }
     }
 
