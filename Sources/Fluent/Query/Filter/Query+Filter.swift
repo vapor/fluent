@@ -75,21 +75,49 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
     }
 
 
-    /// Subset `in` filter.
+    /// Filter entity with subset `in`
     @discardableResult
-    public func filter(_ field: String, in values: [NodeRepresentable?]) throws -> Query<Self.E> {
+    public func filter<T: Entity>(
+        _ entity: T.Type,
+        _ field: String,
+        in values: [NodeRepresentable?]
+    ) throws -> Query<Self.E> {
         let values = try values.map { try $0.makeNode(in: Row.defaultContext) }
         let method = Filter.Method.subset(field, .in, values)
-        let filter = Filter(E.self, method)
+        let filter = Filter(entity, method)
         return try makeQuery().filter(filter)
     }
 
-    /// Subset `notIn` filter. 
+    /// Filter self with subset `in`
     @discardableResult
-    public func filter(_ field: String, notIn values: [NodeRepresentable?]) throws -> Query<Self.E> {
+    public func filter(
+        _ field: String,
+        in values: [NodeRepresentable?]
+    ) throws -> Query<Self.E> {
+        return try makeQuery()
+            .filter(E.self, field, in: values)
+    }
+
+    /// Filter entity with subset `notIn`
+    @discardableResult
+    public func filter<T: Entity>(
+        _ entity: T.Type,
+        _ field: String,
+        notIn values: [NodeRepresentable?]
+    ) throws -> Query<Self.E> {
         let values = try values.map { try $0.makeNode(in: Row.defaultContext) }
         let method = Filter.Method.subset(field, .notIn, values)
-        let filter = Filter(E.self, method)
+        let filter = Filter(entity, method)
         return try makeQuery().filter(filter)
+    }
+
+    /// Filter self with subset `notIn`
+    @discardableResult
+    public func filter(
+        _ field: String,
+        notIn values: [NodeRepresentable?]
+    ) throws -> Query<Self.E> {
+        return try makeQuery()
+            .filter(E.self, field, notIn: values)
     }
 }
