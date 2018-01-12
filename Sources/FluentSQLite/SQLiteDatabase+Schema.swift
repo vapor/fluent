@@ -61,7 +61,7 @@ extension SQLiteDatabase: SchemaSupporting {
     public static func fieldType(for type: Any.Type) throws -> SQLiteFieldType {
         switch id(type) {
         case id(Date.self), id(Double.self), id(Float.self): return .real
-        case id(Int.self), id(UInt.self): return .integer
+        case id(Int.self), id(UInt.self), id(Bool.self): return .integer
         case id(String.self): return .text
         case id(UUID.self), id(Data.self): return .blob
         default: fatalError("Unsupported SQLite field type")

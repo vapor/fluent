@@ -40,7 +40,10 @@ internal final class DecodingContainer<K: CodingKey>:
     }
 
     func decode(_ type: Bool.Type, forKey key: K) throws -> Bool {
-        fatalError("unimplemented")
+        guard let bool = decoder.row[key.stringValue]?.fuzzyBool else {
+            fatalError("No bool found at key `\(key.stringValue)`")
+        }
+        return bool
     }
 
     func decode(_ type: Int.Type, forKey key: K) throws -> Int {
