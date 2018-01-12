@@ -115,7 +115,7 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
     }
 
     open func aggregate(_ field: String, _ aggregate: Aggregate) -> (String, [Node]) {
-        let fieldEscaped: String
+        var fieldEscaped: String
         switch field {
         case "*":
             fieldEscaped = field
@@ -131,7 +131,7 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
 
         statement += "SELECT"
         if query.isDistinct {
-            statement += "DISTINCT"
+            fieldEscaped = "DISTINCT \(fieldEscaped)"
         }
         
         let function: String
