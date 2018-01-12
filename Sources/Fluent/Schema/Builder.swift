@@ -24,7 +24,9 @@ extension Builder {
         optional: Bool = false,
         unique: Bool = false,
         foreignIdKey: String = E.foreignIdKey,
-        foreignKeyName: String? = nil
+        foreignKeyName: String? = nil,
+        onUpdate: ForeignKey.ReferentialAction = .noAction,
+        onDelete: ForeignKey.ReferentialAction = .noAction
     ) {
         let field = Field(
             name: foreignIdKey,
@@ -39,7 +41,9 @@ extension Builder {
                 foreignIdKey,
                 references: E.idKey,
                 on: E.self,
-                named: foreignKeyName
+                named: foreignKeyName,
+                onUpdate: onUpdate,
+                onDelete: onDelete
             )
         }
     }
@@ -164,13 +168,17 @@ extension Builder {
         _ entity: E.Type = E.self,
         optional: Bool = false,
         unique: Bool = false,
-        foreignIdKey: String = E.foreignIdKey
+        foreignIdKey: String = E.foreignIdKey,
+        onUpdate: ForeignKey.ReferentialAction = .noAction,
+        onDelete: ForeignKey.ReferentialAction = .noAction
     ) {
         foreignId(
             for: E.self,
             optional: optional,
             unique: unique,
-            foreignIdKey: foreignIdKey
+            foreignIdKey: foreignIdKey,
+            onUpdate: onUpdate,
+            onDelete: onDelete
         )
     }
     
@@ -186,14 +194,18 @@ extension Builder {
         _ foreignIdKey: String,
         references idKey: String,
         on foreignEntity: E.Type = E.self,
-        named name: String? = nil
+        named name: String? = nil,
+        onUpdate: ForeignKey.ReferentialAction = .noAction,
+        onDelete: ForeignKey.ReferentialAction = .noAction
     ) {
         let foreignKey = ForeignKey(
             entity: entity,
             field: foreignIdKey,
             foreignField: idKey,
             foreignEntity: foreignEntity,
-            name: name
+            name: name,
+            onUpdate: onUpdate,
+            onDelete: onDelete
         )
         self.foreignKey(foreignKey)
     }
