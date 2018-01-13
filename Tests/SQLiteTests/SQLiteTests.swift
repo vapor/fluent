@@ -5,10 +5,10 @@ import XCTest
 
 class SQLiteTests: XCTestCase {
     var database: SQLiteConnection!
-    var queue: DispatchEventLoop!
+    var queue: DefaultEventLoop!
 
     override func setUp() {
-        self.queue = DispatchEventLoop(label: "sqlite.tests.queue")
+        self.queue = try! DefaultEventLoop(label: "sqlite.tests.queue")
         self.database = SQLiteConnection.makeTestConnection(queue: queue)
     }
 
