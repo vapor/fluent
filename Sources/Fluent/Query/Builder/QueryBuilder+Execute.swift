@@ -8,9 +8,25 @@ extension QueryBuilder {
     /// in the returned future.
     public func all() -> Future<[Model]> {
         let stream = run()
-        let models = stream.all()
+
+        let promise = Promise([Model].self)
+
+        // cache the rows
+        var rows: [Model] = []
+
+        // drain the stream of results
+        let drain = stream.drain { row, upstream in
+            rows.append(row)
+        }.catch { error in
+            promise.fail(error)
+        }.finally {
+            promise.complete(rows)
+        }
+
         stream.execute()
-        return models
+        drain.upstream?.request(count: .max)
+
+        return promise.future
     }
 
     /// Returns a future with the first result of the query.
@@ -31,10 +47,7 @@ extension QueryBuilder {
 
         let stream = run()
 
-        stream.drain { req in
-            /// request fire hose
-            req.request(count: .max)
-        }.output { model in
+        let drain = stream.drain { model, upstream in
             // ignore output
         }.catch { err in
             promise.fail(err)
@@ -43,7 +56,8 @@ extension QueryBuilder {
         }
 
         stream.execute()
-        
+        drain.upstream?.request(count: .max)
+
         return promise.future
     }
 }
@@ -75,9 +89,7 @@ extension QueryBuilder {
         let stream = run(decoding: T.self)
 
         // drain the stream of results
-        stream.drain { upstream in
-            upstream.request(count: .max)
-        }.output { row in
+        let drain = stream.drain { row, upstream in
             partial.append(row)
             if partial.count >= max {
                 try closure(partial)
@@ -97,31 +109,7 @@ extension QueryBuilder {
         }
 
         stream.execute()
-
-        return promise.future
-    }
-}
-
-/// FIXME: move this to async
-
-extension OutputStream {
-    /// Convenience for gathering all rows into a single array.
-    public func all() -> Future<[Output]> {
-        let promise = Promise([Output].self)
-
-        // cache the rows
-        var rows: [Output] = []
-
-        // drain the stream of results
-        drain { upstream in
-            upstream.request(count: .max)
-        }.output { row in
-            rows.append(row)
-        }.catch { error in
-            promise.fail(error)
-        }.finally {
-            promise.complete(rows)
-        }
+        drain.upstream?.request(count: .max)
 
         return promise.future
     }

@@ -7,9 +7,11 @@ import XCTest
 
 final class SQLiteBenchmarkTests: XCTestCase {
     var benchmarker: Benchmarker<SQLiteDatabase>!
-    let worker = DispatchEventLoop(label: "benchmark-sqlite")
+    var worker: EventLoop!
 
     override func setUp() {
+        self.worker = try! DefaultEventLoop(label: "benchmark-sqlite")
+        Thread.async { self.worker.runLoop() }
         let database = try! SQLiteDatabase(storage: .memory)
         benchmarker = Benchmarker(database, config: .init(), on: worker, onFail: XCTFail)
     }
