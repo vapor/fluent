@@ -69,10 +69,9 @@ extension QueryBuilder {
 
         let stream = run(decoding: AggregateResult<D>.self)
 
-        stream.drain { upstream in
-            upstream.request(count: .max)
-        }.output { res in
+        _ = stream.drain { res, upstream in
             result = res.fluentAggregate
+            upstream.request()
         }.catch { err in
             promise.fail(err)
         }.finally {

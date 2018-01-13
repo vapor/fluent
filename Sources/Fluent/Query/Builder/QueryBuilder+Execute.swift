@@ -31,11 +31,8 @@ extension QueryBuilder {
 
         let stream = run()
 
-        stream.drain { req in
-            /// request fire hose
-            req.request(count: .max)
-        }.output { model in
-            // ignore output
+        _ = stream.drain { _, u in
+            u.request(count: .max)
         }.catch { err in
             promise.fail(err)
         }.finally {
@@ -75,14 +72,14 @@ extension QueryBuilder {
         let stream = run(decoding: T.self)
 
         // drain the stream of results
-        stream.drain { upstream in
-            upstream.request(count: .max)
-        }.output { row in
+        _ = stream.drain { row, upstream in
             partial.append(row)
             if partial.count >= max {
                 try closure(partial)
                 partial = []
             }
+            
+            upstream.request()
         }.catch { error in
             promise.fail(error)
         }.finally {
@@ -113,10 +110,9 @@ extension OutputStream {
         var rows: [Output] = []
 
         // drain the stream of results
-        drain { upstream in
-            upstream.request(count: .max)
-        }.output { row in
+        _ = drain { row, upstream in
             rows.append(row)
+            upstream.request()
         }.catch { error in
             promise.fail(error)
         }.finally {

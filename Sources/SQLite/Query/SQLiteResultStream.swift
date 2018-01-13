@@ -66,22 +66,14 @@ extension OutputStream {
         // cache the rows
         var rows: [Output] = []
 
-        var upstream: ConnectionContext?
-
         // drain the stream of results
-        drain { u in
-            upstream = u
-        }.output { row in
+        _ = drain { row, u  in
             rows.append(row)
-        }.catch { error in
-            promise.fail(error)
-        }.finally {
+            u.request()
+        }.catch(onError: promise.fail).finally {
             promise.complete(rows)
         }
-
-
-        upstream!.request(count: .max)
-
+        
         return promise.future
     }
 }
