@@ -147,20 +147,20 @@ extension Model where Database: QuerySupporting {
     /// Calls `create` if the ID is `nil`, and `update` if it exists.
     /// If you need to create a model with a pre-existing ID,
     /// call `create` instead.
-    public func save(on conn: DatabaseConnectable) -> Future<Void> {
-        return query(on: conn).save(self)
+    public func save(on conn: DatabaseConnectable) -> Future<Self> {
+        return query(on: conn).save(self).transform(to: self)
     }
 
     /// Saves this model as a new item in the database.
     /// This method can auto-generate an ID depending on ID type.
-    public func create(on conn: DatabaseConnectable) -> Future<Void> {
-        return query(on: conn).create(self)
+    public func create(on conn: DatabaseConnectable) -> Future<Self> {
+        return query(on: conn).create(self).transform(to: self)
     }
 
     /// Updates the model. This requires that
     /// the model has its ID set.
-    public func update(on conn: DatabaseConnectable) -> Future<Void> {
-        return query(on: conn).update(self)
+    public func update(on conn: DatabaseConnectable) -> Future<Self> {
+        return query(on: conn).update(self).transform(to: self)
     }
 
     /// Saves this model to the supplied query executor.

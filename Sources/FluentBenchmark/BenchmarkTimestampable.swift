@@ -12,7 +12,7 @@ extension Benchmarker where Database: QuerySupporting {
             self.fail("timestamps should have been nil")
         }
 
-        return tanner.save(on: conn).flatMap(to: Date.self) {
+        return tanner.save(on: conn).transform(to: Void()).flatMap(to: Date.self) {
             if tanner.createdAt?.isWithin(seconds: 1, of: Date()) != true {
                 self.fail("timestamps should be current")
             }
@@ -23,7 +23,7 @@ extension Benchmarker where Database: QuerySupporting {
             
             let updated = tanner.updatedAt!
             
-            return tanner.save(on: conn).map(to: Date.self) {
+            return tanner.save(on: conn).transform(to: Void()).map(to: Date.self) {
                 return updated
             }
         }.flatMap(to: User<Database>?.self) { originalUpdatedAt in

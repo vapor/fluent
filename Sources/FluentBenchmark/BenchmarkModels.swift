@@ -10,8 +10,8 @@ extension Benchmarker where Database: QuerySupporting {
         let a = Foo<Database>(bar: "asdf", baz: 42)
         let b = Foo<Database>(bar: "asdf", baz: 42)
         
-        return a.save(on: conn).flatMap(to: Void.self) {
-            return b.save(on: conn)
+        return a.save(on: conn).flatMap(to: Void.self) { a in
+            return b.save(on: conn).transform(to: Void())
         }.flatMap(to: Int.self) {
             return conn.query(Foo<Database>.self).count()
         }.flatMap(to: Void.self) { count in
@@ -22,7 +22,7 @@ extension Benchmarker where Database: QuerySupporting {
             // update
             b.bar = "fdsa"
             
-            return b.save(on: conn)
+            return b.save(on: conn).transform(to: Void())
         }.flatMap(to: Foo<Database>?.self) {
             return try Foo<Database>.find(b.requireID(), on: conn)
         }.flatMap(to: Void.self) { fetched in
