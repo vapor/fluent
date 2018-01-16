@@ -17,6 +17,7 @@ extension QueryBuilder {
         // drain the stream of results
         let drain = stream.drain { row, upstream in
             rows.append(row)
+            upstream.request()
         }.catch { error in
             promise.fail(error)
         }.finally {
@@ -24,7 +25,7 @@ extension QueryBuilder {
         }
 
         stream.execute()
-        drain.upstream?.request(count: .max)
+        drain.upstream?.request()
 
         return promise.future
     }
@@ -47,8 +48,9 @@ extension QueryBuilder {
 
         let stream = run()
 
-        let drain = stream.drain { model, upstream in
+        let drain = stream.drain { _, upstream in
             // ignore output
+            upstream.request()
         }.catch { err in
             promise.fail(err)
         }.finally {
@@ -56,7 +58,7 @@ extension QueryBuilder {
         }
 
         stream.execute()
-        drain.upstream?.request(count: .max)
+        drain.upstream?.request()
 
         return promise.future
     }
@@ -95,6 +97,7 @@ extension QueryBuilder {
                 try closure(partial)
                 partial = []
             }
+            upstream.request()
         }.catch { error in
             promise.fail(error)
         }.finally {
@@ -109,7 +112,7 @@ extension QueryBuilder {
         }
 
         stream.execute()
-        drain.upstream?.request(count: .max)
+        drain.upstream?.request()
 
         return promise.future
     }

@@ -69,13 +69,14 @@ extension OutputStream {
         // drain the stream of results
         let drain = self.drain { row, upstream in
             rows.append(row)
+            upstream.request()
         }.catch { error in
             promise.fail(error)
         }.finally {
             promise.complete(rows)
         }
 
-        drain.upstream!.request(count: .max)
+        drain.upstream?.request()
 
         return promise.future
     }

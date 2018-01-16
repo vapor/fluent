@@ -71,6 +71,7 @@ extension QueryBuilder {
 
         let drain = stream.drain { res, upstream in
             result = res.fluentAggregate
+            upstream.request()
         }.catch { err in
             promise.fail(err)
         }.finally {
@@ -82,7 +83,7 @@ extension QueryBuilder {
         }
 
         stream.execute()
-        drain.upstream?.request(count: .max)
+        drain.upstream?.request()
 
         return promise.future
     }
