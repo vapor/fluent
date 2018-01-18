@@ -22,6 +22,9 @@ public final class Benchmarker<Database: Fluent.Database> {
     /// Logs collected
     private var logs: [DatabaseLog]
 
+    /// The internal eventLoop
+    private let eventLoop: EventLoop
+
     /// Create a new benchmarker
     public init(_ database: Database, config: Database.Connection.Config, on worker: Worker, onFail: @escaping OnFail) {
         self.database = database
@@ -29,6 +32,7 @@ public final class Benchmarker<Database: Fluent.Database> {
         self.logs = []
         self.config = config
         self.pool = self.database.makeConnectionPool(max: 20, using: config, on: worker)
+        self.eventLoop = worker.eventLoop
 
         if let logSupporting = database as? LogSupporting {
             let logger = DatabaseLogger { log in
@@ -65,7 +69,7 @@ public final class Benchmarker<Database: Fluent.Database> {
     /// Awaits the future or fails
     internal func test<T>(_ future: Future<T>, file: StaticString = #file, line: UInt = #line) throws -> T {
         do {
-            return try future.blockingAwait(timeout: .seconds(60))
+            return try future.await(on: eventLoop)
         } catch {
             fail("\(error)", file: file, line: line)
             throw error
