@@ -8,9 +8,6 @@ public protocol SchemaSupporting: Database {
     /// See SchemaFieldType
     associatedtype FieldType
 
-    /// Serializes the schema field to a string.
-    static func dataType(for field: SchemaField<Self>) -> String
-
     /// Default schema field types Fluent must know
     /// how to make for migrations and tests.
     static func fieldType(for type: Any.Type) throws -> FieldType
