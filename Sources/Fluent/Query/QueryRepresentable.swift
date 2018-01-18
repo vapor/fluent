@@ -144,10 +144,18 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
             entity.didUpdate()
         } else {
             // create
-            if entity.id == nil, case .uuid = E.idType {
-                // automatically generates uuids
-                // for models without them
-                entity.id = Identifier(UUID.random())
+            if entity.id == nil {
+                switch E.idType {
+                case .uuid:
+                    // automatically generates uuids
+                    // for models without them
+                    entity.id = Identifier(UUID.random())
+                case .string(let closure), .custom(_, let closure):
+                    // generate a custom id
+                    // for models without them
+                    entity.id = try closure()
+                case .int: ()
+                }
             }
             try E.willCreate(entity: entity)
             try entity.willCreate()

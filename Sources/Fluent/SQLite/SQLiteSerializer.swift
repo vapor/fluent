@@ -24,9 +24,9 @@
                 switch idType {
                 case .int:
                     string = "INTEGER"
-                case .uuid:
+                case .uuid, .string:
                     string = "TEXT"
-                case .custom(let custom):
+                case .custom(let custom, _):
                     string = custom
                 }
                 if primaryKey {

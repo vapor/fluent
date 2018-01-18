@@ -83,7 +83,7 @@
                         if let id = database.lastId {
                             return Node(id)
                         }
-                    case .uuid, .custom:
+                    case .uuid, .string, .custom:
                         // sqlite annoyingly doesn't support anything
                         // besides integers for getting last ID.
                         // so we must manually pull the id from the data

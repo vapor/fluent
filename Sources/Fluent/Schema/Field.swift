@@ -98,9 +98,10 @@ extension IdentifierType: Equatable {
     public static func ==(lhs: IdentifierType, rhs: IdentifierType) -> Bool {
         switch (lhs, rhs) {
         case (.int, .int),
-             (.uuid, .uuid):
+             (.uuid, .uuid),
+             (.string, .string):
             return true
-        case (.custom(let a), .custom(let b)):
+        case (.custom(let a, _), .custom(let b, _)):
             return a == b
         default:
             return false
