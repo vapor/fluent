@@ -110,7 +110,7 @@ extension Siblings
     where Through: ModifiablePivot, Through.Left == Base, Through.Right == Related, Through.Database: QuerySupporting
 {
     /// Attaches the model to this relationship.
-    public func attach(_ model: Related, on conn: DatabaseConnectable) -> Future<Void> {
+    public func attach(_ model: Related, on conn: DatabaseConnectable) -> Future<Through> {
         do {
             let pivot = try Through(base, model)
             return pivot.save(on: conn)
@@ -125,7 +125,7 @@ extension Siblings
     where Through: ModifiablePivot, Through.Left == Related, Through.Right == Base, Through.Database: QuerySupporting
 {
     /// Attaches the model to this relationship.
-    public func attach(_ model: Related, on conn: DatabaseConnectable) -> Future<Void> {
+    public func attach(_ model: Related, on conn: DatabaseConnectable) -> Future<Through> {
         do {
             let pivot = try Through(model, base)
             return pivot.save(on: conn)

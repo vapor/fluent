@@ -16,7 +16,7 @@ extension Benchmarker where Database: QuerySupporting {
             let user = User<Database>(name: "User \(i)", age: i)
             
             future = future.flatMap(to: Void.self) {
-                return user.save(on: conn)
+                return user.save(on: conn).transform(to: Void())
             }
         }
         

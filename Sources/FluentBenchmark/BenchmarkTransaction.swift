@@ -10,7 +10,7 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
         let tanner = User<Database>(name: "Tanner", age: 23)
         let promise = Promise<Void>()
         
-        tanner.save(on: conn).flatMap(to: Void.self) {
+        tanner.save(on: conn).flatMap(to: Void.self) { tanner in
             return Database.transaction(on: conn) { conn in
                 var future = Future<Void>(())
                 
@@ -19,7 +19,7 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
                     let user = User<Database>(name: "User \(i)", age: i)
                     
                     future = future.flatMap(to: Void.self) {
-                        return user.save(on: conn)
+                        return user.save(on: conn).transform(to: Void())
                     }
                 }
                 
