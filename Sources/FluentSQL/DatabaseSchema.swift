@@ -4,16 +4,16 @@ import SQL
 extension DatabaseSchema {
     /// Converts a database schema to sql schema query
     public func makeSchemaQuery(dataTypeFactory: (SchemaField<Database>) -> String) -> SchemaQuery {
-        let schemaStatement: SchemaStatement
-
         switch action {
         case .create:
-            schemaStatement = .create(
+            return .create(
+                table: entity,
                 columns: addFields.map { $0.makeSchemaColumn(dataType: dataTypeFactory($0)) },
                 foreignKeys: []
             )
         case .update:
-            schemaStatement = .alter(
+            return .alter(
+                table: entity,
                 columns: addFields.map {
                     $0.makeSchemaColumn(dataType: dataTypeFactory($0))
                 },
@@ -21,37 +21,19 @@ extension DatabaseSchema {
                 deleteForeignKeys: []
             )
         case .delete:
-            schemaStatement = .drop
+            return .drop(table: entity)
         }
-
-        return SchemaQuery(statement: schemaStatement, table: entity)
     }
 }
 
 
 extension DatabaseSchema where Database: ReferenceSupporting {
     /// Converts a database schema to sql schema query
-    public func makeSchemaQuery_withReferences(dataTypeFactory: (SchemaField<Database>) -> String) -> SchemaQuery {
-        let schemaStatement: SchemaStatement
-
-        switch action {
-        case .create:
-            schemaStatement = .create(
-                columns: addFields.map { $0.makeSchemaColumn(dataType: dataTypeFactory($0)) },
-                foreignKeys: addForeignKeys()
-            )
-        case .update:
-            schemaStatement = .alter(
-                columns: addFields.map {
-                    $0.makeSchemaColumn(dataType: dataTypeFactory($0))
-                },
-                deleteColumns: removeFields,
-                deleteForeignKeys: removeForeignKeys()
-            )
-        case .delete:
-            schemaStatement = .drop
+    public func applyReferences(to schemaQuery: inout SchemaQuery) {
+        switch schemaQuery.statement {
+        case .create: schemaQuery.addForeignKeys = addForeignKeys()
+        case .alter: schemaQuery.deleteForeignKeys = removeForeignKeys()
+        default: break
         }
-
-        return SchemaQuery(statement: schemaStatement, table: entity)
     }
 }
