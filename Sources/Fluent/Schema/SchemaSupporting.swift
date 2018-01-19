@@ -29,7 +29,7 @@ extension SchemaSupporting {
         where Model.Database == Self
     {
         let creator = SchemaCreator(Model.self)
-        return Future {
+        return Future.flatMap {
             try closure(creator)
             return self.execute(schema: creator.schema, on: connection)
         }
@@ -45,7 +45,7 @@ extension SchemaSupporting {
         where Model.Database == Self
     {
         let updater = SchemaUpdater(Model.self)
-        return Future {
+        return Future.flatMap {
             try closure(updater)
             return self.execute(schema: updater.schema, on: connection)
         }
