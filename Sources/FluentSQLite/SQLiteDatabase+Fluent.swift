@@ -28,7 +28,8 @@ extension DatabaseIdentifier {
 
 extension SQLiteDatabase: Database, Service {
     public typealias Connection = SQLiteConnection
-    
+
+    /// See `Database.makeConnection`
     public func makeConnection(
         using config: SQLiteConfig,
         on worker: Worker

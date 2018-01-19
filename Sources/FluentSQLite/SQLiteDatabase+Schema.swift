@@ -7,7 +7,7 @@ import SQLite
 extension SQLiteDatabase: SchemaSupporting {
     /// See SchemaExecutor.execute()
     public static func execute(schema: DatabaseSchema<SQLiteDatabase>, on connection: SQLiteConnection) -> Future<Void> {
-        return Future {
+        return Future.flatMap {
             guard schema.removeReferences.count <= 0 else {
                 throw FluentSQLiteError(
                     identifier: "unsupported",
@@ -15,17 +15,8 @@ extension SQLiteDatabase: SchemaSupporting {
                 )
             }
 
-            var schemaQuery = schema.makeSchemaQuery()
-
-            switch schemaQuery.statement {
-            case .create(let cols, _):
-                schemaQuery.statement = .create(
-                    columns: cols,
-                    foreignKeys: schema.makeForeignKeys()
-                )
-            default: break
-            }
-
+            var schemaQuery = schema.makeSchemaQuery(dataTypeFactory: dataType)
+            schema.applyReferences(to: &schemaQuery)
             let string = SQLiteSQLSerializer()
                 .serialize(schema: schemaQuery)
 

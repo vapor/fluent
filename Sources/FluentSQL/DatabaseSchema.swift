@@ -3,27 +3,37 @@ import SQL
 
 extension DatabaseSchema {
     /// Converts a database schema to sql schema query
-    public func makeSchemaQuery() -> SchemaQuery {
-        let schemaStatement: SchemaStatement
-
+    public func makeSchemaQuery(dataTypeFactory: (SchemaField<Database>) -> String) -> SchemaQuery {
         switch action {
         case .create:
-            schemaStatement = .create(
-                columns: addFields.map { $0.makeSchemaColumn() },
+            return .create(
+                table: entity,
+                columns: addFields.map { $0.makeSchemaColumn(dataType: dataTypeFactory($0)) },
                 foreignKeys: []
             )
         case .update:
-            schemaStatement = .alter(
+            return .alter(
+                table: entity,
                 columns: addFields.map {
-                    $0.makeSchemaColumn()
+                    $0.makeSchemaColumn(dataType: dataTypeFactory($0))
                 },
                 deleteColumns: removeFields,
                 deleteForeignKeys: []
             )
         case .delete:
-            schemaStatement = .drop
+            return .drop(table: entity)
         }
+    }
+}
 
-        return SchemaQuery(statement: schemaStatement, table: entity)
+
+extension DatabaseSchema where Database: ReferenceSupporting {
+    /// Converts a database schema to sql schema query
+    public func applyReferences(to schemaQuery: inout SchemaQuery) {
+        switch schemaQuery.statement {
+        case .create: schemaQuery.addForeignKeys = addForeignKeys()
+        case .alter: schemaQuery.deleteForeignKeys = removeForeignKeys()
+        default: break
+        }
     }
 }

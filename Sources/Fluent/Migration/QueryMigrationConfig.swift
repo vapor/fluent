@@ -18,7 +18,7 @@ internal struct QueryMigrationConfig<Database>: MigrationRunnable where Database
 
     /// See MigrationRunnable.migrate
     internal func migrate(using databases: Databases, using container: Container) -> Future<Void> {
-        return Future {
+        return Future.flatMap {
             guard let database = databases.database(for: self.database) else {
                 throw FluentError(identifier: "no-migration-database", reason: "no database \(self.database.uid) was found for migrations")
             }

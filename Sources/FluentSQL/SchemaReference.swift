@@ -3,8 +3,13 @@ import SQL
 
 extension DatabaseSchema where Database: ReferenceSupporting {
     /// Convert schema references to a sql foreign key
-    public func makeForeignKeys() -> [SchemaForeignKey] {
+    public func addForeignKeys() -> [SchemaForeignKey] {
         return addReferences.map { $0.makeForeignKey() }
+    }
+
+    /// Convert schema references to a sql foreign key
+    public func removeForeignKeys() -> [String] {
+        return removeReferences.map { $0.referenced.name }
     }
 }
 

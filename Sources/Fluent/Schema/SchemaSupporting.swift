@@ -8,9 +8,6 @@ public protocol SchemaSupporting: Database {
     /// See SchemaFieldType
     associatedtype FieldType
 
-    /// Serializes the schema field to a string.
-    static func dataType(for field: SchemaField<Self>) -> String
-
     /// Default schema field types Fluent must know
     /// how to make for migrations and tests.
     static func fieldType(for type: Any.Type) throws -> FieldType
@@ -32,7 +29,7 @@ extension SchemaSupporting {
         where Model.Database == Self
     {
         let creator = SchemaCreator(Model.self)
-        return Future {
+        return Future.flatMap {
             try closure(creator)
             return self.execute(schema: creator.schema, on: connection)
         }
@@ -48,7 +45,7 @@ extension SchemaSupporting {
         where Model.Database == Self
     {
         let updater = SchemaUpdater(Model.self)
-        return Future {
+        return Future.flatMap {
             try closure(updater)
             return self.execute(schema: updater.schema, on: connection)
         }

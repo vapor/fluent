@@ -63,7 +63,6 @@ extension SQLiteDatabase: QuerySupporting {
                 stream.close()
             }
         } catch {
-            print(error)
             stream.error(error)
             stream.close()
         }
