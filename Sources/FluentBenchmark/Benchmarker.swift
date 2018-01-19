@@ -23,7 +23,7 @@ public final class Benchmarker<Database: Fluent.Database> {
     private var logs: [DatabaseLog]
 
     /// The internal eventLoop
-    private let eventLoop: EventLoop
+    internal let eventLoop: EventLoop
 
     /// Create a new benchmarker
     public init(_ database: Database, config: Database.Connection.Config, on worker: Worker, onFail: @escaping OnFail) {
