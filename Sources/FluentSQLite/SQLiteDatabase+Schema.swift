@@ -15,17 +15,7 @@ extension SQLiteDatabase: SchemaSupporting {
                 )
             }
 
-            var schemaQuery = schema.makeSchemaQuery(dataTypeFactory: dataType)
-
-            switch schemaQuery.statement {
-            case .create(let cols, _):
-                schemaQuery.statement = .create(
-                    columns: cols,
-                    foreignKeys: schema.makeForeignKeys()
-                )
-            default: break
-            }
-
+            let schemaQuery = schema.makeSchemaQuery_withReferences(dataTypeFactory: dataType)
             let string = SQLiteSQLSerializer()
                 .serialize(schema: schemaQuery)
 

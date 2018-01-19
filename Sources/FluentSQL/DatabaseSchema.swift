@@ -27,3 +27,31 @@ extension DatabaseSchema {
         return SchemaQuery(statement: schemaStatement, table: entity)
     }
 }
+
+
+extension DatabaseSchema where Database: ReferenceSupporting {
+    /// Converts a database schema to sql schema query
+    public func makeSchemaQuery_withReferences(dataTypeFactory: (SchemaField<Database>) -> String) -> SchemaQuery {
+        let schemaStatement: SchemaStatement
+
+        switch action {
+        case .create:
+            schemaStatement = .create(
+                columns: addFields.map { $0.makeSchemaColumn(dataType: dataTypeFactory($0)) },
+                foreignKeys: addForeignKeys()
+            )
+        case .update:
+            schemaStatement = .alter(
+                columns: addFields.map {
+                    $0.makeSchemaColumn(dataType: dataTypeFactory($0))
+                },
+                deleteColumns: removeFields,
+                deleteForeignKeys: removeForeignKeys()
+            )
+        case .delete:
+            schemaStatement = .drop
+        }
+
+        return SchemaQuery(statement: schemaStatement, table: entity)
+    }
+}
