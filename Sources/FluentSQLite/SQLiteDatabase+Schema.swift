@@ -15,7 +15,7 @@ extension SQLiteDatabase: SchemaSupporting {
                 )
             }
 
-            var schemaQuery = schema.makeSchemaQuery()
+            var schemaQuery = schema.makeSchemaQuery(dataTypeFactory: dataType)
 
             switch schemaQuery.statement {
             case .create(let cols, _):

@@ -10,38 +10,38 @@ final class SQLiteBenchmarkTests: XCTestCase {
     var worker: EventLoop!
 
     override func setUp() {
-        self.worker = try! DefaultEventLoop(label: "benchmark-sqlite")
+        self.worker = try! DefaultEventLoop(label: "codes.vapor.fluent.test.sqlite")
         Thread.async { self.worker.runLoop() }
         let database = try! SQLiteDatabase(storage: .memory)
         benchmarker = Benchmarker(database, config: .init(), on: worker, onFail: XCTFail)
     }
 
     func testSchema() throws {
-        try benchmarker.benchmarkSchema().blockingAwait(timeout: .seconds(60))
+        try benchmarker.benchmarkSchema()
     }
 
     func testModels() throws {
-        try benchmarker.benchmarkModels_withSchema().blockingAwait(timeout: .seconds(60))
+        try benchmarker.benchmarkModels_withSchema()
     }
 
     func testRelations() throws {
-        try benchmarker.benchmarkRelations_withSchema().blockingAwait(timeout: .seconds(60))
+        try benchmarker.benchmarkRelations_withSchema()
     }
 
     func testTimestampable() throws {
-        try benchmarker.benchmarkTimestampable_withSchema().blockingAwait(timeout: .seconds(60))
+        try benchmarker.benchmarkTimestampable_withSchema()
     }
 
     func testTransactions() throws {
-        try benchmarker.benchmarkTransactions_withSchema().blockingAwait(timeout: .seconds(60))
+        try benchmarker.benchmarkTransactions_withSchema()
     }
 
     func testChunking() throws {
-        try benchmarker.benchmarkChunking_withSchema().blockingAwait(timeout: .seconds(60))
+        try benchmarker.benchmarkChunking_withSchema()
     }
 
     func testAutoincrement() throws {
-        try benchmarker.benchmarkAutoincrement_withSchema().blockingAwait(timeout: .seconds(60))
+        try benchmarker.benchmarkAutoincrement_withSchema()
     }
 
     static let allTests = [
