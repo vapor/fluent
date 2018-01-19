@@ -84,7 +84,7 @@ extension Siblings where Base.Database: QuerySupporting {
     /// Returns true if the supplied model is attached
     /// to this relationship.
     public func isAttached(_ model: Related, on conn: DatabaseConnectable) -> Future<Bool> {
-        return Future {
+        return Future.flatMap {
             return try Through.query(on: conn)
                 .filter(self.basePivotField == self.base.requireID())
                 .filter(self.relatedPivotField == model.requireID())
@@ -96,7 +96,7 @@ extension Siblings where Base.Database: QuerySupporting {
     /// Detaches the supplied model from this relationship
     /// if it was attached.
     public func detach(_ model: Related, on conn: DatabaseConnectable) -> Future<Void> {
-        return Future {
+        return Future.flatMap {
             return try Through.query(on: conn)
                 .filter(self.basePivotField == self.base.requireID())
                 .filter(self.relatedPivotField == model.requireID())
