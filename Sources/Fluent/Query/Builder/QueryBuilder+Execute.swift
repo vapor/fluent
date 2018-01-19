@@ -24,10 +24,10 @@ extension QueryBuilder {
             promise.complete(rows)
         }
 
-        stream.execute()
-        drain.upstream?.request()
-
-        return promise.future
+        return stream.prepare().flatMap(to: [Model].self) {
+            drain.upstream?.request()
+            return promise.future
+        }
     }
 
     /// Returns a future with the first result of the query.
@@ -57,10 +57,10 @@ extension QueryBuilder {
             promise.complete()
         }
 
-        stream.execute()
-        drain.upstream?.request()
-
-        return promise.future
+        return stream.prepare().flatMap(to: Void.self) {
+            drain.upstream?.request()
+            return promise.future
+        }
     }
 }
 
@@ -111,10 +111,10 @@ extension QueryBuilder {
             promise.complete()
         }
 
-        stream.execute()
-        drain.upstream?.request()
-
-        return promise.future
+        return stream.prepare().flatMap(to: Void.self) {
+            drain.upstream?.request()
+            return promise.future
+        }
     }
 }
 

@@ -82,10 +82,10 @@ extension QueryBuilder {
             }
         }
 
-        stream.execute()
-        drain.upstream?.request()
-
-        return promise.future
+        return stream.prepare().flatMap(to: D.self) {
+            drain.upstream?.request()
+            return promise.future
+        }
     }
 }
 

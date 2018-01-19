@@ -68,15 +68,19 @@ public final class QueryResultStream<Model, Database>: Async.Stream
         upstream.flatMap(inputStream.connect)
     }
 
-    /// Executes the stream
-    internal func execute() {
+    /// Prepares the output stream
+    internal func prepare() -> Future<Void> {
+        let promise = Promise(Void.self)
         connection.do { conn in
             self.currentConnection = conn
             Database.execute(query: self.query, into: self, on: conn)
+            promise.complete()
         }.catch { error in
             self.error(error)
             self.close()
+            promise.fail(error)
         }
+        return promise.future
     }
 }
 
