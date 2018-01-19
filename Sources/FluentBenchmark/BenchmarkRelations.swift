@@ -14,7 +14,12 @@ extension Benchmarker where Database: JoinSupporting & ReferenceSupporting & Que
         _ = try test(ziz.save(on: conn))
 
         let foo = Pet<Database>(name: "Foo", ownerID: UUID())
-        _ = try test(foo.save(on: conn))
+        do {
+            _ = try foo.save(on: conn).await(on: eventLoop)
+            fail("save should have failed")
+        } catch {
+            // pass
+        }
 
         var count = try test(tanner.pets.query(on: conn).count())
         if count != 1 {
