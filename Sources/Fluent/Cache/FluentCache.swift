@@ -1,9 +1,10 @@
 import Async
 import Foundation
+import Service
 
 /// A Fluent-based keyed cache implementation.
 /// Requires a database prepared for querying `FluentCacheEntry` models.
-public final class FluentCache<Database>: KeyedCache
+public final class FluentCache<Database>: KeyedCache, Service
     where Database: QuerySupporting
 {
     /// Used to request a connection for each get/set/remove
