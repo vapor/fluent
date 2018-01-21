@@ -80,12 +80,8 @@ extension QueryBuilder {
     /// Deletes the supplied model.
     /// Throws an error if the mdoel did not have an id.
     internal func delete(_ model: Model) -> Future<Void> {
-        if let type = Model.self as? AnySoftDeletable.Type
-        {
-            /// model is soft deletable
-            let path = type.anyDeletedAtKey
-                as! ReferenceWritableKeyPath<Model, Date?>
-            model[keyPath: path] = Date()
+        if let softDeletable = model as? AnySoftDeletable {
+            softDeletable.fluentDeletedAt = Date()
             return update(model)
         } else {
             return _delete(model)

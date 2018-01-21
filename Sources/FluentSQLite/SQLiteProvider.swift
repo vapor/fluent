@@ -22,8 +22,14 @@ public final class FluentSQLiteProvider: Provider {
             let storage = try container.make(SQLiteStorage.self, for: FluentSQLiteProvider.self)
             return try SQLiteDatabase(storage: storage)
         }
+        services.register(KeyedCache.self) { container -> SQLiteCache in
+            let pool = try container.connectionPool(to: .sqlite)
+            return .init(pool: pool)
+        }
     }
 
     /// See Provider.boot
     public func boot(_ container: Container) throws {}
 }
+
+public typealias SQLiteCache = FluentCache<SQLiteDatabase>

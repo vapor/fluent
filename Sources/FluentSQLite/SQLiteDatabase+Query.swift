@@ -92,7 +92,6 @@ extension SQLiteDatabase: QuerySupporting {
     }
 }
 
-
 extension SQLiteDataEncoder {
     /// Converts a SQL bind value into SQLite data.
     /// This method applies wildcards if necessary.

@@ -28,19 +28,16 @@ public final class QueryBuilder<Model> where Model: Fluent.Model, Model.Database
             let type = Model.self as? AnySoftDeletable.Type,
             !self.query.withSoftDeleted
         {
-            let deletedAtKey = D.unsafeCodingPath(forKey: type.anyDeletedAtKey)
-            let deletedAtField = QueryField(entity: type.entity, name: deletedAtKey[0].stringValue)
-
             try! self.group(.or) { or in
                 let notDeleted = QueryFilter<Model.Database>(
                     entity: type.entity,
-                    method: .compare(deletedAtField, .equality(.equals), .value(Date.null))
+                    method: .compare(type.deletedAtField, .equality(.equals), .value(Date.null))
                 )
                 or.addFilter(notDeleted)
 
                 let notYetDeleted = QueryFilter<Model.Database>(
                     entity: type.entity,
-                    method: .compare(deletedAtField, .order(.greaterThan), .value(Date()))
+                    method: .compare(type.deletedAtField, .order(.greaterThan), .value(Date()))
                 )
                 or.addFilter(notYetDeleted)
             }

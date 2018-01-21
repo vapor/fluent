@@ -44,6 +44,10 @@ final class SQLiteBenchmarkTests: XCTestCase {
         try benchmarker.benchmarkAutoincrement_withSchema()
     }
 
+    func testCache() throws {
+        try benchmarker.benchmarkCache_withSchema()
+    }
+
     static let allTests = [
         ("testSchema", testSchema),
         ("testModels", testModels),
@@ -52,5 +56,6 @@ final class SQLiteBenchmarkTests: XCTestCase {
         ("testTransactions", testTransactions),
         ("testChunking", testChunking),
         ("testAutoincrement", testAutoincrement),
+        ("testCache", testCache),
     ]
 }

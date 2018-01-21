@@ -54,17 +54,22 @@ extension QueryBuilder where Model: SoftDeletable {
     }
 }
 
-// MARK: Hack
-
-/// Unfortunately we need this hack.
+/// Unfortunately we need this hack until we have existentials.
 /// note: do not rely on this exterally.
 public protocol AnySoftDeletable: AnyModel {
-    /// Pointer to type erased key path
-    static var anyDeletedAtKey: AnyKeyPath { get }
+    /// Pointer to type erased key string
+    static var deletedAtField: QueryField { get }
+
+    /// Access the deleted at property.
+    var fluentDeletedAt: Date? { get set }
 }
 
 extension SoftDeletable {
-    public static var anyDeletedAtKey: AnyKeyPath {
-        return deletedAtKey
+    /// See `AnySoftDeletable.deletedAtField`
+    public static var deletedAtField: QueryField {
+        return QueryField(
+            entity: entity,
+            name: Self.codingPath(forKey: deletedAtKey)[0].stringValue
+        )
     }
 }

@@ -31,9 +31,13 @@ internal final class RowEncodingContainer<K: CodingKey>: KeyedEncodingContainerP
     }
 
     func encode<T: Encodable>(_ value: T, forKey key: K) throws {
-        let d = SQLiteDataEncoder()
-        try value.encode(to: d)
-        encoder.row[key.stringValue] = d.data
+        if let convertible = value as? SQLiteDataConvertible {
+            encoder.row[key.stringValue] = try convertible.convertToSQLiteData()
+        } else {
+            let d = SQLiteDataEncoder()
+            try value.encode(to: d)
+            encoder.row[key.stringValue] = d.data
+        }
     }
 
     func encodeNil(forKey key: K) throws {

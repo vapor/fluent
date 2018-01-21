@@ -20,7 +20,7 @@ public struct QueryField {
 extension KeyPath where Root: Model {
     /// See QueryFieldRepresentable.makeQueryField()
     public func makeQueryField() -> QueryField {
-        let key = Root.unsafeCodingPath(forKey: self)
+        let key = Root.codingPath(forKey: self)
         return QueryField(entity: Root.entity, name: key[0].stringValue)
     }
 }
