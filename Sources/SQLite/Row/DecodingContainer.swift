@@ -115,8 +115,12 @@ internal final class DecodingContainer<K: CodingKey>:
             fatalError("no data at key")
         }
 
-        let d = SQLiteDataDecoder(data: data)
-        return try T(from: d)
+        if let convertible = T.self as? SQLiteDataConvertible.Type {
+            return try convertible.convertFromSQLiteData(data) as! T
+        } else {
+            let d = SQLiteDataDecoder(data: data)
+            return try T(from: d)
+        }
     }
 
     func nestedContainer<NestedKey: CodingKey>(keyedBy type: NestedKey.Type, forKey key: K) throws -> KeyedDecodingContainer<NestedKey> {

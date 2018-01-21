@@ -78,3 +78,22 @@ extension SQLiteData: CustomStringConvertible {
         }
     }
 }
+
+public protocol SQLiteDataConvertible {
+    static func convertFromSQLiteData(_ data: SQLiteData) throws -> Self
+    func convertToSQLiteData() throws -> SQLiteData
+}
+
+
+extension Data: SQLiteDataConvertible {
+    public static func convertFromSQLiteData(_ data: SQLiteData) throws -> Data {
+        switch data {
+        case .blob(let data): return data
+        default: throw SQLiteError(problem: .warning, reason: "Could not convert to Data: \(data)")
+        }
+    }
+
+    public func convertToSQLiteData() throws -> SQLiteData {
+        return .blob(self)
+    }
+}

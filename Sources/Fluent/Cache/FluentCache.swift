@@ -31,7 +31,7 @@ public final class FluentCache<Database>: KeyedCache
     public func set<E>(_ entity: E, forKey key: String) throws -> Future<Void> where E : Encodable {
         return pool.requestConnection().flatMap(to: Void.self) { conn in
             let data = try JSONEncoder().encode(entity)
-            return FluentCacheEntry<Database>(key: key, data: data).save(on: conn).map(to: Void.self) { entry in
+            return FluentCacheEntry<Database>(key: key, data: data).create(on: conn).map(to: Void.self) { entry in
                 self.pool.releaseConnection(conn)
             }
         }

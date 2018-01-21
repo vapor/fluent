@@ -19,3 +19,13 @@ public final class FluentCacheMigration<D>: Migration where D: QuerySupporting, 
         return Database.delete(FluentCacheEntry<D>.self, on: connection)
     }
 }
+
+
+extension MigrationConfig {
+    /// Prepares the supplied `SchemaSupporting` database for `FluentCache` use.
+    public mutating func prepareCache<D>(for database: DatabaseIdentifier<D>)
+        where D: QuerySupporting, D: SchemaSupporting
+    {
+        self.add(migration: FluentCacheMigration<D>.self, database: database)
+    }
+}
