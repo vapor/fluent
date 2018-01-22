@@ -10,7 +10,7 @@ public typealias ID = Codable & Equatable
 ///
 /// Types conforming to this protocol provide the basis
 /// fetching and saving data to/from Fluent.
-public protocol Model: AnyModel, ContainerFindable {
+public protocol Model: AnyModel {
     /// The type of database this model can be queried on.
     associatedtype Database: Fluent.Database
 
@@ -205,11 +205,11 @@ extension Model {
     }
 }
 
-// MARK: Container Findable
+// MARK: Routing
 
 extension Model where Database: QuerySupporting {
-    /// See ContainerFindable.find
-    public static func find(identifier: String, using container: Container) throws -> Future<Self> {
+    /// See `Parameter.make`
+    public static func make(for parameter: String, using container: Container) throws -> Future<Self> {
         guard let idType = ID.self as? StringDecodable.Type else {
             throw FluentError(
                 identifier: "invalidIDType",
@@ -217,10 +217,10 @@ extension Model where Database: QuerySupporting {
             )
         }
 
-        guard let id = idType.decode(from: identifier) as? ID else {
+        guard let id = idType.decode(from: parameter) as? ID else {
             throw FluentError(
                 identifier: "invalidID",
-                reason: "Could not convert parameter \(identifier) to type `\(ID.self)`"
+                reason: "Could not convert parameter \(parameter) to type `\(ID.self)`"
             )
         }
 
