@@ -23,7 +23,7 @@ public final class FluentCache<Database>: KeyedCache, Service
                     return nil
                 }
                 self.pool.releaseConnection(conn)
-                return try JSONDecoder().decode(D.self, from: entry.data)
+                return try JSONDecoder().decode(_DecodeWrapper<D>.self, from: entry.data).data
             }
         }
     }
@@ -31,7 +31,7 @@ public final class FluentCache<Database>: KeyedCache, Service
     /// See `KeyedCache.set(_:forKey:)`
     public func set<E>(_ entity: E, forKey key: String) throws -> Future<Void> where E : Encodable {
         return pool.requestConnection().flatMap(to: Void.self) { conn in
-            let data = try JSONEncoder().encode(entity)
+            let data = try JSONEncoder().encode(_EncodeWrapper<E>(data: entity))
             return FluentCacheEntry<Database>(key: key, data: data).create(on: conn).map(to: Void.self) { entry in
                 self.pool.releaseConnection(conn)
             }
@@ -47,3 +47,7 @@ public final class FluentCache<Database>: KeyedCache, Service
         }
     }
 }
+
+/// Dictionary wrappers to prevent JSON failures from encoding top-level fragments.
+fileprivate struct _EncodeWrapper<D>: Encodable where D: Encodable { let data: D }
+fileprivate struct _DecodeWrapper<D>: Decodable where D: Decodable { let data: D }
