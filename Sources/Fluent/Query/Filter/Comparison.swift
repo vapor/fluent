@@ -16,7 +16,7 @@ extension Encodable {
 /// MARK: .equals
 
 /// Model.field == value
-public func == <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
+public func == <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
     where Model: Fluent.Model, Value: Encodable & Equatable
 {
     return ModelFilterMethod<Model>(
@@ -25,7 +25,7 @@ public func == <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: 
 }
 
 /// Model.field? == value
-public func == <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value?>, rhs: Value) -> ModelFilterMethod<Model>
+public func == <Model, Value>(lhs: KeyPath<Model, Value?>, rhs: Value) -> ModelFilterMethod<Model>
     where Model: Fluent.Model, Value: Encodable & Equatable
 {
     return ModelFilterMethod<Model>(
@@ -36,7 +36,7 @@ public func == <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value?>, rhs:
 /// MARK: .notEquals
 
 /// Model.field != value
-public func != <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
+public func != <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
     where Model: Fluent.Model, Value: Encodable & Equatable
 {
     return ModelFilterMethod<Model>(
