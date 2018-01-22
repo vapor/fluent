@@ -21,7 +21,7 @@ class SQLiteTests: XCTestCase {
         _ = try database.query("INSERT INTO foo VALUES (1337, 'Elite', 209.234)").execute().blockingAwait()
         _ = try database.query("INSERT INTO foo VALUES (9, NULL, 34.567)").execute().blockingAwait()
 
-        if let resultBar = try database.query("SELECT * FROM foo WHERE bar = 42").execute().blockingAwait()!.stream().all().blockingAwait().first {
+        if let resultBar = try database.query("SELECT * FROM foo WHERE bar = 42").execute().blockingAwait()!.fetchRow().blockingAwait() {
             XCTAssertEqual(resultBar["bar"]?.integer, 42)
             XCTAssertEqual(resultBar["baz"]?.text, "Life")
             XCTAssertEqual(resultBar["biz"]?.float, 0.44)
@@ -30,14 +30,14 @@ class SQLiteTests: XCTestCase {
         }
 
 
-        if let resultBaz = try database.query("SELECT * FROM foo where baz = 'Elite'").execute().blockingAwait()!.stream().all().blockingAwait().first {
+        if let resultBaz = try database.query("SELECT * FROM foo where baz = 'Elite'").execute().blockingAwait()!.fetchRow().blockingAwait() {
             XCTAssertEqual(resultBaz["bar"]?.integer, 1337)
             XCTAssertEqual(resultBaz["baz"]?.text, "Elite")
         } else {
             XCTFail("Could not get baz result")
         }
 
-        if let resultBaz = try database.query("SELECT * FROM foo where bar = 9").execute().blockingAwait()!.stream().all().blockingAwait().first {
+        if let resultBaz = try database.query("SELECT * FROM foo where bar = 9").execute().blockingAwait()!.fetchRow().blockingAwait() {
             XCTAssertEqual(resultBaz["bar"]?.integer, 9)
             XCTAssertEqual(resultBaz["baz"]?.isNull, true)
         } else {
@@ -58,11 +58,11 @@ class SQLiteTests: XCTestCase {
             .blockingAwait()
 
 
-        let selectAllResults = try database.query("SELECT * FROM `foo`").execute().blockingAwait()!.stream().all().blockingAwait().first
+        let selectAllResults = try database.query("SELECT * FROM `foo`").execute().blockingAwait()!.fetchRow().blockingAwait()
         XCTAssertNotNil(selectAllResults)
         XCTAssertEqual(selectAllResults!["bar"]?.text, unicode)
 
-        let selectWhereResults = try database.query("SELECT * FROM `foo` WHERE bar = '\(unicode)'").execute().blockingAwait()!.stream().all().blockingAwait().first
+        let selectWhereResults = try database.query("SELECT * FROM `foo` WHERE bar = '\(unicode)'").execute().blockingAwait()!.fetchRow().blockingAwait()
         XCTAssertNotNil(selectWhereResults)
         XCTAssertEqual(selectWhereResults!["bar"]?.text, unicode)
     }
@@ -77,7 +77,7 @@ class SQLiteTests: XCTestCase {
             .execute()
             .blockingAwait()
 
-        if let result = try! database.query("SELECT * FROM foo").execute().blockingAwait()!.stream().all().blockingAwait().first {
+        if let result = try! database.query("SELECT * FROM foo").execute().blockingAwait()!.fetchRow().blockingAwait() {
             XCTAssertEqual(result["max"]?.integer, max)
         }
     }
@@ -92,7 +92,7 @@ class SQLiteTests: XCTestCase {
             .execute()
             .blockingAwait()
 
-        if let result = try database.query("SELECT * FROM foo").execute().blockingAwait()!.stream().all().blockingAwait().first {
+        if let result = try database.query("SELECT * FROM foo").execute().blockingAwait()!.fetchRow().blockingAwait() {
             XCTAssertEqual(result["bar"]!.blob, data)
         } else {
             XCTFail()

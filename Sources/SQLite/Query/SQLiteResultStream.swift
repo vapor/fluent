@@ -1,7 +1,7 @@
 import Async
 import CSQLite
 
-public final class SQLiteResultStream: OutputStream, ConnectionContext {
+public final class SQLiteResultStream: OutputStream {
     // See OutputStream.Output
     public typealias Output = SQLiteRow
 
@@ -19,30 +19,22 @@ public final class SQLiteResultStream: OutputStream, ConnectionContext {
     /// See OutputStream.output
     public func output<S>(to inputStream: S) where S: Async.InputStream, S.Input == Output {
         downstream = AnyInputStream(inputStream)
-        inputStream.connect(to: self)
     }
 
     /// See ConnectionContext.connection
-    public func connection(_ event: ConnectionEvent) {
-        switch event {
-        case .cancel:
-            /// FIXME: handle better
-            break
-        case .request(let count):
-            guard count > 0 else {
-                return
-            }
-
-            results.fetchRow().do { row in
-                if let row = row {
-                    self.downstream?.next(row)
-                    self.request(count: count - 1)
-                } else {
-                    self.downstream?.close()
+    public func start() {
+        results.fetchRow().do { row in
+            if let row = row {
+                self.downstream?.next(row).do {
+                    self.start()
+                }.catch { error in
+                    self.downstream?.error(error)
                 }
-            }.catch { error in
-                self.downstream?.error(error)
+            } else {
+                self.downstream?.close()
             }
+        }.catch { error in
+            self.downstream?.error(error)
         }
     }
 }
@@ -67,16 +59,13 @@ extension OutputStream {
         var rows: [Output] = []
 
         // drain the stream of results
-        let drain = self.drain { row, upstream in
+        self.drain { row in
             rows.append(row)
-            upstream.request()
         }.catch { error in
             promise.fail(error)
         }.finally {
             promise.complete(rows)
         }
-
-        drain.upstream?.request()
 
         return promise.future
     }

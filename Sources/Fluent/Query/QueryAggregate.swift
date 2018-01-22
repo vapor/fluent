@@ -69,21 +69,19 @@ extension QueryBuilder {
 
         let stream = run(decoding: AggregateResult<D>.self)
 
-        let drain = stream.drain { res, upstream in
+        stream.drain { res in
             result = res.fluentAggregate
-            upstream.request()
         }.catch { err in
             promise.fail(err)
         }.finally {
             if let result = result {
                 promise.complete(result)
             } else {
-                promise.fail(FluentError(identifier: "driver-error", reason: "The driver closed successfully without a result"))
+                promise.fail(FluentError(identifier: "aggregate", reason: "The driver closed successfully without a result"))
             }
         }
 
         return stream.prepare().flatMap(to: D.self) {
-            drain.upstream?.request()
             return promise.future
         }
     }

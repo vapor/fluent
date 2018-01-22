@@ -50,11 +50,13 @@ extension SQLiteDatabase: QuerySupporting {
             sqliteQuery.execute().do { results in
                 if let results = results {
                     /// there are results to be streamed
-                    results.stream().map(to: D.self) { row in
+                    let resultStream = results.stream()
+                    resultStream.map(to: D.self) { row in
                         let decoder = SQLiteRowDecoder(row: row)
                         let model = try D(from: decoder)
                         return model
                     }.output(to: stream)
+                    resultStream.start()
                 } else {
                     stream.close()
                 }

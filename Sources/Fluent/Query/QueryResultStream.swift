@@ -19,9 +19,6 @@ public final class QueryResultStream<Model, Database>: Async.Stream
     /// Use a basic stream to easily implement our output stream.
     private var downstream: AnyInputStream<Output>?
 
-    /// Use a basic stream to easily implement our output stream.
-    private var upstream: ConnectionContext?
-
     /// Pointer to the connection
     private var connection: Future<Database.Connection>
 
@@ -42,21 +39,17 @@ public final class QueryResultStream<Model, Database>: Async.Stream
         switch event {
         case .close:
             downstream?.close()
-        case .connect(let upstream):
-            self.upstream = upstream
-            /// act as a passthrough stream
-            downstream?.connect(to: upstream)
         case .error(let error): downstream?.error(error)
-        case .next(let input):
+        case .next(let input, let ready):
             if let map = outputMap {
                 do {
                     let mapped = try map(input, currentConnection!) // if conn is nil, something is wrong
-                    mapped.stream(to: downstream!)
+                    mapped.stream(to: downstream!).chain(to: ready)
                 } catch {
                     downstream?.error(error)
                 }
             } else {
-                downstream?.next(input)
+                downstream?.next(input, ready)
             }
         }
     }
@@ -64,8 +57,6 @@ public final class QueryResultStream<Model, Database>: Async.Stream
     /// See OutputStream.output(to:)
     public func output<S>(to inputStream: S) where S: Async.InputStream, S.Input == Output {
         downstream = AnyInputStream(inputStream)
-        /// act as a passthrough stream
-        upstream.flatMap(inputStream.connect)
     }
 
     /// Prepares the output stream

@@ -15,9 +15,8 @@ extension QueryBuilder {
         var rows: [Model] = []
 
         // drain the stream of results
-        let drain = stream.drain { row, upstream in
+        stream.drain { row in
             rows.append(row)
-            upstream.request()
         }.catch { error in
             promise.fail(error)
         }.finally {
@@ -25,7 +24,6 @@ extension QueryBuilder {
         }
 
         return stream.prepare().flatMap(to: [Model].self) {
-            drain.upstream?.request()
             return promise.future
         }
     }
@@ -48,9 +46,8 @@ extension QueryBuilder {
 
         let stream = run()
 
-        let drain = stream.drain { _, upstream in
+        stream.drain { _ in
             // ignore output
-            upstream.request()
         }.catch { err in
             promise.fail(err)
         }.finally {
@@ -58,7 +55,6 @@ extension QueryBuilder {
         }
 
         return stream.prepare().flatMap(to: Void.self) {
-            drain.upstream?.request()
             return promise.future
         }
     }
@@ -91,13 +87,12 @@ extension QueryBuilder {
         let stream = run(decoding: T.self)
 
         // drain the stream of results
-        let drain = stream.drain { row, upstream in
+        stream.drain { row in
             partial.append(row)
             if partial.count >= max {
                 try closure(partial)
                 partial = []
             }
-            upstream.request()
         }.catch { error in
             promise.fail(error)
         }.finally {
@@ -112,7 +107,6 @@ extension QueryBuilder {
         }
 
         return stream.prepare().flatMap(to: Void.self) {
-            drain.upstream?.request()
             return promise.future
         }
     }
