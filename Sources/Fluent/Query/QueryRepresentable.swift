@@ -64,19 +64,18 @@ extension QueryRepresentable where Self: ExecutorRepresentable {
     /// Returns the first entity retrieved by the query.
     public func first(_ computedFields: [RawOr<ComputedField>] = []) throws -> E? {
         let query = try makeQuery()
-        query.action = .fetch(computedFields + E.computedFields)
         try query.limit(1)
 
-        let model = try query.all().first
+        let model = try query.all(computedFields).first
 
         return model
     }
 
     /// Returns the first entity with the given `id`.
-    public func find(_ id: NodeRepresentable?) throws -> E? {
+    public func find(_ id: NodeRepresentable?, _ computedFields: [RawOr<ComputedField>] = []) throws -> E? {
         return try makeQuery()
             .filter(E.idKey, id)
-            .first()
+            .first(computedFields)
     }
 }
 

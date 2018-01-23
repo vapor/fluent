@@ -2,6 +2,7 @@ extension QueryRepresentable where E: Paginatable, Self: ExecutorRepresentable {
     public func paginate(
         page: Int,
         count: Int = E.defaultPageSize,
+        computedFields: [RawOr<ComputedField>] = [],
         _ sorts: [Sort] = E.defaultPageSorts
     ) throws -> Page<E> {
         guard page > 0 else {
@@ -21,7 +22,7 @@ extension QueryRepresentable where E: Paginatable, Self: ExecutorRepresentable {
         _ = try sorts.map(query.sort)
 
         // fetch the data
-        let data = try query.all()
+        let data = try query.all(computedFields)
 
         return try Page(
             number: page,
