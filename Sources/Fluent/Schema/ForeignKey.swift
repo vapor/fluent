@@ -37,7 +37,7 @@ public struct ForeignKey {
 		let f1 = String("\(field)".characters.prefix(12))
 		let f2 = String("\(foreignField)".characters.prefix(12))
 	
-		let timestamp = String(describing: ²Date().timeIntervalSince1970).suffix(12)
+		let timestamp = String(describing: Date().timeIntervalSince1970).suffix(12)
 
 		self.name = name ?? "\(timestamp)_\(e1).\(f1)-\(e2).\(f2)"
 	}
