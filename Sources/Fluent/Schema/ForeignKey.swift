@@ -36,7 +36,10 @@ public struct ForeignKey {
 		let e2 = String("\(foreignEntity.entity)".characters.prefix(12))
 		let f1 = String("\(field)".characters.prefix(12))
 		let f2 = String("\(foreignField)".characters.prefix(12))
-		self.name = name ?? "\(e1).\(f1)-\(e2).\(f2)"
+	
+		let timestamp = String(describing: ²Date().timeIntervalSince1970).suffix(12)
+
+		self.name = name ?? "\(timestamp)_\(e1).\(f1)-\(e2).\(f2)"
 	}
     }
 }
