@@ -80,11 +80,44 @@ extension DatabaseQuery {
 
 extension QueryBuilder where Model.Database: JoinSupporting {
     /// Join another model to this query builder.
-    public func join<Joined: Fluent.Model>(
+    public func join<Joined>(
+        _ joinedType: Joined.Type = Joined.self,
         field joinedKey: ReferenceWritableKeyPath<Joined, Model.ID>,
         to baseKey: ReferenceWritableKeyPath<Model, Model.ID?> = Model.idKey,
         method: QueryJoinMethod = .inner
-    ) -> Self {
+    ) -> Self where Joined: Fluent.Model {
+        let join = QueryJoin(
+            method: method,
+            base:  Model.idKey.makeQueryField(),
+            joined: joinedKey.makeQueryField()
+        )
+        query.joins.append(join)
+        return self
+    }
+
+    /// Join another model to this query builder.
+    public func join<Joined>(
+        _ joinedType: Joined.Type = Joined.self,
+        field joinedKey: ReferenceWritableKeyPath<Joined, Model.ID?>,
+        to baseKey: ReferenceWritableKeyPath<Model, Model.ID?> = Model.idKey,
+        method: QueryJoinMethod = .inner
+    ) -> Self where Joined: Fluent.Model {
+        let join = QueryJoin(
+            method: method,
+            base:  Model.idKey.makeQueryField(),
+            joined: joinedKey.makeQueryField()
+        )
+        query.joins.append(join)
+        return self
+    }
+
+    /// Join another model to this query builder.
+    public func join<Joined>(
+        _ joinedType: Joined.Type = Joined.self,
+        field joinedKey: ReferenceWritableKeyPath<Joined, Joined.ID?>,
+        to baseKey: ReferenceWritableKeyPath<Model, Joined.ID>,
+        method: QueryJoinMethod = .inner
+    ) -> Self where Joined: Fluent.Model {
         let join = QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),
@@ -95,11 +128,12 @@ extension QueryBuilder where Model.Database: JoinSupporting {
     }
 
     /// Join another model to this query builder.
-    public func join<Joined: Fluent.Model>(
+    public func join<Joined>(
+        _ joinedType: Joined.Type = Joined.self,
         field joinedKey: ReferenceWritableKeyPath<Joined, Joined.ID?>,
-        to baseKey: ReferenceWritableKeyPath<Model, Joined.ID>,
+        to baseKey: ReferenceWritableKeyPath<Model, Joined.ID?>,
         method: QueryJoinMethod = .inner
-    ) -> Self {
+    ) -> Self where Joined: Fluent.Model {
         let join = QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),

@@ -48,6 +48,10 @@ final class SQLiteBenchmarkTests: XCTestCase {
         try benchmarker.benchmarkCache_withSchema()
     }
 
+    func testJoins() throws {
+        try benchmarker.benchmarkJoins_withSchema()
+    }
+
     static let allTests = [
         ("testSchema", testSchema),
         ("testModels", testModels),
