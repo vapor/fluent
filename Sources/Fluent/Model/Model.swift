@@ -3,7 +3,7 @@ import CodableKit
 import Service
 
 /// A Fluent compatible identifier.
-public typealias ID = Codable & Equatable
+public typealias ID = Codable & Equatable & KeyStringDecodable
 
 /// Fluent database models. These types can be fetched
 /// from a database connection using a query.

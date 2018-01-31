@@ -1,7 +1,9 @@
+import CodableKit
 import Async
 import Dispatch
 import Foundation
 @testable import SQLite
+import FluentSQLite
 import XCTest
 
 class SQLiteTests: XCTestCase {
@@ -123,5 +125,21 @@ class SQLiteTests: XCTestCase {
 extension SQLiteConnection {
     func query(_ string: String) throws -> SQLiteQuery {
         return SQLiteQuery(string: string, connection: self)
+    }
+}
+
+
+final class Forum: Model, Migration {
+    static var idKey: ReferenceWritableKeyPath<Forum, UUID?> = \Forum.id
+    
+    typealias Database = SQLiteDatabase
+    
+    typealias ID = UUID
+    
+    var id: UUID?
+    var name: String
+    
+    init(name: String) {
+        self.name = name
     }
 }
