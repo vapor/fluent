@@ -38,7 +38,7 @@ internal struct SchemaMigrationConfig<Database>: MigrationRunnable where Databas
     /// Prepares the connection for migrations by ensuring
     /// the migration log model is ready for use.
     internal func prepareForMigration(on conn: Database.Connection) -> Future<Void> {
-        return MigrationLogMigration<Database>.prepareMetadata(on: conn).flatMap(to: Void.self) {
+        return MigrationLog<Database>.prepareMetadata(on: conn).flatMap(to: Void.self) {
             return MigrationLog<Database>.latestBatch(on: conn).flatMap(to: Void.self) { lastBatch in
                 return self.migrateBatch(on: conn, batch: lastBatch + 1)
             }

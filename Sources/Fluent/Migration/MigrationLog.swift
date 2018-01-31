@@ -50,26 +50,7 @@ final class MigrationLog<D>: Model, Timestampable where D: QuerySupporting {
 }
 
 /// MARK: Migration
-final class MigrationLogMigration<D>: Migration where D: QuerySupporting & SchemaSupporting {
-    public typealias Database = D
-
-    /// See Migration.prepare
-    static func prepare(on connection: D.Connection) -> Future<Void> {
-        return Database.create(MigrationLog<D>.self, on: connection) { builder in
-            try builder.field(for: \MigrationLog<D>.id)
-            try builder.field(for: \MigrationLog<D>.name)
-            try builder.field(for: \MigrationLog<D>.batch)
-            try builder.field(for: \MigrationLog<D>.createdAt)
-            try builder.field(for: \MigrationLog<D>.updatedAt)
-        }
-    }
-
-    /// See Migration.revert
-    static func revert(on connection: Database.Connection) -> Future<Void> {
-        return Database.delete(MigrationLog<Database>.self, on: connection)
-    }
-
-}
+extension MigrationLog: Migration where D: SchemaSupporting { }
 
 /// MARK: Internal
 
@@ -84,7 +65,7 @@ extension MigrationLog {
     }
 }
 
-extension MigrationLogMigration {
+extension MigrationLog where D: SchemaSupporting {
     /// Prepares the connection for storing migration logs.
     /// note: this is unlike other migrations since we are checking
     /// for an error instead of asking if the migration has already prepared.
