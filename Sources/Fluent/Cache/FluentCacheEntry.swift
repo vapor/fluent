@@ -9,16 +9,13 @@ public final class FluentCacheEntry<D>: Model
     public static var name: String { return "fluentcache" }
 
     /// See `Model.idKey`
-    public static var idKey: IDKey { return \.key }
-
-    /// See `Model.ID`
-    public typealias ID = String
+    public static var idKey: ReferenceWritableKeyPath<FluentCacheEntry<D>, String?> { return \.key }
 
     /// See `Model.Database`
     public typealias Database = D
 
     /// The cache entry's unique key.
-    public var key: ID?
+    public var key: String?
 
     /// The cache entry's JSON encoded data.
     public var data: Data

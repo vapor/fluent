@@ -87,7 +87,7 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: ReferenceWritableKeyPath<Joined, Model.ID>,
         to baseKey: ReferenceWritableKeyPath<Model, Model.ID?> = Model.idKey,
         method: QueryJoinMethod = .inner
-    ) -> Self where Joined: Fluent.Model, Model.ID: KeyStringDecodable {
+    ) -> Self where Joined: Fluent.Model {
         let join = QueryJoin(
             method: method,
             base:  Model.idKey.makeQueryField(),
@@ -103,7 +103,7 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: ReferenceWritableKeyPath<Joined, Model.ID?>,
         to baseKey: ReferenceWritableKeyPath<Model, Model.ID?> = Model.idKey,
         method: QueryJoinMethod = .inner
-    ) -> Self where Joined: Fluent.Model, Model.ID: KeyStringDecodable {
+    ) -> Self where Joined: Fluent.Model {
         let join = QueryJoin(
             method: method,
             base:  Model.idKey.makeQueryField(),
@@ -119,7 +119,7 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: ReferenceWritableKeyPath<Joined, Joined.ID?>,
         to baseKey: ReferenceWritableKeyPath<Model, Joined.ID>,
         method: QueryJoinMethod = .inner
-    ) -> Self where Joined: Fluent.Model, Joined.ID: KeyStringDecodable {
+    ) -> Self where Joined: Fluent.Model {
         let join = QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),
@@ -135,7 +135,7 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: ReferenceWritableKeyPath<Joined, Joined.ID?>,
         to baseKey: ReferenceWritableKeyPath<Model, Joined.ID?>,
         method: QueryJoinMethod = .inner
-    ) -> Self where Joined: Fluent.Model, Joined.ID: KeyStringDecodable {
+    ) -> Self where Joined: Fluent.Model {
         let join = QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),

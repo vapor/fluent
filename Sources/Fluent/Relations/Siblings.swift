@@ -81,7 +81,7 @@ extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecod
 
 // MARK: ModifiablePivot
 
-extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecodable, Related.ID: KeyStringDecodable {
+extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecodable {
     /// Returns true if the supplied model is attached
     /// to this relationship.
     public func isAttached(_ model: Related, on conn: DatabaseConnectable) -> Future<Bool> {
@@ -108,7 +108,7 @@ extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecod
 
 /// Left-side
 extension Siblings
-    where Through: ModifiablePivot, Through.Left == Base, Through.Right == Related, Through.Database: QuerySupporting, Through.ID: KeyStringDecodable
+    where Through: ModifiablePivot, Through.Left == Base, Through.Right == Related, Through.Database: QuerySupporting
 {
     /// Attaches the model to this relationship.
     public func attach(_ model: Related, on conn: DatabaseConnectable) -> Future<Through> {
@@ -123,7 +123,7 @@ extension Siblings
 
 /// Right-side
 extension Siblings
-    where Through: ModifiablePivot, Through.Left == Related, Through.Right == Base, Through.Database: QuerySupporting, Through.ID: KeyStringDecodable
+    where Through: ModifiablePivot, Through.Left == Related, Through.Right == Base, Through.Database: QuerySupporting
 {
     /// Attaches the model to this relationship.
     public func attach(_ model: Related, on conn: DatabaseConnectable) -> Future<Through> {

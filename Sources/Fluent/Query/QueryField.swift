@@ -90,7 +90,7 @@ extension Model where ID: KeyStringDecodable {
 }
 
 /// A container for decoding model key paths.
-public struct QueryFieldDecodingContainer<Model: Fluent.Model> where Model.ID: KeyStringDecodable {
+public struct QueryFieldDecodingContainer<Model> where Model: Fluent.Model {
     /// The underlying container.
     public var container: KeyedDecodingContainer<QueryField>
     
