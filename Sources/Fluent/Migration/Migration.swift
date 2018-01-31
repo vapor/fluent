@@ -19,7 +19,7 @@ public protocol Migration {
     static func revert(on connection: Database.Connection) -> Future<Void>
 }
 
-extension Model where Self: Migration, Database: SchemaSupporting, ID: KeyStringDecodable {
+extension Model where Self: Migration, Database: SchemaSupporting {
     /// See Migration.prepare
     public static func prepare(on connection: Database.Connection) -> Future<Void> {
         return Database.create(self, on: connection) { schema in
