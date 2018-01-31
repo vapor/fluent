@@ -22,9 +22,10 @@ public protocol Migration {
 extension Model where Self: Migration, Database: SchemaSupporting {
     /// See Migration.prepare
     public static func prepare(on connection: Database.Connection) -> Future<Void> {
+        let idCodingPath = Self.codingPath(forKey: idKey)
+        let properties = Self.properties()
         return Database.create(self, on: connection) { schema in
-            let idCodingPath = Self.codingPath(forKey: idKey)
-            for property in Self.properties() {
+            for property in properties {
                 guard property.codingPath.count == 1 else {
                     continue
                 }
