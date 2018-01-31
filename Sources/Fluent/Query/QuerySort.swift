@@ -30,10 +30,9 @@ public enum QuerySortDirection {
 
 extension QueryBuilder {
     /// Add a Sort to the Query.
-    public func sort<T>(
-        _ field: ReferenceWritableKeyPath<Model, T>,
-        _ direction: QuerySortDirection
-    ) -> Self where T: KeyStringDecodable {
+    public func sort<T>(_ field: KeyPath<Model, T>, _ direction: QuerySortDirection) -> Self
+        where T: KeyStringDecodable
+    {
         let sort = QuerySort(
             field: field.makeQueryField(),
             direction: direction

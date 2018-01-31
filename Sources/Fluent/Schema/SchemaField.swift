@@ -89,9 +89,9 @@ extension SchemaBuilder where Model.ID: KeyStringDecodable {
     }
 
     /// Removes a field from the schema.
-    public func removeField<T>(
-        for field: ReferenceWritableKeyPath<Model, T>
-    ) where T: KeyStringDecodable {
+    public func removeField<T>(for field: KeyPath<Model, T>)
+        where T: KeyStringDecodable
+    {
         let name = field.makeQueryField().name
         schema.removeFields.append(name)
     }

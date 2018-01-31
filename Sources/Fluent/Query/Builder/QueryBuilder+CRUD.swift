@@ -22,10 +22,10 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
         query.action = .create
         return connection.flatMap(to: Void.self) { conn in
             // set timestamps
-            if var timestampable = model as? Timestampable {
+            if let timestampable = model as? AnyTimestampable {
                 let now = Date()
-                timestampable.updatedAt = now
-                timestampable.createdAt = now
+                timestampable.fluentUpdatedAt = now
+                timestampable.fluentCreatedAt = now
             }
 
             return Model.Database.modelEvent(
@@ -60,8 +60,8 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
             self.query.action = .update
 
             // update timestamps if required
-            if var timestampable = model as? Timestampable {
-                timestampable.updatedAt = Date()
+            if let timestampable = model as? AnyTimestampable {
+                timestampable.fluentUpdatedAt = Date()
             }
 
             return Model.Database.modelEvent(

@@ -20,6 +20,12 @@ final class MigrationLog<D>: Model, Timestampable where D: QuerySupporting {
     /// See Model.idKeyPath
     static var idKey: IDKey { return \.id }
 
+    /// See Timestampable.createdAtKey
+    static var createdAtKey: CreatedAtKey { return \.createdAt }
+
+    /// See Timestampable.updatedAtKey
+    static var updatedAtKey: UpdatedAtKey { return \.updatedAt }
+
     /// See Model.id
     var id: UUID?
 

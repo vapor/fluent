@@ -58,10 +58,7 @@ public enum SequenceComparison {
 
 /// Model.field ~= value
 infix operator ~=
-public func ~= <Model, Value>(
-    lhs: ReferenceWritableKeyPath<Model, Value>,
-    rhs: Value
-) -> ModelFilterMethod<Model>
+public func ~= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
     where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
@@ -71,7 +68,7 @@ public func ~= <Model, Value>(
 
 /// Model.field =~ value
 infix operator =~
-public func =~ <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
+public func =~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
     where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
@@ -81,7 +78,7 @@ public func =~ <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: 
 
 /// Model.field ~~ value
 infix operator ~~
-public func ~~ <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
+public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
     where Model: Fluent.Model, Value: Encodable & Equatable, Value: KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
@@ -102,7 +99,7 @@ public enum OrderedComparison {
 /// .greaterThan
 
 /// Model.field > value
-public func > <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
+public func > <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
     where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
@@ -113,7 +110,7 @@ public func > <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: V
 /// .lessThan
 
 /// Model.field > value
-public func < <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
+public func < <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
     where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
@@ -124,7 +121,7 @@ public func < <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: V
 /// .greaterThanOrEquals
 
 /// Model.field >= value
-public func >= <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
+public func >= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
     where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
@@ -135,7 +132,7 @@ public func >= <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: 
 /// .lessThanOrEquals
 
 /// Model.field <= value
-public func <= <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
+public func <= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
     where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(

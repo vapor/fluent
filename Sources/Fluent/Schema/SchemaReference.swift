@@ -108,19 +108,17 @@ extension SchemaBuilder where Model.Database: ReferenceSupporting, Model.ID: Key
     }
 
     /// Adds a field to the schema.
-    public func removeField<T, Other>(
-        for field: ReferenceWritableKeyPath<Model, T>,
-        referencing: KeyPath<Other, Optional<T>>
-    ) throws where Other: Fluent.Model, T: KeyStringDecodable {
+    public func removeField<T, Other>(for field: KeyPath<Model, T>, referencing: KeyPath<Other, Optional<T>>) throws
+        where Other: Fluent.Model, T: KeyStringDecodable
+    {
         removeField(for: field)
         try removeReference(from: field, to: referencing)
     }
 
     /// Adds a field to the schema.
-    public func removeReference<T, Other>(
-        from field: ReferenceWritableKeyPath<Model, T>,
-        to referencing: KeyPath<Other, Optional<T>>
-    ) throws where Other: Fluent.Model, T: KeyStringDecodable {
+    public func removeReference<T, Other>(from field: KeyPath<Model, T>, to referencing: KeyPath<Other, Optional<T>>) throws
+        where Other: Fluent.Model, T: KeyStringDecodable
+    {
         let reference = SchemaReference<Model.Database>(
             base: field.makeQueryField(),
             referenced: referencing.makeQueryField()

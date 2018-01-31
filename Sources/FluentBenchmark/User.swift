@@ -12,6 +12,12 @@ public final class User<D>: Model, Timestampable where D: QuerySupporting {
     /// See Model.idKey
     public static var idKey: IDKey { return \.id }
 
+    /// See Timestampable.createdAtKey
+    public static var createdAtKey: CreatedAtKey { return \.createdAt }
+
+    /// See Timestampable.updatedAtKey
+    public static var updatedAtKey: UpdatedAtKey { return \.updatedAt }
+
     /// See Model.name
     public static var entity: String {
         return "users"
