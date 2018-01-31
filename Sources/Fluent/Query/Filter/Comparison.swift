@@ -1,3 +1,4 @@
+import CodableKit
 // MARK: Equality
 
 /// Comparisons that require an equatable value.
@@ -17,7 +18,7 @@ extension Encodable {
 
 /// Model.field == value
 public func == <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
-    where Model: Fluent.Model, Value: Encodable & Equatable
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
         method: .compare(lhs.makeQueryField(), .equality(.equals), .value(rhs))
@@ -26,7 +27,7 @@ public func == <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> ModelFi
 
 /// Model.field? == value
 public func == <Model, Value>(lhs: KeyPath<Model, Value?>, rhs: Value) -> ModelFilterMethod<Model>
-    where Model: Fluent.Model, Value: Encodable & Equatable
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
         method: .compare(lhs.makeQueryField(), .equality(.equals), .value(rhs))
@@ -37,7 +38,7 @@ public func == <Model, Value>(lhs: KeyPath<Model, Value?>, rhs: Value) -> ModelF
 
 /// Model.field != value
 public func != <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
-    where Model: Fluent.Model, Value: Encodable & Equatable
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
         method: .compare(lhs.makeQueryField(), .equality(.notEquals), .value(rhs))
@@ -61,7 +62,7 @@ public func ~= <Model, Value>(
     lhs: ReferenceWritableKeyPath<Model, Value>,
     rhs: Value
 ) -> ModelFilterMethod<Model>
-    where Model: Fluent.Model, Value: Encodable & Equatable
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
         method: .compare(lhs.makeQueryField(), .sequence(.hasSuffix), .value(rhs))
@@ -71,7 +72,7 @@ public func ~= <Model, Value>(
 /// Model.field =~ value
 infix operator =~
 public func =~ <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
-    where Model: Fluent.Model, Value: Encodable & Equatable
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
         method: .compare(lhs.makeQueryField(), .sequence(.hasPrefix), .value(rhs))
@@ -81,7 +82,7 @@ public func =~ <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: 
 /// Model.field ~~ value
 infix operator ~~
 public func ~~ <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
-    where Model: Fluent.Model, Value: Encodable & Equatable
+    where Model: Fluent.Model, Value: Encodable & Equatable, Value: KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
         method: .compare(lhs.makeQueryField(), .sequence(.contains), .value(rhs))
@@ -102,7 +103,7 @@ public enum OrderedComparison {
 
 /// Model.field > value
 public func > <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
-    where Model: Fluent.Model, Value: Encodable & Equatable
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
         method: .compare(lhs.makeQueryField(), .order(.greaterThan), .value(rhs))
@@ -113,7 +114,7 @@ public func > <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: V
 
 /// Model.field > value
 public func < <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
-    where Model: Fluent.Model, Value: Encodable & Equatable
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
         method: .compare(lhs.makeQueryField(), .order(.lessThan), .value(rhs))
@@ -124,7 +125,7 @@ public func < <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: V
 
 /// Model.field >= value
 public func >= <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
-    where Model: Fluent.Model, Value: Encodable & Equatable
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
         method: .compare(lhs.makeQueryField(), .order(.greaterThanOrEquals), .value(rhs))
@@ -135,7 +136,7 @@ public func >= <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: 
 
 /// Model.field <= value
 public func <= <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
-    where Model: Fluent.Model, Value: Encodable & Equatable
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
         method: .compare(lhs.makeQueryField(), .order(.lessThanOrEquals), .value(rhs))

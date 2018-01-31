@@ -8,16 +8,10 @@ import SQLite
 /// A SQLite database model.
 /// See `Fluent.Model`.
 public protocol SQLiteModel: Model where Database == SQLiteDatabase { }
-extension SQLiteModel {
-    public typealias Database = SQLiteDatabase
-}
 
 /// A SQLite database pivot.
 /// See `Fluent.Pivot`.
 public protocol SQLitePivot: Pivot where Database == SQLiteDatabase { }
-extension SQLitePivot {
-    public typealias Database = SQLiteDatabase
-}
 
 extension DatabaseIdentifier {
     /// The main SQLite database identifier.

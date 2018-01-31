@@ -1,3 +1,5 @@
+import CodableKit
+
 /// Sorts results based on a field
 /// and direction.
 public struct QuerySort {
@@ -31,7 +33,7 @@ extension QueryBuilder {
     public func sort<T>(
         _ field: ReferenceWritableKeyPath<Model, T>,
         _ direction: QuerySortDirection
-    ) -> Self {
+    ) -> Self where T: KeyStringDecodable {
         let sort = QuerySort(
             field: field.makeQueryField(),
             direction: direction

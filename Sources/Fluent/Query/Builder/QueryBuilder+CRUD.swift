@@ -1,7 +1,8 @@
+import CodableKit
 import Async
 import Foundation
 
-extension QueryBuilder {
+extension QueryBuilder where Model.ID: KeyStringDecodable {
     /// Saves the supplied model.
     /// Calls `create` if the ID is `nil`, and `update` if it exists.
     /// If you need to create a model with a pre-existing ID,

@@ -1,3 +1,5 @@
+import CodableKit
+
 /// Represents a field and its optional entity in a query.
 /// This is used mostly for query filters.
 public struct QueryField {
@@ -17,7 +19,7 @@ public struct QueryField {
 
 /// Conform key path's where the root is a model.
 /// FIXME: conditional conformance
-extension KeyPath where Root: Model {
+extension KeyPath where Root: Model, Value: KeyStringDecodable {
     /// See QueryFieldRepresentable.makeQueryField()
     public func makeQueryField() -> QueryField {
         let key = Root.codingPath(forKey: self)
@@ -73,7 +75,7 @@ extension QueryField: CodingKey {
     }
 }
 
-extension Model {
+extension Model where ID: KeyStringDecodable {
     /// Creates a query field decoding container for this model.
     public static func decodingContainer(for decoder: Decoder) throws -> QueryFieldDecodingContainer<Self> {
         let container = try decoder.container(keyedBy: QueryField.self)
@@ -88,12 +90,12 @@ extension Model {
 }
 
 /// A container for decoding model key paths.
-public struct QueryFieldDecodingContainer<Model: Fluent.Model> {
+public struct QueryFieldDecodingContainer<Model> where Model: Fluent.Model {
     /// The underlying container.
     public var container: KeyedDecodingContainer<QueryField>
     
     /// Decodes a model key path to a type.
-    public func decode<T: Decodable>(key: KeyPath<Model, T>) throws -> T {
+    public func decode<T: Decodable>(key: KeyPath<Model, T>) throws -> T where T: KeyStringDecodable {
         let field = key.makeQueryField()
         return try container.decode(T.self, forKey: field)
     }
@@ -108,7 +110,7 @@ public struct QueryFieldEncodingContainer<Model: Fluent.Model> {
     public var model: Model
 
     /// Encodes a model key path to the encoder.
-    public mutating func encode<T: Encodable>(key: KeyPath<Model, T>) throws {
+    public mutating func encode<T: Encodable>(key: KeyPath<Model, T>) throws where T: KeyStringDecodable {
         let field = key.makeQueryField()
         let value: T = model[keyPath: key]
         try container.encode(value, forKey: field)

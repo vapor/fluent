@@ -1,3 +1,4 @@
+import CodableKit
 import Async
 
 /// Defines database types that support references
@@ -50,13 +51,13 @@ extension DatabaseSchema where Database: ReferenceSupporting {
     }
 }
 
-extension SchemaBuilder where Model.Database: ReferenceSupporting {
+extension SchemaBuilder where Model.Database: ReferenceSupporting, Model.ID: KeyStringDecodable {
     /// Adds a field to the schema and creates a reference.
     /// T : T
     public func field<T, Other>(
         for key: KeyPath<Model, T>,
         referencing: KeyPath<Other, T>
-    ) throws where Other: Fluent.Model {
+    ) throws where Other: Fluent.Model, T: KeyStringDecodable {
         let base = try field(for: key)
         let reference = SchemaReference(base: base, referenced: referencing.makeQueryField())
         schema.addReferences.append(reference)
@@ -67,7 +68,7 @@ extension SchemaBuilder where Model.Database: ReferenceSupporting {
     public func field<T, Other>(
         for key: KeyPath<Model, T>,
         referencing: KeyPath<Other, Optional<T>>
-    ) throws where Other: Fluent.Model {
+    ) throws where Other: Fluent.Model, T: KeyStringDecodable {
         let base = try field(for: key)
         let reference = SchemaReference(base: base, referenced: referencing.makeQueryField())
         schema.addReferences.append(reference)
@@ -78,7 +79,7 @@ extension SchemaBuilder where Model.Database: ReferenceSupporting {
     public func field<T, Other>(
         for key: KeyPath<Model, Optional<T>>,
         referencing: KeyPath<Other, T>
-    ) throws where Other: Fluent.Model {
+    ) throws where Other: Fluent.Model, T: KeyStringDecodable {
         let base = try field(for: key)
         let reference = SchemaReference(base: base, referenced: referencing.makeQueryField())
         schema.addReferences.append(reference)
@@ -89,7 +90,7 @@ extension SchemaBuilder where Model.Database: ReferenceSupporting {
     public func field<T, Other>(
         for key: KeyPath<Model, Optional<T>>,
         referencing: KeyPath<Other, Optional<T>>
-    ) throws where Other: Fluent.Model {
+    ) throws where Other: Fluent.Model, T: KeyStringDecodable {
         let base = try field(for: key)
         let reference = SchemaReference<Model.Database>(base: base, referenced: referencing.makeQueryField())
         schema.addReferences.append(reference)
@@ -100,7 +101,7 @@ extension SchemaBuilder where Model.Database: ReferenceSupporting {
     public func remove<T, Other>(
         for key: KeyPath<Model, Optional<T>>,
         referencing: KeyPath<Other, Optional<T>>
-    ) throws where Other: Fluent.Model {
+    ) throws where Other: Fluent.Model, T: KeyStringDecodable {
         let base = try field(for: key)
         let reference = SchemaReference<Model.Database>(base: base, referenced: referencing.makeQueryField())
         schema.addReferences.append(reference)
@@ -110,16 +111,16 @@ extension SchemaBuilder where Model.Database: ReferenceSupporting {
     public func removeField<T, Other>(
         for field: ReferenceWritableKeyPath<Model, T>,
         referencing: KeyPath<Other, Optional<T>>
-    ) throws where Other: Fluent.Model {
+    ) throws where Other: Fluent.Model, T: KeyStringDecodable {
         removeField(for: field)
-        removeReference(from: field, to: referencing)
+        try removeReference(from: field, to: referencing)
     }
 
     /// Adds a field to the schema.
     public func removeReference<T, Other>(
         from field: ReferenceWritableKeyPath<Model, T>,
         to referencing: KeyPath<Other, Optional<T>>
-    ) where Other: Fluent.Model {
+    ) throws where Other: Fluent.Model, T: KeyStringDecodable {
         let reference = SchemaReference<Model.Database>(
             base: field.makeQueryField(),
             referenced: referencing.makeQueryField()

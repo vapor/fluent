@@ -13,18 +13,22 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
         do {
             _ = try Database.transaction(on: conn) { conn in
                 /// create 100 users
+                var saves: [Future<User<Database>>] = []
                 for i in 1...100 {
                     let user = User<Database>(name: "User \(i)", age: i)
-                    _ = try self.test(user.save(on: conn))
+                    saves.append(user.save(on: conn))
                 }
 
-                // count users
-                let count = try self.test(conn.query(User<Database>.self).count())
-                if count != 101 {
-                    self.fail("count should be 101")
+                return saves.flatMap(to: Void.self) { _ in
+                    return conn.query(User<Database>.self).count().map(to: Void.self) { count in
+                        if count != 101 {
+                            self.fail("count should be 101")
+                        }
+
+                        throw FluentBenchmarkError(identifier: "test", reason: "rollback")
+                    }
                 }
 
-                throw FluentBenchmarkError(identifier: "test", reason: "rollback")
             }.await(on: eventLoop)
         } catch is FluentBenchmarkError {
             // expected

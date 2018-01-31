@@ -1,3 +1,4 @@
+import CodableKit
 import Foundation
 
 public struct SchemaField<Database> where Database: SchemaSupporting {
@@ -24,10 +25,12 @@ public struct SchemaField<Database> where Database: SchemaSupporting {
 
 // MARK: Fields
 
-extension SchemaBuilder {
+extension SchemaBuilder where Model.ID: KeyStringDecodable {
     /// Adds a field to the schema.
     @discardableResult
-    public func field<T>(for key: KeyPath<Model, Optional<T>>) throws -> SchemaField<Model.Database> {
+    public func field<T>(for key: KeyPath<Model, Optional<T>>) throws -> SchemaField<Model.Database>
+        where T: KeyStringDecodable
+    {
         return try field(
             type: Model.Database.fieldType(for: T.self),
             for: key,
@@ -38,7 +41,9 @@ extension SchemaBuilder {
 
     /// Adds a field to the schema.
     @discardableResult
-    public func field<T>(for key: KeyPath<Model, T>) throws -> SchemaField<Model.Database> {
+    public func field<T>(for key: KeyPath<Model, T>) throws -> SchemaField<Model.Database>
+        where T: KeyStringDecodable
+    {
         return try field(
             type: Model.Database.fieldType(for: T.self),
             for: key,
@@ -54,7 +59,7 @@ extension SchemaBuilder {
         for field: KeyPath<Model, T>,
         isOptional: Bool = false,
         isIdentifier: Bool = false
-    ) -> SchemaField<Model.Database> {
+    ) -> SchemaField<Model.Database> where T: KeyStringDecodable {
         let field = SchemaField<Model.Database>(
             name: field.makeQueryField().name,
             type: type,
@@ -86,7 +91,7 @@ extension SchemaBuilder {
     /// Removes a field from the schema.
     public func removeField<T>(
         for field: ReferenceWritableKeyPath<Model, T>
-    ) {
+    ) where T: KeyStringDecodable {
         let name = field.makeQueryField().name
         schema.removeFields.append(name)
     }

@@ -1,3 +1,4 @@
+import CodableKit
 import Async
 
 /// Declares a database migration.

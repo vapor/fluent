@@ -45,7 +45,7 @@ public final class SQLiteQuery {
 
     // MARK: Execute
 
-    /// Executes the query, blocking until complete.
+    /// Executes the query, completing the future with the results.
     public func execute() -> Future<SQLiteResults?> {
         let promise = Promise(SQLiteResults?.self)
         do {

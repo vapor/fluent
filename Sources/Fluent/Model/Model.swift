@@ -2,9 +2,6 @@ import Async
 import CodableKit
 import Service
 
-/// A Fluent compatible identifier.
-public typealias ID = Codable & Equatable
-
 /// Fluent database models. These types can be fetched
 /// from a database connection using a query.
 ///
@@ -142,7 +139,7 @@ extension Model {
 
 /// MARK: CRUD
 
-extension Model where Database: QuerySupporting {
+extension Model where Database: QuerySupporting, ID: KeyStringDecodable {
     /// Saves the supplied model.
     /// Calls `create` if the ID is `nil`, and `update` if it exists.
     /// If you need to create a model with a pre-existing ID,
@@ -207,7 +204,7 @@ extension Model {
 
 // MARK: Routing
 
-extension Model where Database: QuerySupporting {
+extension Model where Database: QuerySupporting, ID: KeyStringDecodable {
     /// See `Parameter.make`
     public static func make(for parameter: String, using container: Container) throws -> Future<Self> {
         guard let idType = ID.self as? StringDecodable.Type else {

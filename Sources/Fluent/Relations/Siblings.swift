@@ -1,3 +1,4 @@
+import CodableKit
 import Async
 
 /// A siblings relation is a many-to-many relation between
@@ -69,7 +70,7 @@ public struct Siblings<Base: Model, Related: Model, Through: Pivot>
     }
 }
 
-extension Siblings where Base.Database: QuerySupporting{
+extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecodable, Related.ID: KeyStringDecodable {
     /// Create a query for the parent.
     public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Related> {
         return try Related.query(on: conn)
@@ -80,7 +81,7 @@ extension Siblings where Base.Database: QuerySupporting{
 
 // MARK: ModifiablePivot
 
-extension Siblings where Base.Database: QuerySupporting {
+extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecodable {
     /// Returns true if the supplied model is attached
     /// to this relationship.
     public func isAttached(_ model: Related, on conn: DatabaseConnectable) -> Future<Bool> {

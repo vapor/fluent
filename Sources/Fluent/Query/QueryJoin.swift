@@ -1,3 +1,5 @@
+import CodableKit
+
 /// Describes a relational join which brings
 /// columns of data from multiple entities
 /// into one response.
@@ -80,11 +82,44 @@ extension DatabaseQuery {
 
 extension QueryBuilder where Model.Database: JoinSupporting {
     /// Join another model to this query builder.
-    public func join<Joined: Fluent.Model>(
+    public func join<Joined>(
+        _ joinedType: Joined.Type = Joined.self,
         field joinedKey: ReferenceWritableKeyPath<Joined, Model.ID>,
         to baseKey: ReferenceWritableKeyPath<Model, Model.ID?> = Model.idKey,
         method: QueryJoinMethod = .inner
-    ) -> Self {
+    ) -> Self where Joined: Fluent.Model {
+        let join = QueryJoin(
+            method: method,
+            base:  Model.idKey.makeQueryField(),
+            joined: joinedKey.makeQueryField()
+        )
+        query.joins.append(join)
+        return self
+    }
+
+    /// Join another model to this query builder.
+    public func join<Joined>(
+        _ joinedType: Joined.Type = Joined.self,
+        field joinedKey: ReferenceWritableKeyPath<Joined, Model.ID?>,
+        to baseKey: ReferenceWritableKeyPath<Model, Model.ID?> = Model.idKey,
+        method: QueryJoinMethod = .inner
+    ) -> Self where Joined: Fluent.Model {
+        let join = QueryJoin(
+            method: method,
+            base:  Model.idKey.makeQueryField(),
+            joined: joinedKey.makeQueryField()
+        )
+        query.joins.append(join)
+        return self
+    }
+
+    /// Join another model to this query builder.
+    public func join<Joined>(
+        _ joinedType: Joined.Type = Joined.self,
+        field joinedKey: ReferenceWritableKeyPath<Joined, Joined.ID?>,
+        to baseKey: ReferenceWritableKeyPath<Model, Joined.ID>,
+        method: QueryJoinMethod = .inner
+    ) -> Self where Joined: Fluent.Model {
         let join = QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),
@@ -95,11 +130,12 @@ extension QueryBuilder where Model.Database: JoinSupporting {
     }
 
     /// Join another model to this query builder.
-    public func join<Joined: Fluent.Model>(
+    public func join<Joined>(
+        _ joinedType: Joined.Type = Joined.self,
         field joinedKey: ReferenceWritableKeyPath<Joined, Joined.ID?>,
-        to baseKey: ReferenceWritableKeyPath<Model, Joined.ID>,
+        to baseKey: ReferenceWritableKeyPath<Model, Joined.ID?>,
         method: QueryJoinMethod = .inner
-    ) -> Self {
+    ) -> Self where Joined: Fluent.Model {
         let join = QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),
@@ -123,7 +159,7 @@ extension QueryBuilder {
 
 /// Model.field == value
 public func == <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) -> QueryFilterMethod<Model.Database>
-    where Model: Fluent.Model, Value: Encodable & Equatable
+    where Model: Fluent.Model, Value: Encodable & Equatable, Value: KeyStringDecodable
 {
     return .compare(lhs.makeQueryField(), .equality(.equals), .value(rhs))
 }
