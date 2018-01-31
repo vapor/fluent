@@ -1,30 +1,43 @@
+import Async
 import Foundation
 
 /// Internal Fluent model powering `FluentCache`.
-internal final class FluentCacheEntry<D>: Model
+public final class FluentCacheEntry<D>: Model
     where D: QuerySupporting
 {
     /// See `Model.name`
-    internal static var name: String { return "fluentcache" }
+    public static var name: String { return "fluentcache" }
 
     /// See `Model.idKey`
-    internal static var idKey: IDKey { return \.key }
+    public static var idKey: IDKey { return \.key }
 
     /// See `Model.ID`
-    internal typealias ID = String
+    public typealias ID = String
 
     /// See `Model.Database`
-    internal typealias Database = D
+    public typealias Database = D
 
     /// The cache entry's unique key.
-    internal var key: ID?
+    public var key: ID?
 
     /// The cache entry's JSON encoded data.
-    internal var data: Data
+    public var data: Data
 
     /// Creates a new `CacheEntry`
-    internal init(key: String, data: Data) {
+    public init(key: String, data: Data) {
         self.key = key
         self.data = data
+    }
+}
+
+extension FluentCacheEntry: Migration where D: SchemaSupporting { }
+
+
+extension MigrationConfig {
+    /// Prepares the supplied `SchemaSupporting` database for `FluentCache` use.
+    public mutating func prepareCache<D>(for database: DatabaseIdentifier<D>)
+        where D: QuerySupporting, D: SchemaSupporting
+    {
+        self.add(migration: FluentCacheEntry<D>.self, database: database)
     }
 }
