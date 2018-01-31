@@ -1,3 +1,4 @@
+import CodableKit
 import Async
 import Foundation
 
@@ -24,7 +25,7 @@ extension SoftDeletable {
 
 // MARK: Model
 
-extension Model where Self: SoftDeletable, Database: QuerySupporting {
+extension Model where Self: SoftDeletable, Database: QuerySupporting, ID: KeyStringDecodable {
     /// Permanently deletes a soft deletable model.
     public func forceDelete(on conn: DatabaseConnectable) -> Future<Void> {
         return query(on: conn)._delete(self)

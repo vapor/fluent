@@ -1,3 +1,4 @@
+import CodableKit
 import Async
 
 public struct QueryAggregate {
@@ -24,22 +25,30 @@ extension QueryBuilder {
     }
 
     /// Returns the sum of the supplied field
-    public func sum<T>(_ field: ReferenceWritableKeyPath<Model, T>) -> Future<Double> {
+    public func sum<T>(_ field: ReferenceWritableKeyPath<Model, T>) -> Future<Double>
+        where T: KeyStringDecodable
+    {
         return aggregate(.sum, field: field)
     }
 
     /// Returns the average of the supplied field
-    public func average<T>(_ field: ReferenceWritableKeyPath<Model, T>) -> Future<Double> {
+    public func average<T>(_ field: ReferenceWritableKeyPath<Model, T>) -> Future<Double>
+        where T: KeyStringDecodable
+    {
         return aggregate(.average, field: field)
     }
 
     /// Returns the min of the supplied field
-    public func min<T>(_ field: ReferenceWritableKeyPath<Model, T>) -> Future<Double> {
+    public func min<T>(_ field: ReferenceWritableKeyPath<Model, T>) -> Future<Double>
+        where T: KeyStringDecodable
+    {
         return aggregate(.min, field: field)
     }
 
     /// Returns the max of the supplied field
-    public func max<T>(_ field: ReferenceWritableKeyPath<Model, T>) -> Future<Double> {
+    public func max<T>(_ field: ReferenceWritableKeyPath<Model, T>) -> Future<Double>
+        where T: KeyStringDecodable
+    {
         return aggregate(.max, field: field)
     }
 
@@ -50,7 +59,7 @@ extension QueryBuilder {
         _ method: QueryAggregateMethod,
         field: ReferenceWritableKeyPath<Model, T>,
         as type: D.Type = D.self
-    ) -> Future<D> where D: Decodable {
+    ) -> Future<D> where D: Decodable, T: KeyStringDecodable {
         let aggregate = QueryAggregate(field: field.makeQueryField(), method: method)
         return self.aggregate(aggregate)
     }

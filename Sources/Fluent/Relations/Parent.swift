@@ -1,3 +1,4 @@
+import CodableKit
 import Async
 
 /// The parent relation is one side of a
@@ -26,7 +27,7 @@ public struct Parent<Child: Model, Parent: Model>
     }
 }
 
-extension Parent where Child.Database: QuerySupporting {
+extension Parent where Child.Database: QuerySupporting, Parent.ID: KeyStringDecodable {
     /// Create a query for the parent.
     public func query(on conn: DatabaseConnectable) -> QueryBuilder<Parent> {
         return Parent.query(on: conn)

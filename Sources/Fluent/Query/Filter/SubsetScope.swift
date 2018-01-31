@@ -1,3 +1,5 @@
+import CodableKit
+
 /// Describes the methods for comparing
 /// a field to a set of values.
 /// Think of it like Swift's `.contains`.
@@ -20,8 +22,8 @@ extension QueryBuilder {
     @discardableResult
     public func filter<T>(
         _ field: ReferenceWritableKeyPath<Model, T>,
-        in values: [Encodable?]
-    ) -> Self {
+        in values: [Encodable]
+    ) -> Self where T: KeyStringDecodable {
         let filter = QueryFilter<Model.Database>(
             entity: Model.entity,
             method: .subset(field.makeQueryField(), .in, .array(values))
@@ -33,8 +35,8 @@ extension QueryBuilder {
     @discardableResult
     public func filter<T>(
         _ field: ReferenceWritableKeyPath<Model, T>,
-        notIn values: [Encodable?]
-    ) -> Self {
+        notIn values: [Encodable]
+    ) -> Self where T: KeyStringDecodable {
         let filter = QueryFilter<Model.Database>(
             entity: Model.entity,
             method: .subset(field.makeQueryField(), .notIn, .array(values))

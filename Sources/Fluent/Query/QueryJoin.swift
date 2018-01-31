@@ -1,3 +1,5 @@
+import CodableKit
+
 /// Describes a relational join which brings
 /// columns of data from multiple entities
 /// into one response.
@@ -85,7 +87,7 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: ReferenceWritableKeyPath<Joined, Model.ID>,
         to baseKey: ReferenceWritableKeyPath<Model, Model.ID?> = Model.idKey,
         method: QueryJoinMethod = .inner
-    ) -> Self where Joined: Fluent.Model {
+    ) -> Self where Joined: Fluent.Model, Model.ID: KeyStringDecodable {
         let join = QueryJoin(
             method: method,
             base:  Model.idKey.makeQueryField(),
@@ -101,7 +103,7 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: ReferenceWritableKeyPath<Joined, Model.ID?>,
         to baseKey: ReferenceWritableKeyPath<Model, Model.ID?> = Model.idKey,
         method: QueryJoinMethod = .inner
-    ) -> Self where Joined: Fluent.Model {
+    ) -> Self where Joined: Fluent.Model, Model.ID: KeyStringDecodable {
         let join = QueryJoin(
             method: method,
             base:  Model.idKey.makeQueryField(),
@@ -117,7 +119,7 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: ReferenceWritableKeyPath<Joined, Joined.ID?>,
         to baseKey: ReferenceWritableKeyPath<Model, Joined.ID>,
         method: QueryJoinMethod = .inner
-    ) -> Self where Joined: Fluent.Model {
+    ) -> Self where Joined: Fluent.Model, Joined.ID: KeyStringDecodable {
         let join = QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),
@@ -133,7 +135,7 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: ReferenceWritableKeyPath<Joined, Joined.ID?>,
         to baseKey: ReferenceWritableKeyPath<Model, Joined.ID?>,
         method: QueryJoinMethod = .inner
-    ) -> Self where Joined: Fluent.Model {
+    ) -> Self where Joined: Fluent.Model, Joined.ID: KeyStringDecodable {
         let join = QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),
@@ -157,7 +159,7 @@ extension QueryBuilder {
 
 /// Model.field == value
 public func == <Model, Value>(lhs: ReferenceWritableKeyPath<Model, Value>, rhs: Value) -> QueryFilterMethod<Model.Database>
-    where Model: Fluent.Model, Value: Encodable & Equatable
+    where Model: Fluent.Model, Value: Encodable & Equatable, Value: KeyStringDecodable
 {
     return .compare(lhs.makeQueryField(), .equality(.equals), .value(rhs))
 }
