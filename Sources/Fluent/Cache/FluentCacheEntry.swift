@@ -9,7 +9,7 @@ public final class FluentCacheEntry<D>: Model
     public static var name: String { return "fluentcache" }
 
     /// See `Model.idKey`
-    public static var idKey: ReferenceWritableKeyPath<FluentCacheEntry<D>, String?> { return \.key }
+    public static var idKey: WritableKeyPath<FluentCacheEntry<D>, String?> { return \.key }
 
     /// See `Model.Database`
     public typealias Database = D

@@ -39,7 +39,7 @@ internal struct MigrationContainer<D> where D: QuerySupporting {
                     // create the migration log
                     let log = MigrationLog<Database>(name: self.name, batch: batch)
                     return QueryBuilder(MigrationLog<Database>.self, on: Future(connection))
-                        .save(log)
+                        .save(log).transform(to: ())
                 }
             }
         }

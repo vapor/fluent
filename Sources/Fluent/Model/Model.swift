@@ -16,7 +16,7 @@ public protocol Model: AnyModel {
     associatedtype ID: Fluent.ID
 
     /// Key path to identifier
-    typealias IDKey = ReferenceWritableKeyPath<Self, ID?>
+    typealias IDKey = WritableKeyPath<Self, ID?>
 
     /// This model's id key.
     /// note: If this is not `id`, you
@@ -26,9 +26,9 @@ public protocol Model: AnyModel {
 
     /// Called before a model is created when saving.
     /// Throwing will cancel the save.
-    func willCreate(on connection: Database.Connection)  throws -> Future<Void>
+    func willCreate(on connection: Database.Connection)  throws -> Future<Self>
     /// Called after the model is created when saving.
-    func didCreate(on connection: Database.Connection) throws -> Future<Void>
+    func didCreate(on connection: Database.Connection) throws -> Future<Self>
 
     /// Called before a model is fetched.
     /// Throwing will cancel the fetch.
@@ -36,24 +36,24 @@ public protocol Model: AnyModel {
     // func willRead(on connection: Database.Connection)  throws -> Future<Void>
 
     /// Called after the model is fetched.
-    func didRead(on connection: Database.Connection) throws -> Future<Void>
+    func didRead(on connection: Database.Connection) throws -> Future<Self>
 
     /// Called before a model is updated when saving.
     /// Throwing will cancel the save.
-    func willUpdate(on connection: Database.Connection) throws -> Future<Void>
+    func willUpdate(on connection: Database.Connection) throws -> Future<Self>
     /// Called after the model is updated when saving.
-    func didUpdate(on connection: Database.Connection) throws -> Future<Void>
+    func didUpdate(on connection: Database.Connection) throws -> Future<Self>
 
     /// Called before a model is deleted.
     /// Throwing will cancel the deletion.
-    func willDelete(on connection: Database.Connection) throws -> Future<Void>
+    func willDelete(on connection: Database.Connection) throws -> Future<Self>
     /// Called after the model is deleted.
-    func didDelete(on connection: Database.Connection) throws -> Future<Void>
+    func didDelete(on connection: Database.Connection) throws -> Future<Self>
 }
 
 /// Type-erased model.
 /// See Model
-public protocol AnyModel: class, Codable {
+public protocol AnyModel: Codable {
     /// This model's unique name.
     static var name: String { get }
 
@@ -102,25 +102,25 @@ extension Model {
     }
 
     /// Seee Model.willCreate()
-    public func willCreate(on connection: Database.Connection) throws -> Future<Void> { return .done }
+    public func willCreate(on connection: Database.Connection) throws -> Future<Self> { return Future(self) }
     /// See Model.didCreate()
-    public func didCreate(on connection: Database.Connection) throws -> Future<Void> { return .done }
+    public func didCreate(on connection: Database.Connection) throws -> Future<Self> { return Future(self) }
 
     /// Seee Model.willRead()
     // public func willRead(on connection: Database.Connection) throws -> Future<Void> { return .done }
     
     /// See Model.didRead()
-    public func didRead(on connection: Database.Connection) throws -> Future<Void> { return .done }
+    public func didRead(on connection: Database.Connection) throws -> Future<Self> { return Future(self) }
 
     /// See Model.willUpdate()
-    public func willUpdate(on connection: Database.Connection) throws -> Future<Void> { return .done }
+    public func willUpdate(on connection: Database.Connection) throws -> Future<Self> { return Future(self) }
     /// See Model.didUpdate()
-    public func didUpdate(on connection: Database.Connection) throws -> Future<Void> { return .done }
+    public func didUpdate(on connection: Database.Connection) throws -> Future<Self> { return Future(self) }
 
     /// See Model.willDelete()
-    public func willDelete(on connection: Database.Connection) throws -> Future<Void> { return .done }
+    public func willDelete(on connection: Database.Connection) throws -> Future<Self> { return Future(self) }
     /// See Model.didDelete()
-    public func didDelete(on connection: Database.Connection) throws -> Future<Void> { return .done }
+    public func didDelete(on connection: Database.Connection) throws -> Future<Self> { return Future(self) }
 }
 
 /// MARK: Convenience
@@ -145,25 +145,25 @@ extension Model where Database: QuerySupporting, ID: KeyStringDecodable {
     /// If you need to create a model with a pre-existing ID,
     /// call `create` instead.
     public func save(on conn: DatabaseConnectable) -> Future<Self> {
-        return query(on: conn).save(self).transform(to: self)
+        return query(on: conn).save(self)
     }
 
     /// Saves this model as a new item in the database.
     /// This method can auto-generate an ID depending on ID type.
     public func create(on conn: DatabaseConnectable) -> Future<Self> {
-        return query(on: conn).create(self).transform(to: self)
+        return query(on: conn).create(self)
     }
 
     /// Updates the model. This requires that
     /// the model has its ID set.
     public func update(on conn: DatabaseConnectable) -> Future<Self> {
-        return query(on: conn).update(self).transform(to: self)
+        return query(on: conn).update(self)
     }
 
     /// Saves this model to the supplied query executor.
     /// If `shouldCreate` is true, the model will be saved
     /// as a new item even if it already has an identifier.
-    public func delete(on conn: DatabaseConnectable) -> Future<Void> {
+    public func delete(on conn: DatabaseConnectable) -> Future<Self> {
         return query(on: conn).delete(self)
     }
 
