@@ -1,4 +1,16 @@
-extension Database {
+public protocol Preparable {
+    func prepare(_ preparations: [Preparation.Type]) throws
+    func prepareMetadata() throws
+}
+public protocol Revertable {
+    
+    func revertAll(_ preparations: [Preparation.Type]) throws
+    func previewRevertBatch(_ preparations: [Preparation.Type]) throws -> (batch: Int, revert: [Preparation.Type])
+    func revertBatch(_ preparations: [Preparation.Type]) throws
+    func revertMetadata() throws
+}
+
+extension DatabaseImpl: Preparable, Revertable {
     // MARK: Prepare
     
     public func prepare(_ preparations: [Preparation.Type]) throws {

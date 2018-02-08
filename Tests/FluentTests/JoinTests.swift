@@ -13,7 +13,7 @@ class JoinTests: XCTestCase {
 
     override func setUp() {
         lqd = LastQueryDriver()
-        db = Database(lqd)
+        db = DatabaseImpl(lqd)
         
         Atom.database = db
         Compound.database = db

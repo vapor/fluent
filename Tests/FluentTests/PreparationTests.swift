@@ -39,7 +39,7 @@ class PreparationTests: XCTestCase {
             XCTAssertEqual(colThreeLength, 128)
         }
 
-        let database = Database(driver)
+        let database = DatabaseImpl(driver)
 
         TestPreparation.testClosure = { builder in
             builder.int("id")
@@ -77,7 +77,7 @@ class PreparationTests: XCTestCase {
             }
         }
         
-        let database = Database(driver)
+        let database = DatabaseImpl(driver)
         
         do {
             try StringIdentifiedThing.prepare(database)
@@ -117,7 +117,7 @@ class PreparationTests: XCTestCase {
             XCTAssertEqual(fields[2].wrapped?.name, "age")
         }
 
-        let database = Database(driver)
+        let database = DatabaseImpl(driver)
 
         do {
             try TestModel.prepare(database)

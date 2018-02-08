@@ -8,7 +8,7 @@ class GroupTests: XCTestCase {
 
     var database: Database!
     override func setUp() {
-        database = Database(DummyDriver())
+        database = DatabaseImpl(DummyDriver())
     }
 
     func testBasic() throws {

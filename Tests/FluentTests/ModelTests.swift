@@ -12,7 +12,7 @@ class ModelTests: XCTestCase {
     override func setUp() {
         Node.fuzzy = [Node.self]
         lqd = LastQueryDriver()
-        db = Database(lqd)
+        db = DatabaseImpl(lqd)
     }
 
     func testExamples() throws {
@@ -120,7 +120,7 @@ class ModelTests: XCTestCase {
     }
 
     func testKeyNamingConvention() throws {
-        Database.default = nil
+        DatabaseRefs.default = nil
         XCTAssertEqual(CamelModel.foreignIdKey, "camelModelId")
         XCTAssertEqual(SnakeModel.foreignIdKey, "snake_model_id")
     }

@@ -243,14 +243,14 @@ extension Entity {
     /// relatable object from the static database map.
     public static var database: Database? {
         get {
-            if let db = Database.map[Self.identifier] {
+            if let db = DatabaseRefs.map[Self.identifier] {
                 return db
             } else {
-                return Database.default
+                return DatabaseRefs.default
             }
         }
         set {
-            Database.map[Self.identifier] = newValue
+            DatabaseRefs.map[Self.identifier] = newValue
         }
     }
 }

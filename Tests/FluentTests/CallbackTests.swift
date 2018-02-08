@@ -70,8 +70,8 @@ class CallbacksTests: XCTestCase {
 
     override func setUp() {
         Node.fuzzy = [Node.self]
-        database = Database(DummyDriver())
-        Database.default = database
+        database = DatabaseImpl(DummyDriver())
+        DatabaseRefs.default = database
     }
 
     var database: Database!

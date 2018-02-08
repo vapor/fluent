@@ -1,4 +1,9 @@
-extension Database {
+public protocol Schemable {
+    func create<E: Entity>(_ e: E.Type, closure: (Creator) throws -> ()) throws
+    func modify<E: Entity>(_ e: E.Type, closure: (Modifier) throws -> ()) throws
+    func delete<E: Entity>(_ e: E.Type) throws
+}
+extension DatabaseImpl: Schemable {
     /// Creates the schema of the database
     /// for the given entity.
     public func create<E: Entity>(_ e: E.Type, closure: (Creator) throws -> ()) throws {

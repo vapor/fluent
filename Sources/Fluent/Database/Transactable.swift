@@ -4,7 +4,7 @@ public protocol Transactable {
     func transaction<R>(_ closure: (Connection) throws -> R) throws -> R
 }
 
-extension Database: Transactable {
+extension DatabaseImpl: Transactable {
     /// Transactions allow you to group multiple queries
     /// into one single unit of work. If any one of the 
     /// queries experiences a problem, the entire transaction will
