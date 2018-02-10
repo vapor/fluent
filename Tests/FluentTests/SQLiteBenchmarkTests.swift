@@ -63,3 +63,17 @@ final class SQLiteBenchmarkTests: XCTestCase {
         ("testCache", testCache),
     ]
 }
+
+
+struct User: SQLiteModel {
+    static let idKey = \User.id
+    var id: UUID?
+    var name: String
+}
+
+extension DatabaseConnectable {
+    func findUser(named names: [String]) -> Future<User?> {
+        return User.query(on: self).filter(\.name, in: names).first()
+    }
+}
+
