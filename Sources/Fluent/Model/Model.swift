@@ -139,7 +139,7 @@ extension Model {
 
 /// MARK: CRUD
 
-extension Model where Database: QuerySupporting, ID: KeyStringDecodable {
+extension Model where Database: QuerySupporting {
     /// Saves the supplied model.
     /// Calls `create` if the ID is `nil`, and `update` if it exists.
     /// If you need to create a model with a pre-existing ID,
@@ -166,7 +166,43 @@ extension Model where Database: QuerySupporting, ID: KeyStringDecodable {
     public func delete(on conn: DatabaseConnectable) -> Future<Self> {
         return query(on: conn).delete(self)
     }
+}
 
+/// MARK: Future CRUD
+
+extension Future where T: Model, T.Database: QuerySupporting {
+    /// See `Model.save(on:)`
+    public func save(on connectable: DatabaseConnectable) -> Future<T> {
+        return self.flatMap(to: T.self) { (model) in
+            return model.save(on: connectable).transform(to: model)
+        }
+    }
+
+    /// See `Model.create(on:)`
+    public func create(on connectable: DatabaseConnectable) -> Future<T> {
+        return self.flatMap(to: T.self) { (model) in
+            return model.create(on: connectable).transform(to: model)
+        }
+    }
+
+    /// See `Model.update(on:)`
+    public func update(on connectable: DatabaseConnectable) -> Future<T> {
+        return self.flatMap(to: T.self) { (model) in
+            return model.update(on: connectable).transform(to: model)
+        }
+    }
+
+    /// See `Model.delete(on:)`
+    public func delete(on connectable: DatabaseConnectable) -> Future<T> {
+        return self.flatMap(to: T.self) { (model) in
+            return model.delete(on: connectable).transform(to: model)
+        }
+    }
+}
+
+/// MARK: Find
+
+extension Model where Database: QuerySupporting {
     /// Attempts to find an instance of this model w/
     /// the supplied identifier.
     public static func find(_ id: Self.ID, on conn: DatabaseConnectable) -> Future<Self?> {

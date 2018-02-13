@@ -25,17 +25,35 @@ extension SoftDeletable {
 
 // MARK: Model
 
-extension Model where Self: SoftDeletable, Database: QuerySupporting, ID: KeyStringDecodable {
+extension Model where Self: SoftDeletable, Database: QuerySupporting {
     /// Permanently deletes a soft deletable model.
     public func forceDelete(on conn: DatabaseConnectable) -> Future<Self> {
         return query(on: conn)._delete(self)
     }
 
     /// Restores a soft deleted model.
-    public func restore(on connection: DatabaseConnectable) -> Future<Self> {
+    public func restore(on conn: DatabaseConnectable) -> Future<Self> {
         var copy = self
         copy.fluentDeletedAt = nil
-        return query(on: connection).withSoftDeleted().update(copy)
+        return query(on: conn).withSoftDeleted().update(copy)
+    }
+}
+
+/// MARK: Future Model
+
+extension Future where T: SoftDeletable, T.Database: QuerySupporting {
+    /// See `Model.forceDelete(on:)`
+    public func forceDelete(on conn: DatabaseConnectable) -> Future<T> {
+        return flatMap(to: T.self) { model in
+            return model.forceDelete(on: conn)
+        }
+    }
+
+    /// See `Model.restore(on:)`
+    public func restore(on conn: DatabaseConnectable) -> Future<T> {
+        return flatMap(to: T.self) { model in
+            return model.restore(on: conn)
+        }
     }
 }
 
