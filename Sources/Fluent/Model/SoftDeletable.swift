@@ -5,7 +5,7 @@ import Foundation
 /// Has create and update timestamps.
 public protocol SoftDeletable: Model, AnySoftDeletable {
     /// Key referencing deleted at property.
-    typealias DeletedAtKey = ReferenceWritableKeyPath<Self, Date?>
+    typealias DeletedAtKey = WritableKeyPath<Self, Date?>
 
     /// The date at which this model was deleted.
     /// nil if the model has not been deleted yet.

@@ -31,7 +31,7 @@ public final class QueryBuilder<Model> where Model: Fluent.Model, Model.Database
                 let type = Model.self as? AnySoftDeletable.Type,
                 !self.query.withSoftDeleted
             {
-                try! self.group(.or) { or in
+                self.group(.or) { or in
                     let notDeleted = QueryFilter<Model.Database>(
                         entity: type.entity,
                         method: .compare(type.deletedAtField, .equality(.equals), .null)

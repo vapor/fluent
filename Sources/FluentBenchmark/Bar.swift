@@ -2,7 +2,7 @@ import Async
 import Fluent
 import Foundation
 
-internal final class Bar<D>: Model, SoftDeletable where D: QuerySupporting {
+struct Bar<D>: Model, SoftDeletable where D: QuerySupporting {
     /// See Model.Database
     typealias Database = D
 

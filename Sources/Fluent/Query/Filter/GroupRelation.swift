@@ -11,7 +11,7 @@ extension QueryBuilder {
     public func group(
         _ relation: QueryGroupRelation,
         closure: @escaping GroupClosure
-    ) throws -> Self {
+    ) rethrows -> Self {
         let sub = copy()
         try closure(sub)
         let filter = QueryFilter(
