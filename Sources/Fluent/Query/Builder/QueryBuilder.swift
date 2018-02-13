@@ -24,25 +24,30 @@ public final class QueryBuilder<Model> where Model: Fluent.Model, Model.Database
     public func run<D>(decoding type: D.Type) -> QueryResultStream<D, Model.Database> where D: Decodable {
         /// if the model is soft deletable, and soft deleted
         /// models were not requested, then exclude them
-        if
-            let type = Model.self as? AnySoftDeletable.Type,
-            !self.query.withSoftDeleted
-        {
-            try! self.group(.or) { or in
-                let notDeleted = QueryFilter<Model.Database>(
-                    entity: type.entity,
-                    method: .compare(type.deletedAtField, .equality(.equals), .value(Date.null))
-                )
-                or.addFilter(notDeleted)
+        switch query.action {
+        case .create: break // no soft delete filters needed for create
+        case .aggregate, .read, .update, .delete:
+            if
+                let type = Model.self as? AnySoftDeletable.Type,
+                !self.query.withSoftDeleted
+            {
+                self.group(.or) { or in
+                    let notDeleted = QueryFilter<Model.Database>(
+                        entity: type.entity,
+                        method: .compare(type.deletedAtField, .equality(.equals), .null)
+                    )
+                    or.addFilter(notDeleted)
 
-                let notYetDeleted = QueryFilter<Model.Database>(
-                    entity: type.entity,
-                    method: .compare(type.deletedAtField, .order(.greaterThan), .value(Date()))
-                )
-                or.addFilter(notYetDeleted)
+                    let notYetDeleted = QueryFilter<Model.Database>(
+                        entity: type.entity,
+                        method: .compare(type.deletedAtField, .order(.greaterThan), .value(Date()))
+                    )
+                    or.addFilter(notYetDeleted)
+                }
             }
         }
 
+        /// Create the result stream
         return QueryResultStream(query: query, on: connection)
     }
 

@@ -23,8 +23,9 @@ extension SQLiteDatabase: QuerySupporting {
             // bind model columns to sql query
             if let model = query.data {
                 try model.encode(to: rowEncoder)
-                dataQuery.columns += rowEncoder.row.fields.keys.map {
-                    DataColumn(table: query.entity, name: $0.name)
+                rowEncoder.row.fields.forEach { key, val in
+                    let col = DataColumn(table: query.entity, name: key.name)
+                    dataQuery.columns.append(col)
                 }
             }
 

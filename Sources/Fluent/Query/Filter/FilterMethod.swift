@@ -12,6 +12,7 @@ public enum QueryComparison {
 }
 
 public enum QueryComparisonValue {
+    case null
     case value(Encodable)
     case field(QueryField)
 }
