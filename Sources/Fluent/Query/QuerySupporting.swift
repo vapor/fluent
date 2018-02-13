@@ -17,7 +17,7 @@ public protocol QuerySupporting: Database {
         event: ModelEvent,
         model: M,
         on connection: Connection
-    ) -> Future<Void> where M: Model, M.Database == Self
+    ) -> Future<M> where M: Model, M.Database == Self
 }
 
 /// Model events.

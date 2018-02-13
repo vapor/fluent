@@ -56,12 +56,9 @@ public final class QueryBuilder<Model> where Model: Fluent.Model, Model.Database
         stream.outputMap = { output, conn in
             return Model.Database.modelEvent(
                 event: .didRead, model: output, on: conn
-            ).flatMap(to: Void.self) {
+            ).flatMap(to: Model.self) { model in
                 return try output.didRead(on: conn)
-            }.map(to: Model.self) {
-                return output
             }
-
         }
 
         return stream

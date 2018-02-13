@@ -7,11 +7,11 @@ extension Benchmarker where Database: JoinSupporting & ReferenceSupporting & Que
     /// The actual benchmark.
     fileprivate func _benchmark(on conn: Database.Connection) throws {
         // create
-        let tanner = User<Database>(name: "Tanner", age: 23)
-        _ = try test(tanner.save(on: conn))
+        var tanner = User<Database>(name: "Tanner", age: 23)
+        tanner = try test(tanner.save(on: conn))
 
-        let ziz = try Pet<Database>(name: "Ziz", ownerID: tanner.requireID())
-        _ = try test(ziz.save(on: conn))
+        var ziz = try Pet<Database>(name: "Ziz", ownerID: tanner.requireID())
+        ziz = try test(ziz.save(on: conn))
 
         let foo = Pet<Database>(name: "Foo", ownerID: UUID())
         do {
@@ -31,18 +31,18 @@ extension Benchmarker where Database: JoinSupporting & ReferenceSupporting & Que
             self.fail("pet owner's name wrong")
         }
 
-        let plasticBag = Toy<Database>(name: "Plastic Bag")
-        _ = try test(plasticBag.save(on: conn))
+        var plasticBag = Toy<Database>(name: "Plastic Bag")
+        plasticBag = try test(plasticBag.save(on: conn))
 
-        let oldBologna = Toy<Database>(name: "Old Bologna")
-        _ = try test(oldBologna.save(on: conn))
+        var oldBologna = Toy<Database>(name: "Old Bologna")
+        oldBologna = try test(oldBologna.save(on: conn))
 
         _ = try test(ziz.toys.attach(plasticBag, on: conn))
         _ = try test(oldBologna.pets.attach(ziz, on: conn))
 
         count = try test(ziz.toys.query(on: conn).count())
         if count != 2 {
-            self.fail("count should have been 2")
+            self.fail("count \(count) != 2")
         }
 
         count = try test(oldBologna.pets.query(on: conn).count())

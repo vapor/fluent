@@ -75,22 +75,23 @@ extension SQLiteDatabase: QuerySupporting {
         event: ModelEvent,
         model: M,
         on connection: SQLiteConnection
-    ) -> Future<Void> where SQLiteDatabase == M.Database, M: Model {
+    ) -> Future<M> where SQLiteDatabase == M.Database, M: Model {
+        var copy = model
         switch event {
         case .willCreate:
             switch id(M.ID.self) {
-            case id(UUID.self): model.fluentID = UUID() as? M.ID
+            case id(UUID.self): copy.fluentID = UUID() as? M.ID
             default: break
             }
         case .didCreate:
             switch id(M.ID.self) {
-            case id(Int.self): model.fluentID = connection.lastAutoincrementID as? M.ID
+            case id(Int.self): copy.fluentID = connection.lastAutoincrementID as? M.ID
             default: break
             }
         default: break
         }
 
-        return .done
+        return Future(copy)
     }
 }
 

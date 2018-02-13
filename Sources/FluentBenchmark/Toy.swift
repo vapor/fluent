@@ -2,7 +2,7 @@ import Async
 import Fluent
 import Foundation
 
-public final class Toy<D>: Model where D: QuerySupporting {
+public struct Toy<D>: Model where D: QuerySupporting {
     /// See Model.Database
     public typealias Database = D
 
