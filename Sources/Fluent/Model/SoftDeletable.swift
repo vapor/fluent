@@ -32,9 +32,10 @@ extension Model where Self: SoftDeletable, Database: QuerySupporting, ID: KeyStr
     }
 
     /// Restores a soft deleted model.
-    public mutating func restore(on connection: DatabaseConnectable) -> Future<Self> {
-        fluentDeletedAt = nil
-        return update(on: connection)
+    public func restore(on connection: DatabaseConnectable) -> Future<Self> {
+        var copy = self
+        copy.fluentDeletedAt = nil
+        return query(on: connection).withSoftDeleted().update(copy)
     }
 }
 
@@ -50,8 +51,9 @@ extension DatabaseQuery {
 
 extension QueryBuilder where Model: SoftDeletable {
     /// Includes soft deleted models in the results.
-    public func withSoftDeleted() {
+    public func withSoftDeleted() -> Self {
         query.withSoftDeleted = true
+        return self
     }
 }
 

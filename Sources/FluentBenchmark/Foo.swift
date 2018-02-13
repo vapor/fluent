@@ -15,11 +15,6 @@ internal final class Foo<D>: Model where D: QuerySupporting {
     /// See Model.idKey
     static var idKey: IDKey { return \.id }
 
-    /// See Model.database
-    public static var database: DatabaseIdentifier<D> {
-        return .init("test")
-    }
-
     /// Foo's identifier
     var id: UUID?
 

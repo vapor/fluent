@@ -3,9 +3,13 @@ import SQL
 
 extension QueryComparison {
     /// Convert query comparison to sql predicate comparison.
-    internal func makeDataPredicateComparison() -> DataPredicateComparison {
+    internal func makeDataPredicateComparison(for value: QueryComparisonValue) -> DataPredicateComparison {
         switch self {
-        case .equality(let eq): return eq.makeDataPredicateComparison()
+        case .equality(let eq):
+            switch value {
+            case .null: return .null
+            default: return eq.makeDataPredicateComparison()
+            }
         case .order(let or): return or.makeDataPredicateComparison()
         case .sequence(let seq): return seq.makeDataPredicateComparison()
         }
@@ -16,10 +20,9 @@ extension QueryComparisonValue {
     /// Convert query comparison value to sql data predicate value.
     internal func makeDataPredicateValue() -> DataPredicateValue {
         switch self {
-        case .field(let field):
-            return .column(field.makeDataColumn())
-        case .value:
-            return .placeholder
+        case .null: return .none
+        case .field(let field): return .column(field.makeDataColumn())
+        case .value: return .placeholder
         }
     }
 }

@@ -52,6 +52,10 @@ final class SQLiteBenchmarkTests: XCTestCase {
         try benchmarker.benchmarkJoins_withSchema()
     }
 
+    func testSoftDeletable() throws {
+        try benchmarker.benchmarkSoftDeletable_withSchema()
+    }
+
     static let allTests = [
         ("testSchema", testSchema),
         ("testModels", testModels),
@@ -61,5 +65,6 @@ final class SQLiteBenchmarkTests: XCTestCase {
         ("testChunking", testChunking),
         ("testAutoincrement", testAutoincrement),
         ("testCache", testCache),
+        ("testSoftDeletable", testSoftDeletable)
     ]
 }

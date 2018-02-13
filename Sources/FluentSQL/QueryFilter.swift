@@ -11,7 +11,7 @@ extension QueryFilter {
         case .compare(let field, let comp, let value):
             let predicate = DataPredicate(
                 column: field.makeDataColumn(),
-                comparison: comp.makeDataPredicateComparison(),
+                comparison: comp.makeDataPredicateComparison(for: value),
                 value: value.makeDataPredicateValue()
             )
 
