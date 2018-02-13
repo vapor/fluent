@@ -8,22 +8,19 @@ import Async
 /// model that the supplied child references.
 ///
 /// The opposite side of this relation is called `Children`.
-public struct Parent<Child: Model, Parent: Model>
-    where Child.Database == Parent.Database
+public struct Parent<Child, Parent>
+    where Child: Model, Parent: Model, Child.Database == Parent.Database
 {
     /// The child object with reference to parent
     public var child: Child
 
-    /// Key referencing property storing parent's ID
-    public typealias ParentForeignIDKey = KeyPath<Child, Parent.ID>
-
     /// Reference to the parent's ID
-    public var parentForeignIDKey: ParentForeignIDKey
+    public var parentID: Parent.ID
 
     /// Creates a new children relationship.
-    public init(child: Child, parentForeignIDKey: ParentForeignIDKey) {
+    internal init(child: Child, parentID: Parent.ID) {
         self.child = child
-        self.parentForeignIDKey = parentForeignIDKey
+        self.parentID = parentID
     }
 }
 
@@ -31,7 +28,7 @@ extension Parent where Child.Database: QuerySupporting, Parent.ID: KeyStringDeco
     /// Create a query for the parent.
     public func query(on conn: DatabaseConnectable) -> QueryBuilder<Parent> {
         return Parent.query(on: conn)
-            .filter(Parent.idKey == child[keyPath: parentForeignIDKey])
+            .filter(Parent.idKey == parentID)
     }
 
     /// Convenience for getting the parent.
@@ -49,12 +46,26 @@ extension Parent where Child.Database: QuerySupporting, Parent.ID: KeyStringDeco
 
 extension Model {
     /// Create a children relation for this model.
-    public func parent<P: Model>(
-        _ parentForeignIDKey: Parent<Self, P>.ParentForeignIDKey
-    ) -> Parent<Self, P> {
+    public func parent<P>(
+        _ parentForeignIDKey: KeyPath<Self, P.ID>
+    ) -> Parent<Self, P> where P: Model {
         return Parent(
             child: self,
-            parentForeignIDKey: parentForeignIDKey
+            parentID: self[keyPath: parentForeignIDKey]
+        )
+    }
+
+    /// Create a children relation for this model.
+    public func parent<P>(
+        _ parentForeignIDKey: KeyPath<Self, P.ID?>
+    ) -> Parent<Self, P>? where P: Model {
+        guard let parentID = self[keyPath: parentForeignIDKey] else {
+            return nil
+        }
+
+        return Parent(
+            child: self,
+            parentID: parentID
         )
     }
 }

@@ -19,7 +19,20 @@ extension SchemaReference {
         return SchemaForeignKey(
             name: "",
             local: DataColumn(table: nil, name: base.name),
-            foreign: referenced.makeDataColumn()
+            foreign: referenced.makeDataColumn(),
+            onUpdate: actions.update?.makeForeignKeyAction(),
+            onDelete: actions.delete?.makeForeignKeyAction()
         )
+    }
+}
+
+extension ReferentialAction {
+    /// Converts a `ReferentialAction` to `SchemaForeignKeyAction`
+    fileprivate func makeForeignKeyAction() -> SchemaForeignKeyAction {
+        switch self {
+        case .nullify: return .setNull
+        case .prevent: return .restrict
+        case .update: return .cascade
+        }
     }
 }

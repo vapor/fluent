@@ -29,15 +29,15 @@ public final class Pet<D>: Model where D: QuerySupporting {
     var name: String
 
     /// Age int
-    var ownerID: User<Database>.ID
+    var ownerID: User<Database>.ID?
 
-    /// Create a new foo
-    init(id: ID? = nil, name: String, ownerID: User<Database>.ID) {
+    /// Creates a new `Pet`
+    init(id: ID? = nil, name: String, ownerID: User<Database>.ID?) {
         self.id = id
         self.name = name
         self.ownerID = ownerID
     }
-
+    
     /// See Encodable.encode
     public func encode(to encoder: Encoder) throws {
         var container = encodingContainer(for: encoder)
@@ -51,7 +51,7 @@ public final class Pet<D>: Model where D: QuerySupporting {
 
 extension Pet {
     /// A relation to this pet's owner.
-    var owner: Parent<Pet, User<Database>> {
+    var owner: Parent<Pet, User<Database>>? {
         return parent(\.ownerID)
     }
 }
@@ -70,7 +70,7 @@ extension Pet: Migration where D: SchemaSupporting & ReferenceSupporting {
     public static func prepare(on connection: Database.Connection) -> Future<Void> {
         return Database.create(self, on: connection) { builder in
             try addProperties(to: builder)
-            try builder.addReference(for: \.ownerID, referencing: \User<D>.id)
+            try builder.addReference(from: \.ownerID, to: \User<D>.id, actions: .init(update: .update, delete: .nullify))
         }
     }
 }

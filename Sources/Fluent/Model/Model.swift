@@ -156,8 +156,8 @@ extension Model where Database: QuerySupporting {
 
     /// Updates the model. This requires that
     /// the model has its ID set.
-    public func update(on conn: DatabaseConnectable) -> Future<Self> {
-        return query(on: conn).update(self)
+    public func update(on conn: DatabaseConnectable, originalID: ID? = nil) -> Future<Self> {
+        return query(on: conn).update(self, originalID: originalID)
     }
 
     /// Saves this model to the supplied query executor.

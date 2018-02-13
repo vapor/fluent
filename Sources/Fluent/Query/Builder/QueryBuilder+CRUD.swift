@@ -49,7 +49,7 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
 
     /// Updates the model. This requires that
     /// the model has its ID set.
-    public func update(_ model: Model) -> Future<Model> {
+    public func update(_ model: Model, originalID: Model.ID? = nil) -> Future<Model> {
         // set timestamps
         let copy: Model
         if var timestampable = model as? AnyTimestampable {
@@ -60,7 +60,7 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
         }
 
         return connection.flatMap(to: Model.self) { conn in
-            guard let id = model.fluentID else {
+            guard let id = originalID ?? model.fluentID else {
                 throw FluentError(
                     identifier: "idRequired",
                     reason: "No ID was set on updated model, it is required for updating."
