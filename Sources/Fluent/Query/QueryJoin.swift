@@ -90,7 +90,7 @@ extension QueryBuilder where Model.Database: JoinSupporting {
     ) -> Self where Joined: Fluent.Model {
         let join = QueryJoin(
             method: method,
-            base:  baseKey.makeQueryField(),
+            base: baseKey.makeQueryField(),
             joined: joinedKey.makeQueryField()
         )
         query.joins.append(join)
@@ -106,7 +106,7 @@ extension QueryBuilder where Model.Database: JoinSupporting {
     ) -> Self where Joined: Fluent.Model {
         let join = QueryJoin(
             method: method,
-            base:  baseKey.makeQueryField(),
+            base: baseKey.makeQueryField(),
             joined: joinedKey.makeQueryField()
         )
         query.joins.append(join)
@@ -122,7 +122,7 @@ extension QueryBuilder where Model.Database: JoinSupporting {
     ) -> Self where Joined: Fluent.Model {
         let join = QueryJoin(
             method: method,
-            base:  baseKey.makeQueryField(),
+            base: baseKey.makeQueryField(),
             joined: joinedKey.makeQueryField()
         )
         query.joins.append(join)
@@ -138,7 +138,7 @@ extension QueryBuilder where Model.Database: JoinSupporting {
     ) -> Self where Joined: Fluent.Model {
         let join = QueryJoin(
             method: method,
-            base:  baseKey.makeQueryField(),
+            base: baseKey.makeQueryField(),
             joined: joinedKey.makeQueryField()
         )
         query.joins.append(join)
