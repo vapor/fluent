@@ -82,7 +82,7 @@ extension Benchmarker where Database: SchemaSupporting & JoinSupporting & Refere
         try test(Database.enableReferences(on: conn))
 
         try test(UserMigration<Database>.prepare(on: conn))
-        try test(PetMigration<Database>.prepare(on: conn))
+        try test(Pet<Database>.prepare(on: conn))
         try test(ToyMigration<Database>.prepare(on: conn))
         try test(PetToyMigration<Database>.prepare(on: conn))
 
@@ -90,7 +90,7 @@ extension Benchmarker where Database: SchemaSupporting & JoinSupporting & Refere
 
         try test(PetToyMigration<Database>.revert(on: conn))
         try test(ToyMigration<Database>.revert(on: conn))
-        try test(PetMigration<Database>.revert(on: conn))
+        try test(Pet<Database>.revert(on: conn))
         try test(UserMigration<Database>.revert(on: conn))
 
         self.pool.releaseConnection(conn)

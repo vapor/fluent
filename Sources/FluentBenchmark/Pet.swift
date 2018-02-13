@@ -56,7 +56,7 @@ extension Pet {
     }
 }
 
-extension Pet where Database: JoinSupporting {
+extension Pet where D: JoinSupporting {
     /// A relation to this pet's toys.
     var toys: Siblings<Pet, Toy<Database>, PetToy<Database>> {
         return siblings()
@@ -65,25 +65,12 @@ extension Pet where Database: JoinSupporting {
 
 // MARK: Migration
 
-internal struct PetMigration<D>: Migration
-    where D: SchemaSupporting & ReferenceSupporting & QuerySupporting
-{
-    /// See Migration.database
-    typealias Database = D
-
-    /// See Migration.prepare
-    static func prepare(on connection: Database.Connection) -> Future<Void> {
-        return Database.create(Pet<Database>.self, on: connection) { builder in
-            try builder.field(for: \Pet<Database>.id)
-            try builder.field(for: \Pet<Database>.name)
-            try builder.field(for: \Pet<Database>.ownerID, referencing: \User<Database>.id)
+extension Pet: Migration where D: SchemaSupporting & ReferenceSupporting {
+    /// See `Migration.prepare(on:)`
+    public static func prepare(on connection: Database.Connection) -> Future<Void> {
+        return Database.create(self, on: connection) { builder in
+            try addProperties(to: builder)
+            try builder.addReference(for: \.ownerID, referencing: \User<D>.id)
         }
     }
-
-    /// See Migration.revert
-    static func revert(on connection: Database.Connection) -> Future<Void> {
-        return Database.delete(Pet<Database>.self, on: connection)
-    }
 }
-
-
