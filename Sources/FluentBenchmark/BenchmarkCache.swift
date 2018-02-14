@@ -55,8 +55,10 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting & 
     public func benchmarkCache_withSchema() throws {
         let conn = try test(pool.requestConnection())
         try test(FluentCacheEntry<Database>.prepare(on: conn))
+        defer {
+            try? test(FluentCacheEntry<Database>.revert(on: conn))
+        }
         try self._benchmark(on: conn)
-        try test(FluentCacheEntry<Database>.revert(on: conn))
         pool.releaseConnection(conn)
     }
 }

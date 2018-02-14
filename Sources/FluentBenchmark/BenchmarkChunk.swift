@@ -43,7 +43,11 @@ extension Benchmarker where Database: QuerySupporting {
     /// Benchmark result chunking
     public func benchmarkChunking() throws {
         let conn = try test(pool.requestConnection())
-        try self._benchmark(on: conn)
+        do {
+            try self._benchmark(on: conn)
+        } catch {
+            fail("\(error)")
+        }
         pool.releaseConnection(conn)
     }
 }
@@ -54,8 +58,10 @@ extension Benchmarker where Database: SchemaSupporting & QuerySupporting {
     public func benchmarkChunking_withSchema() throws {
         let conn = try test(pool.requestConnection())
         try test(UserMigration<Database>.prepare(on: conn))
+        defer {
+            try? test(UserMigration<Database>.revert(on: conn))
+        }
         try self._benchmark(on: conn)
-        try test(UserMigration<Database>.revert(on: conn))
         pool.releaseConnection(conn)
     }
 }

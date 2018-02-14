@@ -23,7 +23,7 @@ public func == <Model, Value>(lhs: KeyPath<Model, Value?>, rhs: Value?) -> Model
     where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
-        method: .compare(lhs.makeQueryField(), .equality(.equals), rhs == nil ? .null : .value(rhs))
+        method: .compare(lhs.makeQueryField(), .equality(.equals), rhs.flatMap { .value($0) } ?? .null)
     )
 }
 
@@ -43,7 +43,7 @@ public func != <Model, Value>(lhs: KeyPath<Model, Value?>, rhs: Value?) -> Model
     where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
-        method: .compare(lhs.makeQueryField(), .equality(.notEquals), rhs == nil ? .null : .value(rhs))
+        method: .compare(lhs.makeQueryField(), .equality(.notEquals), rhs.flatMap { .value($0) } ?? .null)
     )
 }
 
@@ -73,7 +73,7 @@ public func ~= <Model, Value>(lhs: KeyPath<Model, Value?>, rhs: Value?) -> Model
     where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
-        method: .compare(lhs.makeQueryField(), .sequence(.hasSuffix), rhs == nil ? .null : .value(rhs))
+        method: .compare(lhs.makeQueryField(), .sequence(.hasSuffix), rhs.flatMap { .value($0) } ?? .null)
     )
 }
 
@@ -92,7 +92,7 @@ public func =~ <Model, Value>(lhs: KeyPath<Model, Value?>, rhs: Value?) -> Model
     where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
-        method: .compare(lhs.makeQueryField(), .sequence(.hasPrefix), rhs == nil ? .null : .value(rhs))
+        method: .compare(lhs.makeQueryField(), .sequence(.hasPrefix), rhs.flatMap { .value($0) } ?? .null)
     )
 }
 
@@ -110,7 +110,7 @@ public func ~~ <Model, Value>(lhs: KeyPath<Model, Value?>, rhs: Value?) -> Model
     where Model: Fluent.Model, Value: Encodable & Equatable, Value: KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
-        method: .compare(lhs.makeQueryField(), .sequence(.contains), rhs == nil ? .null : .value(rhs))
+        method: .compare(lhs.makeQueryField(), .sequence(.contains), rhs.flatMap { .value($0) } ?? .null)
     )
 }
 
@@ -139,7 +139,7 @@ public func > <Model, Value>(lhs: KeyPath<Model, Value?>, rhs: Value?) -> ModelF
     where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
-        method: .compare(lhs.makeQueryField(), .order(.greaterThan), rhs == nil ? .null : .value(rhs))
+        method: .compare(lhs.makeQueryField(), .order(.greaterThan), rhs.flatMap { .value($0) } ?? .null)
     )
 }
 
@@ -158,7 +158,7 @@ public func < <Model, Value>(lhs: KeyPath<Model, Value?>, rhs: Value?) -> ModelF
     where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
-        method: .compare(lhs.makeQueryField(), .order(.lessThan), rhs == nil ? .null : .value(rhs))
+        method: .compare(lhs.makeQueryField(), .order(.lessThan), rhs.flatMap { .value($0) } ?? .null)
     )
 }
 
@@ -177,7 +177,7 @@ public func >= <Model, Value>(lhs: KeyPath<Model, Value?>, rhs: Value?) throws -
     where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
-        method: .compare(lhs.makeQueryField(), .order(.greaterThanOrEquals), rhs == nil ? .null : .value(rhs))
+        method: .compare(lhs.makeQueryField(), .order(.greaterThanOrEquals), rhs.flatMap { .value($0) } ?? .null)
     )
 }
 
@@ -196,6 +196,6 @@ public func <= <Model, Value>(lhs: KeyPath<Model, Value?>, rhs: Value?) -> Model
     where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
 {
     return ModelFilterMethod<Model>(
-        method: .compare(lhs.makeQueryField(), .order(.lessThanOrEquals), rhs == nil ? .null : .value(rhs))
+        method: .compare(lhs.makeQueryField(), .order(.lessThanOrEquals), rhs.flatMap { .value($0) } ?? .null)
     )
 }

@@ -42,12 +42,12 @@ extension Benchmarker where Database: SchemaSupporting & JoinSupporting & Refere
 
         try test(UserMigration<Database>.prepare(on: conn))
         try test(Pet<Database>.prepare(on: conn))
+        defer {
+            try? test(Pet<Database>.revert(on: conn))
+            try? test(UserMigration<Database>.revert(on: conn))
+        }
 
         try self._benchmark(on: conn)
-
-        try test(Pet<Database>.revert(on: conn))
-        try test(UserMigration<Database>.revert(on: conn))
-
         self.pool.releaseConnection(conn)
     }
 }

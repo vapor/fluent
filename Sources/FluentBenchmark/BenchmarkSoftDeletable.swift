@@ -68,8 +68,10 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting & 
     public func benchmarkSoftDeletable_withSchema() throws {
         let conn = try test(pool.requestConnection())
         try test(Bar<Database>.prepare(on: conn))
+        defer {
+            try? test(Bar<Database>.revert(on: conn))
+        }
         try self._benchmark(on: conn)
-        try test(Bar<Database>.revert(on: conn))
         pool.releaseConnection(conn)
     }
 }
