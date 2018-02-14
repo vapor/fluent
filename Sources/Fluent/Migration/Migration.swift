@@ -19,27 +19,41 @@ public protocol Migration {
     static func revert(on connection: Database.Connection) -> Future<Void>
 }
 
-extension Model where Self: Migration, Database: SchemaSupporting {
-    /// See Migration.prepare
-    public static func prepare(on connection: Database.Connection) -> Future<Void> {
+/// MARK: Auto Migration
+
+extension Model where Database: SchemaSupporting {
+    /// Automatically adds `SchemaField`s for each of this `Model`s properties.
+    public static func addProperties(to builder: SchemaCreator<Self>) throws {
         let idCodingPath = Self.codingPath(forKey: idKey)
         let properties = Self.properties()
-        return Database.create(self, on: connection) { schema in
-            for property in properties {
-                guard property.codingPath.count == 1 else {
-                    continue
-                }
-                try schema.addField(
-                    type: Database.fieldType(for: property.type),
-                    name: property.codingPath[0].stringValue,
-                    isOptional: property.isOptional,
-                    isIdentifier: property.codingPath.equals(idCodingPath)
-                )
+
+        for property in properties {
+            guard property.codingPath.count == 1 else {
+                continue
             }
+
+            let field = try SchemaField<Database>(
+                name: property.codingPath[0].stringValue,
+                type: Database.fieldType(for: property.type),
+                isOptional: property.isOptional,
+                isIdentifier: property.codingPath.equals(idCodingPath)
+            )
+            builder.schema.addFields.append(field)
+        }
+    }
+}
+
+/// MARK: Schema Supporting
+
+extension Model where Self: Migration, Database: SchemaSupporting {
+    /// See `Migration.prepare(on:)`
+    public static func prepare(on connection: Database.Connection) -> Future<Void> {
+        return Database.create(self, on: connection) { builder in
+            try addProperties(to: builder)
         }
     }
 
-    /// See Migration.revert
+    /// See `Migration.revert(on:)`
     public static func revert(on connection: Database.Connection) -> Future<Void> {
         return Database.delete(self, on: connection)
     }

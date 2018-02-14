@@ -21,20 +21,66 @@ public struct SchemaReference<Database> where Database: ReferenceSupporting & Sc
     /// we assume it is the same type as the base field.
     public let referenced: QueryField
 
+    /// The action to take if this reference is modified.
+    public let actions: ReferentialActions
+
     /// Creates a new SchemaReference
     public init(
         base: QueryField,
-        referenced: QueryField
+        referenced: QueryField,
+        actions: ReferentialActions
     ) {
         self.base = base
         self.referenced = referenced
+        self.actions = actions
     }
 
     /// Convenience init w/ schema field
-    public init(base: SchemaField<Database>, referenced: QueryField) {
+    public init(base: SchemaField<Database>, referenced: QueryField, actions: ReferentialActions) {
         self.base = QueryField(entity: nil, name: base.name)
         self.referenced = referenced
+        self.actions = actions
     }
+}
+
+public struct ReferentialActions {
+    /// Action to take if referenced entities are updated.
+    public var update: ReferentialAction?
+
+    /// Action to take if referenced entities are deleted.
+    public var delete: ReferentialAction?
+
+    /// Creates a new `ReferentialActions`
+    public init(update: ReferentialAction? = nil, delete: ReferentialAction? = nil) {
+        self.update = update
+        self.delete = delete
+    }
+
+    /// The default `ReferentialActions`
+    public static let `default`: ReferentialActions = .init(update: nil, delete: nil)
+
+    /// The default `ReferentialActions`
+    public static let prevent: ReferentialActions = .init(update: .prevent, delete: .prevent)
+
+    /// The default `ReferentialActions`
+    public static let nullify: ReferentialActions = .init(update: .nullify, delete: .nullify)
+
+    /// The default `ReferentialActions`
+    public static let update: ReferentialActions = .init(update: .update, delete: .update)
+}
+
+/// Supported referential actions.
+public enum ReferentialAction {
+    /// Prevent changes to the database that will affect this reference.
+    case prevent
+    /// If this reference is changed, nullify the relation.
+    /// Note: Requires optional field.
+    case nullify
+    /// If this reference is changed, update any dependents.
+    case update
+
+    /// The default `ReferentialAction`
+    public static let `default`: ReferentialAction = .prevent
 }
 
 extension DatabaseSchema where Database: ReferenceSupporting {
@@ -56,10 +102,11 @@ extension SchemaBuilder where Model.Database: ReferenceSupporting, Model.ID: Key
     /// T : T
     public func field<T, Other>(
         for key: KeyPath<Model, T>,
-        referencing: KeyPath<Other, T>
+        referencing: KeyPath<Other, T>,
+        actions: ReferentialActions = .default
     ) throws where Other: Fluent.Model, T: KeyStringDecodable {
         let base = try field(for: key)
-        let reference = SchemaReference(base: base, referenced: referencing.makeQueryField())
+        let reference = SchemaReference(base: base, referenced: referencing.makeQueryField(), actions: actions)
         schema.addReferences.append(reference)
     }
 
@@ -67,10 +114,11 @@ extension SchemaBuilder where Model.Database: ReferenceSupporting, Model.ID: Key
     /// T : Optional<T>
     public func field<T, Other>(
         for key: KeyPath<Model, T>,
-        referencing: KeyPath<Other, Optional<T>>
+        referencing: KeyPath<Other, Optional<T>>,
+        actions: ReferentialActions = .default
     ) throws where Other: Fluent.Model, T: KeyStringDecodable {
         let base = try field(for: key)
-        let reference = SchemaReference(base: base, referenced: referencing.makeQueryField())
+        let reference = SchemaReference(base: base, referenced: referencing.makeQueryField(), actions: actions)
         schema.addReferences.append(reference)
     }
 
@@ -78,10 +126,11 @@ extension SchemaBuilder where Model.Database: ReferenceSupporting, Model.ID: Key
     /// Optional<T> : T
     public func field<T, Other>(
         for key: KeyPath<Model, Optional<T>>,
-        referencing: KeyPath<Other, T>
+        referencing: KeyPath<Other, T>,
+        actions: ReferentialActions = .default
     ) throws where Other: Fluent.Model, T: KeyStringDecodable {
         let base = try field(for: key)
-        let reference = SchemaReference(base: base, referenced: referencing.makeQueryField())
+        let reference = SchemaReference(base: base, referenced: referencing.makeQueryField(), actions: actions)
         schema.addReferences.append(reference)
     }
 
@@ -89,39 +138,114 @@ extension SchemaBuilder where Model.Database: ReferenceSupporting, Model.ID: Key
     /// Optional<T> : Optional<T>
     public func field<T, Other>(
         for key: KeyPath<Model, Optional<T>>,
-        referencing: KeyPath<Other, Optional<T>>
+        referencing: KeyPath<Other, Optional<T>>,
+        actions: ReferentialActions = .default
     ) throws where Other: Fluent.Model, T: KeyStringDecodable {
         let base = try field(for: key)
-        let reference = SchemaReference<Model.Database>(base: base, referenced: referencing.makeQueryField())
+        let reference = SchemaReference<Model.Database>(base: base, referenced: referencing.makeQueryField(), actions: actions)
         schema.addReferences.append(reference)
     }
 
-    /// Adds a field to the schema and creates a reference.
-    /// Optional<T> : Optional<T>
-    public func remove<T, Other>(
-        for key: KeyPath<Model, Optional<T>>,
-        referencing: KeyPath<Other, Optional<T>>
+    /// Adds a reference.
+    public func addReference<T, Other>(
+        from base: KeyPath<Model, T>,
+        to referenced: KeyPath<Other, T>,
+        actions: ReferentialActions = .default
     ) throws where Other: Fluent.Model, T: KeyStringDecodable {
-        let base = try field(for: key)
-        let reference = SchemaReference<Model.Database>(base: base, referenced: referencing.makeQueryField())
+        let reference = SchemaReference<Model.Database>(
+            base: base.makeQueryField(),
+            referenced: referenced.makeQueryField(),
+            actions: actions
+        )
         schema.addReferences.append(reference)
     }
 
-    /// Adds a field to the schema.
-    public func removeField<T, Other>(for field: KeyPath<Model, T>, referencing: KeyPath<Other, Optional<T>>) throws
-        where Other: Fluent.Model, T: KeyStringDecodable
-    {
-        removeField(for: field)
-        try removeReference(from: field, to: referencing)
+    /// Adds a reference.
+    public func addReference<T, Other>(
+        from base: KeyPath<Model, T?>,
+        to referenced: KeyPath<Other, T>,
+        actions: ReferentialActions = .default
+    ) throws where Other: Fluent.Model, T: KeyStringDecodable {
+        let reference = SchemaReference<Model.Database>(
+            base: base.makeQueryField(),
+            referenced: referenced.makeQueryField(),
+            actions: actions
+        )
+        schema.addReferences.append(reference)
     }
 
-    /// Adds a field to the schema.
-    public func removeReference<T, Other>(from field: KeyPath<Model, T>, to referencing: KeyPath<Other, Optional<T>>) throws
+    /// Adds a reference.
+    public func addReference<T, Other>(
+        from base: KeyPath<Model, T>,
+        to referenced: KeyPath<Other, T?>,
+        actions: ReferentialActions = .default
+    ) throws where Other: Fluent.Model, T: KeyStringDecodable {
+        let reference = SchemaReference<Model.Database>(
+            base: base.makeQueryField(),
+            referenced: referenced.makeQueryField(),
+            actions: actions
+        )
+        schema.addReferences.append(reference)
+    }
+
+    /// Adds a reference.
+    public func addReference<T, Other>(
+        from base: KeyPath<Model, T?>,
+        to referenced: KeyPath<Other, T?>,
+        actions: ReferentialActions = .default
+    ) throws where Other: Fluent.Model, T: KeyStringDecodable {
+        let reference = SchemaReference<Model.Database>(
+            base: base.makeQueryField(),
+            referenced: referenced.makeQueryField(),
+            actions: actions
+        )
+        schema.addReferences.append(reference)
+    }
+
+    /// Removes a reference.
+    public func removeReference<T, Other>(from field: KeyPath<Model, T>, to referencing: KeyPath<Other, T>) throws
         where Other: Fluent.Model, T: KeyStringDecodable
     {
         let reference = SchemaReference<Model.Database>(
             base: field.makeQueryField(),
-            referenced: referencing.makeQueryField()
+            referenced: referencing.makeQueryField(),
+            actions: .default
+        )
+        schema.removeReferences.append(reference)
+    }
+
+    /// Removes a reference.
+    public func removeReference<T, Other>(from field: KeyPath<Model, T?>, to referencing: KeyPath<Other, T>) throws
+        where Other: Fluent.Model, T: KeyStringDecodable
+    {
+        let reference = SchemaReference<Model.Database>(
+            base: field.makeQueryField(),
+            referenced: referencing.makeQueryField(),
+            actions: .default
+        )
+        schema.removeReferences.append(reference)
+    }
+
+    /// Removes a reference.
+    public func removeReference<T, Other>(from field: KeyPath<Model, T>, to referencing: KeyPath<Other, T?>) throws
+        where Other: Fluent.Model, T: KeyStringDecodable
+    {
+        let reference = SchemaReference<Model.Database>(
+            base: field.makeQueryField(),
+            referenced: referencing.makeQueryField(),
+            actions: .default
+        )
+        schema.removeReferences.append(reference)
+    }
+
+    /// Removes a reference.
+    public func removeReference<T, Other>(from field: KeyPath<Model, T?>, to referencing: KeyPath<Other, T?>) throws
+        where Other: Fluent.Model, T: KeyStringDecodable
+    {
+        let reference = SchemaReference<Model.Database>(
+            base: field.makeQueryField(),
+            referenced: referencing.makeQueryField(),
+            actions: .default
         )
         schema.removeReferences.append(reference)
     }

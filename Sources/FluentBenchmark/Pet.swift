@@ -29,15 +29,15 @@ public final class Pet<D>: Model where D: QuerySupporting {
     var name: String
 
     /// Age int
-    var ownerID: User<Database>.ID
+    var ownerID: User<Database>.ID?
 
-    /// Create a new foo
-    init(id: ID? = nil, name: String, ownerID: User<Database>.ID) {
+    /// Creates a new `Pet`
+    init(id: ID? = nil, name: String, ownerID: User<Database>.ID?) {
         self.id = id
         self.name = name
         self.ownerID = ownerID
     }
-
+    
     /// See Encodable.encode
     public func encode(to encoder: Encoder) throws {
         var container = encodingContainer(for: encoder)
@@ -51,12 +51,12 @@ public final class Pet<D>: Model where D: QuerySupporting {
 
 extension Pet {
     /// A relation to this pet's owner.
-    var owner: Parent<Pet, User<Database>> {
+    var owner: Parent<Pet, User<Database>>? {
         return parent(\.ownerID)
     }
 }
 
-extension Pet where Database: JoinSupporting {
+extension Pet where D: JoinSupporting {
     /// A relation to this pet's toys.
     var toys: Siblings<Pet, Toy<Database>, PetToy<Database>> {
         return siblings()
@@ -65,25 +65,12 @@ extension Pet where Database: JoinSupporting {
 
 // MARK: Migration
 
-internal struct PetMigration<D>: Migration
-    where D: SchemaSupporting & ReferenceSupporting & QuerySupporting
-{
-    /// See Migration.database
-    typealias Database = D
-
-    /// See Migration.prepare
-    static func prepare(on connection: Database.Connection) -> Future<Void> {
-        return Database.create(Pet<Database>.self, on: connection) { builder in
-            try builder.field(for: \Pet<Database>.id)
-            try builder.field(for: \Pet<Database>.name)
-            try builder.field(for: \Pet<Database>.ownerID, referencing: \User<Database>.id)
+extension Pet: Migration where D: SchemaSupporting & ReferenceSupporting {
+    /// See `Migration.prepare(on:)`
+    public static func prepare(on connection: Database.Connection) -> Future<Void> {
+        return Database.create(self, on: connection) { builder in
+            try addProperties(to: builder)
+            try builder.addReference(from: \.ownerID, to: \User<D>.id, actions: .init(update: .update, delete: .nullify))
         }
     }
-
-    /// See Migration.revert
-    static func revert(on connection: Database.Connection) -> Future<Void> {
-        return Database.delete(Pet<Database>.self, on: connection)
-    }
 }
-
-
