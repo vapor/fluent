@@ -33,8 +33,10 @@ extension Benchmarker where Database: QuerySupporting & SchemaSupporting {
     public func benchmarkAutoincrement_withSchema() throws {
         let conn = try test(pool.requestConnection())
         try test(LogMessageMigration<Database>.prepare(on: conn))
+        defer {
+            try? test(LogMessageMigration<Database>.revert(on: conn))
+        }
         try self._benchmark(on: conn)
-        try test(LogMessageMigration<Database>.revert(on: conn))
         pool.releaseConnection(conn)
     }
 }
