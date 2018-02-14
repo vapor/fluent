@@ -69,6 +69,7 @@ final class SQLiteBenchmarkTests: XCTestCase {
         ("testChunking", testChunking),
         ("testAutoincrement", testAutoincrement),
         ("testCache", testCache),
+        ("testJoins", testJoins),
         ("testSoftDeletable", testSoftDeletable),
         ("testReferentialActions", testReferentialActions),
     ]
