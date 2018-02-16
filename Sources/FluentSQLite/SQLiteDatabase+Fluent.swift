@@ -7,7 +7,18 @@ import SQLite
 
 /// A SQLite database model.
 /// See `Fluent.Model`.
-public protocol SQLiteModel: Model where Database == SQLiteDatabase { }
+public protocol SQLiteModel: Model where Self.Database == SQLiteDatabase, Self.ID == Int {
+    /// This SQLite Model's unique identifier.
+    var id: ID? { get set }
+}
+
+extension SQLiteModel {
+    /// See `Model.ID`
+    public typealias ID = Int
+
+    /// See `Model.idKey`
+    public static var idKey: IDKey { return \.id }
+}
 
 /// A SQLite database pivot.
 /// See `Fluent.Pivot`.

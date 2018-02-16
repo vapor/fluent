@@ -60,6 +60,18 @@ final class SQLiteBenchmarkTests: XCTestCase {
         try benchmarker.benchmarkReferentialActions_withSchema()
     }
 
+    func testMinimumViableModelDeclaration() throws {
+        /// NOTE: these must never fail to build
+        struct Foo: SQLiteModel {
+            var id: Int?
+            var name: String
+        }
+        final class Bar: SQLiteModel {
+            var id: Int?
+            var name: String
+        }
+    }
+
     static let allTests = [
         ("testSchema", testSchema),
         ("testModels", testModels),
@@ -72,5 +84,6 @@ final class SQLiteBenchmarkTests: XCTestCase {
         ("testJoins", testJoins),
         ("testSoftDeletable", testSoftDeletable),
         ("testReferentialActions", testReferentialActions),
+        ("testMinimumViableModelDeclaration", testMinimumViableModelDeclaration),
     ]
 }
