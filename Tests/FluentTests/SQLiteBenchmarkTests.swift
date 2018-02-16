@@ -13,7 +13,7 @@ final class SQLiteBenchmarkTests: XCTestCase {
         self.worker = try! DefaultEventLoop(label: "codes.vapor.fluent.test.sqlite")
         Thread.async { self.worker.runLoop() }
         let database = try! SQLiteDatabase(storage: .memory)
-        benchmarker = Benchmarker(database, config: .init(), on: worker, onFail: XCTFail)
+        benchmarker = Benchmarker(database, on: worker, onFail: XCTFail)
     }
 
     func testSchema() throws {

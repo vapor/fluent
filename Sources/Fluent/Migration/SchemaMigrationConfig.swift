@@ -17,7 +17,7 @@ internal struct SchemaMigrationConfig<Database>: MigrationRunnable where Databas
     }
 
     /// See MigrationRunnable.migrate
-    internal func migrate(using databases: Databases, using container: Container) -> Future<Void> {
+    internal func migrate(using databases: Databases, using worker: Worker) -> Future<Void> {
         return Future.flatMap {
             guard let database = databases.database(for: self.database) else {
                 throw FluentError(
@@ -26,10 +26,7 @@ internal struct SchemaMigrationConfig<Database>: MigrationRunnable where Databas
                 )
             }
 
-            return try database.makeConnection(
-                using: container.make(for: Database.Connection.self),
-                on: container
-            ).flatMap(to: Void.self) { conn in
+            return database.makeConnection(on: worker.eventLoop).flatMap(to: Void.self) { conn in
                 self.prepareForMigration(on: conn)
             }
         }

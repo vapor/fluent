@@ -15,9 +15,6 @@ public final class Benchmarker<Database: Fluent.Database> {
 
     /// Failure handler
     private let onFail: OnFail
-    
-    /// Container to make configurations from
-    internal let config: Database.Connection.Config
 
     /// Logs collected
     private var logs: [DatabaseLog]
@@ -26,12 +23,11 @@ public final class Benchmarker<Database: Fluent.Database> {
     internal let eventLoop: EventLoop
 
     /// Create a new benchmarker
-    public init(_ database: Database, config: Database.Connection.Config, on worker: Worker, onFail: @escaping OnFail) {
+    public init(_ database: Database, on worker: Worker, onFail: @escaping OnFail) {
         self.database = database
         self.onFail = onFail
         self.logs = []
-        self.config = config
-        self.pool = self.database.makeConnectionPool(max: 20, using: config, on: worker)
+        self.pool = self.database.makeConnectionPool(max: 20, on: worker)
         self.eventLoop = worker.eventLoop
 
         if let logSupporting = database as? LogSupporting {
