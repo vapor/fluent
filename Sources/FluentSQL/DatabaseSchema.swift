@@ -14,11 +14,12 @@ extension DatabaseSchema {
         case .update:
             return .alter(
                 table: entity,
-                columns: addFields.map {
+                addColumns: addFields.map {
                     $0.makeSchemaColumn(dataType: dataTypeFactory($0))
                 },
-                deleteColumns: removeFields,
-                deleteForeignKeys: []
+                removeColumns: removeFields,
+                addForeignKeys: [],
+                removeForeignKeys: []
             )
         case .delete:
             return .drop(table: entity)
@@ -31,8 +32,11 @@ extension DatabaseSchema where Database: ReferenceSupporting {
     /// Converts a database schema to sql schema query
     public func applyReferences(to schemaQuery: inout SchemaQuery) {
         switch schemaQuery.statement {
-        case .create: schemaQuery.addForeignKeys = addForeignKeys()
-        case .alter: schemaQuery.deleteForeignKeys = removeForeignKeys()
+        case .create:
+            schemaQuery.addForeignKeys = makeAddForeignKeys()
+        case .alter:
+            schemaQuery.addForeignKeys = makeAddForeignKeys()
+            schemaQuery.removeForeignKeys = makeRemoveForeignKeys()
         default: break
         }
     }
