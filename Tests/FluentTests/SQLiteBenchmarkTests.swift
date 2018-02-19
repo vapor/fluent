@@ -60,6 +60,10 @@ final class SQLiteBenchmarkTests: XCTestCase {
         try benchmarker.benchmarkReferentialActions_withSchema()
     }
 
+    func testIndexSupporting() throws {
+        try benchmarker.benchmarkIndexSupporting_withSchema()
+    }
+
     static let allTests = [
         ("testSchema", testSchema),
         ("testModels", testModels),
@@ -72,5 +76,6 @@ final class SQLiteBenchmarkTests: XCTestCase {
         ("testJoins", testJoins),
         ("testSoftDeletable", testSoftDeletable),
         ("testReferentialActions", testReferentialActions),
+        ("testIndexSupporting", testIndexSupporting),
     ]
 }
