@@ -41,7 +41,7 @@ public struct Siblings<Base: Model, Related: Model, Through: Pivot>
     public let base: Base
 
     /// Base pivot field type.
-    public typealias BasePivotField = ReferenceWritableKeyPath<Through, Base.ID>
+    public typealias BasePivotField = WritableKeyPath<Through, Base.ID>
 
     /// The base model's foreign id field
     /// that appears on the pivot.
@@ -49,7 +49,7 @@ public struct Siblings<Base: Model, Related: Model, Through: Pivot>
     public let basePivotField: BasePivotField
 
     // Related pivot field type.
-    public typealias RelatedPivotField = ReferenceWritableKeyPath<Through, Related.ID>
+    public typealias RelatedPivotField = WritableKeyPath<Through, Related.ID>
 
     /// The related model's foreign id field
     /// that appears on the pivot.

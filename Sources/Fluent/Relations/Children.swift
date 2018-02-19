@@ -40,7 +40,7 @@ extension Model {
     /// The `foreignField` should refer to the field
     /// on the child entity that contains the parent's ID.
     public func children<Child>(
-        _ parentForeignIDKey: ReferenceWritableKeyPath<Child, Self.ID>
+        _ parentForeignIDKey: WritableKeyPath<Child, Self.ID>
     ) -> Children<Self, Child> {
         return Children(
             parent: self,
@@ -53,7 +53,7 @@ extension Model {
     /// The `foreignField` should refer to the field
     /// on the child entity that contains the parent's ID.
     public func children<Child>(
-        _ parentForeignIDKey: ReferenceWritableKeyPath<Child, Self.ID?>
+        _ parentForeignIDKey: WritableKeyPath<Child, Self.ID?>
     ) -> Children<Self, Child> {
         return Children(
             parent: self,

@@ -3,10 +3,10 @@ import Foundation
 /// Has create and update timestamps.
 public protocol Timestampable: AnyTimestampable {
     /// Key referencing created at property.
-    typealias CreatedAtKey = ReferenceWritableKeyPath<Self, Date?>
+    typealias CreatedAtKey = WritableKeyPath<Self, Date?>
 
     /// Key referencing updated at property.
-    typealias UpdatedAtKey = ReferenceWritableKeyPath<Self, Date?>
+    typealias UpdatedAtKey = WritableKeyPath<Self, Date?>
 
     /// The date at which this model was created.
     /// nil if the model has not been created yet.
