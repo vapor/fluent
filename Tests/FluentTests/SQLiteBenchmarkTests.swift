@@ -70,6 +70,14 @@ final class SQLiteBenchmarkTests: XCTestCase {
             var id: Int?
             var name: String
         }
+        struct Baz: SQLiteUUIDModel {
+            var id: UUID?
+            var name: String
+        }
+        final class Qux: SQLiteUUIDModel {
+            var id: UUID?
+            var name: String
+        }
     }
   
     func testIndexSupporting() throws {
