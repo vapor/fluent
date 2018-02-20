@@ -78,6 +78,10 @@ final class SQLiteBenchmarkTests: XCTestCase {
             var id: UUID?
             var name: String
         }
+        final class Uh: SQLiteStringModel {
+            var id: String?
+            var name: String
+        }
     }
   
     func testIndexSupporting() throws {

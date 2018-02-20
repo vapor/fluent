@@ -43,6 +43,25 @@ extension SQLiteUUIDModel {
 /// See `Fluent.Pivot`.
 public protocol SQLiteUUIDPivot: Pivot, SQLiteUUIDModel { }
 
+/// A SQLite database model.
+/// See `Fluent.Model`.
+public protocol SQLiteStringModel: Model where Self.Database == SQLiteDatabase, Self.ID == String {
+    /// This SQLite Model's unique identifier.
+    var id: String? { get set }
+}
+
+extension SQLiteStringModel {
+    /// See `Model.ID`
+    public typealias ID = String
+
+    /// See `Model.idKey`
+    public static var idKey: IDKey { return \.id }
+}
+
+/// A SQLite database pivot.
+/// See `Fluent.Pivot`.
+public protocol SQLiteStringPivot: Pivot, SQLiteStringModel { }
+
 extension DatabaseIdentifier {
     /// The main SQLite database identifier.
     public static var sqlite: DatabaseIdentifier<SQLiteDatabase> {
