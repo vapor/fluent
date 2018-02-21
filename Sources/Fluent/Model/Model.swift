@@ -108,7 +108,7 @@ extension Model {
 
     /// Seee Model.willRead()
     // public func willRead(on connection: Database.Connection) throws -> Future<Void> { return .done }
-    
+
     /// See Model.didRead()
     public func didRead(on connection: Database.Connection) throws -> Future<Self> { return Future(self) }
 
@@ -258,8 +258,8 @@ extension Model where Database: QuerySupporting, ID: KeyStringDecodable {
         }
 
         let dbid = try Self.requireDefaultDatabase()
-        return container.withConnection(to: dbid) { conn in
-            return self.find(id, on: conn).map(to: Self.self) { model in
+        return container.requestCachedConnection(to: dbid).flatMap(to: Self.self) { conn in
+            self.find(id, on: conn).map(to: Self.self) { model in
                 guard let model = model else {
                     throw FluentError(identifier: "modelNotFound", reason: "No model with ID \(id) was found")
                 }
