@@ -258,8 +258,14 @@ extension Model where Database: QuerySupporting, ID: KeyStringDecodable {
         }
 
         let dbid = try Self.requireDefaultDatabase()
-        return container.requestCachedConnection(to: dbid).flatMap(to: Self.self) { conn in
-            self.find(id, on: conn).map(to: Self.self) { model in
+        let aConn : Future<Database.Connection>
+        if let subcontainer = container as? SubContainer {
+            aConn = subcontainer.requestCachedConnection(to: dbid)
+        } else {
+            aConn = container.requestPooledConnection(to: dbid)
+        }
+        return aConn.flatMap(to: Self.self) { conn in
+            return self.find(id, on: conn).map(to: Self.self) { model in
                 guard let model = model else {
                     throw FluentError(identifier: "modelNotFound", reason: "No model with ID \(id) was found")
                 }
