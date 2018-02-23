@@ -1,50 +1,72 @@
-/// Represents a one-to-many relationship
-/// from a child entity to its parent.
-/// ex: child entities have a "parent_id"
-public final class Parent<
-    Child: Entity, Parent: Entity
-> {
-    /// The parent entity id. This
-    /// will be used to find the parent.
-    public let parentId: Identifier
+import CodableKit
+import Async
 
-    /// The child requesting its parent
-    public let child: Child
-    /// Returns the parent.
-    public func get() throws -> Parent? {
-        return try first()
-    }
+/// The parent relation is one side of a
+/// one-to-many database relation.
+///
+/// The parent relation will return the parent
+/// model that the supplied child references.
+///
+/// The opposite side of this relation is called `Children`.
+public struct Parent<Child, Parent>
+    where Child: Model, Parent: Model, Child.Database == Parent.Database
+{
+    /// The child object with reference to parent
+    public var child: Child
 
-    /// Creates a new Parent relation.
-    public init(
-        from child: Child,
-        to parentType: Parent.Type = Parent.self,
-        withId parentId: Identifier
-    ) {
+    /// Reference to the parent's ID
+    public var parentID: Parent.ID
+
+    /// Creates a new children relationship.
+    internal init(child: Child, parentID: Parent.ID) {
         self.child = child
-        self.parentId = parentId
+        self.parentID = parentID
     }
 }
 
-extension Parent: QueryRepresentable {
-    public func makeQuery(_ executor: Executor) throws -> Query<Parent> {
-        let query = try Parent.makeQuery(executor)
-        return try query.filter(Parent.idKey, parentId)
+extension Parent where Child.Database: QuerySupporting, Parent.ID: KeyStringDecodable {
+    /// Create a query for the parent.
+    public func query(on conn: DatabaseConnectable) -> QueryBuilder<Parent> {
+        return Parent.query(on: conn)
+            .filter(Parent.idKey == parentID)
+    }
+
+    /// Convenience for getting the parent.
+    public func get(on conn: DatabaseConnectable) -> Future<Parent> {
+        return self.query(on: conn).first().map(to: Parent.self) { first in
+            guard let parent = first else {
+                throw FluentError(identifier: "parentRequired", reason: "This parent relationship could not be resolved", source: .capture())
+            }
+            return parent
+        }
     }
 }
 
-extension Parent: ExecutorRepresentable {
-    public func makeExecutor() throws -> Executor {
-        return try Parent.makeExecutor()
+// MARK: Model
+
+extension Model {
+    /// Create a children relation for this model.
+    public func parent<P>(
+        _ parentForeignIDKey: KeyPath<Self, P.ID>
+    ) -> Parent<Self, P> where P: Model {
+        return Parent(
+            child: self,
+            parentID: self[keyPath: parentForeignIDKey]
+        )
+    }
+
+    /// Create a children relation for this model.
+    public func parent<P>(
+        _ parentForeignIDKey: KeyPath<Self, P.ID?>
+    ) -> Parent<Self, P>? where P: Model {
+        guard let parentID = self[keyPath: parentForeignIDKey] else {
+            return nil
+        }
+
+        return Parent(
+            child: self,
+            parentID: parentID
+        )
     }
 }
 
-extension Entity {
-    public func parent<P: Entity>(
-        id parentId: Identifier?,
-        type parentType: P.Type = P.self
-    ) -> Parent<Self, P> {
-        let id = parentId ?? Identifier(.null)
-        return Parent(from: self, withId: id)
-    }
-}

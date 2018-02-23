@@ -1,9 +1,9 @@
 <p align="center">
-    <img src="https://cloud.githubusercontent.com/assets/1342803/24703810/2ec45636-1a05-11e7-9c75-3f26eae65c07.png" width="320" alt="Fluent">
+    <img src="https://user-images.githubusercontent.com/1342803/36584965-e2ed247e-1849-11e8-80c0-adbcef26cc4c.png" height="64" alt="Fluent">
     <br>
     <br>
-    <a href="http://docs.vapor.codes/2.0/fluent/package/">
-        <img src="http://img.shields.io/badge/read_the-docs-92A8D1.svg" alt="Documentation">
+    <a href="http://docs.vapor.codes/3.0/fluent/getting-started/">
+        <img src="http://img.shields.io/badge/read_the-docs-2196f3.svg" alt="Documentation">
     </a>
     <a href="http://vapor.team">
         <img src="http://vapor.team/badge.svg" alt="Slack Team">
@@ -15,6 +15,6 @@
         <img src="https://circleci.com/gh/vapor/fluent.svg?style=shield" alt="Continuous Integration">
     </a>
     <a href="https://swift.org">
-        <img src="http://img.shields.io/badge/swift-3.1-brightgreen.svg" alt="Swift 3.1">
+        <img src="http://img.shields.io/badge/swift-4.1-brightgreen.svg" alt="Swift 4.1">
     </a>
 </p>

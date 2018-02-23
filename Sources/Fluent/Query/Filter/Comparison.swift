@@ -1,68 +1,201 @@
-extension Filter {
-    /// Describes the various operators for
-    /// comparing values.
-    public enum Comparison {
-        case equals
-        case greaterThan
-        case lessThan
-        case greaterThanOrEquals
-        case lessThanOrEquals
-        case notEquals
-        case hasSuffix
-        case hasPrefix
-        case contains
-        case custom(String)
-    }
-    
+import CodableKit
+// MARK: Equality
+
+/// Comparisons that require an equatable value.
+public enum EqualityComparison {
+    case equals
+    case notEquals
 }
 
-public func == (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
-    let node = try rhs.makeNode(in: rowContext)
-    return .compare(lhs, .equals, node)
+/// MARK: .equals
+
+/// Model.field == value
+public func == <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
+{
+    return ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .equality(.equals), .value(rhs))
+    )
 }
 
-public func > (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
-    let node = try rhs.makeNode(in: rowContext)
-    return .compare(lhs, .greaterThan, node)
+/// Model.field? == value
+public func == <Model, Value>(lhs: KeyPath<Model, Value?>, rhs: Value?) -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
+{
+    return ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .equality(.equals), rhs.flatMap { .value($0) } ?? .null)
+    )
 }
 
-public func < (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
-    let node = try rhs.makeNode(in: rowContext)
-    return .compare(lhs, .lessThan, node)
+/// MARK: .notEquals
+
+/// Model.field != value
+public func != <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
+{
+    return ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .equality(.notEquals), .value(rhs))
+    )
 }
 
-public func >= (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
-    let node = try rhs.makeNode(in: rowContext)
-    return .compare(lhs, .greaterThanOrEquals, node)
+/// Model.field? != value
+public func != <Model, Value>(lhs: KeyPath<Model, Value?>, rhs: Value?) -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
+{
+    return ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .equality(.notEquals), rhs.flatMap { .value($0) } ?? .null)
+    )
 }
 
-public func <= (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
-    let node = try rhs.makeNode(in: rowContext)
-    return .compare(lhs, .lessThanOrEquals, node)
+// MARK: Sequence
+
+/// Comparisons that require a sequence value.
+public enum SequenceComparison {
+    case hasSuffix
+    case hasPrefix
+    case contains
 }
 
-public func != (lhs: String, rhs: NodeRepresentable) throws -> Filter.Method {
-    let node = try rhs.makeNode(in: rowContext)
-    return .compare(lhs, .notEquals, node)
+/// .greaterThan
+
+/// Model.field ~= value
+infix operator ~=
+public func ~= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
+{
+    return ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .sequence(.hasSuffix), .value(rhs))
+    )
 }
 
-extension Filter.Comparison: Equatable {
-    public static func ==(lhs: Filter.Comparison, rhs: Filter.Comparison) -> Bool {
-        switch (lhs, rhs) {
-        case (.equals, .equals),
-             (.greaterThan, .greaterThan),
-             (.lessThan, .lessThan),
-             (.greaterThanOrEquals, .greaterThanOrEquals),
-             (.lessThanOrEquals, .lessThanOrEquals),
-             (.notEquals, .notEquals),
-             (.hasSuffix, .hasSuffix),
-             (.hasPrefix, .hasPrefix),
-             (.contains, .contains):
-            return true
-        case (.custom(let a), .custom(let b)):
-            return a == b
-        default:
-            return false
-        }
-    }
+/// Model.field? ~= value
+public func ~= <Model, Value>(lhs: KeyPath<Model, Value?>, rhs: Value?) -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
+{
+    return ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .sequence(.hasSuffix), rhs.flatMap { .value($0) } ?? .null)
+    )
+}
+
+/// Model.field =~ value
+infix operator =~
+public func =~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
+{
+    return ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .sequence(.hasPrefix), .value(rhs))
+    )
+}
+
+/// Model.field? =~ value
+public func =~ <Model, Value>(lhs: KeyPath<Model, Value?>, rhs: Value?) -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
+{
+    return ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .sequence(.hasPrefix), rhs.flatMap { .value($0) } ?? .null)
+    )
+}
+
+/// Model.field ~~ value
+infix operator ~~
+public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable, Value: KeyStringDecodable
+{
+    return ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .sequence(.contains), .value(rhs))
+    )
+}
+/// Model.field ~~ value
+public func ~~ <Model, Value>(lhs: KeyPath<Model, Value?>, rhs: Value?) -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable, Value: KeyStringDecodable
+{
+    return ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .sequence(.contains), rhs.flatMap { .value($0) } ?? .null)
+    )
+}
+
+// MARK: Ordered
+
+/// Comparisons that require an ordered value.
+public enum OrderedComparison {
+    case greaterThan
+    case lessThan
+    case greaterThanOrEquals
+    case lessThanOrEquals
+}
+
+/// .greaterThan
+
+/// Model.field > value
+public func > <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
+{
+    return ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .order(.greaterThan), .value(rhs))
+    )
+}
+/// Model.field? > value
+public func > <Model, Value>(lhs: KeyPath<Model, Value?>, rhs: Value?) -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
+{
+    return ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .order(.greaterThan), rhs.flatMap { .value($0) } ?? .null)
+    )
+}
+
+/// .lessThan
+
+/// Model.field > value
+public func < <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
+{
+    return ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .order(.lessThan), .value(rhs))
+    )
+}
+/// Model.field? > value
+public func < <Model, Value>(lhs: KeyPath<Model, Value?>, rhs: Value?) -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
+{
+    return ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .order(.lessThan), rhs.flatMap { .value($0) } ?? .null)
+    )
+}
+
+/// .greaterThanOrEquals
+
+/// Model.field >= value
+public func >= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) throws -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
+{
+    return ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .order(.greaterThanOrEquals), .value(rhs))
+    )
+}
+/// Model.field? >= value
+public func >= <Model, Value>(lhs: KeyPath<Model, Value?>, rhs: Value?) throws -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
+{
+    return ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .order(.greaterThanOrEquals), rhs.flatMap { .value($0) } ?? .null)
+    )
+}
+
+/// .lessThanOrEquals
+
+/// Model.field <= value
+public func <= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
+{
+    return ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .order(.lessThanOrEquals), .value(rhs))
+    )
+}
+/// Model.field? <= value
+public func <= <Model, Value>(lhs: KeyPath<Model, Value?>, rhs: Value?) -> ModelFilterMethod<Model>
+    where Model: Fluent.Model, Value: Encodable & Equatable & KeyStringDecodable
+{
+    return ModelFilterMethod<Model>(
+        method: .compare(lhs.makeQueryField(), .order(.lessThanOrEquals), rhs.flatMap { .value($0) } ?? .null)
+    )
 }

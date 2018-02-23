@@ -2,36 +2,41 @@
 /// added on fetch, delete, and update
 /// operations to limit the set of
 /// data affected.
-public struct Filter {
-    public enum Relation {
-        case and, or
-    }
+public struct QueryFilter<Database> where Database: QuerySupporting {
+    /// The entity to filter.
+    public var entity: String
 
-    public enum Method {
-        case compare(String, Comparison, Node)
-        case subset(String, Scope, [Node])
-        case group(Relation, [RawOr<Filter>])
-    }
+    /// The method to filter by, comparison, subset, grouped, etc.
+    public var method: QueryFilterMethod<Database>
 
-    public init(_ entity: Entity.Type, _ method: Method) {
+    /// Create a new filter.
+    public init(entity: String, method: QueryFilterMethod<Database>) {
         self.entity = entity
         self.method = method
     }
-
-    public var entity: Entity.Type
-    public var method: Method
 }
 
-extension Filter: CustomStringConvertible {
+extension QueryFilter: CustomStringConvertible {
+    /// A readable description of this filter.
     public var description: String {
         switch method {
         case .compare(let field, let comparison, let value):
             return "(\(entity)) \(field) \(comparison) \(value)"
         case .subset(let field, let scope, let values):
-            let valueDescriptions = values.map { $0.string ?? "" }
-            return "(\(entity)) \(field) \(scope) \(valueDescriptions)"
+            return "(\(entity)) \(field) \(scope) \(values)"
         case .group(let relation, let filters):
             return filters.map { $0.description }.joined(separator: "\(relation)")
         }
+    }
+}
+
+extension QueryBuilder {
+    /// Manually create and append filter
+    @discardableResult
+    public func addFilter(
+        _ filter: QueryFilter<Model.Database>
+    ) -> Self {
+        query.filters.append(filter)
+        return self
     }
 }
