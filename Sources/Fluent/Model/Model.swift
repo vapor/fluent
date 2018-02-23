@@ -108,7 +108,7 @@ extension Model {
 
     /// Seee Model.willRead()
     // public func willRead(on connection: Database.Connection) throws -> Future<Void> { return .done }
-    
+
     /// See Model.didRead()
     public func didRead(on connection: Database.Connection) throws -> Future<Self> { return Future(self) }
 
@@ -241,7 +241,6 @@ extension Model {
 }
 
 // MARK: Routing
-
 extension Model where Database: QuerySupporting, ID: KeyStringDecodable {
     /// See `Parameter.make`
     public static func make(for parameter: String, using container: Container) throws -> Future<Self> {
@@ -262,15 +261,21 @@ extension Model where Database: QuerySupporting, ID: KeyStringDecodable {
             )
         }
 
-        let dbid = try Self.requireDefaultDatabase()
-        return container.withConnection(to: dbid) { conn in
-            return self.find(id, on: conn).map(to: Self.self) { model in
+        func findModel(in connection: Database.Connection) throws -> Future<Self> {
+            return self.find(id, on: connection).map(to: Self.self) { model in
                 guard let model = model else {
                     throw FluentError(identifier: "modelNotFound", reason: "No model with ID \(id) was found", source: .capture())
                 }
                 return model
             }
         }
+
+        let dbid = try Self.requireDefaultDatabase()
+        if let subcontainer = container as? SubContainer {
+            let connection = subcontainer.requestCachedConnection(to: dbid)
+            return connection.flatMap(to: Self.self, findModel)
+        } else {
+            return container.withPooledConnection(to: dbid, closure: findModel)
+        }
     }
 }
-
