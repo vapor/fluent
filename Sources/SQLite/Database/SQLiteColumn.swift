@@ -14,7 +14,7 @@ public final class SQLiteColumn {
     /// Create a column from a statement pointer and offest.
     init(query: SQLiteQuery.Raw, offset: Int32) throws {
         guard let nameRaw = sqlite3_column_name(query, offset) else {
-            throw SQLiteError(problem: .error, reason: "Unexpected nil column name")
+            throw SQLiteError(problem: .error, reason: "Unexpected nil column name", source: .capture())
         }
         self.name = String(cString: nameRaw)
     }

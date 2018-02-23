@@ -38,11 +38,11 @@ public final class SQLiteDatabase {
             let options = SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX
             var raw: SQLiteConnection.Raw?
             guard sqlite3_open_v2(storage.path, &raw, options, nil) == SQLITE_OK else {
-                throw SQLiteError(problem: .error, reason: "Could not open database.")
+                throw SQLiteError(problem: .error, reason: "Could not open database.", source: .capture())
             }
 
             guard let r = raw else {
-                throw SQLiteError(problem: .error, reason: "Unexpected nil database.")
+                throw SQLiteError(problem: .error, reason: "Unexpected nil database.", source: .capture())
             }
 
             let conn = SQLiteConnection(raw: r, database: self, on: worker)

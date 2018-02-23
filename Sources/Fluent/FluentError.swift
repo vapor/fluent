@@ -2,30 +2,27 @@ import Debugging
 import Foundation
 
 /// Errors that can be thrown while working with Fluent.
-public struct FluentError: Traceable, Debuggable, Swift.Error, Encodable {
+public struct FluentError: Debuggable {
     public static let readableName = "Fluent Error"
     public let identifier: String
     public var reason: String
-    public var file: String
-    public var function: String
-    public var line: UInt
-    public var column: UInt
+    public var sourceLocation: SourceLocation?
     public var stackTrace: [String]
+    public var suggestedFixes: [String]
+    public var possibleCauses: [String]
 
     init(
         identifier: String,
         reason: String,
-        file: String = #file,
-        function: String = #function,
-        line: UInt = #line,
-        column: UInt = #column
+        suggestedFixes: [String] = [],
+        possibleCauses: [String] = [],
+        source: SourceLocation
     ) {
         self.identifier = identifier
         self.reason = reason
-        self.file = file
-        self.function = function
-        self.line = line
-        self.column = column
+        self.suggestedFixes = suggestedFixes
+        self.possibleCauses = possibleCauses
+        self.sourceLocation = source
         self.stackTrace = FluentError.makeStackTrace()
     }
 }

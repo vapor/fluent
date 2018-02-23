@@ -84,7 +84,7 @@ extension QueryBuilder {
             if let result = result {
                 promise.complete(result)
             } else {
-                promise.fail(FluentError(identifier: "aggregate", reason: "The driver closed successfully without a result"))
+                promise.fail(FluentError(identifier: "aggregate", reason: "The driver closed successfully without a result", source: .capture()))
             }
         }
 

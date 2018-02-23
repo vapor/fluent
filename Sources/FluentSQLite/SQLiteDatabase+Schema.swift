@@ -11,7 +11,8 @@ extension SQLiteDatabase: SchemaSupporting {
             guard schema.removeReferences.count <= 0 else {
                 throw FluentSQLiteError(
                     identifier: "unsupported",
-                    reason: "SQLite does not support deleting foreign keys"
+                    reason: "SQLite does not support deleting foreign keys",
+                    source: .capture()
                 )
             }
 

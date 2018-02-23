@@ -25,7 +25,7 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
                             self.fail("count should be 101")
                         }
 
-                        throw FluentBenchmarkError(identifier: "test", reason: "rollback")
+                        throw FluentBenchmarkError(identifier: "test", reason: "rollback", source: .capture())
                     }
                 }
 

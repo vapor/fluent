@@ -67,11 +67,11 @@ public final class SQLiteQuery {
 
         let ret = sqlite3_prepare_v2(connection.raw, string, -1, &raw, nil)
         guard ret == SQLITE_OK else {
-            throw SQLiteError(statusCode: ret, connection: connection)
+            throw SQLiteError(statusCode: ret, connection: connection, source: .capture())
         }
 
         guard let r = raw else {
-            throw SQLiteError(statusCode: ret, connection: connection)
+            throw SQLiteError(statusCode: ret, connection: connection, source: .capture())
         }
 
         var nextBindPosition: Int32 = 1
@@ -83,28 +83,28 @@ public final class SQLiteQuery {
                 let pointer: UnsafePointer<Byte> = value.withUnsafeBytes { $0 }
                 let ret = sqlite3_bind_blob(r, nextBindPosition, UnsafeRawPointer(pointer), count, SQLITE_TRANSIENT)
                 guard ret == SQLITE_OK else {
-                    throw SQLiteError(statusCode: ret, connection: connection)
+                    throw SQLiteError(statusCode: ret, connection: connection, source: .capture())
                 }
             case .float(let value):
                 let ret = sqlite3_bind_double(r, nextBindPosition, value)
                 guard ret == SQLITE_OK else {
-                    throw SQLiteError(statusCode: ret, connection: connection)
+                    throw SQLiteError(statusCode: ret, connection: connection, source: .capture())
                 }
             case .integer(let value):
                 let ret = sqlite3_bind_int64(r, nextBindPosition, Int64(value))
                 guard ret == SQLITE_OK else {
-                    throw SQLiteError(statusCode: ret, connection: connection)
+                    throw SQLiteError(statusCode: ret, connection: connection, source: .capture())
                 }
             case .null:
                 let ret = sqlite3_bind_null(r, nextBindPosition)
                 if ret != SQLITE_OK {
-                    throw SQLiteError(statusCode: ret, connection: connection)
+                    throw SQLiteError(statusCode: ret, connection: connection, source: .capture())
                 }
             case .text(let value):
                 let strlen = Int32(value.utf8.count)
                 let ret = sqlite3_bind_text(r, nextBindPosition, value, strlen, SQLITE_TRANSIENT)
                 guard ret == SQLITE_OK else {
-                    throw SQLiteError(statusCode: ret, connection: connection)
+                    throw SQLiteError(statusCode: ret, connection: connection, source: .capture())
                 }
             }
 
@@ -127,7 +127,7 @@ public final class SQLiteQuery {
             // no results
             let ret = sqlite3_finalize(r)
             guard ret == SQLITE_OK else {
-                throw SQLiteError(statusCode: ret, connection: connection)
+                throw SQLiteError(statusCode: ret, connection: connection, source: .capture())
             }
 
             return nil
@@ -135,7 +135,7 @@ public final class SQLiteQuery {
             /// there are results, lets fetch them
             return SQLiteResults(raw: r, columns: columns, on: connection)
         default:
-            throw SQLiteError(statusCode: step, connection: connection)
+            throw SQLiteError(statusCode: step, connection: connection, source: .capture())
         }
     }
 }

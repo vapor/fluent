@@ -63,7 +63,8 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
             guard let id = originalID ?? model.fluentID else {
                 throw FluentError(
                     identifier: "idRequired",
-                    reason: "No ID was set on updated model, it is required for updating."
+                    reason: "No ID was set on updated model, it is required for updating.",
+                    source: .capture()
                 )
             }
 
@@ -110,7 +111,8 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
             guard let id = model.fluentID else {
                 throw FluentError(
                     identifier: "idRequired",
-                    reason: "No ID was set on updated model, it is required for updating."
+                    reason: "No ID was set on updated model, it is required for updating.",
+                    source: .capture()
                 )
             }
 

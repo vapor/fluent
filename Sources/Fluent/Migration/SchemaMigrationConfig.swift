@@ -21,8 +21,9 @@ internal struct SchemaMigrationConfig<Database>: MigrationRunnable where Databas
         return Future.flatMap {
             guard let database = databases.database(for: self.database) else {
                 throw FluentError(
-                    identifier: "no-migration-database",
-                    reason: "no database \(self.database.uid) was found for migrations"
+                    identifier: "schemaMigrationDatabase",
+                    reason: "no database \(self.database.uid) was found for migrations",
+                    source: .capture()
                 )
             }
 

@@ -27,7 +27,7 @@ public struct SQLiteField {
             data = .float(double)
         case .text:
             guard let val = sqlite3_column_text(query, offset) else {
-                throw SQLiteError(problem: .error, reason: "Unexpected nil column text.")
+                throw SQLiteError(problem: .error, reason: "Unexpected nil column text.", source: .capture())
             }
             let string = String(cString: val)
             data = .text(string)

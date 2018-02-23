@@ -20,7 +20,7 @@ internal struct QueryMigrationConfig<Database>: MigrationRunnable where Database
     internal func migrate(using databases: Databases, using worker: Worker) -> Future<Void> {
         return Future.flatMap {
             guard let database = databases.database(for: self.database) else {
-                throw FluentError(identifier: "no-migration-database", reason: "no database \(self.database.uid) was found for migrations")
+                throw FluentError(identifier: "queryMigrationDatabase", reason: "no database \(self.database.uid) was found for migrations", source: .capture())
             }
             return database.makeConnection(on: worker.eventLoop).flatMap(to: Void.self) { conn in
                 return self.migrateBatch(on: conn)

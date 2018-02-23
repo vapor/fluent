@@ -2,13 +2,10 @@ import CSQLite
 import Debugging
 
 /// Errors that can be thrown while using SQLite
-struct SQLiteError: Swift.Error, Debuggable, Traceable {
+struct SQLiteError: Debuggable {
     let problem: Problem
     public let reason: String
-    public var file: String
-    public var function: String
-    public var line: UInt
-    public var column: UInt
+    var sourceLocation: SourceLocation?
     public var stackTrace: [String]
     public var identifier: String {
         return problem.rawValue
@@ -18,17 +15,11 @@ struct SQLiteError: Swift.Error, Debuggable, Traceable {
     init(
         problem: Problem,
         reason: String,
-        file: String = #file,
-        function: String = #function,
-        line: UInt = #line,
-        column: UInt = #column
+        source: SourceLocation
     ) {
         self.problem = problem
         self.reason = reason
-        self.file = file
-        self.function = function
-        self.line = line
-        self.column = column
+        self.sourceLocation = source
         self.stackTrace = SQLiteError.makeStackTrace()
     }
 
@@ -36,17 +27,11 @@ struct SQLiteError: Swift.Error, Debuggable, Traceable {
     init(
         statusCode: Int32,
         connection: SQLiteConnection,
-        file: String = #file,
-        function: String = #function,
-        line: UInt = #line,
-        column: UInt = #column
+        source: SourceLocation
     ) {
         self.problem = Problem(statusCode: statusCode)
         self.reason = connection.errorMessage ?? "Unknown"
-        self.file = file
-        self.function = function
-        self.line = line
-        self.column = column
+        self.sourceLocation = source
         self.stackTrace = SQLiteError.makeStackTrace()
     }
 }

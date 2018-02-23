@@ -61,7 +61,7 @@ public final class SQLiteResults {
         if sqlite3_step(raw) != SQLITE_ROW {
             let ret = sqlite3_finalize(raw)
             guard ret == SQLITE_OK else {
-                throw SQLiteError(statusCode: ret, connection: connection)
+                throw SQLiteError(statusCode: ret, connection: connection, source: .capture())
             }
             self.state = .exhausted
         }

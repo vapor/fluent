@@ -130,7 +130,7 @@ extension Model {
     /// Throws an error if the model doesn't have an ID.
     public func requireID() throws -> ID {
         guard let id = self.fluentID else {
-            throw FluentError(identifier: "idRequired", reason: "\(Self.self) does not have an identifier.")
+            throw FluentError(identifier: "idRequired", reason: "\(Self.self) does not have an identifier.", source: .capture())
         }
 
         return id
@@ -231,7 +231,9 @@ extension Model {
         guard let dbid = Self.defaultDatabase else {
             throw FluentError(
                 identifier: "noDefaultDatabase",
-                reason: "A default database is required if no database ID is passed to `\(Self.self).query(_:on:)` or if `\(Self.self)` is being looked up statically. Set `\(Self.self).defaultDatabase` or to fix this error."
+                reason: "A default database is required if no database ID is passed to `\(Self.self).query(_:on:)` or if `\(Self.self)` is being looked up statically.",
+                suggestedFixes: ["Set `\(Self.self).defaultDatabase` or to fix this error."],
+                source: .capture()
             )
         }
         return dbid
@@ -246,14 +248,17 @@ extension Model where Database: QuerySupporting, ID: KeyStringDecodable {
         guard let idType = ID.self as? StringDecodable.Type else {
             throw FluentError(
                 identifier: "invalidIDType",
-                reason: "Could not convert string to ID. Conform `\(ID.self)` to `StringDecodable` to fix this error."
+                reason: "Could not convert string to ID.",
+                suggestedFixes: ["Conform `\(ID.self)` to `StringDecodable` to fix this error."],
+                source: .capture()
             )
         }
 
         guard let id = idType.decode(from: parameter) as? ID else {
             throw FluentError(
                 identifier: "invalidID",
-                reason: "Could not convert parameter \(parameter) to type `\(ID.self)`"
+                reason: "Could not convert parameter \(parameter) to type `\(ID.self)`",
+                source: .capture()
             )
         }
 
@@ -261,7 +266,7 @@ extension Model where Database: QuerySupporting, ID: KeyStringDecodable {
         return container.withConnection(to: dbid) { conn in
             return self.find(id, on: conn).map(to: Self.self) { model in
                 guard let model = model else {
-                    throw FluentError(identifier: "modelNotFound", reason: "No model with ID \(id) was found")
+                    throw FluentError(identifier: "modelNotFound", reason: "No model with ID \(id) was found", source: .capture())
                 }
                 return model
             }
