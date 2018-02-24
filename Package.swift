@@ -7,8 +7,6 @@ let package = Package(
         .library(name: "Fluent", targets: ["Fluent"]),
         .library(name: "FluentBenchmark", targets: ["FluentBenchmark"]),
         .library(name: "FluentSQL", targets: ["FluentSQL"]),
-        .library(name: "FluentSQLite", targets: ["FluentSQLite"]),
-        .library(name: "SQLite", targets: ["SQLite"]),
     ],
     dependencies: [
         // ⏱ Promises and reactive-streams in Swift built for high-performance and scalability.
@@ -27,13 +25,9 @@ let package = Package(
         .package(url: "https://github.com/vapor/service.git", from: "1.0.0-rc"),
     ],
     targets: [
-        .target(name: "CSQLite"),
         .target(name: "Fluent", dependencies: ["Async", "CodableKit", "Console", "DatabaseKit", "Service"]),
-        .testTarget(name: "FluentTests", dependencies: ["FluentBenchmark", "FluentSQLite", "SQLite"]),
+        .testTarget(name: "FluentTests", dependencies: ["FluentBenchmark"]),
         .target(name: "FluentBenchmark", dependencies: ["Fluent"]),
         .target(name: "FluentSQL", dependencies: ["Fluent", "SQL"]),
-        .target(name: "FluentSQLite", dependencies: ["Fluent", "FluentSQL", "SQLite"]),
-        .target(name: "SQLite", dependencies: ["Bits", "CodableKit", "CSQLite", "Debugging"]),
-        .testTarget(name: "SQLiteTests", dependencies: ["SQLite"]),
     ]
 )

@@ -2,14 +2,9 @@
 
 import XCTest
 @testable import FluentTests
-@testable import SQLiteTests
 
 XCTMain([
-    // Fluent
-    testCase(SQLiteBenchmarkTests.allTests),
-
-    // SQlite
-    testCase(SQLiteTests.allTests),
+	testCase(FluentTests.allTests),
 ])
 
 #endif
