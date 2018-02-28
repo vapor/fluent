@@ -96,14 +96,13 @@ extension QueryBuilder {
         }.catch { error in
             promise.fail(error)
         }.finally {
-            if partial.count > 0 {
-                do {
-                    try closure(partial)
-                } catch {
-                    promise.fail(error)
-                }
+            do {
+                try closure(partial)
+                partial = []
+                promise.complete()
+            } catch {
+                promise.fail(error)
             }
-            promise.complete()
         }
 
         return stream.prepare().flatMap(to: Void.self) {
