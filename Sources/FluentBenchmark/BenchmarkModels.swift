@@ -20,6 +20,7 @@ extension Benchmarker where Database: QuerySupporting {
         // update
         b.bar = "fdsa"
         _ = try test(b.save(on: conn))
+        _ = try test(Foo.query(on: conn).filter(\.id == a.id).set(\Foo<Database>.baz, to: 314))
 
         // read
         let fetched = try test(Foo<Database>.find(b.requireID(), on: conn))
@@ -27,6 +28,14 @@ extension Benchmarker where Database: QuerySupporting {
             self.fail("b.bar should have been updated")
         }
 
+        let fetchedA = try test(Foo<Database>.find(a.requireID(), on: conn))
+        if fetchedA?.baz != 314 {
+            self.fail("a.baz should equal 314")
+        }
+        if fetched?.baz == 314 {
+            self.fail("b.baz should not equal 314")
+        }
+        
         let c = try test(b.delete(on: conn))
         if c.id != nil {
             self.fail("id should have been set to nil")
