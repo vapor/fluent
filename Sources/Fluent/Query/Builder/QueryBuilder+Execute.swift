@@ -7,7 +7,6 @@ extension QueryBuilder {
         var rows: [D] = []
         return run(decoding: D.self) { model, conn in
             rows.append(model)
-            return .done(on: conn)
         }.map(to: [D].self) {
             return rows
         }
@@ -18,7 +17,6 @@ extension QueryBuilder {
         var rows: [Model] = []
         return run() { model, conn in
             rows.append(model)
-            return .done(on: conn)
         }.map(to: [Model].self) {
             return rows
         }
@@ -61,7 +59,6 @@ extension QueryBuilder {
                 try closure(partial)
                 partial = []
             }
-            return .done(on: conn)
         }.map(to: Void.self) {
             // any stragglers
             try closure(partial)

@@ -23,7 +23,7 @@ public final class QueryBuilder<Model> where Model: Fluent.Model, Model.Database
     /// Creates a result stream.
     public func run<D>(
         decoding type: D.Type,
-        into handler: @escaping (D, Model.Database.Connection) throws -> (Future<Void>) = { .done(on: $1) }
+        into handler: @escaping (D, Model.Database.Connection) throws -> () = { _, _ in }
     ) -> Future<Void>
         where D: Decodable
     {
@@ -63,12 +63,12 @@ public final class QueryBuilder<Model> where Model: Fluent.Model, Model.Database
     /// Note: this also sets the model's ID if the ID
     /// type is autoincrement.
     public func run(
-        into handler: @escaping (Model, Model.Database.Connection) throws -> (Future<Void>) = { .done(on: $1) }
+        into handler: @escaping (Model, Model.Database.Connection) throws -> () = { _, _ in }
     ) -> Future<Void> {
         return run(decoding: Model.self, into: { databaseTransformed, conn in
             return Model.Database.modelEvent(event: .willRead, model: databaseTransformed, on: conn).flatMap(to: Void.self) { staticTransformed in
-                return try staticTransformed.willRead(on: conn).flatMap(to: Void.self) { instanceTransformed in
-                    return try handler(instanceTransformed, conn)
+                return try staticTransformed.willRead(on: conn).map(to: Void.self) { instanceTransformed in
+                    try handler(instanceTransformed, conn)
                 }
             }
         })

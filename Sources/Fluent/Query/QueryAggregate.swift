@@ -73,7 +73,6 @@ extension QueryBuilder {
 
         return run(decoding: AggregateResult<D>.self) { row, conn in
             result = row.fluentAggregate
-            return .done(on: conn)
         }.map(to: D.self) {
             guard let result = result else {
                 throw FluentError(identifier: "aggregate", reason: "The driver closed successfully without a result", source: .capture())

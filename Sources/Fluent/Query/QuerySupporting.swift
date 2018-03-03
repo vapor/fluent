@@ -7,7 +7,7 @@ public protocol QuerySupporting: Database {
     /// Results will be outputed through the query's output stream.
     static func execute<D>(
         query: DatabaseQuery<Self>,
-        into handler: @escaping (D, Connection) throws -> (Future<Void>),
+        into handler: @escaping (D, Connection) throws -> (),
         on connection: Connection
     ) -> Future<Void>
         where D: Decodable
