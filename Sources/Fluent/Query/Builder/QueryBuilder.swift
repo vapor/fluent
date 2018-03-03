@@ -20,10 +20,10 @@ public final class QueryBuilder<Model> where Model: Fluent.Model, Model.Database
         self.connection = connection
     }
 
-    /// Creates a result stream.
+    /// Runs the `QueryBuilder's query, decoding results of the supplied type into the handler.
     public func run<D>(
         decoding type: D.Type,
-        into handler: @escaping (D, Model.Database.Connection) throws -> () = { _, _ in }
+        into handler: @escaping (D, Model.Database.Connection) throws -> ()
     ) -> Future<Void>
         where D: Decodable
     {
@@ -58,18 +58,18 @@ public final class QueryBuilder<Model> where Model: Fluent.Model, Model.Database
         }
     }
 
-    /// Convenience run that defaults to outputting a
-    /// stream of the QueryBuilder's model type.
-    /// Note: this also sets the model's ID if the ID
-    /// type is autoincrement.
+    /// Run the `QueryBuilder's query, decoding Models into the handler.
+    /// Omit a handler to ignore results.
     public func run(
-        into handler: @escaping (Model, Model.Database.Connection) throws -> () = { _, _ in }
+        into handler: @escaping (Model, Model.Database.Connection) -> () = { _, _ in }
     ) -> Future<Void> {
-        return run(decoding: Model.self, into: { databaseTransformed, conn in
-            return Model.Database.modelEvent(event: .willRead, model: databaseTransformed, on: conn).flatMap(to: Void.self) { staticTransformed in
-                return try staticTransformed.willRead(on: conn).map(to: Void.self) { instanceTransformed in
-                    try handler(instanceTransformed, conn)
-                }
+        return run(decoding: Model.self, into: { decoded, conn in
+            Model.Database.modelEvent(event: .willRead, model: decoded, on: conn).flatMap(to: Model.self) { model in
+                return try model.willRead(on: conn)
+            }.do { model in
+                handler(model, conn)
+            }.catch { _ in
+                // model event or will read failed, skipping
             }
         })
     }
