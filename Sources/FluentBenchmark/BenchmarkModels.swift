@@ -27,10 +27,7 @@ extension Benchmarker where Database: QuerySupporting {
             self.fail("b.bar should have been updated")
         }
 
-        let c = try test(b.delete(on: conn))
-        if c.id != nil {
-            self.fail("id should have been set to nil")
-        }
+        try test(b.delete(on: conn))
         count = try test(conn.query(Foo<Database>.self).count())
         if count != 1 {
             self.fail("count should have been 1")

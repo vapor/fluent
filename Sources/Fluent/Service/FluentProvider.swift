@@ -28,7 +28,7 @@ public final class FluentProvider: Provider {
                 console.print("Migrating \(uid) DB")
                 return migration.migrate(using: databases, using: container)
             }
-        }.syncFlatten().await(on: container)
+        }.syncFlatten(on: container).wait()
         console.success("Migrations complete")
     }
 }

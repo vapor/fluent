@@ -29,7 +29,7 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
             fail("count should have been 1")
         }
 
-        bar = try test(bar.delete(on: conn))
+        try test(bar.delete(on: conn))
         if try test(Bar<Database>.query(on: conn).count()) != 0 {
             fail("count should have been 0")
         }
@@ -45,7 +45,7 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
             fail("count should have been 1")
         }
 
-        bar = try test(bar.forceDelete(on: conn))
+        try test(bar.forceDelete(on: conn))
         if try test(Bar<Database>.query(on: conn).count()) != 0 {
             fail("count should have been 0")
         }

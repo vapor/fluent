@@ -85,7 +85,7 @@ extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecod
     /// Returns true if the supplied model is attached
     /// to this relationship.
     public func isAttached(_ model: Related, on conn: DatabaseConnectable) -> Future<Bool> {
-        return Future.flatMap {
+        return Future.flatMap(on: conn) {
             return try Through.query(on: conn)
                 .filter(self.basePivotField == self.base.requireID())
                 .filter(self.relatedPivotField == model.requireID())
@@ -97,7 +97,7 @@ extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecod
     /// Detaches the supplied model from this relationship
     /// if it was attached.
     public func detach(_ model: Related, on conn: DatabaseConnectable) -> Future<Void> {
-        return Future.flatMap {
+        return Future.flatMap(on: conn) {
             return try Through.query(on: conn)
                 .filter(self.basePivotField == self.base.requireID())
                 .filter(self.relatedPivotField == model.requireID())
@@ -112,11 +112,9 @@ extension Siblings
 {
     /// Attaches the model to this relationship.
     public func attach(_ model: Related, on conn: DatabaseConnectable) -> Future<Through> {
-        do {
-            let pivot = try Through(base, model)
+        return Future.flatMap(on: conn) {
+            let pivot = try Through(self.base, model)
             return pivot.save(on: conn)
-        } catch {
-            return Future(error: error)
         }
     }
 }
@@ -127,11 +125,9 @@ extension Siblings
 {
     /// Attaches the model to this relationship.
     public func attach(_ model: Related, on conn: DatabaseConnectable) -> Future<Through> {
-        do {
-            let pivot = try Through(model, base)
+        return Future.flatMap(on: conn) {
+            let pivot = try Through(model, self.base)
             return pivot.save(on: conn)
-        } catch {
-            return Future(error: error)
         }
     }
 }

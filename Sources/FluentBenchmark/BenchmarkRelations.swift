@@ -15,7 +15,7 @@ extension Benchmarker where Database: JoinSupporting & ReferenceSupporting & Que
 
         let foo = Pet<Database>(name: "Foo", ownerID: UUID())
         do {
-            _ = try foo.save(on: conn).await(on: eventLoop)
+            _ = try foo.save(on: conn).wait()
             fail("save should have failed")
         } catch {
             // pass

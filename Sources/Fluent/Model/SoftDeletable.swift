@@ -27,7 +27,7 @@ extension SoftDeletable {
 
 extension Model where Self: SoftDeletable, Database: QuerySupporting {
     /// Permanently deletes a soft deletable model.
-    public func forceDelete(on conn: DatabaseConnectable) -> Future<Self> {
+    public func forceDelete(on conn: DatabaseConnectable) -> Future<Void> {
         return query(on: conn)._delete(self)
     }
 
@@ -43,8 +43,8 @@ extension Model where Self: SoftDeletable, Database: QuerySupporting {
 
 extension Future where T: SoftDeletable, T.Database: QuerySupporting {
     /// See `Model.forceDelete(on:)`
-    public func forceDelete(on conn: DatabaseConnectable) -> Future<T> {
-        return flatMap(to: T.self) { model in
+    public func forceDelete(on conn: DatabaseConnectable) -> Future<Void> {
+        return flatMap(to: Void.self) { model in
             return model.forceDelete(on: conn)
         }
     }

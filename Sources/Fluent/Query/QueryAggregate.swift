@@ -63,33 +63,22 @@ extension QueryBuilder {
     }
 
     /// Performs the supplied aggregate struct.
-    public func aggregate<D: Decodable>(
-        _ aggregate: QueryAggregate,
-        as type: D.Type = D.self
-    ) -> Future<D> {
-        let promise = Promise(D.self)
-
+    public func aggregate<D>(_ aggregate: QueryAggregate, as type: D.Type = D.self) -> Future<D>
+        where D: Decodable
+    {
         query.action = .read
         query.aggregates.append(aggregate)
         
         var result: D? = nil
 
-        let stream = run(decoding: AggregateResult<D>.self)
-
-        stream.drain { res in
-            result = res.fluentAggregate
-        }.catch { err in
-            promise.fail(err)
-        }.finally {
-            if let result = result {
-                promise.complete(result)
-            } else {
-                promise.fail(FluentError(identifier: "aggregate", reason: "The driver closed successfully without a result", source: .capture()))
+        return run(decoding: AggregateResult<D>.self) { row, conn in
+            result = row.fluentAggregate
+            return .done(on: conn)
+        }.map(to: D.self) {
+            guard let result = result else {
+                throw FluentError(identifier: "aggregate", reason: "The driver closed successfully without a result", source: .capture())
             }
-        }
-
-        return stream.prepare().flatMap(to: D.self) {
-            return promise.future
+            return result
         }
     }
 }

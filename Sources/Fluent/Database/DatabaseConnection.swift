@@ -6,7 +6,8 @@ extension DatabaseConnection {
     public func query<M>(_ model: M.Type) -> QueryBuilder<M>
         where M.Database.Connection == Self
     {
-        return QueryBuilder(M.self, on: Future(self))
+        return QueryBuilder(M.self, on: Future.map(on: self) { self })
     }
 }
+
 

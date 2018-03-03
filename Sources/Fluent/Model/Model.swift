@@ -30,25 +30,19 @@ public protocol Model: AnyModel {
     /// Called after the model is created when saving.
     func didCreate(on connection: Database.Connection) throws -> Future<Self>
 
-    /// Called before a model is fetched.
-    /// Throwing will cancel the fetch.
-    // not possible, since model not yet loaded
-    // func willRead(on connection: Database.Connection)  throws -> Future<Void>
-
-    /// Called after the model is fetched.
-    func didRead(on connection: Database.Connection) throws -> Future<Self>
-
     /// Called before a model is updated when saving.
     /// Throwing will cancel the save.
     func willUpdate(on connection: Database.Connection) throws -> Future<Self>
     /// Called after the model is updated when saving.
     func didUpdate(on connection: Database.Connection) throws -> Future<Self>
 
+    /// Called before a model is fetched.
+    /// Throwing will cancel the fetch.
+    func willRead(on connection: Database.Connection)  throws -> Future<Self>
+
     /// Called before a model is deleted.
     /// Throwing will cancel the deletion.
     func willDelete(on connection: Database.Connection) throws -> Future<Self>
-    /// Called after the model is deleted.
-    func didDelete(on connection: Database.Connection) throws -> Future<Self>
 }
 
 /// Type-erased model.
@@ -63,9 +57,7 @@ public protocol AnyModel: Codable {
 
 extension Model where Database: QuerySupporting {
     /// Creates a query for this model on the supplied connection.
-    public func query(
-        on conn: DatabaseConnectable
-    ) -> QueryBuilder<Self> {
+    public func query(on conn: DatabaseConnectable) -> QueryBuilder<Self> {
         return .init(on: conn.connect(to: Self.defaultDatabase))
     }
 
@@ -102,25 +94,33 @@ extension Model {
     }
 
     /// Seee Model.willCreate()
-    public func willCreate(on connection: Database.Connection) throws -> Future<Self> { return Future(self) }
+    public func willCreate(on connection: Database.Connection) throws -> Future<Self> {
+        return Future.map(on: connection) { self }
+    }
+
     /// See Model.didCreate()
-    public func didCreate(on connection: Database.Connection) throws -> Future<Self> { return Future(self) }
-
-    /// Seee Model.willRead()
-    // public func willRead(on connection: Database.Connection) throws -> Future<Void> { return .done }
-
-    /// See Model.didRead()
-    public func didRead(on connection: Database.Connection) throws -> Future<Self> { return Future(self) }
+    public func didCreate(on connection: Database.Connection) throws -> Future<Self> {
+        return Future.map(on: connection) { self }
+    }
 
     /// See Model.willUpdate()
-    public func willUpdate(on connection: Database.Connection) throws -> Future<Self> { return Future(self) }
+    public func willUpdate(on connection: Database.Connection) throws -> Future<Self> {
+        return Future.map(on: connection) { self }
+    }
     /// See Model.didUpdate()
-    public func didUpdate(on connection: Database.Connection) throws -> Future<Self> { return Future(self) }
+    public func didUpdate(on connection: Database.Connection) throws -> Future<Self> {
+        return Future.map(on: connection) { self }
+    }
+
+    /// See Model.willRead()
+    public func willRead(on connection: Database.Connection) throws -> Future<Self> {
+        return Future.map(on: connection) { self }
+    }
 
     /// See Model.willDelete()
-    public func willDelete(on connection: Database.Connection) throws -> Future<Self> { return Future(self) }
-    /// See Model.didDelete()
-    public func didDelete(on connection: Database.Connection) throws -> Future<Self> { return Future(self) }
+    public func willDelete(on connection: Database.Connection) throws -> Future<Self> {
+        return Future.map(on: connection) { self }
+    }
 }
 
 /// MARK: Convenience
@@ -163,7 +163,7 @@ extension Model where Database: QuerySupporting {
     /// Saves this model to the supplied query executor.
     /// If `shouldCreate` is true, the model will be saved
     /// as a new item even if it already has an identifier.
-    public func delete(on conn: DatabaseConnectable) -> Future<Self> {
+    public func delete(on conn: DatabaseConnectable) -> Future<Void> {
         return query(on: conn).delete(self)
     }
 }

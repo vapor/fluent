@@ -65,7 +65,7 @@ public final class Benchmarker<Database: Fluent.Database> {
     /// Awaits the future or fails
     internal func test<T>(_ future: Future<T>, file: StaticString = #file, line: UInt = #line) throws -> T {
         do {
-            return try future.await(on: eventLoop)
+            return try future.wait()
         } catch {
             fail("\(error)", file: file, line: line)
             throw error

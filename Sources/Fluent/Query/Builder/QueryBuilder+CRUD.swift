@@ -32,13 +32,11 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
         }
 
         return connection.flatMap(to: Model.self) { conn in
-            return Model.Database.modelEvent(
-                event: .willCreate, model: copy,on: conn
-            ).flatMap(to: Model.self) { model in
+            return Model.Database.modelEvent(event: .willCreate, model: copy, on: conn).flatMap(to: Model.self) { model in
                 return try model.willCreate(on: conn)
             }.flatMap(to: Model.self) { model in
                 self.query.data = model
-                return self.execute().transform(to: model)
+                return self.run().transform(to: model)
             }.flatMap(to: Model.self) { model in
                 return Model.Database.modelEvent(event: .didCreate, model: model, on: conn)
             }.flatMap(to: Model.self) { model in
@@ -72,13 +70,11 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
             self.filter(Model.idKey == id)
             self.query.action = .update
 
-            return Model.Database.modelEvent(
-                event: .willUpdate, model: copy,on: conn
-            ).flatMap(to: Model.self) { model in
+            return Model.Database.modelEvent(event: .willUpdate, model: copy, on: conn).flatMap(to: Model.self) { model in
                 return try copy.willUpdate(on: conn)
             }.flatMap(to: Model.self) { model in
                 self.query.data = model
-                return self.execute().transform(to: model)
+                return self.run().transform(to: model)
             }.flatMap(to: Model.self) { model in
                 return Model.Database.modelEvent(event: .didUpdate, model: model, on: conn)
             }.flatMap(to: Model.self) { model in
@@ -89,25 +85,21 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
 
     /// Deletes the supplied model.
     /// Throws an error if the mdoel did not have an id.
-    internal func delete(_ model: Model) -> Future<Model> {
+    internal func delete(_ model: Model) -> Future<Void> {
         // set timestamps
         if var softDeletable = model as? AnySoftDeletable {
             softDeletable.fluentDeletedAt = Date()
-            return update(softDeletable as! Model)
+            return update(softDeletable as! Model).transform(to: ())
         } else {
-            return _delete(model).map(to: Model.self) { model in
-                var copy = model
-                copy.fluentID = nil
-                return copy
-            }
+            return _delete(model)
         }
     }
 
     /// Deletes the supplied model.
     /// Throws an error if the mdoel did not have an id.
     /// note: does NOT respect soft deletable.
-    internal func _delete(_ model: Model) -> Future<Model> {
-        return connection.flatMap(to: Model.self) { conn in
+    internal func _delete(_ model: Model) -> Future<Void> {
+        return connection.flatMap(to: Void.self) { conn in
             guard let id = model.fluentID else {
                 throw FluentError(
                     identifier: "idRequired",
@@ -119,16 +111,10 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
             self.filter(Model.idKey == id)
             self.query.action = .delete
 
-            return Model.Database.modelEvent(
-                event: .willDelete, model: model,on: conn
-            ).flatMap(to: Model.self) { model in
+            return Model.Database.modelEvent(event: .willDelete, model: model,on: conn).flatMap(to: Model.self) { model in
                 return try model.willDelete(on: conn)
-            }.flatMap(to: Model.self) { model in
-                return self.execute().transform(to: model)
-            }.flatMap(to: Model.self) { model in
-                return Model.Database.modelEvent(event: .didDelete, model: model, on: conn)
-            }.flatMap(to: Model.self) { model in
-                return try model.didDelete(on: conn)
+            }.flatMap(to: Void.self) { model in
+                return self.run()
             }
         }
     }
