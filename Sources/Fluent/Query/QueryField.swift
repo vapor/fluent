@@ -27,6 +27,12 @@ public struct QueryField: Hashable {
     }
 }
 
+extension QueryField: CustomStringConvertible {
+    public var description: String {
+        return (entity ?? "<nil>") + "." + name
+    }
+}
+
 extension Dictionary where Key == QueryField {
     /// Accesses the _first_ value from this dictionary with a matching field name.
     public func firstValue(forField fieldName: String) -> Value? {

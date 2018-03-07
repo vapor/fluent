@@ -72,7 +72,7 @@ public struct Siblings<Base: Model, Related: Model, Through: Pivot>
 
 extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecodable, Related.ID: KeyStringDecodable {
     /// Create a query for the parent.
-    public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Related, (Related, Through)> {
+    public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Related, Related> {
         let baseID = try Base.Database.queryDataSerialize(data: base.requireID())
         return Related.query(on: conn)
             .join(field: relatedPivotField)

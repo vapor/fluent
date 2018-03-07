@@ -72,14 +72,14 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: KeyPath<Joined, Model.ID>,
         to baseKey: KeyPath<Model, Model.ID?> = Model.idKey,
         method: QueryJoinMethod = .inner
-    ) -> QueryBuilder<Model, (Result, Joined)> where Joined: Fluent.Model {
+    ) -> Self where Joined: Fluent.Model {
         let join = QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),
             joined: joinedKey.makeQueryField()
         )
         query.joins.append(join)
-        return alsoDecode(Joined.self)
+        return self
     }
 
     /// Join another model to this query builder.
@@ -88,14 +88,14 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: KeyPath<Joined, Model.ID?>,
         to baseKey: KeyPath<Model, Model.ID?> = Model.idKey,
         method: QueryJoinMethod = .inner
-    ) -> QueryBuilder<Model, (Result, Joined)> where Joined: Fluent.Model {
+    ) -> Self where Joined: Fluent.Model {
         let join = QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),
             joined: joinedKey.makeQueryField()
         )
         query.joins.append(join)
-        return alsoDecode(Joined.self)
+        return self
     }
 
     /// Join another model to this query builder.
@@ -104,14 +104,14 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: KeyPath<Joined, Model.ID?>,
         to baseKey: KeyPath<Model, Model.ID>,
         method: QueryJoinMethod = .inner
-    ) -> QueryBuilder<Model, (Result, Joined)> where Joined: Fluent.Model {
+    ) -> Self where Joined: Fluent.Model {
         let join = QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),
             joined: joinedKey.makeQueryField()
         )
         query.joins.append(join)
-        return alsoDecode(Joined.self)
+        return self
     }
 
     /// Join another model to this query builder.
@@ -120,14 +120,14 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: KeyPath<Joined, Model.ID>,
         to baseKey: KeyPath<Model, Model.ID>,
         method: QueryJoinMethod = .inner
-    ) -> QueryBuilder<Model, (Result, Joined)> where Joined: Fluent.Model {
+    ) -> Self where Joined: Fluent.Model {
         let join = QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),
             joined: joinedKey.makeQueryField()
         )
         query.joins.append(join)
-        return alsoDecode(Joined.self)
+        return self
     }
 }
 
