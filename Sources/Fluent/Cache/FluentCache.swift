@@ -41,7 +41,8 @@ public final class FluentCache<Database>: KeyedCache, Service
     /// See `KeyedCache.remove(key:)`
     public func remove(_ key: String) throws -> Future<Void> {
         return pool.requestConnection().flatMap(to: Void.self) { conn in
-            return FluentCacheEntry<Database>.query(on: conn).filter(\.key == key).delete().map(to: Void.self) {
+            let data = try Database.queryDataSerialize(data: key)
+            return FluentCacheEntry<Database>.query(on: conn).filter(\.key == data).delete().map(to: Void.self) {
                 self.pool.releaseConnection(conn)
             }
         }

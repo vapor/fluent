@@ -71,7 +71,7 @@ extension QueryBuilder {
         
         var result: D? = nil
 
-        return run(decoding: AggregateResult<D>.self) { row, conn in
+        return decode(AggregateResult<D>.self).run() { row in
             result = row.fluentAggregate
         }.map(to: D.self) {
             guard let result = result else {

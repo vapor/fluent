@@ -4,7 +4,7 @@ public enum QueryGroupRelation {
 }
 
 extension QueryBuilder {
-    public typealias GroupClosure = (QueryBuilder<Model>) throws -> ()
+    public typealias GroupClosure = (QueryBuilder<Model, Result>) throws -> ()
 
     /// Create a query group.
     @discardableResult

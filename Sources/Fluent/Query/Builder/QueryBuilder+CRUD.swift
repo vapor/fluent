@@ -68,7 +68,8 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
             }
 
             // update record w/ matching id
-            self.filter(Model.idKey == id)
+            let idData = try Model.Database.queryDataSerialize(data: id)
+            self.filter(Model.idKey == idData)
             self.query.action = .update
 
             return Model.Database.modelEvent(event: .willUpdate, model: copy, on: conn).flatMap(to: Model.self) { model in
@@ -110,7 +111,8 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
                 )
             }
 
-            self.filter(Model.idKey == id)
+            let idData = try Model.Database.queryDataSerialize(data: id)
+            self.filter(Model.idKey == idData)
             self.query.action = .delete
 
             return Model.Database.modelEvent(event: .willDelete, model: model,on: conn).flatMap(to: Model.self) { model in

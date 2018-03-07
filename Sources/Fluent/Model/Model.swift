@@ -57,13 +57,13 @@ public protocol AnyModel: Codable {
 
 extension Model where Database: QuerySupporting {
     /// Creates a query for this model on the supplied connection.
-    public func query(on conn: DatabaseConnectable) -> QueryBuilder<Self> {
-        return .init(on: conn.connect(to: Self.defaultDatabase))
+    public func query(on conn: DatabaseConnectable) -> QueryBuilder<Self, Self> {
+        return Self.query(on: conn)
     }
 
     /// Creates a query for this model on the supplied connection.
-    public static func query(on conn: DatabaseConnectable) -> QueryBuilder<Self> {
-        return .init(on: conn.connect(to: Self.defaultDatabase))
+    public static func query(on conn: DatabaseConnectable) -> QueryBuilder<Self, Self> {
+        return query(on: conn.connect(to: Self.defaultDatabase))
     }
 }
 
@@ -206,8 +206,9 @@ extension Model where Database: QuerySupporting {
     /// Attempts to find an instance of this model w/
     /// the supplied identifier.
     public static func find(_ id: Self.ID, on conn: DatabaseConnectable) -> Future<Self?> {
+        let idData = try! Self.Database.queryDataSerialize(data: id)
         return query(on: conn)
-            .filter(idKey == id)
+            .filter(idKey == idData)
             .first()
     }
 }

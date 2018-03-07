@@ -27,14 +27,15 @@ extension Benchmarker where Database: QuerySupporting {
         if tanner.updatedAt! <= originalUpdatedAt {
             self.fail("new updated at should be greater")
         }
-            
-        let f = try test(conn.query(User<Database>.self).filter(\User<Database>.name == "Tanner").first())
+
+        let nameData = try Database.queryDataSerialize(data: "Tanner")
+        let f = try test(conn.query(User<Database>.self).filter(\.name == nameData).first())
         guard let fetched = f else {
             self.fail("could not fetch user")
             return
         }
 
-        // microsecond roudning
+        // microsecond rounding
         if !fetched.createdAt!.isWithin(seconds: 2, of: tanner.createdAt!) && !fetched.updatedAt!.isWithin(seconds: 2, of: tanner.updatedAt!) {
             self.fail("fetched timestamps are different")
         }

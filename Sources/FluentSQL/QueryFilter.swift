@@ -3,31 +3,20 @@ import SQL
 
 extension QueryFilter {
     /// Convert query filter to sql data predicate and bind values.
-    internal func makeDataPredicateItem() -> (DataPredicateItem, [BindValue]) {
+    internal func makeDataPredicateItem() -> (DataPredicateItem, [Database.QueryData]) {
         let item: DataPredicateItem
-        var values: [BindValue] = []
+        var values: [Database.QueryData] = []
 
         switch method {
         case .compare(let field, let comp, let value):
             let predicate = DataPredicate(
                 column: field.makeDataColumn(),
-                comparison: comp.makeDataPredicateComparison(for: value),
+                comparison: comp.makeDataPredicateComparison(),
                 value: value.makeDataPredicateValue()
             )
-
-            if case .value(let encodable) = value {
-                let method: BindValueMethod
-                switch comp {
-                case .sequence(let seq):
-                    method = .wildcard(seq.makeBindWildcard())
-                default:
-                    method = .plain
-                }
-
-                let value = BindValue(encodable: encodable, method: method)
-                values.append(value)
+            if case .value(let data) = value {
+                values.append(data)
             }
-
             item = .predicate(predicate)
         case .group(let relation, let filters):
             let group = DataPredicateGroup(
@@ -67,11 +56,9 @@ extension QuerySubsetScope {
 }
 
 extension QuerySubsetValue {
-    internal func makeDataPredicateValue() -> (DataPredicateValue, [BindValue]) {
+    internal func makeDataPredicateValue() -> (DataPredicateValue, [Database.QueryData]) {
         switch self {
-        case .array(let array):
-            let values = array.map { BindValue.init(encodable: $0, method: .plain) }
-            return (.placeholderArray(array.count), values)
+        case .array(let array):  return (.placeholders(count: array.count), array)
         case .subquery(let subquery):
             let (dataQuery, values) = subquery.makeDataQuery()
             return (.subquery(dataQuery), values)

@@ -26,14 +26,15 @@ public struct Parent<Child, Parent>
 
 extension Parent where Child.Database: QuerySupporting, Parent.ID: KeyStringDecodable {
     /// Create a query for the parent.
-    public func query(on conn: DatabaseConnectable) -> QueryBuilder<Parent> {
+    public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Parent, Parent> {
+        let idData = try Parent.Database.queryDataSerialize(data: parentID)
         return Parent.query(on: conn)
-            .filter(Parent.idKey == parentID)
+            .filter(Parent.idKey == idData)
     }
 
     /// Convenience for getting the parent.
-    public func get(on conn: DatabaseConnectable) -> Future<Parent> {
-        return self.query(on: conn).first().map(to: Parent.self) { first in
+    public func get(on conn: DatabaseConnectable) throws -> Future<Parent> {
+        return try self.query(on: conn).first().map(to: Parent.self) { first in
             guard let parent = first else {
                 throw FluentError(identifier: "parentRequired", reason: "This parent relationship could not be resolved", source: .capture())
             }

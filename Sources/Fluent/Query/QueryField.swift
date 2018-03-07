@@ -5,22 +5,12 @@ import CodableKit
 public struct QueryField: Hashable {
     /// See `Hashable.hashValue`
     public var hashValue: Int {
-        if let entity = self.entity {
-            return (entity + "." + name).hashValue
-        } else {
-            return name.hashValue
-        }
+        return (entity ?? "<nil>" + "." + name).hashValue
     }
 
     /// See `Equatable.==`
     public static func ==(lhs: QueryField, rhs: QueryField) -> Bool {
-        if let lentity = lhs.entity, let rentity = rhs.entity {
-            guard lentity == rentity else {
-                return false
-            }
-        }
-
-        return lhs.name == rhs.name
+        return lhs.name == rhs.name && lhs.entity == rhs.entity
     }
 
     /// The entity for this field.
@@ -34,6 +24,36 @@ public struct QueryField: Hashable {
     public init(entity: String? = nil, name: String) {
         self.entity = entity
         self.name = name
+    }
+}
+
+extension Dictionary where Key == QueryField {
+    /// Accesses the _first_ value from this dictionary with a matching field name.
+    public func firstValue(forField fieldName: String) -> Value? {
+        for (field, value) in self {
+            if field.name == fieldName {
+                return value
+            }
+        }
+        return nil
+    }
+
+    /// Access a `Value` from this dictionary keyed by `QueryField`s
+    /// using a field (column) name and entity (table) name.
+    public func value(forEntity entity: String, atField field: String) -> Value? {
+        return self[QueryField(entity: entity, name: field)]
+    }
+
+    /// Removes all values that have non-matching entities.
+    /// note: `QueryField`s with `nil` entities will still be included.
+    public func onlyValues(forEntity entity: String) -> [QueryField: Value] {
+        var result: [QueryField: Value] = [:]
+        for (field, value) in self {
+            if field.entity == nil || field.entity == entity {
+                result[field] = value
+            }
+        }
+        return result
     }
 }
 

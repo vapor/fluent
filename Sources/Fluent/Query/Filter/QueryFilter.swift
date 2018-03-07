@@ -16,6 +16,16 @@ public struct QueryFilter<Database> where Database: QuerySupporting {
     }
 }
 
+/// Supported Fluent filter methods.
+public enum QueryFilterMethod<Database> where Database: QuerySupporting {
+    /// Compare a field to another field or value.
+    case compare(QueryField, QueryComparison, QueryComparisonValue<Database>)
+    /// Compare a field to a set of values, or a subquery.
+    case subset(QueryField, QuerySubsetScope, QuerySubsetValue<Database>)
+    /// A group of filter methods, related by AND or OR.
+    case group(QueryGroupRelation, [QueryFilter<Database>])
+}
+
 extension QueryFilter: CustomStringConvertible {
     /// A readable description of this filter.
     public var description: String {
@@ -33,9 +43,7 @@ extension QueryFilter: CustomStringConvertible {
 extension QueryBuilder {
     /// Manually create and append filter
     @discardableResult
-    public func addFilter(
-        _ filter: QueryFilter<Model.Database>
-    ) -> Self {
+    public func addFilter(_ filter: QueryFilter<Model.Database>) -> Self {
         query.filters.append(filter)
         return self
     }

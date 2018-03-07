@@ -30,11 +30,10 @@ private func unsupported() -> Never {
 fileprivate struct _QueryDataKeyedEncoder<K, Database>: KeyedEncodingContainerProtocol
     where K: CodingKey, Database: QuerySupporting
 {
-    var codingPath: [CodingKey]
+    var codingPath: [CodingKey] { return [] }
     let encoder: _QueryDataEncoder<Database>
     init(encoder: _QueryDataEncoder<Database>) {
         self.encoder = encoder
-        self.codingPath = []
     }
 
     mutating func _serialize<T>(_ value: T?, forKey key: K) throws {

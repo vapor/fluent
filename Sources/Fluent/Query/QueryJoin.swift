@@ -1,8 +1,6 @@
 import CodableKit
 
-/// Describes a relational join which brings
-/// columns of data from multiple entities
-/// into one response.
+/// Describes a relational join which brings columns of data from multiple entities into one response.
 ///
 /// A = (id, name, b_id)
 /// B = (id, foo)
@@ -16,24 +14,18 @@ public struct QueryJoin {
     /// See QueryJoinMethod.
     public let method: QueryJoinMethod
 
-    /// table/collection that will be
-    /// accepting the joined data
+    /// Table/collection that will be accepting the joined data
     ///
-    /// The key from the base table that will
-    /// be compared to the key from the joined
-    /// table during the join.
+    /// The key from the base table that will be compared to the key from the joined table during the join.
     ///
     /// base        | joined
     /// ------------+-------
     /// <baseKey>   | base_id
     public let base: QueryField
 
-    /// table/collection that will be
-    /// joining the base data
+    /// table/collection that will be joining the base data
     ///
-    /// The key from the joined table that will
-    /// be compared to the key from the base
-    /// table during the join.
+    /// The key from the joined table that will be compared to the key from the base table during the join.
     ///
     /// base | joined
     /// -----+-------
@@ -41,11 +33,7 @@ public struct QueryJoin {
     public let joined: QueryField
 
     /// Create a new Join
-    public init(
-        method: QueryJoinMethod,
-        base: QueryField,
-        joined: QueryField
-    ) {
+    public init(method: QueryJoinMethod, base: QueryField, joined: QueryField) {
         self.method = method
         self.base = base
         self.joined = joined
@@ -55,12 +43,9 @@ public struct QueryJoin {
 /// An exhaustive list of
 /// possible join types.
 public enum QueryJoinMethod {
-    /// returns only rows that
-    /// appear in both sets
+    /// returns only rows that appear in both sets
     case inner
-    /// returns all matching rows
-    /// from the queried table _and_
-    /// all rows that appear in both sets
+    /// returns all matching rows from the queried table _and_ all rows that appear in both sets
     case outer
 }
 
@@ -87,14 +72,14 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: KeyPath<Joined, Model.ID>,
         to baseKey: KeyPath<Model, Model.ID?> = Model.idKey,
         method: QueryJoinMethod = .inner
-    ) -> Self where Joined: Fluent.Model {
+    ) -> QueryBuilder<Model, (Result, Joined)> where Joined: Fluent.Model {
         let join = QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),
             joined: joinedKey.makeQueryField()
         )
         query.joins.append(join)
-        return self
+        return alsoDecode(Joined.self)
     }
 
     /// Join another model to this query builder.
@@ -103,14 +88,14 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: KeyPath<Joined, Model.ID?>,
         to baseKey: KeyPath<Model, Model.ID?> = Model.idKey,
         method: QueryJoinMethod = .inner
-    ) -> Self where Joined: Fluent.Model {
+    ) -> QueryBuilder<Model, (Result, Joined)> where Joined: Fluent.Model {
         let join = QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),
             joined: joinedKey.makeQueryField()
         )
         query.joins.append(join)
-        return self
+        return alsoDecode(Joined.self)
     }
 
     /// Join another model to this query builder.
@@ -119,14 +104,14 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: KeyPath<Joined, Model.ID?>,
         to baseKey: KeyPath<Model, Model.ID>,
         method: QueryJoinMethod = .inner
-    ) -> Self where Joined: Fluent.Model {
+    ) -> QueryBuilder<Model, (Result, Joined)> where Joined: Fluent.Model {
         let join = QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),
             joined: joinedKey.makeQueryField()
         )
         query.joins.append(join)
-        return self
+        return alsoDecode(Joined.self)
     }
 
     /// Join another model to this query builder.
@@ -135,30 +120,26 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: KeyPath<Joined, Model.ID>,
         to baseKey: KeyPath<Model, Model.ID>,
         method: QueryJoinMethod = .inner
-    ) -> Self where Joined: Fluent.Model {
+    ) -> QueryBuilder<Model, (Result, Joined)> where Joined: Fluent.Model {
         let join = QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),
             joined: joinedKey.makeQueryField()
         )
         query.joins.append(join)
-        return self
+        return alsoDecode(Joined.self)
     }
 }
 
 extension QueryBuilder {
     /// Applies a filter from one of the filter operators (==, !=, etc)
+    /// note: this method is generic, allowing you to omit type names
+    /// when filtering using key paths.
     @discardableResult
-    public func filter(joined value: QueryFilterMethod<Model.Database>) -> Self {
-        let filter = QueryFilter<Model.Database>(entity: Model.entity, method: value)
+    public func filter<M>(_ joined: M.Type, _ value: ModelFilterMethod<M>) -> Self
+        where M.Database == Model.Database
+    {
+        let filter = QueryFilter(entity: M.entity, method: value.method)
         return addFilter(filter)
     }
 }
-
-/// Model.field == value
-public func == <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> QueryFilterMethod<Model.Database>
-    where Model: Fluent.Model, Value: Encodable & Equatable, Value: KeyStringDecodable
-{
-    return .compare(lhs.makeQueryField(), .equality(.equals), .value(rhs))
-}
-
