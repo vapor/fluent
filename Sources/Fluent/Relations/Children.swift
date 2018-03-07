@@ -26,10 +26,8 @@ public struct Children<Parent, Child>
 extension Children where Parent.Database: QuerySupporting, Parent.ID: KeyStringDecodable {
     /// Create a query for all children.
     public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Child, Child> {
-        let id = try parent.requireID()
-        let idData = try Parent.Database.queryDataSerialize(data: id)
-        return Child.query(on: conn)
-            .filter(foreignParentField, .equals, .value(idData))
+        return try Child.query(on: conn)
+            .filter(foreignParentField, .equals, .data(parent.requireID()))
     }
 }
 

@@ -27,9 +27,8 @@ public struct Parent<Child, Parent>
 extension Parent where Child.Database: QuerySupporting, Parent.ID: KeyStringDecodable {
     /// Create a query for the parent.
     public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Parent, Parent> {
-        let idData = try Parent.Database.queryDataSerialize(data: parentID)
-        return Parent.query(on: conn)
-            .filter(Parent.idKey == idData)
+        return try Parent.query(on: conn)
+            .filter(Parent.idKey, .equals, .data(Parent.Database.queryDataSerialize(data: parentID)))
     }
 
     /// Convenience for getting the parent.

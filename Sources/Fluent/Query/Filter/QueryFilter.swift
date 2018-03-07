@@ -1,50 +1,213 @@
+import CodableKit
+
 /// Defines a `Filter` that can be
 /// added on fetch, delete, and update
 /// operations to limit the set of
 /// data affected.
 public struct QueryFilter<Database> where Database: QuerySupporting {
-    /// The entity to filter.
-    public var entity: String
+    /// The field to filer.
+    public var field: QueryField
 
-    /// The method to filter by, comparison, subset, grouped, etc.
-    public var method: QueryFilterMethod<Database>
+    /// The filter type.
+    public var type: QueryFilterType<Database>
+
+    /// The filter value, possible another field.
+    public var value: QueryFilterValue<Database>
 
     /// Create a new filter.
-    public init(entity: String, method: QueryFilterMethod<Database>) {
-        self.entity = entity
-        self.method = method
+    public init(field: QueryField, type: QueryFilterType<Database>, value: QueryFilterValue<Database>) {
+        self.field = field
+        self.type = type
+        self.value = value
     }
 }
 
-/// Supported Fluent filter methods.
-public enum QueryFilterMethod<Database> where Database: QuerySupporting {
-    /// Compare a field to another field or value.
-    case compare(QueryField, QueryComparison, QueryComparisonValue<Database>)
-    /// Compare a field to a set of values, or a subquery.
-    case subset(QueryField, QuerySubsetScope, QuerySubsetValue<Database>)
-    /// A group of filter methods, related by AND or OR.
-    case group(QueryGroupRelation, [QueryFilter<Database>])
+/// Supported filter comparison types.
+public struct QueryFilterType<Database>: Equatable where Database: QuerySupporting {
+    enum QueryFilterTypeStorage: Int {
+        case equals
+        case notEquals
+        case greaterThan
+        case lessThan
+        case greaterThanOrEquals
+        case lessThanOrEquals
+        case `in`
+        case notIn
+    }
+
+    /// Internal storage.
+    let storage: QueryFilterTypeStorage
+
+    /// ==
+    public static var equals: QueryFilterType<Database> { return .init(storage: .equals) }
+    /// !=
+    public static var notEquals: QueryFilterType<Database> { return .init(storage: .notEquals) }
+    /// >
+    public static var greaterThan: QueryFilterType<Database> { return .init(storage: .greaterThan) }
+    /// <
+    public static var lessThan: QueryFilterType<Database> { return .init(storage: .lessThan) }
+    /// >=
+    public static var greaterThanOrEquals: QueryFilterType<Database> { return .init(storage: .greaterThanOrEquals) }
+    /// <=
+    public static var lessThanOrEquals: QueryFilterType<Database> { return .init(storage: .lessThanOrEquals) }
+    /// part of
+    public static var `in`: QueryFilterType<Database> { return .init(storage: .`in`) }
+    /// not a part of
+    public static var notIn: QueryFilterType<Database> { return .init(storage: .notIn) }
 }
 
-extension QueryFilter: CustomStringConvertible {
-    /// A readable description of this filter.
-    public var description: String {
-        switch method {
-        case .compare(let field, let comparison, let value):
-            return "(\(entity)) \(field) \(comparison) \(value)"
-        case .subset(let field, let scope, let values):
-            return "(\(entity)) \(field) \(scope) \(values)"
-        case .group(let relation, let filters):
-            return filters.map { $0.description }.joined(separator: "\(relation)")
+/// Describes the values a subset can have. The subset can be either an array of encodable
+/// values or another query whose purpose is to yield an array of values.
+public struct QueryFilterValue<Database> where Database: QuerySupporting {
+    enum QueryFilterValueStorage {
+        case field(QueryField)
+        case data(Database.QueryData)
+        case array([Database.QueryData])
+        case subquery(DatabaseQuery<Database>)
+    }
+
+    /// Internal storage.
+    let storage: QueryFilterValueStorage
+
+    /// Returns the `QueryField` value if it exists.
+    public func field() -> QueryField? {
+        switch storage {
+        case .field(let field): return field
+        default: return nil
         }
+    }
+    
+    /// Returns the `Database.QueryData` value if it exists.
+    public func data() -> Database.QueryData? {
+        switch storage {
+        case .data(let data): return data
+        case .array(let a): return a.count == 1 ? a[0] : nil
+        default: return nil
+        }
+    }
+
+    /// Another query field.
+    public static func field(_ field: QueryField) -> QueryFilterValue<Database> {
+        return .init(storage: .field(field))
+    }
+
+    /// A single value.
+    public static func data<T>(_ data: T) throws -> QueryFilterValue<Database> {
+        return try .init(storage: .data(Database.queryDataSerialize(data: data)))
+    }
+
+    /// A single value.
+    public static func array<T>(_ array: [T]) throws -> QueryFilterValue<Database> {
+        let array = try array.map { try Database.queryDataSerialize(data: $0) }
+        return .init(storage: .array(array))
+    }
+
+    /// A sub query.
+    public static func subquery(_ subquery: DatabaseQuery<Database>) -> QueryFilterValue<Database> {
+        return .init(storage: .subquery(subquery))
     }
 }
 
 extension QueryBuilder {
     /// Manually create and append filter
     @discardableResult
-    public func addFilter(_ filter: QueryFilter<Model.Database>) -> Self {
+    public func addFilter(_ filter: QueryFilterItem<Model.Database>) -> Self {
         query.filters.append(filter)
         return self
     }
 }
+
+extension QueryBuilder {
+    /// Applies a comparison filter to this query.
+    @discardableResult
+    public func filter<M, T>(_ joined: M.Type, _ key: KeyPath<M, T>, _ type: QueryFilterType<M.Database>, _ value: QueryFilterValue<M.Database>) -> Self
+        where M: Fluent.Model, M.Database == Model.Database, T: KeyStringDecodable
+    {
+        let filter = QueryFilter<M.Database>(
+            field: key.makeQueryField(),
+            type: type,
+            value: value
+        )
+        return addFilter(.single(filter))
+    }
+
+    /// Applies a comparison filter to this query.
+    @discardableResult
+    public func filter<T>(_ key: KeyPath<Model, T>, _ type: QueryFilterType<Model.Database>, _ value: QueryFilterValue<Model.Database>) -> Self
+        where T: KeyStringDecodable
+    {
+        return filter(key.makeQueryField(), type, value)
+    }
+
+
+
+    /// Applies a comparison filter to this query.
+    @discardableResult
+    public func filter(_ field: QueryField, _ type: QueryFilterType<Model.Database>, _ value: QueryFilterValue<Model.Database>) -> Self {
+        let filter = QueryFilter<Model.Database>(
+            field: field,
+            type: type,
+            value: value
+        )
+        return addFilter(.single(filter))
+    }
+}
+
+/// MARK: Array
+
+extension QueryBuilder {
+    /// Subset `in` filter.
+    @discardableResult
+    public func filter<T>(_ field: KeyPath<Model, T>, in values: [Model.Database.QueryDataConvertible]) throws -> Self where T: KeyStringDecodable {
+        return try filter(field, .in, .array(values))
+    }
+
+    /// Subset `notIn` filter.
+    @discardableResult
+    public func filter<T>(_ field: KeyPath<Model, T>, notIn values: [T]) throws -> Self where T: KeyStringDecodable {
+        return try filter(field, .notIn, .array(values))
+    }
+}
+
+extension QueryBuilder {
+    /// Subset `in` filter.
+    @discardableResult
+    public func filter<M, T>(_ joined: M.Type, _ field: KeyPath<M, T>, in values: [Model.Database.QueryDataConvertible]) throws -> Self
+        where T: KeyStringDecodable, M: Fluent.Model, M.Database == Model.Database
+    {
+        return try filter(M.self, field, .in, .array(values))
+    }
+
+    /// Subset `notIn` filter.
+    @discardableResult
+    public func filter<M, T>(_ joined: M.Type, _ field: KeyPath<M, T>, notIn values: [Model.Database.QueryDataConvertible]) throws -> Self
+        where T: KeyStringDecodable, M: Fluent.Model, M.Database == Model.Database
+    {
+        return try filter(M.self, field, .notIn, .array(values))
+    }
+}
+
+/// MARK: Group
+
+/// Possible relations between items in a group
+public enum QueryGroupRelation {
+    case and, or
+}
+
+public enum QueryFilterItem<Database> where Database: QuerySupporting {
+    case single(QueryFilter<Database>)
+    case group(QueryGroupRelation, [QueryFilterItem<Database>])
+}
+
+extension QueryBuilder {
+    public typealias GroupClosure = (QueryBuilder<Model, Result>) throws -> ()
+
+    /// Create a query group.
+    @discardableResult
+    public func group(_ relation: QueryGroupRelation, closure: @escaping GroupClosure) rethrows -> Self {
+        let sub = copy()
+        try closure(sub)
+        return addFilter(.group(.or, sub.query.filters))
+    }
+}
+

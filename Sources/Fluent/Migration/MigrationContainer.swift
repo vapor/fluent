@@ -53,11 +53,10 @@ internal struct MigrationContainer<D> where D: QuerySupporting {
         return hasPrepared(on: connection).flatMap(to: Void.self) { hasPrepared in
             if hasPrepared {
                 return self.revert(connection).flatMap(to: Void.self) { _ in
-                    let nameData = try Database.queryDataSerialize(data: self.name)
                     // delete the migration log
-                    return MigrationLog<Database>
+                    return try MigrationLog<Database>
                         .query(on: Future.map(on: connection) { connection })
-                        .filter(\MigrationLog<Database>.name == nameData)
+                        .filter(\.name, .equals, .data(self.name))
                         .delete()
                 }
             } else {
@@ -69,10 +68,9 @@ internal struct MigrationContainer<D> where D: QuerySupporting {
     /// returns true if the migration has already been prepared.
     internal func hasPrepared(on connection: Database.Connection) -> Future<Bool> {
         return Future.flatMap(on: connection) {
-            let nameData = try Database.queryDataSerialize(data: self.name)
-            return MigrationLog<Database>
+            return try MigrationLog<Database>
                 .query(on: Future.map(on: connection) { connection })
-                .filter(\MigrationLog<Database>.name == nameData)
+                .filter(\.name, .equals, .data(self.name))
                 .first()
                 .map(to: Bool.self) { $0 != nil }
         }

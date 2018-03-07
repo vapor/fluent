@@ -38,10 +38,8 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
                     !query.withSoftDeleted
                 {
                     try group(.or) { or in
-                        let nullDate = try Model.Database.queryDataSerialize(data: Date?.none)
-                        or.filter(type.deletedAtField, .equals, .value(nullDate))
-                        let currentDate = try Model.Database.queryDataSerialize(data: Date())
-                        or.filter(type.deletedAtField, .greaterThan, .value(currentDate))
+                        try or.filter(type.deletedAtField, .equals, .data(Date?.none))
+                        try or.filter(type.deletedAtField, .greaterThan, .data(Date()))
                     }
                 }
             } catch {

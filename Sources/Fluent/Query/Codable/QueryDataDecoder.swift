@@ -53,7 +53,7 @@ fileprivate struct _QueryDataKeyedDecoder<K, Database>: KeyedDecodingContainerPr
             return nil
         }
 
-        return try Database.queryDataParse(T?.self, from: data)
+        return try Database.queryDataParse(T.self, from: data)
     }
 
     func contains(_ key: K) -> Bool { return decoder.data.keys.contains { $0.name == key.stringValue } }

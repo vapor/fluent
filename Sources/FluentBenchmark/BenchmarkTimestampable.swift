@@ -27,9 +27,8 @@ extension Benchmarker where Database: QuerySupporting {
         if tanner.updatedAt! <= originalUpdatedAt {
             self.fail("new updated at should be greater")
         }
-
-        let nameData = try Database.queryDataSerialize(data: "Tanner")
-        let f = try test(conn.query(User<Database>.self).filter(\.name == nameData).first())
+        
+        let f = try test(conn.query(User<Database>.self).filter(\.name == "Tanner").first())
         guard let fetched = f else {
             self.fail("could not fetch user")
             return

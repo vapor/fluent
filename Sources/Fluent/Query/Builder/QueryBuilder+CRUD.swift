@@ -45,9 +45,9 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
     }
 
     /// Performs an `.update` action on the database with the supplied data.
-    public func update(_ data: [QueryField: Model.Database.QueryData]) -> Future<Void> {
+    public func update(_ data: [QueryField: Model.Database.QueryDataConvertible]) -> Future<Void> {
         return connection.flatMap(to: Void.self) { conn in
-            self.query.data = data
+            self.query.data = try data.mapValues { try Model.Database.queryDataSerialize(data: $0) }
             self.query.action = .update
             return self.run()
         }
@@ -74,8 +74,7 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
             }
 
             // update record w/ matching id
-            let idData = try Model.Database.queryDataSerialize(data: id)
-            self.filter(Model.idKey == idData)
+            try self.filter(Model.idKey, .equals, .data(id))
             self.query.action = .update
 
             return Model.Database.modelEvent(event: .willUpdate, model: copy, on: conn).flatMap(to: Model.self) { model in
@@ -115,8 +114,8 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
                 )
             }
 
-            let idData = try Model.Database.queryDataSerialize(data: id)
-            self.filter(Model.idKey == idData)
+            // update record w/ matching id
+            try self.filter(Model.idKey, .equals, .data(id))
             self.query.action = .delete
 
             return Model.Database.modelEvent(event: .willDelete, model: model,on: conn).flatMap(to: Model.self) { model in

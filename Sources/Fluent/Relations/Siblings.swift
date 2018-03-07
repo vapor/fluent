@@ -73,25 +73,22 @@ public struct Siblings<Base: Model, Related: Model, Through: Pivot>
 extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecodable, Related.ID: KeyStringDecodable {
     /// Create a query for the parent.
     public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Related, Related> {
-        let baseID = try Base.Database.queryDataSerialize(data: base.requireID())
-        return Related.query(on: conn)
+        return try Related.query(on: conn)
             .join(field: relatedPivotField)
-            .filter(Through.self, basePivotField == baseID)
+            .filter(Through.self, basePivotField, .equals, .data(base.requireID()))
     }
 }
 
-// MARK: ModifiablePivot
+// MARK: Modifiable Pivot
 
 extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecodable {
     /// Returns true if the supplied model is attached
     /// to this relationship.
     public func isAttached(_ model: Related, on conn: DatabaseConnectable) -> Future<Bool> {
         return Future.flatMap(on: conn) {
-            let baseID = try Base.Database.queryDataSerialize(data: self.base.requireID())
-            let modelID = try Related.Database.queryDataSerialize(data: model.requireID())
-            return Through.query(on: conn)
-                .filter(self.basePivotField == baseID)
-                .filter(self.relatedPivotField == modelID)
+            return try Through.query(on: conn)
+                .filter(self.basePivotField, .equals, .data(self.base.requireID()))
+                .filter(self.relatedPivotField, .equals, .data(model.requireID()))
                 .first()
                 .map(to: Bool.self) { $0 != nil }
         }
@@ -101,11 +98,9 @@ extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecod
     /// if it was attached.
     public func detach(_ model: Related, on conn: DatabaseConnectable) -> Future<Void> {
         return Future.flatMap(on: conn) {
-            let baseID = try Base.Database.queryDataSerialize(data: self.base.requireID())
-            let modelID = try Related.Database.queryDataSerialize(data: model.requireID())
-            return Through.query(on: conn)
-                .filter(self.basePivotField == baseID)
-                .filter(self.relatedPivotField == modelID)
+            return try Through.query(on: conn)
+                .filter(self.basePivotField, .equals, .data(self.base.requireID()))
+                .filter(self.relatedPivotField, .equals, .data(model.requireID()))
                 .delete()
         }
     }

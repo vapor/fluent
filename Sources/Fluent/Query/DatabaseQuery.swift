@@ -7,7 +7,7 @@ public struct DatabaseQuery<Database> where Database: QuerySupporting {
     public var action: QueryAction
 
     /// Result stream will be filtered by these queries.
-    public var filters: [QueryFilter<Database>]
+    public var filters: [QueryFilterItem<Database>]
 
     /// Sorts to be applied to the results.
     public var sorts: [QuerySort]

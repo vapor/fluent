@@ -205,11 +205,8 @@ extension Future where T: Model, T.Database: QuerySupporting {
 extension Model where Database: QuerySupporting {
     /// Attempts to find an instance of this model w/
     /// the supplied identifier.
-    public static func find(_ id: Self.ID, on conn: DatabaseConnectable) -> Future<Self?> {
-        let idData = try! Self.Database.queryDataSerialize(data: id)
-        return query(on: conn)
-            .filter(idKey == idData)
-            .first()
+    public static func find(_ id: Self.ID, on conn: DatabaseConnectable) throws -> Future<Self?> {
+        return try query(on: conn).filter(idKey, .equals, .data(id)).first()
     }
 }
 
@@ -263,7 +260,7 @@ extension Model where Database: QuerySupporting, ID: KeyStringDecodable {
         }
 
         func findModel(in connection: Database.Connection) throws -> Future<Self> {
-            return self.find(id, on: connection).map(to: Self.self) { model in
+            return try self.find(id, on: connection).map(to: Self.self) { model in
                 guard let model = model else {
                     throw FluentError(identifier: "modelNotFound", reason: "No model with ID \(id) was found", source: .capture())
                 }

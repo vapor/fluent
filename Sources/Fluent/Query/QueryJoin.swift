@@ -130,16 +130,3 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         return self
     }
 }
-
-extension QueryBuilder {
-    /// Applies a filter from one of the filter operators (==, !=, etc)
-    /// note: this method is generic, allowing you to omit type names
-    /// when filtering using key paths.
-    @discardableResult
-    public func filter<M>(_ joined: M.Type, _ value: ModelFilterMethod<M>) -> Self
-        where M.Database == Model.Database
-    {
-        let filter = QueryFilter(entity: M.entity, method: value.method)
-        return addFilter(filter)
-    }
-}

@@ -1,20 +1,20 @@
 import Fluent
 import SQL
 
-extension QueryFilter {
+extension QueryFilterItem {
     /// Convert query filter to sql data predicate and bind values.
     internal func makeDataPredicateItem() -> (DataPredicateItem, [Database.QueryData]) {
         let item: DataPredicateItem
         var values: [Database.QueryData] = []
 
-        switch method {
-        case .compare(let field, let comp, let value):
+        switch self {
+        case .single(let filter):
             let predicate = DataPredicate(
-                column: field.makeDataColumn(),
-                comparison: comp.makeDataPredicateComparison(),
-                value: value.makeDataPredicateValue()
+                column: filter.field.makeDataColumn(),
+                comparison: filter.type.makeDataPredicateComparison(for: filter.value),
+                value: filter.value.makeDataPredicateValue()
             )
-            if case .value(let data) = value {
+            if let data = filter.value.data(), !data.isNull {
                 values.append(data)
             }
             item = .predicate(predicate)
@@ -29,40 +29,9 @@ extension QueryFilter {
             )
 
             item = .group(group)
-        case .subset(let field, let scope, let value):
-            let (predicateValue, binds) = value.makeDataPredicateValue()
-            let predicate = DataPredicate(
-                column: field.makeDataColumn(),
-                comparison: scope.makeDataPredicateComparison(),
-                value: predicateValue
-            )
-
-            values += binds
-
-            item = .predicate(predicate)
         }
 
         return (item, values)
-    }
-}
-
-extension QuerySubsetScope {
-    internal func makeDataPredicateComparison() -> DataPredicateComparison {
-        switch self {
-        case .in: return .in
-        case .notIn: return .notIn
-        }
-    }
-}
-
-extension QuerySubsetValue {
-    internal func makeDataPredicateValue() -> (DataPredicateValue, [Database.QueryData]) {
-        switch self {
-        case .array(let array):  return (.placeholders(count: array.count), array)
-        case .subquery(let subquery):
-            let (dataQuery, values) = subquery.makeDataQuery()
-            return (.subquery(dataQuery), values)
-        }
     }
 }
 

@@ -16,13 +16,21 @@ public protocol QuerySupporting: Database {
         where M: Model, M.Database == Self
 
     /// This database's native data type.
-    associatedtype QueryData
+    associatedtype QueryData: FluentData
 
-    /// Serializes a native type to this db's `QueryData`.
+    /// This database's convertible data type.
+    /// This type is used in-place of the `QueryData` type wherever the user can input data.
+    associatedtype QueryDataConvertible
+
+    /// Serializes a native type to this db's `QueryDataConvertible`.
     static func queryDataSerialize<T>(data: T?) throws -> QueryData
 
-    /// Parses this db's `QueryData` into a native type.
-    static func queryDataParse<T>(_ type: T.Type, from data: QueryData) throws -> T
+    /// Parses this db's `QueryDataConvertible` into a native type.
+    static func queryDataParse<T>(_ type: T.Type, from data: QueryData) throws -> T?
+}
+
+public protocol FluentData {
+    var isNull: Bool { get }
 }
 
 /// Model events.
