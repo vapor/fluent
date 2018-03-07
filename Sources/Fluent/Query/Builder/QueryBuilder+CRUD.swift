@@ -35,7 +35,8 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
             return Model.Database.modelEvent(event: .willCreate, model: copy, on: conn).flatMap(to: Model.self) { model in
                 return try model.willCreate(on: conn)
             }.flatMap(to: Model.self) { model in
-                self.query.data = model
+                let encoder = QueryDataEncoder(Model.Database.self)
+                self.query.data = try encoder.encode(model)
                 return self.run().transform(to: model)
             }.flatMap(to: Model.self) { model in
                 return Model.Database.modelEvent(event: .didCreate, model: model, on: conn)
@@ -73,7 +74,8 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
             return Model.Database.modelEvent(event: .willUpdate, model: copy, on: conn).flatMap(to: Model.self) { model in
                 return try copy.willUpdate(on: conn)
             }.flatMap(to: Model.self) { model in
-                self.query.data = model
+                let encoder = QueryDataEncoder(Model.Database.self)
+                self.query.data = try encoder.encode(model)
                 return self.run().transform(to: model)
             }.flatMap(to: Model.self) { model in
                 return Model.Database.modelEvent(event: .didUpdate, model: model, on: conn)

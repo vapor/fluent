@@ -2,7 +2,27 @@ import CodableKit
 
 /// Represents a field and its optional entity in a query.
 /// This is used mostly for query filters.
-public struct QueryField {
+public struct QueryField: Hashable {
+    /// See `Hashable.hashValue`
+    public var hashValue: Int {
+        if let entity = self.entity {
+            return (entity + "." + name).hashValue
+        } else {
+            return name.hashValue
+        }
+    }
+
+    /// See `Equatable.==`
+    public static func ==(lhs: QueryField, rhs: QueryField) -> Bool {
+        if let lentity = lhs.entity, let rentity = rhs.entity {
+            guard lentity == rentity else {
+                return false
+            }
+        }
+
+        return lhs.name == rhs.name
+    }
+
     /// The entity for this field.
     /// If the entity is nil, the query's default entity will be used.
     public var entity: String?

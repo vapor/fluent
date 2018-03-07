@@ -19,7 +19,7 @@ public struct DatabaseQuery<Database> where Database: QuerySupporting {
     public var isDistinct: Bool
 
     /// Optional model data to save or update.
-    public var data: Encodable?
+    public var data: [QueryField: Database.QueryData]
 
     /// Limits and offsets the amount of results
     public var range: QueryRange?
@@ -35,7 +35,7 @@ public struct DatabaseQuery<Database> where Database: QuerySupporting {
         self.sorts = []
         self.aggregates = []
         self.isDistinct = false
-        self.data = nil
+        self.data = [:]
         self.range = nil
         self.extend = [:]
     }
