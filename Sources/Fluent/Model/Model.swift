@@ -57,13 +57,13 @@ public protocol AnyModel: Codable {
 
 extension Model where Database: QuerySupporting {
     /// Creates a query for this model on the supplied connection.
-    public func query(on conn: DatabaseConnectable) -> QueryBuilder<Self> {
-        return .init(on: conn.connect(to: Self.defaultDatabase))
+    public func query(on conn: DatabaseConnectable) -> QueryBuilder<Self, Self> {
+        return Self.query(on: conn)
     }
 
     /// Creates a query for this model on the supplied connection.
-    public static func query(on conn: DatabaseConnectable) -> QueryBuilder<Self> {
-        return .init(on: conn.connect(to: Self.defaultDatabase))
+    public static func query(on conn: DatabaseConnectable) -> QueryBuilder<Self, Self> {
+        return query(on: conn.connect(to: Self.defaultDatabase))
     }
 }
 
@@ -205,10 +205,8 @@ extension Future where T: Model, T.Database: QuerySupporting {
 extension Model where Database: QuerySupporting {
     /// Attempts to find an instance of this model w/
     /// the supplied identifier.
-    public static func find(_ id: Self.ID, on conn: DatabaseConnectable) -> Future<Self?> {
-        return query(on: conn)
-            .filter(idKey == id)
-            .first()
+    public static func find(_ id: Self.ID, on conn: DatabaseConnectable) throws -> Future<Self?> {
+        return try query(on: conn).filter(idKey, .equals, .data(id)).first()
     }
 }
 
@@ -262,7 +260,7 @@ extension Model where Database: QuerySupporting, ID: KeyStringDecodable {
         }
 
         func findModel(in connection: Database.Connection) throws -> Future<Self> {
-            return self.find(id, on: connection).map(to: Self.self) { model in
+            return try self.find(id, on: connection).map(to: Self.self) { model in
                 guard let model = model else {
                     throw FluentError(identifier: "modelNotFound", reason: "No model with ID \(id) was found", source: .capture())
                 }

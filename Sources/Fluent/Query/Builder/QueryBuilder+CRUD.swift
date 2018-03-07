@@ -3,10 +3,8 @@ import Async
 import Foundation
 
 extension QueryBuilder where Model.ID: KeyStringDecodable {
-    /// Saves the supplied model.
-    /// Calls `create` if the ID is `nil`, and `update` if it exists.
-    /// If you need to create a model with a pre-existing ID,
-    /// call `create` instead.
+    /// Saves the supplied model. Calls `create` if the ID is `nil`, and `update` if it exists.
+    /// If you need to create a model with a pre-existing ID, call `create` instead.
     public func save(_ model: Model) -> Future<Model> {
         if model.fluentID != nil {
             return update(model)
@@ -35,7 +33,8 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
             return Model.Database.modelEvent(event: .willCreate, model: copy, on: conn).flatMap(to: Model.self) { model in
                 return try model.willCreate(on: conn)
             }.flatMap(to: Model.self) { model in
-                self.query.data = model
+                let encoder = QueryDataEncoder(Model.Database.self)
+                self.query.data = try encoder.encode(model)
                 return self.run().transform(to: model)
             }.flatMap(to: Model.self) { model in
                 return Model.Database.modelEvent(event: .didCreate, model: model, on: conn)
@@ -45,8 +44,16 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
         }
     }
 
-    /// Updates the model. This requires that
-    /// the model has its ID set.
+    /// Performs an `.update` action on the database with the supplied data.
+    public func update(_ data: [QueryField: Model.Database.QueryDataConvertible]) -> Future<Void> {
+        return connection.flatMap(to: Void.self) { conn in
+            self.query.data = try data.mapValues { try Model.Database.queryDataSerialize(data: $0) }
+            self.query.action = .update
+            return self.run()
+        }
+    }
+
+    /// Updates the model. This requires that the model has its ID set.
     public func update(_ model: Model, originalID: Model.ID? = nil) -> Future<Model> {
         // set timestamps
         let copy: Model
@@ -67,13 +74,14 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
             }
 
             // update record w/ matching id
-            self.filter(Model.idKey == id)
+            try self.filter(Model.idKey, .equals, .data(id))
             self.query.action = .update
 
             return Model.Database.modelEvent(event: .willUpdate, model: copy, on: conn).flatMap(to: Model.self) { model in
                 return try copy.willUpdate(on: conn)
             }.flatMap(to: Model.self) { model in
-                self.query.data = model
+                let encoder = QueryDataEncoder(Model.Database.self)
+                self.query.data = try encoder.encode(model)
                 return self.run().transform(to: model)
             }.flatMap(to: Model.self) { model in
                 return Model.Database.modelEvent(event: .didUpdate, model: model, on: conn)
@@ -83,8 +91,7 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
         }
     }
 
-    /// Deletes the supplied model.
-    /// Throws an error if the mdoel did not have an id.
+    /// Deletes the supplied model. Throws an error if the mdoel did not have an id.
     internal func delete(_ model: Model) -> Future<Void> {
         // set timestamps
         if var softDeletable = model as? AnySoftDeletable {
@@ -95,8 +102,7 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
         }
     }
 
-    /// Deletes the supplied model.
-    /// Throws an error if the mdoel did not have an id.
+    /// Deletes the supplied model. Throws an error if the mdoel did not have an id.
     /// note: does NOT respect soft deletable.
     internal func _delete(_ model: Model) -> Future<Void> {
         return connection.flatMap(to: Void.self) { conn in
@@ -108,7 +114,8 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
                 )
             }
 
-            self.filter(Model.idKey == id)
+            // update record w/ matching id
+            try self.filter(Model.idKey, .equals, .data(id))
             self.query.action = .delete
 
             return Model.Database.modelEvent(event: .willDelete, model: model,on: conn).flatMap(to: Model.self) { model in

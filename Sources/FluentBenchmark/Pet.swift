@@ -70,7 +70,7 @@ extension Pet: Migration where D: SchemaSupporting & ReferenceSupporting {
     public static func prepare(on connection: Database.Connection) -> Future<Void> {
         return Database.create(self, on: connection) { builder in
             try addProperties(to: builder)
-            builder.addReference(from: \.ownerID, to: \User<D>.id, actions: .init(update: .update, delete: .nullify))
+            try builder.addReference(from: \.ownerID, to: \User<D>.id, actions: .init(update: .update, delete: .nullify))
         }
     }
 }

@@ -13,7 +13,7 @@ extension QuerySort {
 
 extension QuerySortDirection {
     /// Convert query sort direction to sql order by direction.
-    internal func makeOrderByDirection() -> OrderByDirection {
+    internal func makeOrderByDirection() -> DataOrderByDirection {
         switch self {
         case .ascending: return .ascending
         case .descending: return .descending

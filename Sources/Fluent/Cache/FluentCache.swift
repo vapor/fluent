@@ -18,7 +18,7 @@ public final class FluentCache<Database>: KeyedCache, Service
     /// See `KeyedCache.get(_:forKey:)`
     public func get<D>(_ type: D.Type, forKey key: String) throws -> Future<D?> where D : Decodable {
         return pool.requestConnection().flatMap(to: D?.self) { conn in
-            return FluentCacheEntry<Database>.find(key, on: conn).map(to: D?.self) { found in
+            return try FluentCacheEntry<Database>.find(key, on: conn).map(to: D?.self) { found in
                 guard let entry = found else {
                     return nil
                 }
@@ -41,7 +41,7 @@ public final class FluentCache<Database>: KeyedCache, Service
     /// See `KeyedCache.remove(key:)`
     public func remove(_ key: String) throws -> Future<Void> {
         return pool.requestConnection().flatMap(to: Void.self) { conn in
-            return FluentCacheEntry<Database>.query(on: conn).filter(\.key == key).delete().map(to: Void.self) {
+            return try FluentCacheEntry<Database>.query(on: conn).filter(\.key, .equals, .data(key)).delete().map(to: Void.self) {
                 self.pool.releaseConnection(conn)
             }
         }

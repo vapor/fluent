@@ -1,73 +1,53 @@
 import Fluent
 import SQL
 
-extension QueryComparison {
+extension QueryFilterType {
     /// Convert query comparison to sql predicate comparison.
-    internal func makeDataPredicateComparison(for value: QueryComparisonValue) -> DataPredicateComparison {
-        switch self {
-        case .equality(let eq):
-            switch value {
-            case .null: return .null
-            default: return eq.makeDataPredicateComparison()
-            }
-        case .order(let or): return or.makeDataPredicateComparison()
-        case .sequence(let seq): return seq.makeDataPredicateComparison()
-        }
-    }
-}
-
-extension QueryComparisonValue {
-    /// Convert query comparison value to sql data predicate value.
-    internal func makeDataPredicateValue() -> DataPredicateValue {
-        switch self {
-        case .null: return .none
-        case .field(let field): return .column(field.makeDataColumn())
-        case .value: return .placeholder
-        }
-    }
-}
-
-extension EqualityComparison {
-    /// Convert query comparison to sql predicate comparison.
-    internal func makeDataPredicateComparison() -> DataPredicateComparison {
-        switch self {
-        case .equals: return .equal
-        case .notEquals: return .notEqual
-        }
-    }
-}
-
-extension OrderedComparison {
-    /// Convert query comparison to sql predicate comparison.
-    internal func makeDataPredicateComparison() -> DataPredicateComparison {
+    internal func makeDataPredicateComparison<D>(for value: QueryFilterValue<D>) -> DataPredicateComparison {
         switch self {
         case .greaterThan: return .greaterThan
         case .greaterThanOrEquals: return .greaterThanOrEqual
         case .lessThan: return .lessThan
         case .lessThanOrEquals: return .lessThanOrEqual
+        case .equals:
+            if let _ = value.field() {
+                return .equal
+            } else if let data = value.data() {
+                return data.isNull ? .isNull : .equal
+            } else {
+                return .none
+            }
+        case .notEquals:
+            if let _ = value.field() {
+                return .notEqual
+            } else if let data = value.data() {
+                return data.isNull ? .isNotNull : .notEqual
+            } else {
+                return .none
+            }
+        default: return .none
         }
     }
 }
 
-extension SequenceComparison {
-    /// Convert query comparison to sql predicate comparison.
-    internal func makeDataPredicateComparison() -> DataPredicateComparison {
-        switch self {
-        case .hasPrefix: return .like
-        case .hasSuffix: return .like
-        case .contains: return .like
+extension QueryFilterValue {
+    /// Convert query comparison value to sql data predicate value.
+    internal func makeDataPredicateValue() -> DataPredicateValue {
+        if let field = self.field() {
+            return .column(field.makeDataColumn())
+        } else if let _ = self.data() {
+            return .placeholder
+        } else {
+            return .none
         }
+
+        /*
+ switch self {
+ case .array(let array):  return (.placeholders(count: array.count), array)
+ case .subquery(let subquery):
+ let (dataQuery, values) = subquery.makeDataQuery()
+ return (.subquery(dataQuery), values)
+ }
+ */
     }
 }
-
-extension SequenceComparison {
-    /// Convert sequence comparison to bind wildcard.
-    internal func makeBindWildcard() -> BindWildcard {
-        switch self {
-        case .contains: return .fullWildcard
-        case .hasPrefix: return .trailingWildcard
-        case .hasSuffix: return .leadingWildcard
-        }
-    }
-}
-

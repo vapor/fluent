@@ -3,33 +3,18 @@ import Async
 /// Execute the database query.
 extension QueryBuilder {
     /// Runs the query, collecting all of the results into an array.
-    public func all<D>(decoding type: D.Type) -> Future<[D]> where D: Decodable {
-        var rows: [D] = []
-        return run(decoding: D.self) { model, conn in
-            rows.append(model)
-        }.map(to: [D].self) {
-            return rows
-        }
-    }
-
-    /// Runs the query, collecting all of the results into an array.
-    public func all() -> Future<[Model]> {
-        var rows: [Model] = []
-        return run() { model, conn in
-            rows.append(model)
-        }.map(to: [Model].self) {
-            return rows
+    public func all() -> Future<[Result]> {
+        var results: [Result] = []
+        return run() { result in
+            results.append(result)
+        }.map(to: [Result].self) {
+            return results
         }
     }
 
     /// Returns the first result of the query or `nil` if no results were returned.
-    public func first<D>(decoding type: D.Type) -> Future<D?>  where D: Decodable {
-        return range(...1).all(decoding: D.self).map(to: D?.self) { $0.first }
-    }
-
-    /// Returns the first result of the query or `nil` if no results were returned.
-    public func first() -> Future<Model?> {
-        return range(...1).all().map(to: Model?.self) { $0.first }
+    public func first() -> Future<Result?> {
+        return range(...1).all().map(to: Result?.self) { $0.first }
     }
 
     /// Runs a delete operation.
@@ -37,23 +22,12 @@ extension QueryBuilder {
         query.action = .delete
         return run()
     }
-}
 
-// MARK: Chunk
-
-extension QueryBuilder {
     /// Convenience for chunking model results.
-    public func chunk(max: Int, closure: @escaping ([Model]) throws -> ()) -> Future<Void> {
-        return chunk(decoding: Model.self, max: max, closure: closure)
-    }
-
-    /// Run the query, grouping the results into chunks before calling closure.
-    public func chunk<D>(decoding type: D.Type, max: Int, closure: @escaping ([D]) throws -> ()) -> Future<Void>
-        where D: Decodable
-    {
-        var partial: [D] = []
+    public func chunk(max: Int, closure: @escaping ([Result]) throws -> ()) -> Future<Void> {
+        var partial: [Result] = []
         partial.reserveCapacity(max)
-        return run(decoding: D.self) { row, conn in
+        return run { row in
             partial.append(row)
             if partial.count >= max {
                 try closure(partial)
@@ -66,4 +40,3 @@ extension QueryBuilder {
         }
     }
 }
-

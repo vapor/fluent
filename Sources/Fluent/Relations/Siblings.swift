@@ -72,14 +72,14 @@ public struct Siblings<Base: Model, Related: Model, Through: Pivot>
 
 extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecodable, Related.ID: KeyStringDecodable {
     /// Create a query for the parent.
-    public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Related> {
+    public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Related, Related> {
         return try Related.query(on: conn)
             .join(field: relatedPivotField)
-            .filter(joined: basePivotField == base.requireID())
+            .filter(Through.self, basePivotField, .equals, .data(base.requireID()))
     }
 }
 
-// MARK: ModifiablePivot
+// MARK: Modifiable Pivot
 
 extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecodable {
     /// Returns true if the supplied model is attached
@@ -87,8 +87,8 @@ extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecod
     public func isAttached(_ model: Related, on conn: DatabaseConnectable) -> Future<Bool> {
         return Future.flatMap(on: conn) {
             return try Through.query(on: conn)
-                .filter(self.basePivotField == self.base.requireID())
-                .filter(self.relatedPivotField == model.requireID())
+                .filter(self.basePivotField, .equals, .data(self.base.requireID()))
+                .filter(self.relatedPivotField, .equals, .data(model.requireID()))
                 .first()
                 .map(to: Bool.self) { $0 != nil }
         }
@@ -99,8 +99,8 @@ extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecod
     public func detach(_ model: Related, on conn: DatabaseConnectable) -> Future<Void> {
         return Future.flatMap(on: conn) {
             return try Through.query(on: conn)
-                .filter(self.basePivotField == self.base.requireID())
-                .filter(self.relatedPivotField == model.requireID())
+                .filter(self.basePivotField, .equals, .data(self.base.requireID()))
+                .filter(self.relatedPivotField, .equals, .data(model.requireID()))
                 .delete()
         }
     }
