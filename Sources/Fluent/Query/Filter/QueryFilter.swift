@@ -120,10 +120,10 @@ extension QueryBuilder {
 extension QueryBuilder {
     /// Applies a comparison filter to this query.
     @discardableResult
-    public func filter<M, T>(_ joined: M.Type, _ key: KeyPath<M, T>, _ type: QueryFilterType<M.Database>, _ value: QueryFilterValue<M.Database>) -> Self
+    public func filter<M, T>(_ joined: M.Type, _ key: KeyPath<M, T>, _ type: QueryFilterType<M.Database>, _ value: QueryFilterValue<M.Database>) throws -> Self
         where M: Fluent.Model, M.Database == Model.Database, T: KeyStringDecodable
     {
-        let filter = QueryFilter<M.Database>(
+        let filter = try QueryFilter<M.Database>(
             field: key.makeQueryField(),
             type: type,
             value: value
@@ -133,10 +133,10 @@ extension QueryBuilder {
 
     /// Applies a comparison filter to this query.
     @discardableResult
-    public func filter<T>(_ key: KeyPath<Model, T>, _ type: QueryFilterType<Model.Database>, _ value: QueryFilterValue<Model.Database>) -> Self
+    public func filter<T>(_ key: KeyPath<Model, T>, _ type: QueryFilterType<Model.Database>, _ value: QueryFilterValue<Model.Database>) throws -> Self
         where T: KeyStringDecodable
     {
-        return filter(key.makeQueryField(), type, value)
+        return try filter(key.makeQueryField(), type, value)
     }
 
 

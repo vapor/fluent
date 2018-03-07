@@ -72,8 +72,8 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: KeyPath<Joined, Model.ID>,
         to baseKey: KeyPath<Model, Model.ID?> = Model.idKey,
         method: QueryJoinMethod = .inner
-    ) -> Self where Joined: Fluent.Model {
-        let join = QueryJoin(
+    ) throws -> Self where Joined: Fluent.Model {
+        let join = try QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),
             joined: joinedKey.makeQueryField()
@@ -88,8 +88,8 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: KeyPath<Joined, Model.ID?>,
         to baseKey: KeyPath<Model, Model.ID?> = Model.idKey,
         method: QueryJoinMethod = .inner
-    ) -> Self where Joined: Fluent.Model {
-        let join = QueryJoin(
+    ) throws -> Self where Joined: Fluent.Model {
+        let join = try QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),
             joined: joinedKey.makeQueryField()
@@ -104,8 +104,8 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: KeyPath<Joined, Model.ID?>,
         to baseKey: KeyPath<Model, Model.ID>,
         method: QueryJoinMethod = .inner
-    ) -> Self where Joined: Fluent.Model {
-        let join = QueryJoin(
+    ) throws -> Self where Joined: Fluent.Model {
+        let join = try QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),
             joined: joinedKey.makeQueryField()
@@ -120,8 +120,8 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         field joinedKey: KeyPath<Joined, Model.ID>,
         to baseKey: KeyPath<Model, Model.ID>,
         method: QueryJoinMethod = .inner
-    ) -> Self where Joined: Fluent.Model {
-        let join = QueryJoin(
+    ) throws -> Self where Joined: Fluent.Model {
+        let join = try QueryJoin(
             method: method,
             base: baseKey.makeQueryField(),
             joined: joinedKey.makeQueryField()

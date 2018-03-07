@@ -75,18 +75,11 @@ extension Dictionary where Key == QueryField {
 /// FIXME: conditional conformance
 extension KeyPath where Root: Model, Value: KeyStringDecodable {
     /// See QueryFieldRepresentable.makeQueryField()
-    public func makeQueryField() -> QueryField {
-        let key = Root.codingPath(forKey: self)
+    public func makeQueryField() throws -> QueryField {
+        let key = try Root.codingPath(forKey: self)
         return QueryField(entity: Root.entity, name: key[0].stringValue)
     }
 }
-
-///// Query fields obviously should get free conformance.
-//extension QueryField: QueryFieldRepresentable {
-//    public func makeQueryField() -> QueryField {
-//        return self
-//    }
-//}
 
 /// Allow models to easily generate query fields statically.
 extension Model {
@@ -150,7 +143,7 @@ public struct QueryFieldDecodingContainer<Model> where Model: Fluent.Model {
     
     /// Decodes a model key path to a type.
     public func decode<T: Decodable>(key: KeyPath<Model, T>) throws -> T where T: KeyStringDecodable {
-        let field = key.makeQueryField()
+        let field = try key.makeQueryField()
         return try container.decode(T.self, forKey: field)
     }
 }
@@ -165,7 +158,7 @@ public struct QueryFieldEncodingContainer<Model: Fluent.Model> {
 
     /// Encodes a model key path to the encoder.
     public mutating func encode<T: Encodable>(key: KeyPath<Model, T>) throws where T: KeyStringDecodable {
-        let field = key.makeQueryField()
+        let field = try key.makeQueryField()
         let value: T = model[keyPath: key]
         try container.encode(value, forKey: field)
     }
