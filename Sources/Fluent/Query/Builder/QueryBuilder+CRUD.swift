@@ -3,10 +3,8 @@ import Async
 import Foundation
 
 extension QueryBuilder where Model.ID: KeyStringDecodable {
-    /// Saves the supplied model.
-    /// Calls `create` if the ID is `nil`, and `update` if it exists.
-    /// If you need to create a model with a pre-existing ID,
-    /// call `create` instead.
+    /// Saves the supplied model. Calls `create` if the ID is `nil`, and `update` if it exists.
+    /// If you need to create a model with a pre-existing ID, call `create` instead.
     public func save(_ model: Model) -> Future<Model> {
         if model.fluentID != nil {
             return update(model)
@@ -46,8 +44,16 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
         }
     }
 
-    /// Updates the model. This requires that
-    /// the model has its ID set.
+    /// Performs an `.update` action on the database with the supplied data.
+    public func update(_ data: [QueryField: Model.Database.QueryData]) -> Future<Void> {
+        return connection.flatMap(to: Void.self) { conn in
+            self.query.data = data
+            self.query.action = .update
+            return self.run()
+        }
+    }
+
+    /// Updates the model. This requires that the model has its ID set.
     public func update(_ model: Model, originalID: Model.ID? = nil) -> Future<Model> {
         // set timestamps
         let copy: Model
@@ -86,8 +92,7 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
         }
     }
 
-    /// Deletes the supplied model.
-    /// Throws an error if the mdoel did not have an id.
+    /// Deletes the supplied model. Throws an error if the mdoel did not have an id.
     internal func delete(_ model: Model) -> Future<Void> {
         // set timestamps
         if var softDeletable = model as? AnySoftDeletable {
@@ -98,8 +103,7 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
         }
     }
 
-    /// Deletes the supplied model.
-    /// Throws an error if the mdoel did not have an id.
+    /// Deletes the supplied model. Throws an error if the mdoel did not have an id.
     /// note: does NOT respect soft deletable.
     internal func _delete(_ model: Model) -> Future<Void> {
         return connection.flatMap(to: Void.self) { conn in

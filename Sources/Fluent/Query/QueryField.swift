@@ -28,8 +28,16 @@ public struct QueryField: Hashable {
 }
 
 extension QueryField: CustomStringConvertible {
+    /// See `CustomStringConvertible.description`
     public var description: String {
         return (entity ?? "<nil>") + "." + name
+    }
+}
+
+extension QueryField: ExpressibleByStringLiteral {
+    /// See `ExpressibleByStringLiteral.init(stringLiteral:)`
+    public init(stringLiteral value: String) {
+        self.init(name: value)
     }
 }
 
