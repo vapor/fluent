@@ -39,7 +39,7 @@ jobs:
           command: apt-get install -yq pkg-config libssl-dev
       - run:
           name: Clone Fluent PostgreSQL
-          command: git clone -b nio git@github.com:vapor/fluent-postgresql.git
+          command: git clone -b nio https://github.com/vapor/fluent-postgresql.git
           working_directory: ~/
       - run:
           name: Switch Fluent PostgreSQL to this Fluent revision
