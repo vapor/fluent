@@ -25,7 +25,7 @@ jobs:
           working_directory: ~/
       - run:
           name: Switch Fluent PostgreSQL to this Fluent revision
-          command: witch package edit Fluent --revision $CIRCLE_SHA1
+          command: swift package edit Fluent --revision $CIRCLE_SHA1
           working_directory: ~/fluent-postgresql
       - run:
           name: Run Fluent PostgreSQL unit tests
