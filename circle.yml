@@ -13,17 +13,25 @@ jobs:
       - image: norionomura/swift:swift-4.1-branch
     steps:
       - checkout
-      - run: swift build
-      - run: swift test
-      - run:
-          - cd $HOME
-          - git clone git@github.com:vapor/fluent-postgresql.git
-          - cd fluent-postgresql
-          - git checkout nio # check out appropriate psql branch
-          - switch package edit Fluent --revision $CIRCLE_SHA1
-          - swift test
       - run: 
-      - run: swift build -c release
+          name: Compile Source
+          command: swift build
+      - run: 
+          name: Run Unit Tests
+          command: swift test
+      - run:
+          name: Run PostgreSQL Unit Tests
+          command: |
+              cd $HOME
+              git clone git@github.com:vapor/fluent-postgresql.git
+              cd fluent-postgresql
+              git checkout nio # check out appropriate psql branch
+              switch package edit Fluent --revision $CIRCLE_SHA1
+              swift test
+      - run: 
+      - run: 
+          name: Compile Source with Optimizations
+          command: swift build -c release
 workflows:
   version: 2
   tests:
