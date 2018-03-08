@@ -14,14 +14,14 @@ jobs:
     steps:
       - checkout
       - run: 
-          name: Compile source
+          name: Compile code
           command: swift build
       - run: 
           name: Run unit tests
           command: swift test
       - run:
           name: Clone Fluent PostgreSQL
-          command: git clone git@github.com:vapor/fluent-postgresql.git
+          command: git clone -b nio git@github.com:vapor/fluent-postgresql.git
           working_directory: ~/
       - run:
           name: Switch Fluent PostgreSQL to this Fluent revision
@@ -32,7 +32,7 @@ jobs:
           command: swift test
           working_directory: ~/fluent-postgresql
       - run: 
-          name: Compile source with optimizations
+          name: Compile code with optimizations
           command: swift build -c release
 workflows:
   version: 2
