@@ -15,6 +15,14 @@ jobs:
       - checkout
       - run: swift build
       - run: swift test
+      - run:
+          - cd $HOME
+          - git clone git@github.com:vapor/fluent-postgresql.git
+          - cd fluent-postgresql
+          - git checkout nio # check out appropriate psql branch
+          - switch package edit Fluent --revision $CIRCLE_SHA1
+          - swift test
+      - run: 
       - run: swift build -c release
 workflows:
   version: 2
