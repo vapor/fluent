@@ -12,6 +12,9 @@ jobs:
     docker:
       - image: norionomura/swift:swift-4.1-branch
     steps:
+      - run:
+          name: Install dependencies
+          command: apt-get update; apt-get install -yq pkg-config libssl-dev
       - checkout
       - run: 
           name: Compile code
@@ -19,6 +22,7 @@ jobs:
       - run: 
           name: Run unit tests
           command: swift test
+
       - run:
           name: Clone Fluent PostgreSQL
           command: git clone -b nio git@github.com:vapor/fluent-postgresql.git
@@ -31,6 +35,7 @@ jobs:
           name: Run Fluent PostgreSQL unit tests
           command: swift test
           working_directory: ~/fluent-postgresql
+
       - run: 
           name: Compile code with optimizations
           command: swift build -c release
