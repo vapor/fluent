@@ -78,10 +78,10 @@ public struct QueryFilterValue<Database> where Database: QuerySupporting {
     }
     
     /// Returns the `Database.QueryData` value if it exists.
-    public func data() -> Database.QueryData? {
+    public func data() -> [Database.QueryData]? {
         switch storage {
-        case .data(let data): return data
-        case .array(let a): return a.count == 1 ? a[0] : nil
+        case .data(let data): return [data]
+        case .array(let a): return a
         default: return nil
         }
     }

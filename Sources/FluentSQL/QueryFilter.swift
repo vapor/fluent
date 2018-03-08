@@ -14,8 +14,11 @@ extension QueryFilterItem {
                 comparison: filter.type.makeDataPredicateComparison(for: filter.value),
                 value: filter.value.makeDataPredicateValue()
             )
-            if let data = filter.value.data(), !data.isNull {
-                values.append(data)
+            if let array = filter.value.data() {
+                for data in array {
+                    if data.isNull { continue }
+                    values.append(data)
+                }
             }
             item = .predicate(predicate)
         case .group(let relation, let filters):
