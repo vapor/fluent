@@ -14,22 +14,22 @@ jobs:
     steps:
       - checkout
       - run: 
-          name: Compile Source
+          name: Compile source
           command: swift build
       - run: 
-          name: Run Unit Tests
+          name: Run unit tests
           command: swift test
       - run:
-          name: Run PostgreSQL Unit Tests
-          command: |
-              cd $HOME
-              git clone git@github.com:vapor/fluent-postgresql.git
-              cd fluent-postgresql
-              git checkout nio # check out appropriate psql branch
-              switch package edit Fluent --revision $CIRCLE_SHA1
-              swift test
+          name: Run PostgreSQL unit tests
+          command:
+              - cd $HOME
+              - git clone git@github.com:vapor/fluent-postgresql.git
+              - cd fluent-postgresql
+              - git checkout nio # check out appropriate psql branch
+              - switch package edit Fluent --revision $CIRCLE_SHA1
+              - swift test
       - run: 
-          name: Compile Source with Optimizations
+          name: Compile source with optimizations
           command: swift build -c release
 workflows:
   version: 2
