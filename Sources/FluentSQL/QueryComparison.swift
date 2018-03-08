@@ -12,7 +12,7 @@ extension QueryFilterType {
         case .equals:
             if let _ = value.field() {
                 return .equal
-            } else if let data = value.data() {
+            } else if let data = value.data()?.first {
                 return data.isNull ? .isNull : .equal
             } else {
                 return .none
@@ -20,11 +20,13 @@ extension QueryFilterType {
         case .notEquals:
             if let _ = value.field() {
                 return .notEqual
-            } else if let data = value.data() {
+            } else if let data = value.data()?.first {
                 return data.isNull ? .isNotNull : .notEqual
             } else {
                 return .none
             }
+        case .in: return .in
+        case .notIn: return .notIn
         default: return .none
         }
     }
@@ -35,8 +37,8 @@ extension QueryFilterValue {
     internal func makeDataPredicateValue() -> DataPredicateValue {
         if let field = self.field() {
             return .column(field.makeDataColumn())
-        } else if let _ = self.data() {
-            return .placeholder
+        } else if let data = self.data() {
+            return .placeholders(count: data.count)
         } else {
             return .none
         }
