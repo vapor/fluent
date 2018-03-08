@@ -29,7 +29,6 @@ jobs:
               switch package edit Fluent --revision $CIRCLE_SHA1
               swift test
       - run: 
-      - run: 
           name: Compile Source with Optimizations
           command: swift build -c release
 workflows:
