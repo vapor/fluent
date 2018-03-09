@@ -27,6 +27,28 @@ extension Benchmarker where Database: QuerySupporting {
             self.fail("b.bar should have been updated")
         }
 
+        // make sure that AND queries work as expected - this query should return exactly one result
+        let fetchedWithAndQuery = try test(Foo<Database>.query(on: conn)
+            .group(.and) { and in
+                and.filter(\Foo.bar == "asdf")
+                and.filter(\Foo.baz == 42)
+            }
+            .all())
+        if fetchedWithAndQuery.count != 1 {
+            self.fail("fetchedWithAndQuery.count = \(fetchedWithAndQuery.count), should be 1")
+        }
+
+        // make sure that OR queries work as expected - this query should return exactly two results
+        let fetchedWithOrQuery = try test(Foo<Database>.query(on: conn)
+            .group(.or) { or in
+                or.filter(\Foo.bar == "asdf")
+                or.filter(\Foo.bar == "fdsa")
+            }
+            .all())
+        if fetchedWithOrQuery.count != 2 {
+            self.fail("fetchedWithOrQuery.count = \(fetchedWithOrQuery.count), should be 2")
+        }
+
         let c = try test(b.delete(on: conn))
         if c.id != nil {
             self.fail("id should have been set to nil")
