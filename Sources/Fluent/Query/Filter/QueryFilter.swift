@@ -207,7 +207,7 @@ extension QueryBuilder {
     public func group(_ relation: QueryGroupRelation, closure: @escaping GroupClosure) rethrows -> Self {
         let sub = copy()
         try closure(sub)
-        return addFilter(.group(.or, sub.query.filters))
+        return addFilter(.group(relation, sub.query.filters))
     }
 }
 
