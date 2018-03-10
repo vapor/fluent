@@ -28,6 +28,7 @@ extension DatabaseQuery where Database.QueryFilter: DataPredicateComparisonConve
                 return predicate
             },
             orderBys: sorts.map { $0.makeDataOrderBy() },
+            groupBy: groups.map { $0.makeDataGroupBy() },
             limit: limit,
             offset: range?.lower
         )
