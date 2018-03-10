@@ -12,7 +12,7 @@ public struct DatabaseQuery<Database> where Database: QuerySupporting {
     /// Sorts to be applied to the results.
     public var sorts: [QuerySort]
     
-    /// Sorts to be applied to the results.
+    /// Group By to be applied to the results.
     public var groups: [QueryGroupBy]
     
     /// Aggregates / computed methods.
