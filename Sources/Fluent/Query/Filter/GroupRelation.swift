@@ -16,7 +16,7 @@ extension QueryBuilder {
         try closure(sub)
         let filter = QueryFilter(
             entity: Model.entity,
-            method: .group(.or, sub.query.filters)
+            method: .group(relation, sub.query.filters)
         )
         return addFilter(filter)
     }
