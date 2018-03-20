@@ -53,16 +53,15 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
         }
     }
 
-    /// Updates a a given row in the model.
-    /// This requires that the models ID is set.
-    public func update<Value>(_ key: KeyPath<Model, Value>, to value: Value) -> Future<Void> 
-        where Value == Model.Database.QueryDataConvertible 
+    /// Updates a single field to the supplied value.
+    public func update<Value>(_ key: KeyPath<Model, Value>, to value: Value) throws -> Future<Void> 
+        where Value: KeyStringDecodable
     {
-        self.query.data = [
-            key.makeQueryField().name: value
+        self.query.data = try [
+            key.makeQueryField(): Model.Database.queryDataSerialize(data: value)
         ]
         self.query.action = .update
-        return self.execute()
+        return self.run()
     }
     
     /// Updates the model. This requires that the model has its ID set.
