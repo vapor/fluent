@@ -43,12 +43,24 @@ extension QueryField: ExpressibleByStringLiteral {
 
 extension Dictionary where Key == QueryField {
     /// Accesses the _first_ value from this dictionary with a matching field name.
-    public func firstValue(forField fieldName: String) -> Value? {
+    public func firstValue(forField fieldName: String, on entity: String) -> Value? {
+        print("\n\n\nLooking for: \(entity).\(fieldName) in:")
+        for (field, _) in self {
+            print("\t\(field.entity ?? "unknown").\(field.name)")
+        }
         for (field, value) in self {
-            if field.name == fieldName {
+            if field.name == fieldName && field.entity == entity {
+                print("\n\tFound exact match: \(field.entity ?? "unknown").\(field.name)\n\n\n")
                 return value
             }
         }
+        for (field, value) in self {
+            if field.name == fieldName {
+                print("\n\tFound match: \(field.entity ?? "unknown").\(field.name)\n\n\n")
+                return value
+            }
+        }
+        print("\tNot found\n\n\n")
         return nil
     }
 
@@ -140,7 +152,7 @@ extension Model where ID: KeyStringDecodable {
 public struct QueryFieldDecodingContainer<Model> where Model: Fluent.Model {
     /// The underlying container.
     public var container: KeyedDecodingContainer<QueryField>
-    
+
     /// Decodes a model key path to a type.
     public func decode<T: Decodable>(key: KeyPath<Model, T>) throws -> T where T: KeyStringDecodable {
         let field = try key.makeQueryField()
@@ -163,3 +175,4 @@ public struct QueryFieldEncodingContainer<Model: Fluent.Model> {
         try container.encode(value, forKey: field)
     }
 }
+
