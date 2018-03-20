@@ -11,7 +11,7 @@ public struct FluentError: Debuggable {
     public var suggestedFixes: [String]
     public var possibleCauses: [String]
 
-    init(
+    public init(
         identifier: String,
         reason: String,
         suggestedFixes: [String] = [],
