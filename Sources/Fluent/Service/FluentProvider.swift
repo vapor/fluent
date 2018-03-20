@@ -18,9 +18,9 @@ public final class FluentProvider: Provider {
 
     /// See Provider.boot()
     public func boot(_ container: Container) throws {
-        let migrations = try container.make(MigrationConfig.self, for: FluentProvider.self)
-        let databases = try container.make(Databases.self, for: FluentProvider.self)
-        let console = try container.make(Console.self, for: FluentProvider.self)
+        let migrations = try container.make(MigrationConfig.self)
+        let databases = try container.make(Databases.self)
+        let console = try container.make(Console.self)
         
         // FIXME: should this be nonblocking?
         try migrations.storage.map { (uid, migration) in

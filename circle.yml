@@ -13,7 +13,7 @@ jobs:
 
   linux:
     docker:
-      - image: norionomura/swift:swift-4.1-branch
+      - image: codevapor/swift:4.1
     steps:
       - checkout
       - run: 
@@ -29,19 +29,13 @@ jobs:
 
   linux-postgresql:
     docker:
-      - image: norionomura/swift:swift-4.1-branch
+      - image: codevapor/swift:4.1
       - image: circleci/postgres:latest
         environment:
           POSTGRES_USER: postgres
           POSTGRES_DB: postgres
           POSTGRES_PASSWORD: ""
     steps:
-      - run:
-          name: Update APT
-          command: apt-get update
-      - run:
-          name: Install Swift NIO dependencies
-          command: apt-get install -yq pkg-config libssl-dev
       - run:
           name: Clone Fluent PostgreSQL
           command: git clone -b nio https://github.com/vapor/fluent-postgresql.git
@@ -58,7 +52,7 @@ jobs:
 
   linux-mysql:
     docker:
-      - image: norionomura/swift:swift-4.1-branch
+      - image: codevapor/swift:4.1
       - image: mysql:5.7
         environment:
           MYSQL_ALLOW_EMPTY_PASSWORD: true
@@ -66,12 +60,6 @@ jobs:
           MYSQL_USER: vapor_username
           MYSQL_PASSWORD: vapor_password
     steps:
-      - run:
-          name: Update APT
-          command: apt-get update
-      - run:
-          name: Install Swift NIO dependencies
-          command: apt-get install -yq pkg-config libssl-dev
       - run:
           name: Clone Fluent MySQL
           command: git clone -b nio https://github.com/vapor/fluent-mysql.git
@@ -88,14 +76,8 @@ jobs:
 
   linux-sqlite:
     docker:
-      - image: norionomura/swift:swift-4.1-branch
+      - image: codevapor/swift:4.1
     steps:
-      - run:
-          name: Update APT
-          command: apt-get update
-      - run:
-          name: Install Swift NIO dependencies
-          command: apt-get install -yq pkg-config libssl-dev
       - run:
           name: Clone Fluent SQLite
           command: git clone -b nio https://github.com/vapor/fluent-sqlite.git
@@ -116,4 +98,17 @@ workflows:
       - linux-postgresql
       - linux-mysql
       - linux-sqlite
+      # - macos
+
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
+                
+    jobs:
+      - linux
       # - macos
