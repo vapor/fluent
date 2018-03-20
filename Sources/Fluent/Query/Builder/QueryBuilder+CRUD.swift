@@ -53,6 +53,17 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
         }
     }
 
+    /// Updates a single field to the supplied value.
+    public func update<Value>(_ key: KeyPath<Model, Value>, to value: Value) throws -> Future<Void> 
+        where Value: KeyStringDecodable
+    {
+        self.query.data = try [
+            key.makeQueryField(): Model.Database.queryDataSerialize(data: value)
+        ]
+        self.query.action = .update
+        return self.run()
+    }
+    
     /// Updates the model. This requires that the model has its ID set.
     public func update(_ model: Model, originalID: Model.ID? = nil) -> Future<Model> {
         // set timestamps
