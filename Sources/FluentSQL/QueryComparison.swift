@@ -67,7 +67,6 @@ extension QueryFilterValue {
 }
 
 
-infix operator ~=
 /// Has prefix
 public func ~= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
     where Value: KeyStringDecodable, Model.Database.QueryFilter: DataPredicateComparisonConvertible
