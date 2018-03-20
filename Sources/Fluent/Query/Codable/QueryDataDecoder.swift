@@ -1,6 +1,8 @@
 final class QueryDataDecoder<Database> where Database: QuerySupporting {
     var entity: String?
-    init(_ database: Database.Type, entity: String? = nil) { }
+    init(_ database: Database.Type, entity: String? = nil) {
+        self.entity = entity
+    }
     func decode<D>(_ type: D.Type, from data: [QueryField: Database.QueryData]) throws -> D where D: Decodable {
         let decoder = _QueryDataDecoder<Database>(data: data, entity: entity)
         return try D.init(from: decoder)
@@ -54,10 +56,11 @@ fileprivate struct _QueryDataKeyedDecoder<K, Database>: KeyedDecodingContainerPr
     }
 
     func _value(forEntity entity: String?, atField field: String) -> Database.QueryData? {
+        print("Entity is: \(entity ?? "unknown")")
         guard let entity = entity else {
             return decoder.data.firstValue(forField: field)
         }
-        return decoder.data.value(forEntity: entity, atField: field)
+        return decoder.data.value(forEntity: entity, atField: field) ?? decoder.data.firstValue(forField: field)
     }
 
     func _parse<T>(_ type: T.Type, forKey key: K) throws -> T? {
