@@ -1,7 +1,10 @@
 final class QueryDataDecoder<Database> where Database: QuerySupporting {
-    init(_ database: Database.Type) { }
+    var entity: String?
+    init(_ database: Database.Type, entity: String? = nil) {
+        self.entity = entity
+    }
     func decode<D>(_ type: D.Type, from data: [QueryField: Database.QueryData]) throws -> D where D: Decodable {
-        let decoder = _QueryDataDecoder<Database>(data: data)
+        let decoder = _QueryDataDecoder<Database>(data: data, entity: entity)
         return try D.init(from: decoder)
     }
 }
@@ -12,12 +15,14 @@ fileprivate final class _QueryDataDecoder<Database>: Decoder where Database: Que
     var codingPath: [CodingKey] { return [] }
     var userInfo: [CodingUserInfoKey: Any] { return [:] }
     var data: [QueryField: Database.QueryData]
-    init(data: [QueryField: Database.QueryData]) {
+    var entity: String?
+    init(data: [QueryField: Database.QueryData], entity: String?) {
         self.data = data
+        self.entity = entity
     }
 
     func container<Key>(keyedBy type: Key.Type) throws -> KeyedDecodingContainer<Key> where Key : CodingKey {
-        return KeyedDecodingContainer(_QueryDataKeyedDecoder<Key, Database>(decoder: self))
+        return KeyedDecodingContainer(_QueryDataKeyedDecoder<Key, Database>(decoder: self, entity: entity))
     }
 
     func unkeyedContainer() throws -> UnkeyedDecodingContainer { throw unsupported() }
@@ -44,12 +49,22 @@ fileprivate struct _QueryDataKeyedDecoder<K, Database>: KeyedDecodingContainerPr
     }
     var codingPath: [CodingKey] { return [] }
     let decoder: _QueryDataDecoder<Database>
-    init(decoder: _QueryDataDecoder<Database>) {
+    var entity: String?
+    init(decoder: _QueryDataDecoder<Database>, entity: String?) {
         self.decoder = decoder
+        self.entity = entity
+    }
+
+    func _value(forEntity entity: String?, atField field: String) -> Database.QueryData? {
+        print("Entity is: \(entity ?? "unknown")")
+        guard let entity = entity else {
+            return decoder.data.firstValue(forField: field)
+        }
+        return decoder.data.value(forEntity: entity, atField: field) ?? decoder.data.firstValue(forField: field)
     }
 
     func _parse<T>(_ type: T.Type, forKey key: K) throws -> T? {
-        guard let data = decoder.data.firstValue(forField: key.stringValue) else {
+        guard let data = _value(forEntity: entity, atField: key.stringValue)  else {
             return nil
         }
 
@@ -57,7 +72,7 @@ fileprivate struct _QueryDataKeyedDecoder<K, Database>: KeyedDecodingContainerPr
     }
 
     func contains(_ key: K) -> Bool { return decoder.data.keys.contains { $0.name == key.stringValue } }
-    func decodeNil(forKey key: K) throws -> Bool { return decoder.data.firstValue(forField: key.stringValue) == nil }
+    func decodeNil(forKey key: K) throws -> Bool { return _value(forEntity: entity, atField: key.stringValue) == nil }
     func decodeIfPresent(_ type: Int.Type, forKey key: K) throws -> Int? { return try _parse(Int.self, forKey: key) }
     func decodeIfPresent(_ type: Int8.Type, forKey key: K) throws -> Int8? { return try _parse(Int8.self, forKey: key) }
     func decodeIfPresent(_ type: Int16.Type, forKey key: K) throws -> Int16? { return try _parse(Int16.self, forKey: key) }
@@ -86,3 +101,4 @@ fileprivate struct _QueryDataKeyedDecoder<K, Database>: KeyedDecodingContainerPr
     func superDecoder() throws -> Decoder { return decoder }
     func superDecoder(forKey key: K) throws -> Decoder { return decoder }
 }
+
