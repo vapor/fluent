@@ -1,35 +1,56 @@
+import CodableKit
 import Fluent
 import SQL
 
 extension QueryFilterType {
     /// Convert query comparison to sql predicate comparison.
-    internal func makeDataPredicateComparison<D>(for value: QueryFilterValue<D>) -> DataPredicateComparison {
-        switch self {
-        case .greaterThan: return .greaterThan
-        case .greaterThanOrEquals: return .greaterThanOrEqual
-        case .lessThan: return .lessThan
-        case .lessThanOrEquals: return .lessThanOrEqual
-        case .equals:
-            if let _ = value.field() {
-                return .equal
-            } else if let data = value.data()?.first {
-                return data.isNull ? .isNull : .equal
-            } else {
-                return .none
+    internal func makeDataPredicateComparison<D>(for filter: QueryFilter<D>) -> DataPredicateComparison
+        where D.QueryFilter: DataPredicateComparisonConvertible
+    {
+        if let custom = filter.type.custom() {
+            return custom.convertToDataPredicateComparison()
+        } else {
+            switch self {
+            case .greaterThan: return .greaterThan
+            case .greaterThanOrEquals: return .greaterThanOrEqual
+            case .lessThan: return .lessThan
+            case .lessThanOrEquals: return .lessThanOrEqual
+            case .equals:
+                if let _ = filter.value.field() {
+                    return .equal
+                } else if let data = filter.value.data()?.first {
+                    return data.isNull ? .isNull : .equal
+                } else {
+                    return .none
+                }
+            case .notEquals:
+                if let _ = filter.value.field() {
+                    return .notEqual
+                } else if let data = filter.value.data()?.first {
+                    return data.isNull ? .isNotNull : .notEqual
+                } else {
+                    return .none
+                }
+            case .in: return .in
+            case .notIn: return .notIn
+            default: return .none
             }
-        case .notEquals:
-            if let _ = value.field() {
-                return .notEqual
-            } else if let data = value.data()?.first {
-                return data.isNull ? .isNotNull : .notEqual
-            } else {
-                return .none
-            }
-        case .in: return .in
-        case .notIn: return .notIn
-        default: return .none
         }
     }
+}
+
+extension DataPredicateComparison: DataPredicateComparisonConvertible {
+    public func convertToDataPredicateComparison() -> DataPredicateComparison {
+        return self
+    }
+    public static func convertFromDataPredicateComparison(_ comparison: DataPredicateComparison) -> DataPredicateComparison {
+        return comparison
+    }
+}
+
+public protocol DataPredicateComparisonConvertible {
+    func convertToDataPredicateComparison() -> DataPredicateComparison
+    static func convertFromDataPredicateComparison(_ comparison: DataPredicateComparison) -> Self
 }
 
 extension QueryFilterValue {
@@ -42,14 +63,42 @@ extension QueryFilterValue {
         } else {
             return .none
         }
-
-        /*
- switch self {
- case .array(let array):  return (.placeholders(count: array.count), array)
- case .subquery(let subquery):
- let (dataQuery, values) = subquery.makeDataQuery()
- return (.subquery(dataQuery), values)
- }
- */
     }
+}
+
+
+infix operator ~=
+/// Has prefix
+public func ~= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
+    where Value: KeyStringDecodable, Model.Database.QueryFilter: DataPredicateComparisonConvertible
+{
+    return try _contains(lhs, value: "%\(rhs)")
+}
+
+infix operator =~
+/// Has suffix.
+public func =~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
+    where Value: KeyStringDecodable, Model.Database.QueryFilter: DataPredicateComparisonConvertible
+{
+    return try _contains(lhs, value: "\(rhs)%")
+}
+
+infix operator ~~
+/// Contains.
+public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
+    where Value: KeyStringDecodable, Model.Database.QueryFilter: DataPredicateComparisonConvertible
+{
+    return try _contains(lhs, value: "%\(rhs)%")
+}
+
+/// Operator helper func.
+private func _contains<M, V>(_ key: KeyPath<M, V>, value: String) throws -> ModelFilter<M>
+    where V: KeyStringDecodable, M.Database.QueryFilter: DataPredicateComparisonConvertible
+{
+    let filter = try QueryFilter<M.Database>(
+        field: key.makeQueryField(),
+        type: .custom(.convertFromDataPredicateComparison(.like)),
+        value: .data(value)
+    )
+    return ModelFilter<M>(filter: filter)
 }
