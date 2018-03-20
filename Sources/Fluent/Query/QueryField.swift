@@ -163,4 +163,3 @@ public struct QueryFieldEncodingContainer<Model: Fluent.Model> {
         try container.encode(value, forKey: field)
     }
 }
-
