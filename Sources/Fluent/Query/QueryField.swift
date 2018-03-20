@@ -43,24 +43,12 @@ extension QueryField: ExpressibleByStringLiteral {
 
 extension Dictionary where Key == QueryField {
     /// Accesses the _first_ value from this dictionary with a matching field name.
-    public func firstValue(forField fieldName: String, on entity: String) -> Value? {
-        print("\n\n\nLooking for: \(entity).\(fieldName) in:")
-        for (field, _) in self {
-            print("\t\(field.entity ?? "unknown").\(field.name)")
-        }
-        for (field, value) in self {
-            if field.name == fieldName && field.entity == entity {
-                print("\n\tFound exact match: \(field.entity ?? "unknown").\(field.name)\n\n\n")
-                return value
-            }
-        }
+    public func firstValue(forField fieldName: String) -> Value? {
         for (field, value) in self {
             if field.name == fieldName {
-                print("\n\tFound match: \(field.entity ?? "unknown").\(field.name)\n\n\n")
                 return value
             }
         }
-        print("\tNot found\n\n\n")
         return nil
     }
 

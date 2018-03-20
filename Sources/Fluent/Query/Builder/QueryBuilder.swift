@@ -19,7 +19,7 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
         query: DatabaseQuery<Model.Database>,
         on connection: Future<Model.Database.Connection>,
         resultTransformer: @escaping ([QueryField: Model.Database.QueryData], Model.Database.Connection) -> Future<Result>
-        ) {
+    ) {
         self.query = query
         self.connection = connection
         self.resultTransformer = resultTransformer
@@ -69,7 +69,7 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
     static func make(
         on connection: Future<Model.Database.Connection>,
         with transformer: @escaping ([QueryField: Model.Database.QueryData], Model.Database.Connection) -> Future<Result>
-        ) -> QueryBuilder<Model, Result> {
+    ) -> QueryBuilder<Model, Result> {
         return QueryBuilder(query: DatabaseQuery(entity: Model.entity), on: connection, resultTransformer: { row, conn in
             return transformer(row, conn)
         })
@@ -78,7 +78,7 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
     /// Replaces the query result handler with the supplied closure.
     func changeResult<NewResult>(
         with transformer: @escaping ([QueryField: Model.Database.QueryData], Model.Database.Connection) -> Future<NewResult>
-        ) -> QueryBuilder<Model, NewResult> {
+    ) -> QueryBuilder<Model, NewResult> {
         return QueryBuilder<Model, NewResult>(query: self.query, on: self.connection, resultTransformer: { row, conn in
             return transformer(row, conn)
         })
@@ -87,7 +87,7 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
     /// Transforms the previous query result to a new result using the supplied closure.
     func transformResult<NewResult>(
         with transformer: @escaping ([QueryField: Model.Database.QueryData], Model.Database.Connection, Result) -> Future<NewResult>
-        ) -> QueryBuilder<Model, NewResult> {
+    ) -> QueryBuilder<Model, NewResult> {
         return QueryBuilder<Model, NewResult>(query: self.query, on: self.connection, resultTransformer: { row, conn in
             return self.resultTransformer(row, conn).flatMap(to: NewResult.self) { result in
                 return transformer(row, conn, result)
@@ -97,7 +97,7 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
 
     /// Sets the query to decode type `D` when run.
     public func decode<D>(_ type: D.Type, entity: String = Model.entity) -> QueryBuilder<Model, D> where D: Decodable {
-        let decoder = QueryDataDecoder(Model.self)
+        let decoder = QueryDataDecoder(Model.Database.self, entity: entity)
         return changeResult { row, conn in
             let row = row.onlyValues(forEntity: entity)
             return Future.map(on: conn) {
@@ -109,7 +109,7 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
     /// Adds an additional type `D` to be decoded when run.
     /// The new result for this query will be a tuple containing the previous result and this new result.
     public func alsoDecode<D>(_ type: D.Type, entity: String) -> QueryBuilder<Model, (Result, D)> where D: Decodable {
-        let decoder = QueryDataDecoder(Model.self)
+        let decoder = QueryDataDecoder(Model.Database.self, entity: entity)
         return transformResult { row, conn, result in
             let row = row.onlyValues(forEntity: entity)
             return Future.map(on: conn) {
@@ -131,7 +131,7 @@ extension Model where Database: QuerySupporting {
     static func query<D>(decoding type: D.Type, on connection: Future<Self.Database.Connection>) -> QueryBuilder<Self, D> where D: Decodable {
         return QueryBuilder<Self, D>.make(on: connection) { row, conn in
             return Future.map(on: conn) {
-                let decoder = QueryDataDecoder(Self.self)
+                let decoder = QueryDataDecoder(Self.Database.self, entity: Self.entity)
                 return try decoder.decode(D.self, from: row)
             }
         }
