@@ -140,7 +140,7 @@ extension Model where ID: KeyStringDecodable {
 public struct QueryFieldDecodingContainer<Model> where Model: Fluent.Model {
     /// The underlying container.
     public var container: KeyedDecodingContainer<QueryField>
-
+    
     /// Decodes a model key path to a type.
     public func decode<T: Decodable>(key: KeyPath<Model, T>) throws -> T where T: KeyStringDecodable {
         let field = try key.makeQueryField()
