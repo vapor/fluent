@@ -1,7 +1,7 @@
 import Fluent
 import SQL
 
-extension QueryFilterItem {
+extension QueryFilterItem where Database.QueryFilter: DataPredicateComparisonConvertible {
     /// Convert query filter to sql data predicate and bind values.
     internal func makeDataPredicateItem() -> (DataPredicateItem, [Database.QueryData]) {
         let item: DataPredicateItem
@@ -11,7 +11,7 @@ extension QueryFilterItem {
         case .single(let filter):
             let predicate = DataPredicate(
                 column: filter.field.makeDataColumn(),
-                comparison: filter.type.makeDataPredicateComparison(for: filter.value),
+                comparison: filter.type.makeDataPredicateComparison(for: filter),
                 value: filter.value.makeDataPredicateValue()
             )
             if let array = filter.value.data() {

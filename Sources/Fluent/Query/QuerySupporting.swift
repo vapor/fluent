@@ -27,6 +27,9 @@ public protocol QuerySupporting: Database {
 
     /// Parses this db's `QueryDataConvertible` into a native type.
     static func queryDataParse<T>(_ type: T.Type, from data: QueryData) throws -> T?
+
+    /// This database's native filter types.
+    associatedtype QueryFilter: Equatable
 }
 
 public protocol FluentData {

@@ -24,7 +24,7 @@ public struct QueryFilter<Database> where Database: QuerySupporting {
 
 /// Supported filter comparison types.
 public struct QueryFilterType<Database>: Equatable where Database: QuerySupporting {
-    enum QueryFilterTypeStorage: Int {
+    enum QueryFilterTypeStorage: Equatable {
         case equals
         case notEquals
         case greaterThan
@@ -33,10 +33,19 @@ public struct QueryFilterType<Database>: Equatable where Database: QuerySupporti
         case lessThanOrEquals
         case `in`
         case notIn
+        case custom(Database.QueryFilter)
     }
 
     /// Internal storage.
     let storage: QueryFilterTypeStorage
+
+    /// Returns the custom query filter if it is set.
+    public func custom() -> Database.QueryFilter? {
+        switch storage {
+        case .custom(let filter): return filter
+        default: return nil
+        }
+    }
 
     /// ==
     public static var equals: QueryFilterType<Database> { return .init(storage: .equals) }
@@ -54,6 +63,11 @@ public struct QueryFilterType<Database>: Equatable where Database: QuerySupporti
     public static var `in`: QueryFilterType<Database> { return .init(storage: .`in`) }
     /// not a part of
     public static var notIn: QueryFilterType<Database> { return .init(storage: .notIn) }
+
+    /// Custom filter for this database type.
+    public static func custom(_ filter: Database.QueryFilter) -> QueryFilterType<Database> {
+        return .init(storage: .custom(filter))
+    }
 }
 
 /// Describes the values a subset can have. The subset can be either an array of encodable

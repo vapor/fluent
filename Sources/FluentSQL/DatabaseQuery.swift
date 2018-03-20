@@ -1,7 +1,7 @@
 import Fluent
 import SQL
 
-extension DatabaseQuery {
+extension DatabaseQuery where Database.QueryFilter: DataPredicateComparisonConvertible {
     /// Create a SQL query from this database query.
     /// All Encodable values found while converting the query
     /// will be returned in an array in the order that placeholders
