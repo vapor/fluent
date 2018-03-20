@@ -59,8 +59,8 @@ extension SchemaBuilder where Model.ID: KeyStringDecodable {
         for field: KeyPath<Model, T>,
         isOptional: Bool = false,
         isIdentifier: Bool = false
-    ) -> SchemaField<Model.Database> where T: KeyStringDecodable {
-        let field = SchemaField<Model.Database>(
+    ) throws -> SchemaField<Model.Database> where T: KeyStringDecodable {
+        let field = try SchemaField<Model.Database>(
             name: field.makeQueryField().name,
             type: type,
             isOptional: isOptional,
@@ -89,10 +89,10 @@ extension SchemaBuilder where Model.ID: KeyStringDecodable {
     }
 
     /// Removes a field from the schema.
-    public func removeField<T>(for field: KeyPath<Model, T>)
+    public func removeField<T>(for field: KeyPath<Model, T>) throws
         where T: KeyStringDecodable
     {
-        let name = field.makeQueryField().name
+        let name = try field.makeQueryField().name
         schema.removeFields.append(name)
     }
 }

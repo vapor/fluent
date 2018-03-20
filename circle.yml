@@ -1,6 +1,7 @@
 version: 2
 
 jobs:
+
   macos:
     macos:
       xcode: "9.2"
@@ -8,17 +9,106 @@ jobs:
       - checkout
       - run: swift build
       - run: swift test
+
+
   linux:
     docker:
-      - image: norionomura/swift:swift-4.1-branch
+      - image: codevapor/swift:4.1
     steps:
       - checkout
-      - run: swift build
-      - run: swift test
-      - run: swift build -c release
+      - run: 
+          name: Compile code
+          command: swift build
+      - run: 
+          name: Run unit tests
+          command: swift test
+      - run: 
+          name: Compile code with optimizations
+          command: swift build -c release
+
+
+  linux-postgresql:
+    docker:
+      - image: codevapor/swift:4.1
+      - image: circleci/postgres:latest
+        environment:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+          POSTGRES_PASSWORD: ""
+    steps:
+      - run:
+          name: Clone Fluent PostgreSQL
+          command: git clone -b nio https://github.com/vapor/fluent-postgresql.git
+          working_directory: ~/
+      - run:
+          name: Switch Fluent PostgreSQL to this Fluent revision
+          command: swift package edit Fluent --revision $CIRCLE_SHA1
+          working_directory: ~/fluent-postgresql
+      - run:
+          name: Run Fluent PostgreSQL unit tests
+          command: swift test
+          working_directory: ~/fluent-postgresql
+
+
+  linux-mysql:
+    docker:
+      - image: codevapor/swift:4.1
+      - image: mysql:5.7
+        environment:
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+          MYSQL_DATABASE: vapor_database
+          MYSQL_USER: vapor_username
+          MYSQL_PASSWORD: vapor_password
+    steps:
+      - run:
+          name: Clone Fluent MySQL
+          command: git clone -b nio https://github.com/vapor/fluent-mysql.git
+          working_directory: ~/
+      - run:
+          name: Switch Fluent MySQL to this Fluent revision
+          command: swift package edit Fluent --revision $CIRCLE_SHA1
+          working_directory: ~/fluent-mysql
+      - run:
+          name: Run Fluent MySQL unit tests
+          command: swift test
+          working_directory: ~/fluent-mysql
+
+
+  linux-sqlite:
+    docker:
+      - image: codevapor/swift:4.1
+    steps:
+      - run:
+          name: Clone Fluent SQLite
+          command: git clone -b nio https://github.com/vapor/fluent-sqlite.git
+          working_directory: ~/
+      - run:
+          name: Switch Fluent SQLite to this Fluent revision
+          command: swift package edit Fluent --revision $CIRCLE_SHA1
+          working_directory: ~/fluent-sqlite
+      - run:
+          name: Run Fluent SQLite unit tests
+          command: swift test
+          working_directory: ~/fluent-sqlite
 workflows:
   version: 2
   tests:
+    jobs:
+      - linux
+      - linux-postgresql
+      - linux-mysql
+      - linux-sqlite
+      # - macos
+
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
+                
     jobs:
       - linux
       # - macos

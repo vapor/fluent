@@ -17,18 +17,18 @@ public final class FluentProvider: Provider {
     }
 
     /// See Provider.boot()
-    public func boot(_ container: Container) throws {
-        let migrations = try container.make(MigrationConfig.self, for: FluentProvider.self)
-        let databases = try container.make(Databases.self, for: FluentProvider.self)
-        let console = try container.make(Console.self, for: FluentProvider.self)
+    public func didBoot(_ container: Container) throws -> Future<Void> {
+        let migrations = try container.make(MigrationConfig.self)
+        let databases = try container.make(Databases.self)
+        let console = try container.make(Console.self)
         
-        // FIXME: should this be nonblocking?
-        try migrations.storage.map { (uid, migration) in
+        return migrations.storage.map { (uid, migration) in
             return {
                 console.print("Migrating \(uid) DB")
                 return migration.migrate(using: databases, using: container)
             }
-        }.syncFlatten().await(on: container)
-        console.success("Migrations complete")
+        }.syncFlatten(on: container).map(to: Void.self) {
+            console.success("Migrations complete")
+        }
     }
 }

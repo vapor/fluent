@@ -24,8 +24,8 @@ public protocol Migration {
 extension Model where Database: SchemaSupporting {
     /// Automatically adds `SchemaField`s for each of this `Model`s properties.
     public static func addProperties(to builder: SchemaCreator<Self>) throws {
-        let idCodingPath = Self.codingPath(forKey: idKey)
-        let properties = Self.properties()
+        let idCodingPath = try Self.codingPath(forKey: idKey)
+        let properties = try Self.properties()
 
         for property in properties {
             guard property.codingPath.count == 1 else {

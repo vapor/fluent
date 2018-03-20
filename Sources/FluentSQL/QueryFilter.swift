@@ -1,33 +1,25 @@
 import Fluent
 import SQL
 
-extension QueryFilter {
+extension QueryFilterItem {
     /// Convert query filter to sql data predicate and bind values.
-    internal func makeDataPredicateItem() -> (DataPredicateItem, [BindValue]) {
+    internal func makeDataPredicateItem() -> (DataPredicateItem, [Database.QueryData]) {
         let item: DataPredicateItem
-        var values: [BindValue] = []
+        var values: [Database.QueryData] = []
 
-        switch method {
-        case .compare(let field, let comp, let value):
+        switch self {
+        case .single(let filter):
             let predicate = DataPredicate(
-                column: field.makeDataColumn(),
-                comparison: comp.makeDataPredicateComparison(for: value),
-                value: value.makeDataPredicateValue()
+                column: filter.field.makeDataColumn(),
+                comparison: filter.type.makeDataPredicateComparison(for: filter.value),
+                value: filter.value.makeDataPredicateValue()
             )
-
-            if case .value(let encodable) = value {
-                let method: BindValueMethod
-                switch comp {
-                case .sequence(let seq):
-                    method = .wildcard(seq.makeBindWildcard())
-                default:
-                    method = .plain
+            if let array = filter.value.data() {
+                for data in array {
+                    if data.isNull { continue }
+                    values.append(data)
                 }
-
-                let value = BindValue(encodable: encodable, method: method)
-                values.append(value)
             }
-
             item = .predicate(predicate)
         case .group(let relation, let filters):
             let group = DataPredicateGroup(
@@ -40,42 +32,9 @@ extension QueryFilter {
             )
 
             item = .group(group)
-        case .subset(let field, let scope, let value):
-            let (predicateValue, binds) = value.makeDataPredicateValue()
-            let predicate = DataPredicate(
-                column: field.makeDataColumn(),
-                comparison: scope.makeDataPredicateComparison(),
-                value: predicateValue
-            )
-
-            values += binds
-
-            item = .predicate(predicate)
         }
 
         return (item, values)
-    }
-}
-
-extension QuerySubsetScope {
-    internal func makeDataPredicateComparison() -> DataPredicateComparison {
-        switch self {
-        case .in: return .in
-        case .notIn: return .notIn
-        }
-    }
-}
-
-extension QuerySubsetValue {
-    internal func makeDataPredicateValue() -> (DataPredicateValue, [BindValue]) {
-        switch self {
-        case .array(let array):
-            let values = array.map { BindValue.init(encodable: $0, method: .plain) }
-            return (.placeholderArray(array.count), values)
-        case .subquery(let subquery):
-            let (dataQuery, values) = subquery.makeDataQuery()
-            return (.subquery(dataQuery), values)
-        }
     }
 }
 

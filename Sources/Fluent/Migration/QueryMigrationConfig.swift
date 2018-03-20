@@ -18,23 +18,23 @@ internal struct QueryMigrationConfig<Database>: MigrationRunnable where Database
 
     /// See MigrationRunnable.migrate
     internal func migrate(using databases: Databases, using worker: Worker) -> Future<Void> {
-        return Future.flatMap {
+        return Future.flatMap(on: worker) {
             guard let database = databases.database(for: self.database) else {
                 throw FluentError(identifier: "queryMigrationDatabase", reason: "no database \(self.database.uid) was found for migrations", source: .capture())
             }
-            return database.makeConnection(on: worker.eventLoop).flatMap(to: Void.self) { conn in
-                return self.migrateBatch(on: conn)
+            return database.makeConnection(on: worker).flatMap(to: Void.self) { conn in
+                return try self.migrateBatch(on: conn)
             }
         }
     }
 
     /// Migrates this configs migrations under the current batch.
     /// Migrations that have already been prepared will be skipped.
-    internal func migrateBatch(on conn: Database.Connection) -> Future<Void> {
-        return MigrationLog<Database>.latestBatch(on: conn).flatMap(to: Void.self) { lastBatch in
+    internal func migrateBatch(on conn: Database.Connection) throws -> Future<Void> {
+        return try MigrationLog<Database>.latestBatch(on: conn).flatMap(to: Void.self) { lastBatch in
             return self.migrations.map { migration in
                 return { migration.prepareIfNeeded(batch: lastBatch + 1, on: conn) }
-            }.syncFlatten()
+            }.syncFlatten(on: conn)
         }
     }
 

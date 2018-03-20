@@ -49,7 +49,7 @@ extension Benchmarker where Database: JoinSupporting & ReferenceSupporting & Que
             }
         }
 
-        tanner = try test(tanner.delete(on: conn))
+        try test(tanner.delete(on: conn))
         do {
             guard let zizFetch = try test(Pet<Database>.query(on: conn).first()) else {
                 fail("could not fetch pet")
