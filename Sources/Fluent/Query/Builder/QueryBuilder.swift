@@ -43,20 +43,27 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
                     }
                 }
             } catch {
-                print("[Fluent] Filtering soft-deleted types failed: \(error)")
+                /// throw this error
+                return connection.map(to: Void.self) { conn in
+                    throw error
+                }
             }
         }
 
         let q = self.query
         let resultTransformer = self.resultTransformer
         return connection.flatMap(to: Void.self) { conn in
-            return Model.Database.execute(query: q, into: { row, conn in
+            let promise = conn.eventLoop.newPromise(Void.self)
+
+            Model.Database.execute(query: q, into: { row, conn in
                 resultTransformer(row, conn).map(to: Void.self) { result in
                     return try handler(result)
                 }.catch { error in
-                    print("[Fluent] Skipping row: \(error)")
+                    promise.fail(error: error)
                 }
-            }, on: conn)
+            }, on: conn).chain(to: promise)
+
+            return promise.futureResult
         }
     }
 
