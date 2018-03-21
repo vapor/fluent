@@ -38,7 +38,7 @@ jobs:
     steps:
       - run:
           name: Clone Fluent PostgreSQL
-          command: git clone -b nio https://github.com/vapor/fluent-postgresql.git
+          command: git clone -b master https://github.com/vapor/fluent-postgresql.git
           working_directory: ~/
       - run:
           name: Switch Fluent PostgreSQL to this Fluent revision
@@ -62,7 +62,7 @@ jobs:
     steps:
       - run:
           name: Clone Fluent MySQL
-          command: git clone -b nio https://github.com/vapor/fluent-mysql.git
+          command: git clone -b master https://github.com/vapor/fluent-mysql.git
           working_directory: ~/
       - run:
           name: Switch Fluent MySQL to this Fluent revision
@@ -80,7 +80,7 @@ jobs:
     steps:
       - run:
           name: Clone Fluent SQLite
-          command: git clone -b nio https://github.com/vapor/fluent-sqlite.git
+          command: git clone -b master https://github.com/vapor/fluent-sqlite.git
           working_directory: ~/
       - run:
           name: Switch Fluent SQLite to this Fluent revision
