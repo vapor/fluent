@@ -56,7 +56,6 @@ fileprivate struct _QueryDataKeyedDecoder<K, Database>: KeyedDecodingContainerPr
     }
 
     func _value(forEntity entity: String?, atField field: String) -> Database.QueryData? {
-        print("Entity is: \(entity ?? "unknown")")
         guard let entity = entity else {
             return decoder.data.firstValue(forField: field)
         }

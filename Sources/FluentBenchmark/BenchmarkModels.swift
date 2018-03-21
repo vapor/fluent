@@ -32,7 +32,7 @@ extension Benchmarker where Database: QuerySupporting {
         let fetchedWithAndQuery = try test(Foo<Database>.query(on: conn)
             .group(.and) { and in
                 try and.filter(\Foo.bar == "asdf")
-                try and.filter(\Foo.baz == 42)
+                try and.filter(\Foo.baz == 314)
             }
             .all())
         if fetchedWithAndQuery.count != 1 {
