@@ -4,6 +4,41 @@ import Dispatch
 import Fluent
 import Foundation
 
+extension Benchmarker where Database: QuerySupporting {
+    /// The actual benchmark.
+    fileprivate func _benchmark(on conn: Database.Connection) throws {
+        let one = BasicUser<Database>(name: "one")
+        let two = BasicUser<Database>(name: "two")
+        let three = BasicUser<Database>(name: "three")
+
+        _ = try test([
+            one.save(on: conn),
+            two.save(on: conn),
+            three.save(on: conn),
+        ].flatten(on: conn))
+        if one.id == two.id || one.id == three.id || two.id == three.id {
+            fail("ids are equal")
+        }
+    }
+
+    /// Benchmarks misc bugs
+    public func benchmarkBugs() throws {
+        let conn = try test(pool.requestConnection())
+        try self._benchmark(on: conn)
+        pool.releaseConnection(conn)
+    }
+}
+
+extension Benchmarker where Database: QuerySupporting & SchemaSupporting {
+    /// Benchmarks misc bugs, preparing the schema first.
+    public func benchmarkBugs_withSchema() throws {
+        let conn = try test(pool.requestConnection())
+        try test(BasicUser<Database>.prepare(on: conn))
+        defer { try? test(BasicUser<Database>.revert(on: conn)) }
+        try self._benchmark(on: conn)
+        pool.releaseConnection(conn)
+    }
+}
 
 final class BasicUser<D>:  Model where D: QuerySupporting {
     /// See Model.Database
@@ -31,40 +66,3 @@ final class BasicUser<D>:  Model where D: QuerySupporting {
 }
 
 extension BasicUser: Migration where D: SchemaSupporting { }
-
-extension Benchmarker where Database: QuerySupporting {
-    /// The actual benchmark.
-    fileprivate func _benchmark(on conn: Database.Connection) throws {
-        let one = BasicUser<Database>(name: "one")
-        let two = BasicUser<Database>(name: "two")
-        let three = BasicUser<Database>(name: "three")
-
-        _ = try test([
-            one.save(on: conn),
-            two.save(on: conn),
-            three.save(on: conn),
-        ].flatten(on: conn))
-        if one.id == two.id || one.id == three.id || two.id == three.id {
-            fail("ids are equal")
-        }
-    }
-
-    /// Benchmark the Timestampable protocol
-    public func benchmarkBugs() throws {
-        let conn = try test(pool.requestConnection())
-        try self._benchmark(on: conn)
-        pool.releaseConnection(conn)
-    }
-}
-
-extension Benchmarker where Database: QuerySupporting & SchemaSupporting {
-    /// Benchmark the Timestampable protocol
-    /// The schema will be prepared first.
-    public func benchmarkBugs_withSchema() throws {
-        let conn = try test(pool.requestConnection())
-        try test(BasicUser<Database>.prepare(on: conn))
-        defer { try? test(BasicUser<Database>.revert(on: conn)) }
-        try self._benchmark(on: conn)
-        pool.releaseConnection(conn)
-    }
-}
