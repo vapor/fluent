@@ -32,8 +32,8 @@ jobs:
       - image: codevapor/swift:4.1
       - image: circleci/postgres:latest
         environment:
-          POSTGRES_USER: postgres
-          POSTGRES_DB: postgres
+          POSTGRES_USER: vapor_username
+          POSTGRES_DB: vapor_database
           POSTGRES_PASSWORD: ""
     steps:
       - run:
