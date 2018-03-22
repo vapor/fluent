@@ -243,16 +243,16 @@ extension Model {
 extension Model where Database: QuerySupporting, ID: KeyStringDecodable {
     /// See `Parameter.make`
     public static func make(for parameter: String, using container: Container) throws -> Future<Self> {
-        guard let idType = ID.self as? StringDecodable.Type else {
+        guard let idType = ID.self as? LosslessStringConvertible.Type else {
             throw FluentError(
                 identifier: "invalidIDType",
                 reason: "Could not convert string to ID.",
-                suggestedFixes: ["Conform `\(ID.self)` to `StringDecodable` to fix this error."],
+                suggestedFixes: ["Conform `\(ID.self)` to `LosslessStringConvertible` to fix this error."],
                 source: .capture()
             )
         }
 
-        guard let id = idType.decode(from: parameter) as? ID else {
+        guard let id = idType.init(parameter) as? ID else {
             throw FluentError(
                 identifier: "invalidID",
                 reason: "Could not convert parameter \(parameter) to type `\(ID.self)`",
