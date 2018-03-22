@@ -76,8 +76,8 @@ extension Dictionary where Key == QueryField {
 extension KeyPath where Root: Model, Value: KeyStringDecodable {
     /// See QueryFieldRepresentable.makeQueryField()
     public func makeQueryField() throws -> QueryField {
-        let key = try Root.codingPath(forKey: self)
-        return QueryField(entity: Root.entity, name: key[0].stringValue)
+        let key = try Root.reflectProperty(forKey: self)
+        return QueryField(entity: Root.entity, name: key.path.first ?? "")
     }
 }
 
