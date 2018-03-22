@@ -37,13 +37,16 @@ extension Benchmarker where Database: QuerySupporting {
     fileprivate func _benchmark(on conn: Database.Connection) throws {
         let one = BasicUser<Database>(name: "one")
         let two = BasicUser<Database>(name: "two")
+        let three = BasicUser<Database>(name: "three")
 
-        let res = try test([
+        _ = try test([
             one.save(on: conn),
-            two.save(on: conn)
+            two.save(on: conn),
+            three.save(on: conn),
         ].flatten(on: conn))
-        print(one.id)
-        print(two.id)
+        if one.id == two.id || one.id == three.id || two.id == three.id {
+            fail("ids are equal")
+        }
     }
 
     /// Benchmark the Timestampable protocol
@@ -59,7 +62,6 @@ extension Benchmarker where Database: QuerySupporting & SchemaSupporting {
     /// The schema will be prepared first.
     public func benchmarkBugs_withSchema() throws {
         let conn = try test(pool.requestConnection())
-        try? test(BasicUser<Database>.revert(on: conn))
         try test(BasicUser<Database>.prepare(on: conn))
         defer { try? test(BasicUser<Database>.revert(on: conn)) }
         try self._benchmark(on: conn)

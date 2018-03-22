@@ -30,16 +30,18 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
         }
 
         return connection.flatMap(to: Model.self) { conn in
-            return Model.Database.modelEvent(event: .willCreate, model: copy, on: conn).flatMap(to: Model.self) { model in
-                return try model.willCreate(on: conn)
-            }.flatMap(to: Model.self) { model in
-                let encoder = QueryDataEncoder(Model.Database.self)
-                self.query.data = try encoder.encode(model)
-                return self.run().transform(to: model)
-            }.flatMap(to: Model.self) { model in
-                return Model.Database.modelEvent(event: .didCreate, model: model, on: conn)
-            }.flatMap(to: Model.self) { model in
-                return try model.didCreate(on: conn)
+            return conn.fluentOperation {
+                return Model.Database.modelEvent(event: .willCreate, model: copy, on: conn).flatMap(to: Model.self) { model in
+                    return try model.willCreate(on: conn)
+                }.flatMap(to: Model.self) { model in
+                    let encoder = QueryDataEncoder(Model.Database.self)
+                    self.query.data = try encoder.encode(model)
+                    return self.run().transform(to: model)
+                }.flatMap(to: Model.self) { model in
+                    return Model.Database.modelEvent(event: .didCreate, model: model, on: conn)
+                }.flatMap(to: Model.self) { model in
+                    return try model.didCreate(on: conn)
+                }
             }
         }
     }
