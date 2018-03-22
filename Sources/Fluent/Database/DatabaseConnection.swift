@@ -10,43 +10,11 @@ extension DatabaseConnection {
     }
 }
 
-fileprivate final class PipelineCache {
-    var storage: [ObjectIdentifier: Future<Void>]
-    init() { storage = [:] }
-}
-
-fileprivate var pipelineCache: ThreadSpecificVariable<PipelineCache> = .init()
-
 extension DatabaseConnection {
+    /// The current pipeline future.
     fileprivate var pipeline: Future<Void> {
-        get {
-            let cache: PipelineCache
-            if let existing = pipelineCache.currentValue {
-                cache = existing
-            } else {
-                cache = .init()
-                pipelineCache.currentValue = cache
-            }
-
-            let pipeline: Future<Void>
-            if let existing = cache.storage[.init(self)] {
-                pipeline = existing
-            } else {
-                pipeline = Future.map(on: self) { }
-                cache.storage[.init(self)] = pipeline
-            }
-            return pipeline
-        }
-        set {
-            let cache: PipelineCache
-            if let existing = pipelineCache.currentValue {
-                cache = existing
-            } else {
-                cache = .init()
-                pipelineCache.currentValue = cache
-            }
-            cache.storage[.init(self)] = newValue
-        }
+        get { return extend.get(\DatabaseConnection.pipeline, default: .done(on: self)) }
+        set { extend.set(\DatabaseConnection.pipeline, to: newValue) }
     }
 
     /// Enqueues a Fluent operation.
