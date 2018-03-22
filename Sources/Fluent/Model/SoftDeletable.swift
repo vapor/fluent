@@ -1,4 +1,4 @@
-import CodableKit
+import Core
 import Async
 import Foundation
 
@@ -90,7 +90,7 @@ extension SoftDeletable {
     public static func deletedAtField() throws -> QueryField {
         return QueryField(
             entity: entity,
-            name: try Self.codingPath(forKey: deletedAtKey)[0].stringValue
+            name: try Self.reflectProperty(forKey: deletedAtKey).path.first ?? ""
         )
     }
 }
