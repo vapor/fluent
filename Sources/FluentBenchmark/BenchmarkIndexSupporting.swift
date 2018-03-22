@@ -12,7 +12,7 @@ extension Benchmarker where Database: IndexSupporting, Database: QuerySupporting
         a2 = try test(a2.save(on: conn))
         do {
             var a1Duplicate = IndexSupportingModel<Database>(name: "a", age: 1)
-            a1Duplicate = try a1Duplicate.save(on: conn).await(on: eventLoop)
+            a1Duplicate = try a1Duplicate.save(on: conn).wait()
             fail("should not have saved")
         } catch {
             // pass

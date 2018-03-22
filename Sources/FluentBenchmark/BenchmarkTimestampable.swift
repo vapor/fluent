@@ -13,30 +13,34 @@ extension Benchmarker where Database: QuerySupporting {
         }
 
         _ = try test(tanner.save(on: conn))
-        if tanner.createdAt?.isWithin(seconds: 1, of: Date()) != true {
+        if tanner.createdAt?.isWithin(seconds: 0.1, of: Date()) != true {
             self.fail("timestamps should be current")
         }
 
-        if tanner.updatedAt?.isWithin(seconds: 1, of: Date()) != true {
+        if tanner.updatedAt?.isWithin(seconds: 0.1, of: Date()) != true {
             self.fail("timestamps should be current")
         }
 
         let originalUpdatedAt = tanner.updatedAt!
+        // Ensure that there is a substantial difference between `originalUpdatedAt` and `updatedAt`.
+        Thread.sleep(forTimeInterval: 0.05)
         _ = try test(tanner.save(on: conn))
 
         if tanner.updatedAt! <= originalUpdatedAt {
             self.fail("new updated at should be greater")
         }
-            
-        let f = try test(conn.query(User<Database>.self).filter(\User<Database>.name == "Tanner").first())
+        
+        let f = try test(conn.query(User<Database>.self).filter(\.name == "Tanner").first())
         guard let fetched = f else {
             self.fail("could not fetch user")
             return
         }
 
-        // microsecond roudning
-        if !fetched.createdAt!.isWithin(seconds: 2, of: tanner.createdAt!) && !fetched.updatedAt!.isWithin(seconds: 2, of: tanner.updatedAt!) {
-            self.fail("fetched timestamps are different")
+        if !fetched.createdAt!.isWithin(seconds: 0.002, of: tanner.createdAt!) {
+            self.fail("fetched createdAt timestamp \(fetched.createdAt!.timeIntervalSince1970) is more than 2ms different from expected value \(tanner.createdAt!.timeIntervalSince1970)")
+        }
+        if !fetched.updatedAt!.isWithin(seconds: 0.002, of: tanner.updatedAt!) {
+            self.fail("fetched updatedAt timestamp \(fetched.updatedAt!.timeIntervalSince1970) is more than 2ms different from expected value \(tanner.updatedAt!.timeIntervalSince1970)")
         }
     }
 
@@ -64,11 +68,7 @@ extension Benchmarker where Database: QuerySupporting & SchemaSupporting {
 
 extension Date {
     public func isWithin(seconds: Double, of other: Date) -> Bool {
-        var diff = other.timeIntervalSince1970 - self.timeIntervalSince1970
-        if diff < 0 {
-            diff = diff * -1.0
-        }
-        return diff <= seconds
+        return abs(other.timeIntervalSince1970 - self.timeIntervalSince1970) <= seconds
     }
 
     public var unix: Int {

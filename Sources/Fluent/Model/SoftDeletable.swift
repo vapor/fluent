@@ -1,4 +1,4 @@
-import CodableKit
+import Core
 import Async
 import Foundation
 
@@ -27,7 +27,7 @@ extension SoftDeletable {
 
 extension Model where Self: SoftDeletable, Database: QuerySupporting {
     /// Permanently deletes a soft deletable model.
-    public func forceDelete(on conn: DatabaseConnectable) -> Future<Self> {
+    public func forceDelete(on conn: DatabaseConnectable) -> Future<Void> {
         return query(on: conn)._delete(self)
     }
 
@@ -43,8 +43,8 @@ extension Model where Self: SoftDeletable, Database: QuerySupporting {
 
 extension Future where T: SoftDeletable, T.Database: QuerySupporting {
     /// See `Model.forceDelete(on:)`
-    public func forceDelete(on conn: DatabaseConnectable) -> Future<T> {
-        return flatMap(to: T.self) { model in
+    public func forceDelete(on conn: DatabaseConnectable) -> Future<Void> {
+        return flatMap(to: Void.self) { model in
             return model.forceDelete(on: conn)
         }
     }
@@ -79,7 +79,7 @@ extension QueryBuilder where Model: SoftDeletable {
 /// note: do not rely on this exterally.
 public protocol AnySoftDeletable: AnyModel {
     /// Pointer to type erased key string
-    static var deletedAtField: QueryField { get }
+    static func deletedAtField() throws -> QueryField
 
     /// Access the deleted at property.
     var fluentDeletedAt: Date? { get set }
@@ -87,10 +87,10 @@ public protocol AnySoftDeletable: AnyModel {
 
 extension SoftDeletable {
     /// See `AnySoftDeletable.deletedAtField`
-    public static var deletedAtField: QueryField {
+    public static func deletedAtField() throws -> QueryField {
         return QueryField(
             entity: entity,
-            name: Self.codingPath(forKey: deletedAtKey)[0].stringValue
+            name: try Self.reflectProperty(forKey: deletedAtKey).path.first ?? ""
         )
     }
 }

@@ -23,7 +23,7 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
                     }
                 }
 
-            }.await(on: eventLoop)
+            }.wait()
         } catch is FluentBenchmarkError {
             // expected
         }
@@ -56,5 +56,3 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting & 
         pool.releaseConnection(conn)
     }
 }
-
-

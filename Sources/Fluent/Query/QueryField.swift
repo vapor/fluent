@@ -2,7 +2,17 @@ import CodableKit
 
 /// Represents a field and its optional entity in a query.
 /// This is used mostly for query filters.
-public struct QueryField {
+public struct QueryField: Hashable {
+    /// See `Hashable.hashValue`
+    public var hashValue: Int {
+        return (entity ?? "<nil>" + "." + name).hashValue
+    }
+
+    /// See `Equatable.==`
+    public static func ==(lhs: QueryField, rhs: QueryField) -> Bool {
+        return lhs.name == rhs.name && lhs.entity == rhs.entity
+    }
+
     /// The entity for this field.
     /// If the entity is nil, the query's default entity will be used.
     public var entity: String?
@@ -17,22 +27,59 @@ public struct QueryField {
     }
 }
 
+extension QueryField: CustomStringConvertible {
+    /// See `CustomStringConvertible.description`
+    public var description: String {
+        return (entity ?? "<nil>") + "." + name
+    }
+}
+
+extension QueryField: ExpressibleByStringLiteral {
+    /// See `ExpressibleByStringLiteral.init(stringLiteral:)`
+    public init(stringLiteral value: String) {
+        self.init(name: value)
+    }
+}
+
+extension Dictionary where Key == QueryField {
+    /// Accesses the _first_ value from this dictionary with a matching field name.
+    public func firstValue(forField fieldName: String) -> Value? {
+        for (field, value) in self {
+            if field.name == fieldName {
+                return value
+            }
+        }
+        return nil
+    }
+
+    /// Access a `Value` from this dictionary keyed by `QueryField`s
+    /// using a field (column) name and entity (table) name.
+    public func value(forEntity entity: String, atField field: String) -> Value? {
+        return self[QueryField(entity: entity, name: field)]
+    }
+
+    /// Removes all values that have non-matching entities.
+    /// note: `QueryField`s with `nil` entities will still be included.
+    public func onlyValues(forEntity entity: String) -> [QueryField: Value] {
+        var result: [QueryField: Value] = [:]
+        for (field, value) in self {
+            if field.entity == nil || field.entity == entity {
+                result[field] = value
+            }
+        }
+        return result
+    }
+}
+
 /// Conform key path's where the root is a model.
 /// FIXME: conditional conformance
 extension KeyPath where Root: Model, Value: KeyStringDecodable {
     /// See QueryFieldRepresentable.makeQueryField()
-    public func makeQueryField() -> QueryField {
-        let key = Root.codingPath(forKey: self)
-        return QueryField(entity: Root.entity, name: key[0].stringValue)
+    public func makeQueryField() throws -> QueryField {
+        let key = try Root.reflectProperty(forKey: self)
+        return QueryField(entity: Root.entity, name: key.path.first ?? "")
     }
 }
-
-///// Query fields obviously should get free conformance.
-//extension QueryField: QueryFieldRepresentable {
-//    public func makeQueryField() -> QueryField {
-//        return self
-//    }
-//}
 
 /// Allow models to easily generate query fields statically.
 extension Model {
@@ -96,7 +143,7 @@ public struct QueryFieldDecodingContainer<Model> where Model: Fluent.Model {
     
     /// Decodes a model key path to a type.
     public func decode<T: Decodable>(key: KeyPath<Model, T>) throws -> T where T: KeyStringDecodable {
-        let field = key.makeQueryField()
+        let field = try key.makeQueryField()
         return try container.decode(T.self, forKey: field)
     }
 }
@@ -111,7 +158,7 @@ public struct QueryFieldEncodingContainer<Model: Fluent.Model> {
 
     /// Encodes a model key path to the encoder.
     public mutating func encode<T: Encodable>(key: KeyPath<Model, T>) throws where T: KeyStringDecodable {
-        let field = key.makeQueryField()
+        let field = try key.makeQueryField()
         let value: T = model[keyPath: key]
         try container.encode(value, forKey: field)
     }

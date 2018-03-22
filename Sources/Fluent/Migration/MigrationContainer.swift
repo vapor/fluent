@@ -33,13 +33,15 @@ internal struct MigrationContainer<D> where D: QuerySupporting {
     ) -> Future<Void> {
         return hasPrepared(on: connection).flatMap(to: Void.self) { hasPrepared in
             if hasPrepared {
-                return .done
+                return .done(on: connection)
             } else {
                 return self.prepare(connection).flatMap(to: Void.self) {
                     // create the migration log
                     let log = MigrationLog<Database>(name: self.name, batch: batch)
-                    return QueryBuilder(MigrationLog<Database>.self, on: Future(connection))
-                        .save(log).transform(to: ())
+                    return MigrationLog<Database>
+                        .query(on: Future.map(on: connection) { connection })
+                        .save(log)
+                        .transform(to: ())
                 }
             }
         }
@@ -50,26 +52,27 @@ internal struct MigrationContainer<D> where D: QuerySupporting {
     internal func revertIfNeeded(on connection: Database.Connection) -> Future<Void> {
         return hasPrepared(on: connection).flatMap(to: Void.self) { hasPrepared in
             if hasPrepared {
-                return self.revert(connection).flatMap(to: Void.self) { _ in 
+                return self.revert(connection).flatMap(to: Void.self) { _ in
                     // delete the migration log
-                    return QueryBuilder(
-                        MigrationLog<Database>.self,
-                        on: Future(connection)
-                    )
-                        .filter(\MigrationLog<Database>.name == self.name)
+                    return try MigrationLog<Database>
+                        .query(on: Future.map(on: connection) { connection })
+                        .filter(\.name, .equals, .data(self.name))
                         .delete()
                 }
             } else {
-                return .done
+                return .done(on: connection)
             }
         }
     }
 
     /// returns true if the migration has already been prepared.
     internal func hasPrepared(on connection: Database.Connection) -> Future<Bool> {
-        return QueryBuilder(MigrationLog<Database>.self, on: Future(connection))
-            .filter(\MigrationLog<Database>.name == self.name)
-            .first()
-            .map(to: Bool.self) { $0 != nil }
+        return Future.flatMap(on: connection) {
+            return try MigrationLog<Database>
+                .query(on: Future.map(on: connection) { connection })
+                .filter(\.name, .equals, .data(self.name))
+                .first()
+                .map(to: Bool.self) { $0 != nil }
+        }
     }
 }

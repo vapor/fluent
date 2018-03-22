@@ -1,4 +1,4 @@
-import CodableKit
+import Core
 import Async
 
 /// Declares a database migration.
@@ -24,19 +24,29 @@ public protocol Migration {
 extension Model where Database: SchemaSupporting {
     /// Automatically adds `SchemaField`s for each of this `Model`s properties.
     public static func addProperties(to builder: SchemaCreator<Self>) throws {
-        let idCodingPath = Self.codingPath(forKey: idKey)
-        let properties = Self.properties()
+        let idProperty = try Self.reflectProperty(forKey: idKey)
+        let properties = try Self.reflectProperties()
 
         for property in properties {
-            guard property.codingPath.count == 1 else {
+            guard property.path.count == 1 else {
                 continue
             }
 
+            let type: Any.Type
+            let isOptional: Bool
+            if let o = property.type as? AnyOptionalType.Type {
+                type = o.anyWrappedType
+                isOptional = true
+            } else {
+                type = property.type
+                isOptional = false
+            }
+
             let field = try SchemaField<Database>(
-                name: property.codingPath[0].stringValue,
-                type: Database.fieldType(for: property.type),
-                isOptional: property.isOptional,
-                isIdentifier: property.codingPath.equals(idCodingPath)
+                name: property.path.first ?? "",
+                type: Database.fieldType(for: type),
+                isOptional: isOptional,
+                isIdentifier: property.path == idProperty.path
             )
             builder.schema.addFields.append(field)
         }

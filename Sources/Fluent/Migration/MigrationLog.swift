@@ -57,8 +57,8 @@ extension MigrationLog: Migration where D: SchemaSupporting { }
 extension MigrationLog {
     /// Returns the latest batch number.
     /// note: returns 0 if no batches have run yet.
-    internal static func latestBatch(on conn: Database.Connection) -> Future<Int> {
-        return conn.query(MigrationLog<Database>.self)
+    internal static func latestBatch(on conn: Database.Connection) throws -> Future<Int> {
+        return try conn.query(MigrationLog<Database>.self)
             .sort(\MigrationLog<Database>.batch, .descending)
             .first()
             .map(to: Int.self) { $0?.batch ?? 0 }
@@ -70,16 +70,16 @@ extension MigrationLog where D: SchemaSupporting {
     /// note: this is unlike other migrations since we are checking
     /// for an error instead of asking if the migration has already prepared.
     internal static func prepareMetadata(on conn: Database.Connection) -> Future<Void> {
-        let promise = Promise(Void.self)
+        let promise = conn.eventLoop.newPromise(Void.self)
 
         conn.query(MigrationLog<Database>.self).count().do { count in
-            promise.complete()
+            promise.succeed()
         }.catch { err in
             // table needs to be created
             prepare(on: conn).chain(to: promise)
         }
 
-        return promise.future
+        return promise.futureResult
     }
 
     /// For parity, reverts the migration metadata.

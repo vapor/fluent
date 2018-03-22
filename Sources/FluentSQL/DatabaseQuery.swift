@@ -1,13 +1,13 @@
 import Fluent
 import SQL
 
-extension DatabaseQuery {
+extension DatabaseQuery where Database.QueryFilter: DataPredicateComparisonConvertible {
     /// Create a SQL query from this database query.
     /// All Encodable values found while converting the query
     /// will be returned in an array in the order that placeholders
     /// will appear in the serialized SQL query.
-    public func makeDataQuery() -> (DataQuery, [BindValue]) {
-        var encodables: [BindValue] = []
+    public func makeDataQuery() -> (DataQuery, [Database.QueryData]) {
+        var encodables: [Database.QueryData] = []
 
         let limit: Int?
         if let upper = range?.upper, let lower = range?.lower {

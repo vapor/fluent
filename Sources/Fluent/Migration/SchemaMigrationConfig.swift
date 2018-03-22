@@ -18,7 +18,7 @@ internal struct SchemaMigrationConfig<Database>: MigrationRunnable where Databas
 
     /// See MigrationRunnable.migrate
     internal func migrate(using databases: Databases, using worker: Worker) -> Future<Void> {
-        return Future.flatMap {
+        return Future.flatMap(on: worker) {
             guard let database = databases.database(for: self.database) else {
                 throw FluentError(
                     identifier: "schemaMigrationDatabase",
@@ -27,7 +27,7 @@ internal struct SchemaMigrationConfig<Database>: MigrationRunnable where Databas
                 )
             }
 
-            return database.makeConnection(on: worker.eventLoop).flatMap(to: Void.self) { conn in
+            return database.makeConnection(on: worker).flatMap(to: Void.self) { conn in
                 self.prepareForMigration(on: conn)
             }
         }
@@ -37,7 +37,7 @@ internal struct SchemaMigrationConfig<Database>: MigrationRunnable where Databas
     /// the migration log model is ready for use.
     internal func prepareForMigration(on conn: Database.Connection) -> Future<Void> {
         return MigrationLog<Database>.prepareMetadata(on: conn).flatMap(to: Void.self) {
-            return MigrationLog<Database>.latestBatch(on: conn).flatMap(to: Void.self) { lastBatch in
+            return try MigrationLog<Database>.latestBatch(on: conn).flatMap(to: Void.self) { lastBatch in
                 return self.migrateBatch(on: conn, batch: lastBatch + 1)
             }
         }
@@ -48,7 +48,7 @@ internal struct SchemaMigrationConfig<Database>: MigrationRunnable where Databas
     internal func migrateBatch(on conn: Database.Connection, batch: Int) -> Future<Void> {
         return migrations.map { migration in
             return { migration.prepareIfNeeded(batch: batch, on: conn) }
-        }.syncFlatten()
+        }.syncFlatten(on: conn)
     }
 
     /// Adds a migration to the config.
@@ -59,5 +59,3 @@ internal struct SchemaMigrationConfig<Database>: MigrationRunnable where Databas
         migrations.append(container)
     }
 }
-
-
