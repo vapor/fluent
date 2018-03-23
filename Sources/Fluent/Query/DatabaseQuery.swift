@@ -6,6 +6,9 @@ public struct DatabaseQuery<Database> where Database: QuerySupporting {
     /// The action to perform on the database
     public var action: QueryAction
 
+    /// Custom select fields
+    public var fields: [QueryField]
+    
     /// Result stream will be filtered by these queries.
     public var filters: [QueryFilterItem<Database>]
 
@@ -31,6 +34,7 @@ public struct DatabaseQuery<Database> where Database: QuerySupporting {
     public init(entity: String) {
         self.entity = entity
         self.action = .read
+        self.fields = []
         self.filters = []
         self.sorts = []
         self.aggregates = []
