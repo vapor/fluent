@@ -79,9 +79,9 @@ extension Dictionary where Key == QueryField {
 /// FIXME: conditional conformance
 extension KeyPath where Root: Model, Value: KeyStringDecodable {
     /// See QueryFieldRepresentable.makeQueryField()
-    public func makeQueryField() throws -> QueryField {
+    public func makeQueryField(alias: String? = nil) throws -> QueryField {
         let key = try Root.reflectProperty(forKey: self)
-        return QueryField(entity: Root.entity, name: key.path.first ?? "")
+        return QueryField(entity: Root.entity, name: key.path.first ?? "", alias: alias)
     }
 }
 
@@ -191,6 +191,14 @@ extension QueryBuilder {
         where T: KeyStringDecodable
     {
         return try self.fields(fields.map { try $0.makeQueryField() })
+    }
+    
+    /// Append a specific column with an alias to the Query.
+    public func append<T>(fields: (key: KeyPath<Model, T>, alias: String)...) throws -> Self
+        where T: KeyStringDecodable
+    {
+        try query.fields.append(contentsOf: (fields.map { try $0.key.makeQueryField(alias: $0.alias) }))
+        return self
     }
     
     /// Append a specific column to the Query.
