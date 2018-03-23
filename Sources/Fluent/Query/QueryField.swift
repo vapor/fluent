@@ -19,11 +19,15 @@ public struct QueryField: Hashable {
 
     /// The name of the field.
     public var name: String
+    
+    /// Optional alias for the field.
+    public var alias: String?
 
     /// Create a new query field.
-    public init(entity: String? = nil, name: String) {
+    public init(entity: String? = nil, name: String, alias: String? = nil) {
         self.entity = entity
         self.name = name
+        self.alias = alias
     }
 }
 
