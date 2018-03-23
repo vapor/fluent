@@ -16,7 +16,7 @@ let package = Package(
         .package(url: "https://github.com/vapor/console.git", from: "3.0.0-rc.2"),
 
         // 🗄 Core services for creating database integrations.
-        .package(url: "https://github.com/vapor/database-kit.git", from: "1.0.0-rc.2"),
+        .package(url: "https://github.com/rafiki270/database-kit.git", .branch("master")),
 
         // 📦 Dependency injection / inversion of control framework.
         .package(url: "https://github.com/vapor/service.git", from: "1.0.0-rc.2"),
