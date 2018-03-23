@@ -1,5 +1,6 @@
 import Foundation
 import Fluent
+import NIO
 
 
 class FakeConnection: DatabaseConnection {
@@ -11,7 +12,11 @@ class FakeConnection: DatabaseConnection {
     }
     
     func next() -> EventLoop {
-        return nil
+        return FakeEventLoop()
+    }
+    
+    func shutdownGracefully(queue: DispatchQueue, _ callback: @escaping (Error?) -> Void) {
+        
     }
     
 }

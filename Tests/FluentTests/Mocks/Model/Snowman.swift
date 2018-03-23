@@ -4,11 +4,13 @@ import Fluent
 
 struct Snowman: Model {
     
+    static var idKey: WritableKeyPath<Snowman, UUID?> = \Snowman.id as! WritableKeyPath<Snowman, UUID?>
+    
     typealias Database = FakeDatabase
     
     typealias ID = UUID
     
-    let id: ID
+    let id: ID?
     let name: String
     let hasCarrot: Bool
     
@@ -17,4 +19,5 @@ struct Snowman: Model {
         case name
         case hasCarrot = "carrot"
     }
+    
 }
