@@ -175,14 +175,36 @@ extension QueryField {
 // MARK: Builder
 
 extension QueryBuilder {
-    /// Add a Sort to the Query.
+    /// Set specific select columns to the Query.
     public func fields<T>(_ fields: [KeyPath<Model, T>]) throws -> Self
         where T: KeyStringDecodable
     {
         return try self.fields(fields.map { try $0.makeQueryField() })
     }
     
-    /// Add a Sort to the Query.
+    /// Set specific select columns to the Query.
+    public func fields<T>(_ fields: KeyPath<Model, T>...) throws -> Self
+        where T: KeyStringDecodable
+    {
+        return try self.fields(fields.map { try $0.makeQueryField() })
+    }
+    
+    /// Append a specific column to the Query.
+    public func append<T>(fields: KeyPath<Model, T>...) throws -> Self
+        where T: KeyStringDecodable
+    {
+        try query.fields.append(contentsOf: (fields.map { try $0.makeQueryField() }))
+        return self
+    }
+    
+    /// Append a specific column to the Query.
+    public func append(fields: QueryField...) throws -> Self
+    {
+        query.fields.append(contentsOf: fields)
+        return self
+    }
+    
+    /// Set specific select columns to the Query.
     public func fields(_ fields: [QueryField]) -> Self {
         query.fields = fields
         return self
