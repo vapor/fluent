@@ -76,7 +76,7 @@ extension MigrationLog {
         using container: Container
     ) -> Future<Void> {
         return latestBatch(on: conn).flatMap(to: Void.self) { lastBatch in
-            return migrations.map { migration in
+            return migrations.reversed().map { migration in
                 return { return migration.revertIfNeeded(batch: lastBatch, on: conn, using: container) }
             }.syncFlatten(on: conn)
         }
@@ -88,7 +88,7 @@ extension MigrationLog {
         on conn: Database.Connection,
         using container: Container
     ) -> Future<Void> {
-        return migrations.map { migration in
+        return migrations.reversed().map { migration in
             return { return migration.revertIfNeeded(on: conn, using: container) }
         }.syncFlatten(on: conn)
     }

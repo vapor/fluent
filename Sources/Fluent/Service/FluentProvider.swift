@@ -9,20 +9,8 @@ public final class FluentProvider: Provider {
     /// See `Provider.repositoryName`
     public static var repositoryName: String = "fluent"
 
-    /// If `true`, the latest migration batch should be reverted.
-    private var revert: Bool?
-
-    /// If `true`, all migrations should be reverted.
-    private var revertAll: Bool?
-
     /// Creates a new Fluent provider.
     public init() { }
-
-    /// See `Provider.detect(_:)`
-    public func detect(_ env: inout Environment) throws {
-        revert = try env.commandInput.parse(option: .flag(name: "revert"))?.bool
-        revertAll = try env.commandInput.parse(option: .flag(name: "all"))?.bool
-    }
 
     /// See `Provider.register(_:)`
     public func register(_ services: inout Services) throws {
