@@ -94,7 +94,11 @@ public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws ->
 public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: [Value]) throws -> ModelFilter<Model>
     where Value: KeyStringDecodable, Model.Database.QueryFilter: DataPredicateComparisonConvertible
 {
-    return try _contains(lhs, .in, .array(rhs))
+    switch rhs.count {
+    case 0: return try _contains(lhs, .sql("false"), .none())
+    case 1: return try _contains(lhs, .equal, .data(rhs[0]))
+    default: return try _contains(lhs, .in, .array(rhs))
+    }
 }
 
 infix operator !~
@@ -103,7 +107,11 @@ infix operator !~
 public func !~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: [Value]) throws -> ModelFilter<Model>
     where Value: KeyStringDecodable, Model.Database.QueryFilter: DataPredicateComparisonConvertible
 {
-    return try _contains(lhs, .in, .array(rhs))
+    switch rhs.count {
+    case 0: return try _contains(lhs, .sql("true"), .none())
+    case 1: return try _contains(lhs, .notEqual, .data(rhs[0]))
+    default: return try _contains(lhs, .notIn, .array(rhs))
+    }
 }
 
 /// Operator helper func.
