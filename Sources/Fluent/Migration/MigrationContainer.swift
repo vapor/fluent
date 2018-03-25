@@ -25,8 +25,7 @@ internal struct MigrationContainer<D> where D: QuerySupporting {
         self.name = _type.components(separatedBy: ".Type").first ?? _type
     }
 
-    /// prepares this migration only if it hasn't been previously.
-    /// if prepared now, saves a migration log.
+    /// Prepares the migration if it hasn't previously run.
     internal func prepareIfNeeded(
         batch: Int,
         on connection: Database.Connection
@@ -47,21 +46,41 @@ internal struct MigrationContainer<D> where D: QuerySupporting {
         }
     }
 
-    /// reverts this migration only if it hasn't previous run.
-    /// if reverted, the migration log is deleted.
-    internal func revertIfNeeded(on connection: Database.Connection) -> Future<Void> {
-        return hasPrepared(on: connection).flatMap(to: Void.self) { hasPrepared in
-            if hasPrepared {
-                return self.revert(connection).flatMap(to: Void.self) { _ in
-                    // delete the migration log
-                    return try MigrationLog<Database>
-                        .query(on: Future.map(on: connection) { connection })
-                        .filter(\.name, .equals, .data(self.name))
-                        .delete()
-                }
+    /// Reverts the migration if it was part of the supplied batch number.
+    internal func revertIfNeeded(batch: Int, on connection: Database.Connection) -> Future<Void> {
+        return Future.flatMap(on: connection) {
+            return try MigrationLog<Database>
+                .query(on: connection)
+                .filter(\MigrationLog<Database>.name, .equals, .data(self.name))
+                .filter(\MigrationLog<Database>.batch, .equals, .data(batch))
+                .first()
+        }.flatMap(to: Void.self) { mig in
+            if mig != nil {
+                return self.revertDeletingMetadata(on: connection)
             } else {
                 return .done(on: connection)
             }
+        }
+    }
+
+    /// Reverts the migration if it has previously run.
+    internal func revertIfNeeded(on connection: Database.Connection) -> Future<Void> {
+        return hasPrepared(on: connection).flatMap(to: Void.self) { hasPrepared in
+            if hasPrepared {
+                return self.revertDeletingMetadata(on: connection)
+            } else {
+                return .done(on: connection)
+            }
+        }
+    }
+
+    func revertDeletingMetadata(on connection: Database.Connection) -> Future<Void> {
+        return self.revert(connection).flatMap(to: Void.self) { _ in
+            // delete the migration log
+            return try MigrationLog<Database>
+                .query(on: connection)
+                .filter(\.name, .equals, .data(self.name))
+                .delete()
         }
     }
 

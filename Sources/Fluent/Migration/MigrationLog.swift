@@ -55,14 +55,41 @@ extension MigrationLog: Migration where D: SchemaSupporting { }
 /// MARK: Internal
 
 extension MigrationLog {
-    /// Returns the latest batch number.
-    /// note: returns 0 if no batches have run yet.
-    internal static func latestBatch(on conn: Database.Connection) throws -> Future<Int> {
-        return try conn.query(MigrationLog<Database>.self)
-            .sort(\MigrationLog<Database>.batch, .descending)
-            .first()
-            .map(to: Int.self) { $0?.batch ?? 0 }
+    /// Prepares all of the supplied migrations that have not already run, assigning an incremented batch number.
+    static func prepareBatch(_ migrations: [MigrationContainer<Database>], on conn: Database.Connection) -> Future<Void> {
+        return latestBatch(on: conn).flatMap(to: Void.self) { lastBatch in
+            return migrations.map { migration in
+                return { migration.prepareIfNeeded(batch: lastBatch + 1, on: conn) }
+            }.syncFlatten(on: conn)
+        }
     }
+
+    /// Reverts all of the supplied migrations that ran in the most recent batch.
+    static func revertBatch(_ migrations: [MigrationContainer<Database>], on conn: Database.Connection) -> Future<Void> {
+        return latestBatch(on: conn).flatMap(to: Void.self) { lastBatch in
+            return migrations.map { migration in
+                return { return migration.revertIfNeeded(batch: lastBatch, on: conn) }
+            }.syncFlatten(on: conn)
+        }
+    }
+
+    /// Reverts all of the supplied migrations (if they have been migrated).
+    static func revertAll(_ migrations: [MigrationContainer<Database>], on conn: Database.Connection) -> Future<Void> {
+        return migrations.map { migration in
+            return { return migration.revertIfNeeded(on: conn) }
+        }.syncFlatten(on: conn)
+    }
+
+    /// Returns the latest batch number. Returns 0 if no batches have run yet.
+    static func latestBatch(on conn: Database.Connection) -> Future<Int> {
+        return Future.flatMap(on: conn) {
+            return try conn.query(MigrationLog<Database>.self)
+                .sort(\MigrationLog<Database>.batch, .descending)
+                .first()
+                .map(to: Int.self) { $0?.batch ?? 0 }
+        }
+    }
+
 }
 
 extension MigrationLog where D: SchemaSupporting {
