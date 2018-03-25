@@ -71,7 +71,7 @@ extension QueryFilterValue {
 public func ~= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
     where Value: KeyStringDecodable, Model.Database.QueryFilter: DataPredicateComparisonConvertible
 {
-    return try _contains(lhs, value: "%\(rhs)")
+    return try _contains(lhs, .like, .data("%\(rhs)"))
 }
 
 infix operator =~
@@ -79,7 +79,7 @@ infix operator =~
 public func =~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
     where Value: KeyStringDecodable, Model.Database.QueryFilter: DataPredicateComparisonConvertible
 {
-    return try _contains(lhs, value: "\(rhs)%")
+    return try _contains(lhs, .like, .data("\(rhs)%"))
 }
 
 infix operator ~~
@@ -87,17 +87,41 @@ infix operator ~~
 public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
     where Value: KeyStringDecodable, Model.Database.QueryFilter: DataPredicateComparisonConvertible
 {
-    return try _contains(lhs, value: "%\(rhs)%")
+    return try _contains(lhs, .like, .data("%\(rhs)%"))
+}
+
+/// Subset: IN.
+public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: [Value]) throws -> ModelFilter<Model>
+    where Value: KeyStringDecodable, Model.Database.QueryFilter: DataPredicateComparisonConvertible
+{
+    switch rhs.count {
+    case 0: return try _contains(lhs, .sql("false"), .none())
+    case 1: return try _contains(lhs, .equal, .data(rhs[0]))
+    default: return try _contains(lhs, .in, .array(rhs))
+    }
+}
+
+infix operator !~
+
+/// Subset: NOT IN.
+public func !~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: [Value]) throws -> ModelFilter<Model>
+    where Value: KeyStringDecodable, Model.Database.QueryFilter: DataPredicateComparisonConvertible
+{
+    switch rhs.count {
+    case 0: return try _contains(lhs, .sql("true"), .none())
+    case 1: return try _contains(lhs, .notEqual, .data(rhs[0]))
+    default: return try _contains(lhs, .notIn, .array(rhs))
+    }
 }
 
 /// Operator helper func.
-private func _contains<M, V>(_ key: KeyPath<M, V>, value: String) throws -> ModelFilter<M>
+private func _contains<M, V>(_ key: KeyPath<M, V>, _ comp: DataPredicateComparison, _ value: QueryFilterValue<M.Database>) throws -> ModelFilter<M>
     where V: KeyStringDecodable, M.Database.QueryFilter: DataPredicateComparisonConvertible
 {
     let filter = try QueryFilter<M.Database>(
         field: key.makeQueryField(),
-        type: .custom(.convertFromDataPredicateComparison(.like)),
-        value: .data(value)
+        type: .custom(.convertFromDataPredicateComparison(comp)),
+        value: value
     )
     return ModelFilter<M>(filter: filter)
 }

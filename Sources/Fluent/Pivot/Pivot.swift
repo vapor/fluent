@@ -1,3 +1,16 @@
+/// The string to use when connecting entity names for pivot tables.
+///
+/// A pivot name connector of `"_"` would derive the following name for a pivot on `Pet` and `User`.
+///
+///     pet_user
+///
+/// You can change the `pivotNameConnector` by updating the global variable.
+///
+///     Fluent.pivotNameConnector = "+"
+///
+/// Note: Changing the `pivotNameConnector` requires that you also update any pivot tables in your database.
+public var pivotNameConnector: String = "_"
+
 /// Capable of being a pivot between two
 /// models. Usually in a Siblings relation.
 /// note: special care must be taken when using pivots
@@ -40,9 +53,9 @@ extension Pivot {
     /// See Model.entity
     public static var name: String {
         if Left.name < Right.name {
-            return "\(Left.name)+\(Right.name)"
+            return Left.name + pivotNameConnector + Right.name
         } else {
-            return "\(Right.name)+\(Left.name)"
+            return Right.name + pivotNameConnector + Left.name
         }
     }
 
