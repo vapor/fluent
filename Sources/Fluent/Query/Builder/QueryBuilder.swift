@@ -9,7 +9,7 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
     /// The connection this query will be excuted on.
     /// note: don't call execute manually or fluent's
     /// hooks will not run properly.
-    internal let connection: Future<Model.Database.Connection>
+    public let connection: Future<Model.Database.Connection>
 
     /// Current result transformation.
     private var resultTransformer: ([QueryField: Model.Database.QueryData], Model.Database.Connection) -> Future<Result>
