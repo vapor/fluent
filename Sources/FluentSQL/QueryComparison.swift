@@ -71,7 +71,7 @@ extension QueryFilterValue {
 public func ~= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
     where Value: KeyStringDecodable, Model.Database.QueryFilter: DataPredicateComparisonConvertible
 {
-    return try _contains(lhs, value: "%\(rhs)")
+    return try _contains(lhs, .like, "%\(rhs)")
 }
 
 infix operator =~
@@ -79,7 +79,7 @@ infix operator =~
 public func =~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
     where Value: KeyStringDecodable, Model.Database.QueryFilter: DataPredicateComparisonConvertible
 {
-    return try _contains(lhs, value: "\(rhs)%")
+    return try _contains(lhs, .like, "\(rhs)%")
 }
 
 infix operator ~~
@@ -87,16 +87,32 @@ infix operator ~~
 public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
     where Value: KeyStringDecodable, Model.Database.QueryFilter: DataPredicateComparisonConvertible
 {
-    return try _contains(lhs, value: "%\(rhs)%")
+    return try _contains(lhs, .like, "%\(rhs)%")
+}
+
+/// Subset: IN.
+public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: [Value]) throws -> ModelFilter<Model>
+    where Value: KeyStringDecodable, Model.Database.QueryFilter: DataPredicateComparisonConvertible
+{
+    return try _contains(lhs, .in, rhs)
+}
+
+infix operator !~
+
+/// Subset: NOT IN.
+public func !~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: [Value]) throws -> ModelFilter<Model>
+    where Value: KeyStringDecodable, Model.Database.QueryFilter: DataPredicateComparisonConvertible
+{
+    return try _contains(lhs, .in, rhs)
 }
 
 /// Operator helper func.
-private func _contains<M, V>(_ key: KeyPath<M, V>, value: String) throws -> ModelFilter<M>
+private func _contains<M, V, T>(_ key: KeyPath<M, V>, _ comp: DataPredicateComparison, _ value: T) throws -> ModelFilter<M>
     where V: KeyStringDecodable, M.Database.QueryFilter: DataPredicateComparisonConvertible
 {
     let filter = try QueryFilter<M.Database>(
         field: key.makeQueryField(),
-        type: .custom(.convertFromDataPredicateComparison(.like)),
+        type: .custom(.convertFromDataPredicateComparison(comp)),
         value: .data(value)
     )
     return ModelFilter<M>(filter: filter)
