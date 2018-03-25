@@ -40,9 +40,9 @@ extension Pivot {
     /// See Model.entity
     public static var name: String {
         if Left.name < Right.name {
-            return "\(Left.name)+\(Right.name)"
+            return "\(Left.name)_\(Right.name)"
         } else {
-            return "\(Right.name)+\(Left.name)"
+            return "\(Right.name)_\(Left.name)"
         }
     }
 
