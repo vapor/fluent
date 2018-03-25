@@ -163,3 +163,29 @@ public struct QueryFieldEncodingContainer<Model: Fluent.Model> {
         try container.encode(value, forKey: field)
     }
 }
+
+/// Creating select all field
+extension QueryField {
+    /// Predefined select all field
+    static func all() -> QueryField {
+        return QueryField(name: "*")
+    }
+}
+
+// MARK: Builder
+
+extension QueryBuilder {
+    /// Add a Sort to the Query.
+    public func fields<T>(_ fields: [KeyPath<Model, T>]) throws -> Self
+        where T: KeyStringDecodable
+    {
+        return try self.fields(fields.map { try $0.makeQueryField() })
+    }
+    
+    /// Add a Sort to the Query.
+    public func fields(_ fields: [QueryField]) -> Self {
+        query.fields = fields
+        return self
+    }
+}
+
