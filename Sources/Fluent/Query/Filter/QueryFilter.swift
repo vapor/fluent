@@ -78,6 +78,7 @@ public struct QueryFilterValue<Database> where Database: QuerySupporting {
         case data(Database.QueryData)
         case array([Database.QueryData])
         case subquery(DatabaseQuery<Database>)
+        case none
     }
 
     /// Internal storage.
@@ -119,6 +120,11 @@ public struct QueryFilterValue<Database> where Database: QuerySupporting {
     /// A sub query.
     public static func subquery(_ subquery: DatabaseQuery<Database>) -> QueryFilterValue<Database> {
         return .init(storage: .subquery(subquery))
+    }
+
+    /// No value.
+    public static func none() -> QueryFilterValue<Database> {
+        return .init(storage: .none)
     }
 }
 
