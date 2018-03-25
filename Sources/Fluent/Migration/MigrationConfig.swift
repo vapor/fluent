@@ -82,5 +82,7 @@ public struct MigrationConfig: Service {
 /// We need this protocol because we lose some database type
 /// info in our MigrationConfig storage.
 internal protocol MigrationRunnable {
-    func migrate(using databases: Databases, using worker: Worker) -> Future<Void>
+    func migrationPrepareBatch(on container: Container) -> Future<Void>
+    func migrationRevertBatch(on container: Container) -> Future<Void>
+    func migrationRevertAll(on container: Container) -> Future<Void>
 }
