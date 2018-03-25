@@ -113,7 +113,7 @@ private func _contains<M, V>(_ key: KeyPath<M, V>, _ comp: DataPredicateComparis
     let filter = try QueryFilter<M.Database>(
         field: key.makeQueryField(),
         type: .custom(.convertFromDataPredicateComparison(comp)),
-        value: .data(value)
+        value: value
     )
     return ModelFilter<M>(filter: filter)
 }
