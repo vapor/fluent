@@ -164,14 +164,6 @@ public struct QueryFieldEncodingContainer<Model: Fluent.Model> {
     }
 }
 
-/// Creating select all field
-extension QueryField {
-    /// Predefined select all field
-    static func all() -> QueryField {
-        return QueryField(name: "*")
-    }
-}
-
 // MARK: Builder
 
 extension QueryBuilder {
