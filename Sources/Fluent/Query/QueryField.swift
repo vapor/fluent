@@ -193,7 +193,15 @@ extension QueryBuilder {
         return try self.fields(fields.map { try $0.makeQueryField() })
     }
     
-    /// Append a specific column with an alias to the Query.
+    /// Append specific columns with an alias to the Query.
+    public func append<T>(fields: [(key: KeyPath<Model, T>, alias: String)]) throws -> Self
+        where T: KeyStringDecodable
+    {
+        try query.fields.append(contentsOf: (fields.map { try $0.key.makeQueryField(alias: $0.alias) }))
+        return self
+    }
+    
+    /// Append specific columns with an alias to the Query.
     public func append<T>(fields: (key: KeyPath<Model, T>, alias: String)...) throws -> Self
         where T: KeyStringDecodable
     {
