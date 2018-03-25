@@ -2,12 +2,12 @@ import CodableKit
 
 /// GROUP BY statement for QueryBuilder
 public struct QueryGroupBy {
-    public enum Storage {
+    private enum Storage {
         case field(QueryField)
     }
     
     /// Internal storage
-    public let storage: Storage
+    let storage: Storage
     
     /// Generates QueryGroupBy object for a field
     public static func field(_ field: QueryField) -> QueryGroupBy { return .init(storage: .field(field)) }
