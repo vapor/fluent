@@ -71,7 +71,7 @@ extension QueryFilterValue {
 public func ~= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
     where Value: KeyStringDecodable, Model.Database.QueryFilter: DataPredicateComparisonConvertible
 {
-    return try _contains(lhs, .like, "%\(rhs)")
+    return try _contains(lhs, .like, .data("%\(rhs)"))
 }
 
 infix operator =~
@@ -79,7 +79,7 @@ infix operator =~
 public func =~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
     where Value: KeyStringDecodable, Model.Database.QueryFilter: DataPredicateComparisonConvertible
 {
-    return try _contains(lhs, .like, "\(rhs)%")
+    return try _contains(lhs, .like, .data("\(rhs)%"))
 }
 
 infix operator ~~
@@ -87,14 +87,14 @@ infix operator ~~
 public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
     where Value: KeyStringDecodable, Model.Database.QueryFilter: DataPredicateComparisonConvertible
 {
-    return try _contains(lhs, .like, "%\(rhs)%")
+    return try _contains(lhs, .like, .data("%\(rhs)%"))
 }
 
 /// Subset: IN.
 public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: [Value]) throws -> ModelFilter<Model>
     where Value: KeyStringDecodable, Model.Database.QueryFilter: DataPredicateComparisonConvertible
 {
-    return try _contains(lhs, .in, rhs)
+    return try _contains(lhs, .in, .array(rhs))
 }
 
 infix operator !~
@@ -103,11 +103,11 @@ infix operator !~
 public func !~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: [Value]) throws -> ModelFilter<Model>
     where Value: KeyStringDecodable, Model.Database.QueryFilter: DataPredicateComparisonConvertible
 {
-    return try _contains(lhs, .in, rhs)
+    return try _contains(lhs, .in, .array(rhs))
 }
 
 /// Operator helper func.
-private func _contains<M, V, T>(_ key: KeyPath<M, V>, _ comp: DataPredicateComparison, _ value: T) throws -> ModelFilter<M>
+private func _contains<M, V>(_ key: KeyPath<M, V>, _ comp: DataPredicateComparison, _ value: QueryFilterValue<M.Database>) throws -> ModelFilter<M>
     where V: KeyStringDecodable, M.Database.QueryFilter: DataPredicateComparisonConvertible
 {
     let filter = try QueryFilter<M.Database>(
