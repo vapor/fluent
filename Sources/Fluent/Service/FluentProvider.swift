@@ -1,8 +1,8 @@
 import Async
 import Console
 import Command
-import Dispatch
 import Service
+import Logging
 
 /// Registers Fluent related services.
 public final class FluentProvider: Provider {
@@ -10,7 +10,7 @@ public final class FluentProvider: Provider {
     public static var repositoryName: String = "fluent"
 
     /// If `true`, the latest migration batch should be reverted.
-    private var revertBatch: Bool?
+    private var revert: Bool?
 
     /// If `true`, all migrations should be reverted.
     private var revertAll: Bool?
@@ -20,8 +20,8 @@ public final class FluentProvider: Provider {
 
     /// See `Provider.detect(_:)`
     public func detect(_ env: inout Environment) throws {
-        revertBatch = try env.commandInput.parse(option: .flag(name: "revert"))?.bool
-        revertAll = try env.commandInput.parse(option: .flag(name: "revert-alll"))?.bool
+        revert = try env.commandInput.parse(option: .flag(name: "revert"))?.bool
+        revertAll = try env.commandInput.parse(option: .flag(name: "all"))?.bool
     }
 
     /// See `Provider.register(_:)`
@@ -33,33 +33,48 @@ public final class FluentProvider: Provider {
     public func didBoot(_ container: Container) throws -> Future<Void> {
         let migrations = try container.make(MigrationConfig.self)
         let console = try container.make(Console.self)
+        let logger = try container.make(Logger.self)
 
-        if revertAll == true {
-            return migrations.storage.map { (uid, migration) in
-                return {
-                    console.print("Reverting last batch of migrations on \(uid) DB")
-                    return migration.migrationRevertAll(on: container)
+        if revert == true {
+            if revertAll == true {
+                logger.info("Revert all migrations requested")
+                logger.warning("This will revert all migrations for all configured databases")
+                guard console.ask("Are you sure you want to revert all migrations?").bool == true else {
+                    throw FluentError(identifier: "cancelled", reason: "Migration revert cancelled", source: .capture())
                 }
+
+                return migrations.storage.map { (uid, migration) in
+                    return {
+                        logger.info("Reverting all migrations on '\(uid)' database")
+                        return migration.migrationRevertAll(on: container)
+                    }
                 }.syncFlatten(on: container).map(to: Void.self) {
-                    console.success("Last batch of migrations reverted")
-            }
-        } else if revertBatch == true {
-            return migrations.storage.map { (uid, migration) in
-                return {
-                    console.print("Reverting last batch of migrations on \(uid) DB")
-                    return migration.migrationRevertBatch(on: container)
+                    logger.info("Succesfully reverted all migrations")
                 }
-            }.syncFlatten(on: container).map(to: Void.self) {
-                console.success("Last batch of migrations reverted")
+            } else {
+                logger.info("Revert last batch of migrations requested")
+                logger.warning("This will revert the last batch of migrations for all configured databases")
+                guard console.ask("Are you sure you want to revert the last batch of migrations?").bool == true else {
+                    throw FluentError(identifier: "cancelled", reason: "Migration revert cancelled", source: .capture())
+                }
+
+                return migrations.storage.map { (uid, migration) in
+                    return {
+                        logger.info("Reverting last batch of migrations on '\(uid)' database")
+                        return migration.migrationRevertBatch(on: container)
+                    }
+                }.syncFlatten(on: container).map(to: Void.self) {
+                    logger.info("Succesfully reverted last batch of migrations")
+                }
             }
         } else {
             return migrations.storage.map { (uid, migration) in
                 return {
-                    console.print("Migrating \(uid) DB")
+                    logger.info("Migrating '\(uid)' database")
                     return migration.migrationPrepareBatch(on: container)
                 }
             }.syncFlatten(on: container).map(to: Void.self) {
-                console.success("Migrations complete")
+                logger.info("Migrations complete")
             }
         }
     }

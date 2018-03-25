@@ -19,21 +19,21 @@ internal struct QueryMigrationConfig<Database>: MigrationRunnable where Database
     /// See `MigrationRunnable.migrationPrepareBatch(on:)`
     internal func migrationPrepareBatch(on container: Container) -> Future<Void> {
         return container.withConnection(to: database) { conn in
-            return MigrationLog<Database>.prepareBatch(self.migrations, on: conn)
+            return MigrationLog<Database>.prepareBatch(self.migrations, on: conn, using: container)
         }
     }
 
     /// See `MigrationRunnable.migrationRevertBatch(on:)`
     func migrationRevertBatch(on container: Container) -> EventLoopFuture<Void> {
         return container.withConnection(to: database) { conn in
-            return MigrationLog<Database>.revertBatch(self.migrations, on: conn)
+            return MigrationLog<Database>.revertBatch(self.migrations, on: conn, using: container)
         }
     }
 
     /// See `MigrationRunnable.migrationRevertAll(on:)`
     func migrationRevertAll(on container: Container) -> EventLoopFuture<Void> {
         return container.withConnection(to: database) { conn in
-            return MigrationLog<Database>.revertAll(self.migrations, on: conn)
+            return MigrationLog<Database>.revertAll(self.migrations, on: conn, using: container)
         }
     }
 

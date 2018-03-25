@@ -1,5 +1,6 @@
 import Async
 import Foundation
+import Service
 
 /// Represents a migration that has succesfully ran.
 final class MigrationLog<D>: Model, Timestampable where D: QuerySupporting {
@@ -56,27 +57,39 @@ extension MigrationLog: Migration where D: SchemaSupporting { }
 
 extension MigrationLog {
     /// Prepares all of the supplied migrations that have not already run, assigning an incremented batch number.
-    static func prepareBatch(_ migrations: [MigrationContainer<Database>], on conn: Database.Connection) -> Future<Void> {
+    static func prepareBatch(
+        _ migrations: [MigrationContainer<Database>],
+        on conn: Database.Connection,
+        using container: Container
+    ) -> Future<Void> {
         return latestBatch(on: conn).flatMap(to: Void.self) { lastBatch in
             return migrations.map { migration in
-                return { migration.prepareIfNeeded(batch: lastBatch + 1, on: conn) }
+                return { migration.prepareIfNeeded(batch: lastBatch + 1, on: conn, using: container) }
             }.syncFlatten(on: conn)
         }
     }
 
     /// Reverts all of the supplied migrations that ran in the most recent batch.
-    static func revertBatch(_ migrations: [MigrationContainer<Database>], on conn: Database.Connection) -> Future<Void> {
+    static func revertBatch(
+        _ migrations: [MigrationContainer<Database>],
+        on conn: Database.Connection,
+        using container: Container
+    ) -> Future<Void> {
         return latestBatch(on: conn).flatMap(to: Void.self) { lastBatch in
             return migrations.map { migration in
-                return { return migration.revertIfNeeded(batch: lastBatch, on: conn) }
+                return { return migration.revertIfNeeded(batch: lastBatch, on: conn, using: container) }
             }.syncFlatten(on: conn)
         }
     }
 
     /// Reverts all of the supplied migrations (if they have been migrated).
-    static func revertAll(_ migrations: [MigrationContainer<Database>], on conn: Database.Connection) -> Future<Void> {
+    static func revertAll(
+        _ migrations: [MigrationContainer<Database>],
+        on conn: Database.Connection,
+        using container: Container
+    ) -> Future<Void> {
         return migrations.map { migration in
-            return { return migration.revertIfNeeded(on: conn) }
+            return { return migration.revertIfNeeded(on: conn, using: container) }
         }.syncFlatten(on: conn)
     }
 

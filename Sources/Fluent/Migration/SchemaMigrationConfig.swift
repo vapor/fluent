@@ -20,7 +20,7 @@ internal struct SchemaMigrationConfig<Database>: MigrationRunnable where Databas
     internal func migrationPrepareBatch(on container: Container) -> Future<Void> {
         return container.withConnection(to: database) { conn in
             return MigrationLog<Database>.prepareMetadata(on: conn).flatMap(to: Void.self) { _ in
-                return MigrationLog<Database>.prepareBatch(self.migrations, on: conn)
+                return MigrationLog<Database>.prepareBatch(self.migrations, on: conn, using: container)
             }
         }
     }
@@ -29,7 +29,7 @@ internal struct SchemaMigrationConfig<Database>: MigrationRunnable where Databas
     func migrationRevertBatch(on container: Container) -> EventLoopFuture<Void> {
         return container.withConnection(to: database) { conn in
             return MigrationLog<Database>.prepareMetadata(on: conn).flatMap(to: Void.self) { _ in
-                return MigrationLog<Database>.revertBatch(self.migrations, on: conn)
+                return MigrationLog<Database>.revertBatch(self.migrations, on: conn, using: container)
             }
         }
     }
@@ -38,7 +38,7 @@ internal struct SchemaMigrationConfig<Database>: MigrationRunnable where Databas
     func migrationRevertAll(on container: Container) -> EventLoopFuture<Void> {
         return container.withConnection(to: database) { conn in
             return MigrationLog<Database>.prepareMetadata(on: conn).flatMap(to: Void.self) { _ in
-                return MigrationLog<Database>.revertAll(self.migrations, on: conn)
+                return MigrationLog<Database>.revertAll(self.migrations, on: conn, using: container)
             }
         }
     }
