@@ -25,30 +25,22 @@ extension QueryBuilder {
     }
 
     /// Returns the sum of the supplied field
-    public func sum<T>(_ field: KeyPath<Model, T>) throws -> Future<Double>
-        where T: KeyStringDecodable
-    {
+    public func sum<T>(_ field: KeyPath<Model, T>) throws -> Future<Double> {
         return try aggregate(.sum, field: field)
     }
 
     /// Returns the average of the supplied field
-    public func average<T>(_ field: KeyPath<Model, T>) throws -> Future<Double>
-        where T: KeyStringDecodable
-    {
+    public func average<T>(_ field: KeyPath<Model, T>) throws -> Future<Double> {
         return try aggregate(.average, field: field)
     }
 
     /// Returns the min of the supplied field
-    public func min<T>(_ field: KeyPath<Model, T>) throws -> Future<Double>
-        where T: KeyStringDecodable
-    {
+    public func min<T>(_ field: KeyPath<Model, T>) throws -> Future<Double> {
         return try aggregate(.min, field: field)
     }
 
     /// Returns the max of the supplied field
-    public func max<T>(_ field: KeyPath<Model, T>) throws -> Future<Double>
-        where T: KeyStringDecodable
-    {
+    public func max<T>(_ field: KeyPath<Model, T>) throws -> Future<Double> {
         return try aggregate(.max, field: field)
     }
 
@@ -56,7 +48,7 @@ extension QueryBuilder {
     /// on the supplied model.
     /// Decode as the supplied type.
     public func aggregate<D, T>(_ method: QueryAggregateMethod, field: KeyPath<Model, T>, as type: D.Type = D.self) throws -> Future<D>
-        where D: Decodable, T: KeyStringDecodable
+        where D: Decodable
     {
         let aggregate = try QueryAggregate(field: field.makeQueryField(), method: method)
         return self.aggregate(aggregate)

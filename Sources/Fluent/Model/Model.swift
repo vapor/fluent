@@ -240,7 +240,7 @@ extension Model {
 }
 
 // MARK: Routing
-extension Model where Database: QuerySupporting, ID: KeyStringDecodable {
+extension Model where Database: QuerySupporting {
     /// See `Parameter.make`
     public static func make(for parameter: String, using container: Container) throws -> Future<Self> {
         guard let idType = ID.self as? LosslessStringConvertible.Type else {

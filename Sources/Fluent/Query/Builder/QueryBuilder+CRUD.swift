@@ -2,7 +2,7 @@ import CodableKit
 import Async
 import Foundation
 
-extension QueryBuilder where Model.ID: KeyStringDecodable {
+extension QueryBuilder {
     /// Saves the supplied model. Calls `create` if the ID is `nil`, and `update` if it exists.
     /// If you need to create a model with a pre-existing ID, call `create` instead.
     public func save(_ model: Model) -> Future<Model> {
@@ -56,9 +56,7 @@ extension QueryBuilder where Model.ID: KeyStringDecodable {
     }
 
     /// Updates a single field to the supplied value.
-    public func update<Value>(_ key: KeyPath<Model, Value>, to value: Value) throws -> Future<Void> 
-        where Value: KeyStringDecodable
-    {
+    public func update<Value>(_ key: KeyPath<Model, Value>, to value: Value) throws -> Future<Void> {
         self.query.data = try [
             key.makeQueryField(): Model.Database.queryDataSerialize(data: value)
         ]

@@ -141,7 +141,7 @@ extension QueryBuilder {
     /// Applies a comparison filter to this query.
     @discardableResult
     public func filter<M, T>(_ joined: M.Type, _ key: KeyPath<M, T>, _ type: QueryFilterType<M.Database>, _ value: QueryFilterValue<M.Database>) throws -> Self
-        where M: Fluent.Model, M.Database == Model.Database, T: KeyStringDecodable
+        where M: Fluent.Model, M.Database == Model.Database
     {
         let filter = try QueryFilter<M.Database>(
             field: key.makeQueryField(),
@@ -153,9 +153,7 @@ extension QueryBuilder {
 
     /// Applies a comparison filter to this query.
     @discardableResult
-    public func filter<T>(_ key: KeyPath<Model, T>, _ type: QueryFilterType<Model.Database>, _ value: QueryFilterValue<Model.Database>) throws -> Self
-        where T: KeyStringDecodable
-    {
+    public func filter<T>(_ key: KeyPath<Model, T>, _ type: QueryFilterType<Model.Database>, _ value: QueryFilterValue<Model.Database>) throws -> Self {
         return try filter(key.makeQueryField(), type, value)
     }
 
@@ -170,40 +168,6 @@ extension QueryBuilder {
             value: value
         )
         return addFilter(.single(filter))
-    }
-}
-
-/// MARK: Array
-
-extension QueryBuilder {
-    /// Subset `in` filter.
-    @discardableResult
-    public func filter<T>(_ field: KeyPath<Model, T>, in values: [Model.Database.QueryDataConvertible]) throws -> Self where T: KeyStringDecodable {
-        return try filter(field, .in, .array(values))
-    }
-
-    /// Subset `notIn` filter.
-    @discardableResult
-    public func filter<T>(_ field: KeyPath<Model, T>, notIn values: [T]) throws -> Self where T: KeyStringDecodable {
-        return try filter(field, .notIn, .array(values))
-    }
-}
-
-extension QueryBuilder {
-    /// Subset `in` filter.
-    @discardableResult
-    public func filter<M, T>(_ joined: M.Type, _ field: KeyPath<M, T>, in values: [Model.Database.QueryDataConvertible]) throws -> Self
-        where T: KeyStringDecodable, M: Fluent.Model, M.Database == Model.Database
-    {
-        return try filter(M.self, field, .in, .array(values))
-    }
-
-    /// Subset `notIn` filter.
-    @discardableResult
-    public func filter<M, T>(_ joined: M.Type, _ field: KeyPath<M, T>, notIn values: [Model.Database.QueryDataConvertible]) throws -> Self
-        where T: KeyStringDecodable, M: Fluent.Model, M.Database == Model.Database
-    {
-        return try filter(M.self, field, .notIn, .array(values))
     }
 }
 
