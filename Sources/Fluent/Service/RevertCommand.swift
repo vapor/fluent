@@ -21,7 +21,8 @@ public final class RevertCommand: Command, Service {
 
     /// See `Command.options`
     public var options: [CommandOption] { return [
-        CommandOption.flag(name: "all", short: "a", help: ["Reverts all migrations, not just the latest batch."])
+        CommandOption.flag(name: "all", short: "a", help: ["Reverts all migrations, not just the latest batch."]),
+        CommandOption.flag(name: "yes", short: "y", help: ["Automatically revert migrations without asking for confirmation"])
     ]}
 
     /// See `Command.help`
@@ -41,8 +42,10 @@ public final class RevertCommand: Command, Service {
         if context.options["all"]?.bool == true {
             logger.info("Revert all migrations requested")
             logger.warning("This will revert all migrations for all configured databases")
-            guard context.console.ask("Are you sure you want to revert all migrations?").bool == true else {
-                throw FluentError(identifier: "cancelled", reason: "Migration revert cancelled", source: .capture())
+            if context.options["yes"]?.bool == false {
+                guard context.console.ask("Are you sure you want to revert all migrations?").bool == true else {
+                    throw FluentError(identifier: "cancelled", reason: "Migration revert cancelled", source: .capture())
+                }
             }
 
             return migrations.storage.map { (uid, migration) in
@@ -56,8 +59,10 @@ public final class RevertCommand: Command, Service {
         } else {
             logger.info("Revert last batch of migrations requested")
             logger.warning("This will revert the last batch of migrations for all configured databases")
-            guard context.console.ask("Are you sure you want to revert the last batch of migrations?").bool == true else {
-                throw FluentError(identifier: "cancelled", reason: "Migration revert cancelled", source: .capture())
+            if context.options["yes"]?.bool == false {
+                guard context.console.ask("Are you sure you want to revert the last batch of migrations?").bool == true else {
+                    throw FluentError(identifier: "cancelled", reason: "Migration revert cancelled", source: .capture())
+                }
             }
 
             return migrations.storage.map { (uid, migration) in
