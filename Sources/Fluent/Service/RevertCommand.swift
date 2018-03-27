@@ -41,7 +41,7 @@ public final class RevertCommand: Command, Service {
         if context.options["all"]?.bool == true {
             logger.info("Revert all migrations requested")
             logger.warning("This will revert all migrations for all configured databases")
-            guard context.console.ask("Are you sure you want to revert all migrations?").bool == true else {
+            guard try context.console.confirm("Are you sure you want to revert all migrations?") else {
                 throw FluentError(identifier: "cancelled", reason: "Migration revert cancelled", source: .capture())
             }
 
@@ -56,7 +56,7 @@ public final class RevertCommand: Command, Service {
         } else {
             logger.info("Revert last batch of migrations requested")
             logger.warning("This will revert the last batch of migrations for all configured databases")
-            guard context.console.ask("Are you sure you want to revert the last batch of migrations?").bool == true else {
+            guard try context.console.confirm("Are you sure you want to revert the last batch of migrations?") else {
                 throw FluentError(identifier: "cancelled", reason: "Migration revert cancelled", source: .capture())
             }
 
