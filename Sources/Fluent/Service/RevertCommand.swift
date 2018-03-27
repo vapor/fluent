@@ -21,8 +21,7 @@ public final class RevertCommand: Command, Service {
 
     /// See `Command.options`
     public var options: [CommandOption] { return [
-        CommandOption.flag(name: "all", short: "a", help: ["Reverts all migrations, not just the latest batch."]),
-        CommandOption.flag(name: "yes", short: "y", help: ["Automatically revert migrations without asking for confirmation"])
+        CommandOption.flag(name: "all", short: "a", help: ["Reverts all migrations, not just the latest batch."])
     ]}
 
     /// See `Command.help`
