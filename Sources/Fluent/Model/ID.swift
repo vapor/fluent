@@ -1,9 +1,7 @@
-import CodableKit
-import Foundation
-
+import Core
 
 /// A Fluent compatible identifier.
-public protocol ID: Codable, Equatable, KeyStringDecodable { }
+public protocol ID: Codable, Equatable { }
 
 extension Int: ID { }
 extension String: ID { }
