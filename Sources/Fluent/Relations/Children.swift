@@ -1,7 +1,4 @@
-import CodableKit
-
-/// The children relation is one side of a
-/// one-to-many database relation.
+/// The children relation is one side of a one-to-many database relation.
 ///
 /// The children relation will return all the
 /// models that contain a reference to the parent's identifier.

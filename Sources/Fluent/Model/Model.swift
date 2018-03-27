@@ -1,7 +1,6 @@
 import Async
 import Core
 import Service
-import CodableKit
 
 /// Fluent database models. These types can be fetched
 /// from a database connection using a query.

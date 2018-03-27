@@ -1,5 +1,3 @@
-import CodableKit
-
 /// MARK: Field convenience
 
 extension SchemaBuilder where Model.Database: ReferenceSupporting {

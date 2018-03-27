@@ -1,6 +1,5 @@
-import CodableKit
 import Async
-import Foundation
+import Core
 
 extension QueryBuilder {
     /// Saves the supplied model. Calls `create` if the ID is `nil`, and `update` if it exists.

@@ -22,6 +22,7 @@ internal struct MigrationContainer<D> where D: QuerySupporting {
     init<M>(_ migration: M.Type, name: String) where M: Migration, M.Database == D {
         self.prepare = M.prepare
         self.revert = M.revert
+        self.name = name
     }
 
     /// creates a new migration container from closures.

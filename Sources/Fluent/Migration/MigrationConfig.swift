@@ -11,11 +11,21 @@ public struct MigrationConfig: Service {
         self.storage = [:]
     }
 
-    /// Adds a migration to the config.
+    /// Adds a `Migration` to the `MigrationConfig`. Use `add(model:)` if the migration you are adding is also a `Model`.
+    ///
+    ///     migrationConfig.add(migration: CleanupUsers.self, database: .sqlite)
+    ///
+    /// Note: This method is for databases that do not conform to `SchemaSupporting`.
+    ///
+    /// - parameters:
+    ///     - migration: `Migration` type to add.
+    ///     - database: Database identifier for the database this should run on.
+    ///     - name: Optional unique name for this migration. This will be stored in Fluent's metadata table to detect whether
+    ///             the migration has already run or not.
     public mutating func add<Migration> (
         migration: Migration.Type,
         database: DatabaseIdentifier<Migration.Database>,
-        name: String = Migration.normalizedTypeName
+        name: String = Migration._normalizedTypeName
     ) where
         Migration: Fluent.Migration,
         Migration.Database: QuerySupporting
@@ -25,11 +35,21 @@ public struct MigrationConfig: Service {
         storage[database.uid] = config
     }
 
-    /// Adds a schema supporting migration to the config.
+    /// Adds a `Migration` to the `MigrationConfig`. Use `add(model:)` if the migration you are adding is also a `Model`.
+    ///
+    ///     migrationConfig.add(migration: CleanupUsers.self, database: .sqlite)
+    ///
+    /// Note: This method is for databases that conform to `SchemaSupporting`.
+    ///
+    /// - parameters:
+    ///     - migration: `Migration` type to add.
+    ///     - database: Database identifier for the database this should run on.
+    ///     - name: Optional unique name for this migration. This will be stored in Fluent's metadata table to detect whether
+    ///             the migration has already run or not.
     public mutating func add<Migration> (
         migration: Migration.Type,
         database: DatabaseIdentifier<Migration.Database>,
-        name: String = Migration.normalizedTypeName
+        name: String = Migration._normalizedTypeName
     ) where
         Migration: Fluent.Migration,
         Migration.Database: SchemaSupporting & QuerySupporting
@@ -39,7 +59,19 @@ public struct MigrationConfig: Service {
         storage[database.uid] = config
     }
 
-    /// Adds a migration to the config.
+    /// Adds a `Model & Migration` to the `MigrationConfig`. Use `add(migration:)` if the migration you are adding is not a `Model`.
+    ///
+    ///     migrationConfig.add(model: User.self, database: .sqlite)
+    ///
+    /// This method sets the model's `defaultDatabase` property.
+    ///
+    /// Note: This method is for databases that conform to `SchemaSupporting`.
+    ///
+    /// - parameters:
+    ///     - model: `Model & Migration` type to add.
+    ///     - database: Database identifier for the database this should run on.
+    ///     - name: Optional unique name for this migration. This will be stored in Fluent's metadata table to detect whether
+    ///             the migration has already run or not.
     public mutating func add<Model> (
         model: Model.Type,
         database: DatabaseIdentifier<Model.Database>,
@@ -53,7 +85,19 @@ public struct MigrationConfig: Service {
         Model.defaultDatabase = database
     }
 
-    /// Adds a migration to the config.
+    /// Adds a `Model & Migration` to the `MigrationConfig`. Use `add(migration:)` if the migration you are adding is not a `Model`.
+    ///
+    ///     migrationConfig.add(model: User.self, database: .sqlite)
+    ///
+    /// This method sets the model's `defaultDatabase` property.
+    ///
+    /// Note: This method is for databases that do not conform to `SchemaSupporting`.
+    ///
+    /// - parameters:
+    ///     - model: `Model & Migration` type to add.
+    ///     - database: Database identifier for the database this should run on.
+    ///     - name: Optional unique name for this migration. This will be stored in Fluent's metadata table to detect whether
+    ///             the migration has already run or not.
     public mutating func add<Model> (
         model: Model.Type,
         database: DatabaseIdentifier<Model.Database>,
@@ -123,6 +167,8 @@ public struct MigrationConfig: Service {
         storage[database.uid] = config
     }
 
+    // MARK: Private
+
     /// Fetches a `SchemaMigrationConfig` from storage or inits a new one.
     private func fetchSchemaMigrator<D>(database: DatabaseIdentifier<D>) -> SchemaMigrationConfig<D> {
         var config: SchemaMigrationConfig<D>
@@ -157,8 +203,9 @@ internal protocol MigrationRunnable {
 
 
 extension Migration {
-    static var normalizedTypeName: String {
-        let _type = "\(type(of: M.self))"
+    /// Generates a normalized name for this migration.
+    public static var _normalizedTypeName: String {
+        let _type = "\(type(of: self))"
         return _type.components(separatedBy: ".Type").first ?? _type
     }
 }

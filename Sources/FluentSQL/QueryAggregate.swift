@@ -18,7 +18,6 @@ extension QueryAggregateMethod {
         switch self {
         case .count: return "count"
         case .sum: return "sum"
-        case .custom(let s): return s
         case .average: return "avg"
         case .min: return "min"
         case .max: return "max"

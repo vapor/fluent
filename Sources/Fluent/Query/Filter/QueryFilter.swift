@@ -1,9 +1,4 @@
-import CodableKit
-
-/// Defines a `Filter` that can be
-/// added on fetch, delete, and update
-/// operations to limit the set of
-/// data affected.
+/// Defines a `Filter` that can be added on fetch, delete, and update operations to limit the set of data affected.
 public struct QueryFilter<Database> where Database: QuerySupporting {
     /// The field to filer.
     public var field: QueryField

@@ -1,5 +1,3 @@
-import CodableKit
-
 /// Represents a field and its optional entity in a query.
 /// This is used mostly for query filters.
 public struct QueryField: Hashable {
@@ -76,7 +74,9 @@ extension Dictionary where Key == QueryField {
 extension KeyPath where Root: Model {
     /// See QueryFieldRepresentable.makeQueryField()
     public func makeQueryField() throws -> QueryField {
-        let key = try Root.reflectProperty(forKey: self)
+        guard let key = try Root.reflectProperty(forKey: self) else {
+            throw FluentError(identifier: "reflectProperty", reason: "No property reflected for \(self)", source: .capture())
+        }
         return QueryField(entity: Root.entity, name: key.path.first ?? "")
     }
 }

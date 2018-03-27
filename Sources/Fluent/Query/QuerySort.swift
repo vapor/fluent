@@ -1,7 +1,4 @@
-import CodableKit
-
-/// Sorts results based on a field
-/// and direction.
+/// Sorts results based on a field and direction.
 public struct QuerySort {
     /// The field to sort.
     public let field: QueryField

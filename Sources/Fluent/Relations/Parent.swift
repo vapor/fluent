@@ -1,11 +1,8 @@
-import CodableKit
 import Async
 
-/// The parent relation is one side of a
-/// one-to-many database relation.
+/// The parent relation is one side of a one-to-many database relation.
 ///
-/// The parent relation will return the parent
-/// model that the supplied child references.
+/// The parent relation will return the parent model that the supplied child references.
 ///
 /// The opposite side of this relation is called `Children`.
 public struct Parent<Child, Parent>
