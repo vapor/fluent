@@ -71,3 +71,15 @@ public final class RevertCommand: Command, Service {
         }
     }
 }
+
+extension CommandConfig {
+    /// Adds Fluent's commands to the `CommandConfig`. Currently only the `RevertCommand` at `"revert"`.
+    ///
+    ///     var commandConfig = CommandConfig.default()
+    ///     commandConfig.useFluentCommands()
+    ///     services.register(commandConfig)
+    ///
+    public mutating func useFluentCommands() {
+        use(RevertCommand.self, as: "revert")
+    }
+}
