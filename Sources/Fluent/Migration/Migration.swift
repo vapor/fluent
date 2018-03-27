@@ -1,5 +1,5 @@
-import Core
 import Async
+import Core
 
 /// Declares a database migration.
 public protocol Migration {

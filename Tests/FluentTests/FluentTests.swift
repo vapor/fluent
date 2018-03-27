@@ -5,11 +5,8 @@ import FluentSQL
 import XCTest
 
 final class FluentTests: XCTestCase {
-    func testNothing() throws {
-    }
-
+    func testStub() throws { }
     static let allTests = [
-        ("testNothing", testNothing),
+        ("testStub", testStub),
     ]
 }
-

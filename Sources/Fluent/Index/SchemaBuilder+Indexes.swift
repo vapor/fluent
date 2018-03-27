@@ -1,5 +1,3 @@
-import CodableKit
-
 extension SchemaBuilder where Model.Database: IndexSupporting {
     /// Adds an index to the supplied field.
     public func addIndex<T>(to field: KeyPath<Model, T>, isUnique: Bool = false) throws {

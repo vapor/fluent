@@ -19,12 +19,20 @@ internal struct MigrationContainer<D> where D: QuerySupporting {
     var name: String
 
     /// creates a new migration container for a given migration type
-    init<M>(_ migration: M.Type) where M: Migration, M.Database == D {
+    init<M>(_ migration: M.Type, name: String) where M: Migration, M.Database == D {
         self.prepare = M.prepare
         self.revert = M.revert
+    }
 
-        let _type = "\(type(of: M.self))"
-        self.name = _type.components(separatedBy: ".Type").first ?? _type
+    /// creates a new migration container from closures.
+    init(
+        name: String,
+        prepare: @escaping (Database.Connection) -> Future<Void>,
+        revert: @escaping (Database.Connection) -> Future<Void>
+    ) {
+        self.prepare = prepare
+        self.revert = revert
+        self.name = name
     }
 
     /// Prepares the migration if it hasn't previously run.
