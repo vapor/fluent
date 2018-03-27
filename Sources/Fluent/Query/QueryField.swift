@@ -19,11 +19,15 @@ public struct QueryField: Hashable {
 
     /// The name of the field.
     public var name: String
+    
+    /// Optional alias for the field.
+    public var alias: String?
 
     /// Create a new query field.
-    public init(entity: String? = nil, name: String) {
+    public init(entity: String? = nil, name: String, alias: String? = nil) {
         self.entity = entity
         self.name = name
+        self.alias = alias
     }
 }
 
@@ -75,9 +79,9 @@ extension Dictionary where Key == QueryField {
 /// FIXME: conditional conformance
 extension KeyPath where Root: Model {
     /// See QueryFieldRepresentable.makeQueryField()
-    public func makeQueryField() throws -> QueryField {
+    public func makeQueryField(alias: String? = nil) throws -> QueryField {
         let key = try Root.reflectProperty(forKey: self)
-        return QueryField(entity: Root.entity, name: key.path.first ?? "")
+        return QueryField(entity: Root.entity, name: key.path.first ?? "", alias: alias)
     }
 }
 
@@ -163,3 +167,67 @@ public struct QueryFieldEncodingContainer<Model: Fluent.Model> {
         try container.encode(value, forKey: field)
     }
 }
+
+/// Creating select all field
+extension QueryField {
+    /// Predefined select all field
+    static func all() -> QueryField {
+        return QueryField(name: "*")
+    }
+}
+
+// MARK: Builder
+
+extension QueryBuilder {
+    /// Set specific select columns to the Query.
+    public func fields<T>(_ fields: [KeyPath<Model, T>]) throws -> Self
+        where T: KeyStringDecodable
+    {
+        return try self.fields(fields.map { try $0.makeQueryField() })
+    }
+    
+    /// Set specific select columns to the Query.
+    public func fields<T>(_ fields: KeyPath<Model, T>...) throws -> Self
+        where T: KeyStringDecodable
+    {
+        return try self.fields(fields.map { try $0.makeQueryField() })
+    }
+    
+    /// Append specific columns with an alias to the Query.
+    public func append<T>(fields: [(key: KeyPath<Model, T>, alias: String)]) throws -> Self
+        where T: KeyStringDecodable
+    {
+        try query.fields.append(contentsOf: (fields.map { try $0.key.makeQueryField(alias: $0.alias) }))
+        return self
+    }
+    
+    /// Append specific columns with an alias to the Query.
+    public func append<T>(fields: (key: KeyPath<Model, T>, alias: String)...) throws -> Self
+        where T: KeyStringDecodable
+    {
+        try query.fields.append(contentsOf: (fields.map { try $0.key.makeQueryField(alias: $0.alias) }))
+        return self
+    }
+    
+    /// Append a specific column to the Query.
+    public func append<T>(fields: KeyPath<Model, T>...) throws -> Self
+        where T: KeyStringDecodable
+    {
+        try query.fields.append(contentsOf: (fields.map { try $0.makeQueryField() }))
+        return self
+    }
+    
+    /// Append a specific column to the Query.
+    public func append(fields: QueryField...) throws -> Self
+    {
+        query.fields.append(contentsOf: fields)
+        return self
+    }
+    
+    /// Set specific select columns to the Query.
+    public func fields(_ fields: [QueryField]) -> Self {
+        query.fields = fields
+        return self
+    }
+}
+
