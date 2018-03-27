@@ -36,13 +36,5 @@ internal struct QueryMigrationConfig<Database>: MigrationRunnable where Database
             return MigrationLog<Database>.revertAll(self.migrations, on: conn, using: container)
         }
     }
-
-    /// Adds a migration to the config.
-    internal mutating func add<M: Migration> (
-        migration: M.Type
-    ) where M.Database == Database {
-        let container = MigrationContainer(migration)
-        migrations.append(container)
-    }
 }
 

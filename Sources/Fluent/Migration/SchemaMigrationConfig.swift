@@ -42,12 +42,4 @@ internal struct SchemaMigrationConfig<Database>: MigrationRunnable where Databas
             }
         }
     }
-
-    /// Adds a migration to the config.
-    internal mutating func add<M: Migration> (
-        migration: M.Type
-    ) where M.Database == Database {
-        let container = MigrationContainer(migration)
-        migrations.append(container)
-    }
 }

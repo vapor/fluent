@@ -9,7 +9,7 @@ public final class SchemaUpdater<Model>: SchemaBuilder
 
     /// See `SchemaBuilder.init(type:)`
     public init(_ type: Model.Type = Model.self) {
-        schema = DatabaseSchema(entity: Model.entity)
+        schema = DatabaseSchema(entity: Model.entity, action: .update)
     }
 
     /// Deletes the field with the supplied name.

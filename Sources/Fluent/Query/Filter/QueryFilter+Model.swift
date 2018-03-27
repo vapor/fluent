@@ -1,5 +1,3 @@
-import CodableKit
-
 extension QueryBuilder {
     /// Applies a filter from one of the filter operators (==, !=, etc)
     /// note: this method is generic, allowing you to omit type names

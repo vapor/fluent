@@ -1,6 +1,7 @@
-import CodableKit
-import Foundation
+import Core
 
+/// Represents the meta-structure of a single query field. One or more schema fields is used to define
+/// the overall schema for a given `Model`.
 public struct SchemaField<Database> where Database: SchemaSupporting {
     /// The name of this field.
     public var name: String

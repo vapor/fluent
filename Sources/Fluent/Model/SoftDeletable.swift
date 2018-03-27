@@ -88,9 +88,12 @@ public protocol AnySoftDeletable: AnyModel {
 extension SoftDeletable {
     /// See `AnySoftDeletable.deletedAtField`
     public static func deletedAtField() throws -> QueryField {
+        guard let name = try Self.reflectProperty(forKey: deletedAtKey) else {
+            throw FluentError(identifier: "reflectProperty", reason: "No property reflected for \(deletedAtKey)", source: .capture())
+        }
         return QueryField(
             entity: entity,
-            name: try Self.reflectProperty(forKey: deletedAtKey).path.first ?? ""
+            name: name.path.first ?? ""
         )
     }
 }

@@ -16,9 +16,9 @@ public struct DatabaseSchema<Database> where Database: SchemaSupporting {
     public var extend: [String: Any]
 
     /// Create a new database query.
-    public init(entity: String) {
+    public init(entity: String, action: SchemaAction) {
         self.entity = entity
-        self.action = .create
+        self.action = action
         self.addFields = []
         self.removeFields = []
         self.extend = [:]

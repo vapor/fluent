@@ -1,5 +1,5 @@
-import Core
 import Async
+import Core
 
 /// Declares a database migration.
 public protocol Migration {
@@ -24,7 +24,9 @@ public protocol Migration {
 extension Model where Database: SchemaSupporting {
     /// Automatically adds `SchemaField`s for each of this `Model`s properties.
     public static func addProperties(to builder: SchemaCreator<Self>) throws {
-        let idProperty = try Self.reflectProperty(forKey: idKey)
+        guard let idProperty = try Self.reflectProperty(forKey: idKey) else {
+            throw FluentError(identifier: "reflectProperty", reason: "No property reflected for \(idKey)", source: .capture())
+        }
         let properties = try Self.reflectProperties()
 
         for property in properties {
