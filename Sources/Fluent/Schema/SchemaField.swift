@@ -25,12 +25,10 @@ public struct SchemaField<Database> where Database: SchemaSupporting {
 
 // MARK: Fields
 
-extension SchemaBuilder where Model.ID: KeyStringDecodable {
+extension SchemaBuilder {
     /// Adds a field to the schema.
     @discardableResult
-    public func field<T>(for key: KeyPath<Model, Optional<T>>) throws -> SchemaField<Model.Database>
-        where T: KeyStringDecodable
-    {
+    public func field<T>(for key: KeyPath<Model, Optional<T>>) throws -> SchemaField<Model.Database> {
         return try field(
             type: Model.Database.fieldType(for: T.self),
             for: key,
@@ -41,9 +39,7 @@ extension SchemaBuilder where Model.ID: KeyStringDecodable {
 
     /// Adds a field to the schema.
     @discardableResult
-    public func field<T>(for key: KeyPath<Model, T>) throws -> SchemaField<Model.Database>
-        where T: KeyStringDecodable
-    {
+    public func field<T>(for key: KeyPath<Model, T>) throws -> SchemaField<Model.Database> {
         return try field(
             type: Model.Database.fieldType(for: T.self),
             for: key,
@@ -59,7 +55,7 @@ extension SchemaBuilder where Model.ID: KeyStringDecodable {
         for field: KeyPath<Model, T>,
         isOptional: Bool = false,
         isIdentifier: Bool = false
-    ) throws -> SchemaField<Model.Database> where T: KeyStringDecodable {
+    ) throws -> SchemaField<Model.Database> {
         let field = try SchemaField<Model.Database>(
             name: field.makeQueryField().name,
             type: type,
@@ -89,9 +85,7 @@ extension SchemaBuilder where Model.ID: KeyStringDecodable {
     }
 
     /// Removes a field from the schema.
-    public func removeField<T>(for field: KeyPath<Model, T>) throws
-        where T: KeyStringDecodable
-    {
+    public func removeField<T>(for field: KeyPath<Model, T>) throws {
         let name = try field.makeQueryField().name
         schema.removeFields.append(name)
     }

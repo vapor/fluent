@@ -24,7 +24,7 @@ public struct Parent<Child, Parent>
     }
 }
 
-extension Parent where Child.Database: QuerySupporting, Parent.ID: KeyStringDecodable {
+extension Parent where Child.Database: QuerySupporting {
     /// Create a query for the parent.
     public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Parent, Parent> {
         return try Parent.query(on: conn)

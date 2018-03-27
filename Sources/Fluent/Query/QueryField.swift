@@ -73,7 +73,7 @@ extension Dictionary where Key == QueryField {
 
 /// Conform key path's where the root is a model.
 /// FIXME: conditional conformance
-extension KeyPath where Root: Model, Value: KeyStringDecodable {
+extension KeyPath where Root: Model {
     /// See QueryFieldRepresentable.makeQueryField()
     public func makeQueryField() throws -> QueryField {
         let key = try Root.reflectProperty(forKey: self)
@@ -122,7 +122,7 @@ extension QueryField: CodingKey {
     }
 }
 
-extension Model where ID: KeyStringDecodable {
+extension Model {
     /// Creates a query field decoding container for this model.
     public static func decodingContainer(for decoder: Decoder) throws -> QueryFieldDecodingContainer<Self> {
         let container = try decoder.container(keyedBy: QueryField.self)
@@ -142,7 +142,7 @@ public struct QueryFieldDecodingContainer<Model> where Model: Fluent.Model {
     public var container: KeyedDecodingContainer<QueryField>
     
     /// Decodes a model key path to a type.
-    public func decode<T: Decodable>(key: KeyPath<Model, T>) throws -> T where T: KeyStringDecodable {
+    public func decode<T: Decodable>(key: KeyPath<Model, T>) throws -> T {
         let field = try key.makeQueryField()
         return try container.decode(T.self, forKey: field)
     }
@@ -157,7 +157,7 @@ public struct QueryFieldEncodingContainer<Model: Fluent.Model> {
     public var model: Model
 
     /// Encodes a model key path to the encoder.
-    public mutating func encode<T: Encodable>(key: KeyPath<Model, T>) throws where T: KeyStringDecodable {
+    public mutating func encode<T: Encodable>(key: KeyPath<Model, T>) throws {
         let field = try key.makeQueryField()
         let value: T = model[keyPath: key]
         try container.encode(value, forKey: field)

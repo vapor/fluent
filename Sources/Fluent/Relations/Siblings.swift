@@ -70,7 +70,7 @@ public struct Siblings<Base: Model, Related: Model, Through: Pivot>
     }
 }
 
-extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecodable, Related.ID: KeyStringDecodable {
+extension Siblings where Base.Database: QuerySupporting {
     /// Create a query for the parent.
     public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Related, Related> {
         return try Related.query(on: conn)
@@ -81,7 +81,7 @@ extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecod
 
 // MARK: Modifiable Pivot
 
-extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecodable {
+extension Siblings where Base.Database: QuerySupporting {
     /// Returns true if the supplied model is attached
     /// to this relationship.
     public func isAttached(_ model: Related, on conn: DatabaseConnectable) -> Future<Bool> {

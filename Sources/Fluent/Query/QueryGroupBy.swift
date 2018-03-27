@@ -1,5 +1,3 @@
-import CodableKit
-
 /// GROUP BY statement for QueryBuilder
 public struct QueryGroupBy {
     enum Storage {
@@ -24,7 +22,7 @@ public struct QueryGroupBy {
 
 extension QueryBuilder {
     /// Add a Group By to the Query.
-    public func group<T>(by field: KeyPath<Model, T>) throws -> Self where T: KeyStringDecodable {
+    public func group<T>(by field: KeyPath<Model, T>) throws -> Self {
         let groupBy = try QueryGroupBy.field(field.makeQueryField())
         return self.group(by: groupBy)
     }
