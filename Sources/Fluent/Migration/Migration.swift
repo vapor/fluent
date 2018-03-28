@@ -24,14 +24,19 @@ public protocol Migration {
 extension Model where Database: SchemaSupporting {
     /// Automatically adds `SchemaField`s for each of this `Model`s properties.
     public static func addProperties(to builder: SchemaCreator<Self>) throws {
-        guard let idProperty = try Self.reflectProperty(forKey: idKey) else {
-            throw FluentError(identifier: "reflectProperty", reason: "No property reflected for \(idKey)", source: .capture())
-        }
+        let idProperty = try Self.reflectProperty(forKey: idKey)
         let properties = try Self.reflectProperties()
 
         for property in properties {
             guard property.path.count == 1 else {
                 continue
+            }
+
+            let isID: Bool
+            if let id = idProperty {
+                isID = property.path == id.path
+            } else {
+                isID = (property.path == ["id"] || property.path == ["_id"])
             }
 
             let type: Any.Type
@@ -48,7 +53,7 @@ extension Model where Database: SchemaSupporting {
                 name: property.path.first ?? "",
                 type: Database.fieldType(for: type),
                 isOptional: isOptional,
-                isIdentifier: property.path == idProperty.path
+                isIdentifier: isID
             )
             builder.schema.addFields.append(field)
         }
