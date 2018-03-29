@@ -1,7 +1,4 @@
-import CodableKit
-
-/// The children relation is one side of a
-/// one-to-many database relation.
+/// The children relation is one side of a one-to-many database relation.
 ///
 /// The children relation will return all the
 /// models that contain a reference to the parent's identifier.
@@ -23,7 +20,7 @@ public struct Children<Parent, Child>
     }
 }
 
-extension Children where Parent.Database: QuerySupporting, Parent.ID: KeyStringDecodable {
+extension Children where Parent.Database: QuerySupporting {
     /// Create a query for all children.
     public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Child, Child> {
         return try Child.query(on: conn)

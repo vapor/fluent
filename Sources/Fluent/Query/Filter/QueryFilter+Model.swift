@@ -1,5 +1,3 @@
-import CodableKit
-
 extension QueryBuilder {
     /// Applies a filter from one of the filter operators (==, !=, etc)
     /// note: this method is generic, allowing you to omit type names
@@ -32,57 +30,72 @@ public struct ModelFilter<M> where M: Model, M.Database: QuerySupporting {
 }
 
 /// Model.field == value
-public func == <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) throws -> ModelFilter<Model> where Value: KeyStringDecodable {
-    return try _compare(lhs, .equals, value: rhs)
+public func == <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) throws -> ModelFilter<Model> {
+    return try _compare(lhs, .equals, .data(rhs))
 }
-public func == <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value?) throws -> ModelFilter<Model> where Value: KeyStringDecodable {
-    return try _compare(lhs, .equals, value: rhs)
+public func == <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value?) throws -> ModelFilter<Model> {
+    return try _compare(lhs, .equals, .data(rhs))
 }
 
 /// Model.field != value
-public func != <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) throws -> ModelFilter<Model> where Value: KeyStringDecodable {
-    return try _compare(lhs, .notEquals, value: rhs)
+public func != <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) throws -> ModelFilter<Model> {
+    return try _compare(lhs, .notEquals, .data(rhs))
 }
-public func != <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value?) throws -> ModelFilter<Model> where Value: KeyStringDecodable {
-    return try _compare(lhs, .notEquals, value: rhs)
+public func != <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value?) throws -> ModelFilter<Model> {
+    return try _compare(lhs, .notEquals, .data(rhs))
 }
 
 /// Model.field > value
-public func > <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) throws -> ModelFilter<Model> where Value: KeyStringDecodable {
-    return try _compare(lhs, .greaterThan, value: rhs)
+public func > <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) throws -> ModelFilter<Model> {
+    return try _compare(lhs, .greaterThan, .data(rhs))
 }
-public func > <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value?) throws -> ModelFilter<Model> where Value: KeyStringDecodable {
-    return try _compare(lhs, .greaterThan, value: rhs)
+public func > <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value?) throws -> ModelFilter<Model> {
+    return try _compare(lhs, .greaterThan, .data(rhs))
 }
 
 /// Model.field < value
-public func < <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) throws -> ModelFilter<Model> where Value: KeyStringDecodable {
-    return try _compare(lhs, .lessThan, value: rhs)
+public func < <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) throws -> ModelFilter<Model> {
+    return try _compare(lhs, .lessThan, .data(rhs))
 }
-public func < <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value?) throws -> ModelFilter<Model> where Value: KeyStringDecodable {
-    return try _compare(lhs, .lessThan, value: rhs)
+public func < <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value?) throws -> ModelFilter<Model> {
+    return try _compare(lhs, .lessThan, .data(rhs))
 }
 
 /// Model.field >= value
-public func >= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) throws -> ModelFilter<Model> where Value: KeyStringDecodable {
-    return try _compare(lhs, .greaterThanOrEquals, value: rhs)
+public func >= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) throws -> ModelFilter<Model> {
+    return try _compare(lhs, .greaterThanOrEquals, .data(rhs))
 }
-public func >= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value?) throws -> ModelFilter<Model> where Value: KeyStringDecodable {
-    return try _compare(lhs, .greaterThanOrEquals, value: rhs)
+public func >= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value?) throws -> ModelFilter<Model> {
+    return try _compare(lhs, .greaterThanOrEquals, .data(rhs))
 }
 
 /// Model.field <= value
-public func <= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) throws -> ModelFilter<Model> where Value: KeyStringDecodable {
-    return try _compare(lhs, .lessThanOrEquals, value: rhs)
+public func <= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) throws -> ModelFilter<Model> {
+    return try _compare(lhs, .lessThanOrEquals,  .data(rhs))
 }
-public func <= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value?) throws -> ModelFilter<Model> where Value: KeyStringDecodable {
-    return try _compare(lhs, .lessThanOrEquals, value: rhs)
+public func <= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value?) throws -> ModelFilter<Model> {
+    return try _compare(lhs, .lessThanOrEquals, .data(rhs))
+}
+
+infix operator ~~
+infix operator !~
+
+/// Subset: IN.
+public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: [Value]) throws -> ModelFilter<Model> {
+    return try _compare(lhs, .in, .array(rhs))
+}
+
+/// Subset: NOT IN.
+public func !~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: [Value]) throws -> ModelFilter<Model> {
+    return try _compare(lhs, .notIn, .array(rhs))
 }
 
 /// Operator helper func.
-private func _compare<M, V>(_ key: KeyPath<M, V>, _ type: QueryFilterType<M.Database>, value: V?) throws -> ModelFilter<M>
-    where V: KeyStringDecodable
-{
-    let filter = try QueryFilter(field: key.makeQueryField(), type: type, value: .data(value))
+private func _compare<M, V>(
+    _ key: KeyPath<M, V>,
+    _ type: QueryFilterType<M.Database>,
+    _ value: QueryFilterValue<M.Database>
+) throws -> ModelFilter<M> {
+    let filter = try QueryFilter(field: key.makeQueryField(), type: type, value: value)
     return ModelFilter<M>(filter: filter)
 }

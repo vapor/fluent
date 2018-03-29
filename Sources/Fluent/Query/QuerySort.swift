@@ -1,7 +1,4 @@
-import CodableKit
-
-/// Sorts results based on a field
-/// and direction.
+/// Sorts results based on a field and direction.
 public struct QuerySort {
     /// The field to sort.
     public let field: QueryField
@@ -30,9 +27,7 @@ public enum QuerySortDirection {
 
 extension QueryBuilder {
     /// Add a Sort to the Query.
-    public func sort<T>(_ field: KeyPath<Model, T>, _ direction: QuerySortDirection) throws -> Self
-        where T: KeyStringDecodable
-    {
+    public func sort<T>(_ field: KeyPath<Model, T>, _ direction: QuerySortDirection) throws -> Self {
         let sort = try QuerySort(
             field: field.makeQueryField(),
             direction: direction

@@ -10,6 +10,6 @@ public final class SchemaCreator<Model>: SchemaBuilder
 
     /// See `SchemaBuilder.init(type:)`
     public init(_ type: Model.Type = Model.self) {
-        schema = DatabaseSchema(entity: Model.entity)
+        schema = DatabaseSchema(entity: Model.entity, action: .create)
     }
 }

@@ -1,9 +1,4 @@
-import CodableKit
-
-/// Defines a `Filter` that can be
-/// added on fetch, delete, and update
-/// operations to limit the set of
-/// data affected.
+/// Defines a `Filter` that can be added on fetch, delete, and update operations to limit the set of data affected.
 public struct QueryFilter<Database> where Database: QuerySupporting {
     /// The field to filer.
     public var field: QueryField
@@ -78,6 +73,7 @@ public struct QueryFilterValue<Database> where Database: QuerySupporting {
         case data(Database.QueryData)
         case array([Database.QueryData])
         case subquery(DatabaseQuery<Database>)
+        case none
     }
 
     /// Internal storage.
@@ -120,6 +116,11 @@ public struct QueryFilterValue<Database> where Database: QuerySupporting {
     public static func subquery(_ subquery: DatabaseQuery<Database>) -> QueryFilterValue<Database> {
         return .init(storage: .subquery(subquery))
     }
+
+    /// No value.
+    public static func none() -> QueryFilterValue<Database> {
+        return .init(storage: .none)
+    }
 }
 
 extension QueryBuilder {
@@ -135,7 +136,7 @@ extension QueryBuilder {
     /// Applies a comparison filter to this query.
     @discardableResult
     public func filter<M, T>(_ joined: M.Type, _ key: KeyPath<M, T>, _ type: QueryFilterType<M.Database>, _ value: QueryFilterValue<M.Database>) throws -> Self
-        where M: Fluent.Model, M.Database == Model.Database, T: KeyStringDecodable
+        where M: Fluent.Model, M.Database == Model.Database
     {
         let filter = try QueryFilter<M.Database>(
             field: key.makeQueryField(),
@@ -147,9 +148,7 @@ extension QueryBuilder {
 
     /// Applies a comparison filter to this query.
     @discardableResult
-    public func filter<T>(_ key: KeyPath<Model, T>, _ type: QueryFilterType<Model.Database>, _ value: QueryFilterValue<Model.Database>) throws -> Self
-        where T: KeyStringDecodable
-    {
+    public func filter<T>(_ key: KeyPath<Model, T>, _ type: QueryFilterType<Model.Database>, _ value: QueryFilterValue<Model.Database>) throws -> Self {
         return try filter(key.makeQueryField(), type, value)
     }
 
@@ -164,40 +163,6 @@ extension QueryBuilder {
             value: value
         )
         return addFilter(.single(filter))
-    }
-}
-
-/// MARK: Array
-
-extension QueryBuilder {
-    /// Subset `in` filter.
-    @discardableResult
-    public func filter<T>(_ field: KeyPath<Model, T>, in values: [Model.Database.QueryDataConvertible]) throws -> Self where T: KeyStringDecodable {
-        return try filter(field, .in, .array(values))
-    }
-
-    /// Subset `notIn` filter.
-    @discardableResult
-    public func filter<T>(_ field: KeyPath<Model, T>, notIn values: [T]) throws -> Self where T: KeyStringDecodable {
-        return try filter(field, .notIn, .array(values))
-    }
-}
-
-extension QueryBuilder {
-    /// Subset `in` filter.
-    @discardableResult
-    public func filter<M, T>(_ joined: M.Type, _ field: KeyPath<M, T>, in values: [Model.Database.QueryDataConvertible]) throws -> Self
-        where T: KeyStringDecodable, M: Fluent.Model, M.Database == Model.Database
-    {
-        return try filter(M.self, field, .in, .array(values))
-    }
-
-    /// Subset `notIn` filter.
-    @discardableResult
-    public func filter<M, T>(_ joined: M.Type, _ field: KeyPath<M, T>, notIn values: [Model.Database.QueryDataConvertible]) throws -> Self
-        where T: KeyStringDecodable, M: Fluent.Model, M.Database == Model.Database
-    {
-        return try filter(M.self, field, .notIn, .array(values))
     }
 }
 

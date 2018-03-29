@@ -1,5 +1,3 @@
-import CodableKit
-
 /// Describes a relational join which brings columns of data from multiple entities into one response.
 ///
 /// A = (id, name, b_id)

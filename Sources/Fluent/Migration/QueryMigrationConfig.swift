@@ -16,34 +16,25 @@ internal struct QueryMigrationConfig<Database>: MigrationRunnable where Database
         self.migrations = []
     }
 
-    /// See MigrationRunnable.migrate
-    internal func migrate(using databases: Databases, using worker: Worker) -> Future<Void> {
-        return Future.flatMap(on: worker) {
-            guard let database = databases.database(for: self.database) else {
-                throw FluentError(identifier: "queryMigrationDatabase", reason: "no database \(self.database.uid) was found for migrations", source: .capture())
-            }
-            return database.makeConnection(on: worker).flatMap(to: Void.self) { conn in
-                return try self.migrateBatch(on: conn)
-            }
+    /// See `MigrationRunnable.migrationPrepareBatch(on:)`
+    internal func migrationPrepareBatch(on container: Container) -> Future<Void> {
+        return container.withConnection(to: database) { conn in
+            return MigrationLog<Database>.prepareBatch(self.migrations, on: conn, using: container)
         }
     }
 
-    /// Migrates this configs migrations under the current batch.
-    /// Migrations that have already been prepared will be skipped.
-    internal func migrateBatch(on conn: Database.Connection) throws -> Future<Void> {
-        return try MigrationLog<Database>.latestBatch(on: conn).flatMap(to: Void.self) { lastBatch in
-            return self.migrations.map { migration in
-                return { migration.prepareIfNeeded(batch: lastBatch + 1, on: conn) }
-            }.syncFlatten(on: conn)
+    /// See `MigrationRunnable.migrationRevertBatch(on:)`
+    func migrationRevertBatch(on container: Container) -> EventLoopFuture<Void> {
+        return container.withConnection(to: database) { conn in
+            return MigrationLog<Database>.revertBatch(self.migrations, on: conn, using: container)
         }
     }
 
-    /// Adds a migration to the config.
-    internal mutating func add<M: Migration> (
-        migration: M.Type
-    ) where M.Database == Database {
-        let container = MigrationContainer(migration)
-        migrations.append(container)
+    /// See `MigrationRunnable.migrationRevertAll(on:)`
+    func migrationRevertAll(on container: Container) -> EventLoopFuture<Void> {
+        return container.withConnection(to: database) { conn in
+            return MigrationLog<Database>.revertAll(self.migrations, on: conn, using: container)
+        }
     }
 }
 

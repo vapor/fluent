@@ -1,4 +1,3 @@
-import CodableKit
 import Async
 
 /// A siblings relation is a many-to-many relation between
@@ -70,18 +69,28 @@ public struct Siblings<Base: Model, Related: Model, Through: Pivot>
     }
 }
 
-extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecodable, Related.ID: KeyStringDecodable {
-    /// Create a query for the parent.
+extension Siblings where Base.Database: QuerySupporting {
+    /// Creates a `QueryBuilder` for the `Related` model.
     public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Related, Related> {
         return try Related.query(on: conn)
             .join(field: relatedPivotField)
             .filter(Through.self, basePivotField, .equals, .data(base.requireID()))
     }
+
+    /// Create a query for the `Through` (pivot) model. This is useful for manually attaching / detaching pivots.
+    ///
+    ///     cat.toys.pivots(on: ...).filter(\.isFavorite == false).delete()
+    ///
+    /// See also the `detachAll(on:)` method.
+    public func pivots(on conn: DatabaseConnectable) throws -> QueryBuilder<Through, Through> {
+        return try Through.query(on: conn)
+            .filter(basePivotField, .equals, .data(base.requireID()))
+    }
 }
 
 // MARK: Modifiable Pivot
 
-extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecodable {
+extension Siblings where Base.Database: QuerySupporting {
     /// Returns true if the supplied model is attached
     /// to this relationship.
     public func isAttached(_ model: Related, on conn: DatabaseConnectable) -> Future<Bool> {
@@ -94,14 +103,29 @@ extension Siblings where Base.Database: QuerySupporting, Base.ID: KeyStringDecod
         }
     }
 
-    /// Detaches the supplied model from this relationship
-    /// if it was attached.
+    /// Detaches the supplied model from this relationship if it was attached.
+    ///
+    ///     cat.toys.detach(foo, on: conn)
+    ///
+    /// See `detachAll(on:)` to remove all related models.
     public func detach(_ model: Related, on conn: DatabaseConnectable) -> Future<Void> {
         return Future.flatMap(on: conn) {
             return try Through.query(on: conn)
                 .filter(self.basePivotField, .equals, .data(self.base.requireID()))
                 .filter(self.relatedPivotField, .equals, .data(model.requireID()))
                 .delete()
+        }
+    }
+
+    /// Detaches all attached models from this relationship.
+    ///
+    ///     cat.toys.detachAll(on: ...)
+    ///
+    /// See `detach(on:)` to remove a single related models.
+    /// See the `pivots(on:)` method to create a `QueryBuilder` on the pivots for more functionality.
+    public func detachAll(on conn: DatabaseConnectable) -> Future<Void> {
+        return Future.flatMap(on: conn) {
+            return try self.pivots(on: conn).delete()
         }
     }
 }

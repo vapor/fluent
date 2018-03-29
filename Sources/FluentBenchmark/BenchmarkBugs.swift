@@ -5,8 +5,8 @@ import Fluent
 import Foundation
 
 extension Benchmarker where Database: QuerySupporting {
-    /// The actual benchmark.
-    fileprivate func _benchmark(on conn: Database.Connection) throws {
+    /// Benchmarking pipelining saves.
+    fileprivate func _benchmarkPipelining(on conn: Database.Connection) throws {
         let one = BasicUser<Database>(name: "one")
         let two = BasicUser<Database>(name: "two")
         let three = BasicUser<Database>(name: "three")
@@ -19,6 +19,30 @@ extension Benchmarker where Database: QuerySupporting {
         if one.id == two.id || one.id == three.id || two.id == three.id {
             fail("ids are equal")
         }
+    }
+
+    /// Benchmarking save nil
+    fileprivate func _benchmarkNilUpdate(on conn: Database.Connection) throws {
+        var one = BasicUser<Database>(name: "one")
+        one = try test(one.save(on: conn))
+        if one.name == nil {
+            fail("name is nil")
+        }
+        one.name = nil
+        one = try test(one.save(on: conn))
+
+        if let fetched = try test(BasicUser<Database>.find(one.requireID(), on: conn)) {
+            if fetched.name != nil {
+                fail("name is not nil")
+            }
+        } else {
+            fail("could not fetch")
+        }
+    }
+
+    fileprivate func _benchmark(on conn: Database.Connection) throws {
+        try self._benchmarkPipelining(on: conn)
+        try self._benchmarkNilUpdate(on: conn)
     }
 
     /// Benchmarks misc bugs
@@ -56,10 +80,10 @@ final class BasicUser<D>:  Model where D: QuerySupporting {
     var id: Int?
 
     /// Name string
-    var name: String
+    var name: String?
 
     /// Creates a new `BasicUser`
-    init(id: Int? = nil, name: String) {
+    init(id: Int? = nil, name: String?) {
         self.id = id
         self.name = name
     }

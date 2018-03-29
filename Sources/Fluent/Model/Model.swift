@@ -1,7 +1,6 @@
 import Async
 import Core
 import Service
-import CodableKit
 
 /// Fluent database models. These types can be fetched
 /// from a database connection using a query.
@@ -240,7 +239,7 @@ extension Model {
 }
 
 // MARK: Routing
-extension Model where Database: QuerySupporting, ID: KeyStringDecodable {
+extension Model where Database: QuerySupporting {
     /// See `Parameter.make`
     public static func make(for parameter: String, using container: Container) throws -> Future<Self> {
         guard let idType = ID.self as? LosslessStringConvertible.Type else {

@@ -14,7 +14,10 @@ public struct DatabaseQuery<Database> where Database: QuerySupporting {
 
     /// Sorts to be applied to the results.
     public var sorts: [QuerySort]
-
+    
+    /// Group By to be applied to the results.
+    public var groups: [QueryGroupBy]
+    
     /// Aggregates / computed methods.
     public var aggregates: [QueryAggregate]
 
@@ -37,6 +40,7 @@ public struct DatabaseQuery<Database> where Database: QuerySupporting {
         self.fields = []
         self.filters = []
         self.sorts = []
+        self.groups = []
         self.aggregates = []
         self.isDistinct = false
         self.data = [:]
