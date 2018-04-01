@@ -70,8 +70,14 @@ extension Model where Database: QuerySupporting {
 extension Model {
     /// Access the fluent identifier
     public var fluentID: ID? {
-        get { return self[keyPath: Self.idKey] }
-        set { self[keyPath: Self.idKey] = newValue }
+        get {
+            let path = Self.idKey
+            return self[keyPath: path]
+        }
+        set {
+            let path = Self.idKey
+            self[keyPath: path] = newValue
+        }
     }
 }
 
