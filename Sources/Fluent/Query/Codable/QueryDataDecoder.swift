@@ -1,9 +1,9 @@
-final class QueryDataDecoder<Database> where Database: QuerySupporting {
-    var entity: String?
-    init(_ database: Database.Type, entity: String? = nil) {
+public final class QueryDataDecoder<Database> where Database: QuerySupporting {
+    public var entity: String?
+    public init(_ database: Database.Type, entity: String? = nil) {
         self.entity = entity
     }
-    func decode<D>(_ type: D.Type, from data: [QueryField: Database.QueryData]) throws -> D where D: Decodable {
+    public func decode<D>(_ type: D.Type, from data: [QueryField: Database.QueryData]) throws -> D where D: Decodable {
         let decoder = _QueryDataDecoder<Database>(data: data, entity: entity)
         return try D.init(from: decoder)
     }

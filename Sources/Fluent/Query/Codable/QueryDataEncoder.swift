@@ -1,6 +1,6 @@
-final class QueryDataEncoder<Database> where Database: QuerySupporting {
-    init(_ database: Database.Type) { }
-    func encode<E>(_ data: E) throws -> [QueryField: Database.QueryData] where E: Encodable {
+public final class QueryDataEncoder<Database> where Database: QuerySupporting {
+    public init(_ database: Database.Type) { }
+    public func encode<E>(_ data: E) throws -> [QueryField: Database.QueryData] where E: Encodable {
         let encoder = _QueryDataEncoder<Database>()
         try data.encode(to: encoder)
         return encoder.data
