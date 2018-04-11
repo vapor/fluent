@@ -2,7 +2,7 @@ import Async
 import Fluent
 import Foundation
 
-struct Bar<D>: Model, SoftDeletable where D: QuerySupporting {
+struct Bar<D>: Model, SoftDeletable, Timestampable where D: QuerySupporting {
     /// See Model.Database
     typealias Database = D
 
@@ -15,7 +15,17 @@ struct Bar<D>: Model, SoftDeletable where D: QuerySupporting {
     /// See Model.idKey
     static var idKey: IDKey { return \.id }
 
-    /// See SoftDeletable.deletedAtKey
+    /// See `Timestampable.createdAtKey`
+    static var createdAtKey: CreatedAtKey {
+        return \.createdAt
+    }
+
+    /// See `Timestampable.updatedAtKey`
+    static var updatedAtKey: UpdatedAtKey {
+        return \.updatedAt
+    }
+
+    /// See `SoftDeletable.deletedAtKey`
     static var deletedAtKey: DeletedAtKey {
         return \.deletedAt
     }
@@ -25,6 +35,12 @@ struct Bar<D>: Model, SoftDeletable where D: QuerySupporting {
 
     /// Test integer
     var baz: Int
+
+    /// See `Timestampable.createdAt`
+    var createdAt: Date?
+
+    /// See `Timestampable.updatedAt`
+    var updatedAt: Date?
 
     /// See `SoftDeletable.deletedAt`
     var deletedAt: Date?
