@@ -23,7 +23,7 @@ extension QueryBuilder {
             let now = Date()
             timestampable.fluentUpdatedAt = now
             timestampable.fluentCreatedAt = now
-            copy = model
+            copy = timestampable as! Model
         } else {
             copy = model
         }
@@ -69,7 +69,7 @@ extension QueryBuilder {
         let copy: Model
         if var timestampable = model as? AnyTimestampable {
             timestampable.fluentUpdatedAt = Date()
-            copy = model
+            copy = timestampable as! Model
         } else {
             copy = model
         }
