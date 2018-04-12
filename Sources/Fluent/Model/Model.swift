@@ -208,6 +208,12 @@ extension Model where Database: QuerySupporting {
     public static func find(_ id: Self.ID, on conn: DatabaseConnectable) throws -> Future<Self?> {
         return try query(on: conn).filter(idKey, .equals, .data(id)).first()
     }
+
+    /// Attempts to find an instance of this model w/
+    /// the supplied value at the given key path
+    public static func find<V>(_ keyPath: KeyPath<Self, V>, value: V, on conn: DatabaseConnectable) throws -> NIO.EventLoopFuture<Self?> {
+        return try query(on: conn).filter(keyPath, .equals, QueryFilterValue<Self.Database>.data(value)).first()
+    }
 }
 
 // MARK: Default Database
