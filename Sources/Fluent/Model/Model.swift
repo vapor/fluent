@@ -278,11 +278,6 @@ extension Model where Database: QuerySupporting {
     }
 
     /// See `Parameter`.
-    public static var routingSlug: String {
-        return "\(entity)_id"
-    }
-
-    /// See `Parameter`.
     public static func resolveParameter(_ parameter: String, on container: Container) throws -> Future<Self> {
         return try make(for: parameter, using: container)
     }
