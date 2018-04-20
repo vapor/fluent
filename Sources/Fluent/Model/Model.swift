@@ -246,7 +246,7 @@ extension Model {
 
 // MARK: Routing
 extension Model where Database: QuerySupporting {
-    /// See `Parameter.make`
+    /// See `Parameter`.
     public static func make(for parameter: String, using container: Container) throws -> Future<Self> {
         guard let idType = ID.self as? LosslessStringConvertible.Type else {
             throw FluentError(
@@ -281,5 +281,10 @@ extension Model where Database: QuerySupporting {
         } else {
             return container.withPooledConnection(to: dbid, closure: findModel)
         }
+    }
+
+    /// See `Parameter`.
+    public static func resolveParameter(_ parameter: String, on container: Container) throws -> Future<Self> {
+        return try make(for: parameter, using: container)
     }
 }
