@@ -22,7 +22,7 @@ let package = Package(
         .package(url: "https://github.com/vapor/service.git", from: "1.0.0-rc.2"),
     ],
     targets: [
-        .target(name: "Fluent", dependencies: ["Async", "Console", "Command", "Core", "DatabaseKit", "Logging", "Service"]),
+        .target(name: "Fluent", dependencies: ["Async", "CacheKit", "Console", "Command", "Core", "DatabaseKit", "Logging", "Service"]),
         .testTarget(name: "FluentTests", dependencies: ["FluentBenchmark", "FluentSQL"]),
         .target(name: "FluentBenchmark", dependencies: ["Fluent", "FluentSQL"]),
         .target(name: "FluentSQL", dependencies: ["Fluent", "SQL"]),
