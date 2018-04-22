@@ -19,7 +19,7 @@ extension DatabaseQuery where Database.QueryFilter: DataPredicateComparisonConve
         let query = DataQuery(
             statement: action.makeDataStatement(),
             table: entity,
-            columns: [],
+            columns: fields.map { $0.makeDataColumn() },
             computed: aggregates.map { $0.makeDataComputed() },
             joins: joins.map { $0.makeDataJoin() },
             predicates: filters.map { filter in
