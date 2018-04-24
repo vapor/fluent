@@ -66,6 +66,10 @@ extension Model where Database: QuerySupporting {
         let futureConn: Future<Database.Connection>
         if let db = Self.defaultDatabase {
             futureConn = conn.databaseConnection(to: db)
+        } else if let conn = conn as? Database.Connection {
+            futureConn = conn.eventLoop.newSucceededFuture(result: conn)
+        } else if let conn = conn as? Future<Database.Connection> {
+            futureConn = conn
         } else {
             let error = FluentError(
                 identifier: "defaultDatabase",
