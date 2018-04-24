@@ -4,11 +4,12 @@ import Fluent
 import Dispatch
 
 /// Benchmarks a Fluent database implementation.
-public final class Benchmarker<Database: Fluent.Database> {
+public final class Benchmarker<Database>: DatabaseLogHandler where Database: LogSupporting {
     /// The database being benchmarked
     public let database: Database
-    
-    public let pool: DatabaseConnectionPool<Database>
+
+    /// Connection pool to use.
+    public var pool: DatabaseConnectionPool<ConfiguredDatabase<Database>>!
 
     /// Error handler
     public typealias OnFail = (String, StaticString, UInt) -> ()
@@ -23,21 +24,24 @@ public final class Benchmarker<Database: Fluent.Database> {
     internal let eventLoop: EventLoop
 
     /// Create a new benchmarker
-    public init(_ database: Database, on worker: Worker, onFail: @escaping OnFail) {
+    public init(_ database: Database, on worker: Worker, onFail: @escaping OnFail) throws {
         self.database = database
         self.onFail = onFail
         self.logs = []
-        self.pool = self.database.makeConnectionPool(max: 20, on: worker)
         self.eventLoop = worker.eventLoop
+        let test: DatabaseIdentifier<Database> = "test"
+        var config = DatabasesConfig()
+        config.add(database: database, as: test)
+        config.enableLogging(on: test, logger: self)
+        let container = BasicContainer(config: .init(), environment: .testing, services: .init(), on: worker)
+        let databases = try config.resolve(on: container)
+        self.pool = try databases.requireDatabase(for: test)
+            .newConnectionPool(config: .init(maxConnections: 20), on: worker)
+    }
 
-        if let logSupporting = database as? LogSupporting {
-            let logger = DatabaseLogger { log in
-                self.logs.append(log)
-            }
-            logSupporting.enableLogging(using: logger)
-        } else {
-            print("Conform \(Database.self) to LogSupporting to get better benchmarking debug info")
-        }
+    /// See `DatabaseLogHandler`.
+    public func record(log: DatabaseLog) {
+        logs.append(log)
     }
 
     /// Calls the private on fail function.

@@ -3,7 +3,7 @@ import SQL
 
 extension DatabaseSchema where Database: ReferenceSupporting {
     /// Convert schema references to a sql foreign key
-    public func makeAddForeignKeys() -> [SchemaForeignKey] {
+    public func makeAddForeignKeys() -> [DataDefinitionForeignKey] {
         return addReferences.map { $0.makeForeignKey() }
     }
 
@@ -19,8 +19,8 @@ extension SchemaReference {
     }
 
     /// Convert a schema reference to a sql foreign key
-    fileprivate func makeForeignKey() -> SchemaForeignKey {
-        return SchemaForeignKey(
+    fileprivate func makeForeignKey() -> DataDefinitionForeignKey {
+        return .init(
             name: sqlName,
             local: DataColumn(table: nil, name: base.name),
             foreign: referenced.makeDataColumn(),
@@ -32,7 +32,7 @@ extension SchemaReference {
 
 extension ReferentialAction {
     /// Converts a `ReferentialAction` to `SchemaForeignKeyAction`
-    fileprivate func makeForeignKeyAction() -> SchemaForeignKeyAction {
+    fileprivate func makeForeignKeyAction() -> DataDefinitionForeignKeyAction {
         switch self {
         case .nullify: return .setNull
         case .prevent: return .restrict

@@ -1,6 +1,3 @@
-import Fluent
-import SQL
-
 extension DatabaseQuery where Database.QueryFilter: DataPredicateComparisonConvertible {
     /// Create a SQL query from this database query.
     /// All Encodable values found while converting the query
@@ -17,10 +14,8 @@ extension DatabaseQuery where Database.QueryFilter: DataPredicateComparisonConve
         }
 
         let query = DataQuery(
-            statement: action.makeDataStatement(),
             table: entity,
-            columns: [],
-            computed: aggregates.map { $0.makeDataComputed() },
+            columns: [.all] + aggregates.map { $0.makeDataComputed() }.map { .computed($0, key: "fluentAggregate") },
             joins: joins.map { $0.makeDataJoin() },
             predicates: filters.map { filter in
                 let (predicate, values) = filter.makeDataPredicateItem()
@@ -28,7 +23,7 @@ extension DatabaseQuery where Database.QueryFilter: DataPredicateComparisonConve
                 return predicate
             },
             orderBys: sorts.map { $0.makeDataOrderBy() },
-            groupBy: groups.map { $0.makeDataGroupBy() },
+            groupBys: groups.map { $0.makeDataGroupBy() },
             limit: limit,
             offset: range?.lower
         )
