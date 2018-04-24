@@ -61,7 +61,7 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
                 }.catch { error in
                     promise.fail(error: error)
                 }
-            }, on: conn).chain(to: promise)
+            }, on: conn).cascade(promise: promise)
 
             return promise.futureResult
         }
