@@ -3,7 +3,7 @@ extension DatabaseQuery where Database.QueryFilter: DataPredicateComparisonConve
     /// All Encodable values found while converting the query
     /// will be returned in an array in the order that placeholders
     /// will appear in the serialized SQL query.
-    public func makeDataQuery() -> (DataQueryType, [Database.QueryData]) {
+    public func makeDataQuery() -> (SQLQuery, [Database.QueryData]) {
         var encodables: [Database.QueryData] = []
 
         let limit: Int?
@@ -60,9 +60,4 @@ extension DatabaseQuery where Database.QueryFilter: DataPredicateComparisonConve
         }
 
     }
-}
-
-public enum DataQueryType {
-    case query(DataQuery)
-    case manipulation(DataManipulationQuery)
 }
