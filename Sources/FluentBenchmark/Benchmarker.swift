@@ -4,12 +4,12 @@ import Fluent
 import Dispatch
 
 /// Benchmarks a Fluent database implementation.
-public final class Benchmarker<Database>: DatabaseLogHandler where Database: LogSupporting {
+public final class Benchmarker<Database> where Database: LogSupporting {
     /// The database being benchmarked
     public let database: Database
 
     /// Connection pool to use.
-    public var pool: DatabaseConnectionPool<ConfiguredDatabase<Database>>!
+    public let pool: DatabaseConnectionPool<ConfiguredDatabase<Database>>
 
     /// Error handler
     public typealias OnFail = (String, StaticString, UInt) -> ()
@@ -17,31 +17,27 @@ public final class Benchmarker<Database>: DatabaseLogHandler where Database: Log
     /// Failure handler
     private let onFail: OnFail
 
-    /// Logs collected
-    private var logs: [DatabaseLog]
-
     /// The internal eventLoop
     internal let eventLoop: EventLoop
+
+    /// Records logs during benchmark.
+    private let logger: BenchmarkLogger
 
     /// Create a new benchmarker
     public init(_ database: Database, on worker: Worker, onFail: @escaping OnFail) throws {
         self.database = database
         self.onFail = onFail
-        self.logs = []
         self.eventLoop = worker.eventLoop
         let test: DatabaseIdentifier<Database> = "test"
         var config = DatabasesConfig()
         config.add(database: database, as: test)
-        config.enableLogging(on: test, logger: self)
+        let logger = BenchmarkLogger()
+        config.enableLogging(on: test, logger: logger)
         let container = BasicContainer(config: .init(), environment: .testing, services: .init(), on: worker)
         let databases = try config.resolve(on: container)
         self.pool = try databases.requireDatabase(for: test)
             .newConnectionPool(config: .init(maxConnections: 20), on: worker)
-    }
-
-    /// See `DatabaseLogHandler`.
-    public func record(log: DatabaseLog) {
-        logs.append(log)
+        self.logger = logger
     }
 
     /// Calls the private on fail function.
@@ -50,12 +46,12 @@ public final class Benchmarker<Database>: DatabaseLogHandler where Database: Log
         print("❌ FLUENT BENCHMARK FAILED")
         print()
 
-        if logs.isEmpty {
+        if logger.logs.isEmpty {
             print("==> No Database Logs")
         } else {
             print("==> Database Log History")
         }
-        for log in logs {
+        for log in logger.logs {
             print(log)
         }
         print()
@@ -74,5 +70,20 @@ public final class Benchmarker<Database>: DatabaseLogHandler where Database: Log
             fail("\(error)", file: file, line: line)
             throw error
         }
+    }
+}
+
+final class BenchmarkLogger: DatabaseLogHandler {
+    /// Logs collected
+    var logs: [DatabaseLog]
+
+    /// Creates a new `BenchmarkLogger`.
+    init() {
+        self.logs = []
+    }
+
+    /// See `DatabaseLogHandler`.
+    public func record(log: DatabaseLog) {
+        logs.append(log)
     }
 }
