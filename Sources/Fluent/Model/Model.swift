@@ -63,26 +63,7 @@ extension Model where Database: QuerySupporting {
 
     /// Creates a query for this model on the supplied connection.
     public static func query(on conn: DatabaseConnectable) -> QueryBuilder<Self, Self> {
-        let futureConn: Future<Database.Connection>
-        if let db = Self.defaultDatabase {
-            futureConn = conn.databaseConnection(to: db)
-        } else if let conn = conn as? Database.Connection {
-            futureConn = conn.eventLoop.newSucceededFuture(result: conn)
-        } else if let conn = conn as? Future<Database.Connection> {
-            futureConn = conn
-        } else {
-            let error = FluentError(
-                identifier: "defaultDatabase",
-                reason: "No default database is set on `\(Self.self)`.",
-                suggestedFixes: [
-                    "Add `\(Self.self)` as a migration to `MigrationConfig`.",
-                    "Set `\(Self.self).defaultDatabase` to the preferred database identifier.",
-                ],
-                source: .capture()
-            )
-            futureConn = conn.eventLoop.newFailedFuture(error: error)
-        }
-        return query(on: futureConn)
+        return query(on: conn.databaseConnection(to: Self.defaultDatabase))
     }
 }
 
