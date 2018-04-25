@@ -3,23 +3,23 @@ import Dispatch
 import Fluent
 import Foundation
 
-extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
+extension Benchmarker where Database: QuerySupporting & TransactionSupporting & KeyedCacheSupporting {
     /// The actual benchmark.
     fileprivate func _benchmark(on conn: Database.Connection) throws {
-        let cache = FluentCache<Database>(pool: pool)
+        let cache = DatabaseKeyedCache<ConfiguredDatabase<Database>>(pool: pool)
 
         // get empty
-        let first = try test(cache.get(FooCache.self, forKey: "hello"))
+        let first = try test(cache.get("hello", as: FooCache.self))
         if first != nil {
             fail("cache was not empty")
         }
 
         // save
         let example = FooCache(bar: "swift rulez", baz: 42)
-        try test(cache.set(example, forKey: "hello"))
+        try test(cache.set("hello", to: example))
 
         // fetch saved
-        let fetched = try test(cache.get(FooCache.self, forKey: "hello"))
+        let fetched = try test(cache.get("hello", as: FooCache.self))
         if let foo = fetched {
             if foo.bar != "swift rulez" { fail("invalid bar") }
             if foo.baz != 42 { fail("invalid baz") }
@@ -30,7 +30,7 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
         // delete
         try test(cache.remove("hello"))
 
-        let failed = try test(cache.get(FooCache.self, forKey: "hello"))
+        let failed = try test(cache.get("hello", as: FooCache.self))
         if failed != nil {
             fail("delete failed")
         }
@@ -49,7 +49,7 @@ struct FooCache: Codable {
     var baz: Int
 }
 
-extension Benchmarker where Database: QuerySupporting & TransactionSupporting & SchemaSupporting {
+extension Benchmarker where Database: QuerySupporting & TransactionSupporting & SchemaSupporting & KeyedCacheSupporting {
     /// Benchmark fluent transactions.
     /// The schema will be prepared first.
     public func benchmarkCache_withSchema() throws {

@@ -6,5 +6,4 @@ public enum QueryAction {
     case read
     case update
     case delete
-    case aggregate(QueryAggregate, entity: String?, field: String?)
 }

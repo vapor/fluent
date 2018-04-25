@@ -116,7 +116,7 @@ extension MigrationLog where D: SchemaSupporting {
             promise.succeed()
         }.catch { err in
             // table needs to be created
-            prepare(on: conn).chain(to: promise)
+            prepare(on: conn).cascade(promise: promise)
         }
 
         return promise.futureResult

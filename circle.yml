@@ -10,7 +10,6 @@ jobs:
       - run: swift build
       - run: swift test
 
-
   linux:
     docker:
       - image: codevapor/swift:4.1
@@ -22,6 +21,13 @@ jobs:
       - run: 
           name: Run unit tests
           command: swift test
+
+
+  linux-release:
+    docker:
+      - image: codevapor/swift:4.1
+    steps:
+      - checkout
       - run: 
           name: Compile code with optimizations
           command: swift build -c release
@@ -98,6 +104,7 @@ workflows:
       - linux-postgresql
       - linux-mysql
       - linux-sqlite
+      - linux-release
       # - macos
 
   nightly:
