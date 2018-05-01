@@ -1,13 +1,9 @@
-import Fluent
-import SQL
-
 extension QueryAggregate {
     /// Convert query aggregate to sql computed field.
-    internal func makeDataComputed() -> DataComputed {
-        return DataComputed(
+    internal func makeDataComputed() -> DataComputedColumn {
+        return .init(
             function: method.makeDataComputedFunction(),
-            columns: field.flatMap { [ $0.makeDataColumn() ] } ?? [],
-            key: "fluentAggregate"
+            columns: field.flatMap { [ $0.makeDataColumn() ] } ?? []
         )
     }
 }

@@ -31,7 +31,7 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
         /// models were not requested, then exclude them
         switch query.action {
         case .create: break // no soft delete filters needed for create
-        case .aggregate, .read, .update, .delete:
+        case .read, .update, .delete:
             do {
                 if
                     let type = Model.self as? AnySoftDeletable.Type,
@@ -61,7 +61,7 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
                 }.catch { error in
                     promise.fail(error: error)
                 }
-            }, on: conn).chain(to: promise)
+            }, on: conn).cascade(promise: promise)
 
             return promise.futureResult
         }

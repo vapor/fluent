@@ -3,26 +3,25 @@ import SQL
 
 extension DatabaseSchema {
     /// Converts a database schema to sql schema query
-    public func makeSchemaQuery(dataTypeFactory: (SchemaField<Database>) -> String) -> SchemaQuery {
+    public func makeSchemaQuery(dataTypeFactory: (SchemaField<Database>) -> String) -> DataDefinitionQuery {
         switch action {
         case .create:
-            return .create(
+            return .init(
+                statement: .create,
                 table: entity,
-                columns: addFields.map { $0.makeSchemaColumn(dataType: dataTypeFactory($0)) },
-                foreignKeys: []
+                addColumns: addFields.map { $0.makeSchemaColumn(dataType: dataTypeFactory($0)) },
+                addForeignKeys: []
             )
         case .update:
-            return .alter(
+            return .init(
+                statement: .alter,
                 table: entity,
-                addColumns: addFields.map {
-                    $0.makeSchemaColumn(dataType: dataTypeFactory($0))
-                },
+                addColumns: addFields.map { $0.makeSchemaColumn(dataType: dataTypeFactory($0)) },
                 removeColumns: removeFields,
                 addForeignKeys: [],
                 removeForeignKeys: []
             )
-        case .delete:
-            return .drop(table: entity)
+        case .delete: return .init(statement: .drop, table: entity)
         }
     }
 }
@@ -30,7 +29,7 @@ extension DatabaseSchema {
 
 extension DatabaseSchema where Database: ReferenceSupporting {
     /// Converts a database schema to sql schema query
-    public func applyReferences(to schemaQuery: inout SchemaQuery) {
+    public func applyReferences(to schemaQuery: inout DataDefinitionQuery) {
         switch schemaQuery.statement {
         case .create:
             schemaQuery.addForeignKeys = makeAddForeignKeys()

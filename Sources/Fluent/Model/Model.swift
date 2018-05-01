@@ -63,7 +63,7 @@ extension Model where Database: QuerySupporting {
 
     /// Creates a query for this model on the supplied connection.
     public static func query(on conn: DatabaseConnectable) -> QueryBuilder<Self, Self> {
-        return query(on: conn.connect(to: Self.defaultDatabase))
+        return query(on: conn.databaseConnection(to: Self.defaultDatabase))
     }
 }
 

@@ -35,6 +35,14 @@ extension QueryBuilder {
                 }.flatMap(to: Model.self) { model in
                     let encoder = QueryDataEncoder(Model.Database.self)
                     self.query.data = try encoder.encode(model)
+                    if model.fluentID == nil {
+                        // the id is `nil`, don't pass along a null value
+                        // this can cause some DBs to reject saving a model
+                        // where there is a default value allowed.
+                        var field = try Model.idKey.makeQueryField()
+                        field.entity = nil
+                        self.query.data.removeValue(forKey: field)
+                    }
                     return self.run().transform(to: model)
                 }.flatMap(to: Model.self) { model in
                     return Model.Database.modelEvent(event: .didCreate, model: model, on: conn)
