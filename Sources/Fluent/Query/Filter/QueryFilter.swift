@@ -185,6 +185,7 @@ extension QueryBuilder {
     @discardableResult
     public func group(_ relation: QueryGroupRelation, closure: @escaping GroupClosure) rethrows -> Self {
         let sub = copy()
+        sub.query.filters.removeAll()
         try closure(sub)
         return addFilter(.group(relation, sub.query.filters))
     }
