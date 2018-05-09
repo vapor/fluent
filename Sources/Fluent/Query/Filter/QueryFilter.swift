@@ -189,5 +189,33 @@ extension QueryBuilder {
         try closure(sub)
         return addFilter(.group(relation, sub.query.filters))
     }
+    
+    /// Create a query group.
+    @discardableResult
+    public func filter(_ value: ModelFilterGroup<Model>) throws -> Self {
+        let filters: [QueryFilterItem<Model.Database>] = value.filters.map({ .single($0.filter) })
+        return addFilter(.group(value.relation, filters))
+    }
+    
 }
 
+public struct ModelFilterGroup<M> where M: Model, M.Database: QuerySupporting {
+    
+    public let relation: QueryGroupRelation
+    public let filters: [ModelFilter<M>]
+    
+    public init(relation: QueryGroupRelation, filters: [ModelFilter<M>]) {
+        self.relation = relation
+        self.filters = filters
+    }
+}
+
+/// OR
+public func || <Model>(lhs: ModelFilter<Model>, rhs: ModelFilter<Model>) throws -> ModelFilterGroup<Model> {
+    return ModelFilterGroup(relation: .or, filters: [lhs, rhs])
+}
+
+/// AND
+public func && <Model>(lhs: ModelFilter<Model>, rhs: ModelFilter<Model>) throws -> ModelFilterGroup<Model> {
+    return ModelFilterGroup(relation: .and, filters: [lhs, rhs])
+}
