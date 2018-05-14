@@ -2,6 +2,8 @@ import Async
 
 /// Capable of executing a database query.
 public protocol QuerySupporting: Database {
+    // MARK: Execute
+    
     /// Executes the supplied query on the database connection.
     /// The returned future will be completed when the query is complete.
     /// Results will be outputed through the query's output stream.
