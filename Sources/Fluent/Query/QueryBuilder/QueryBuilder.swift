@@ -69,9 +69,10 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
                     let type = Model.self as? AnySoftDeletable.Type,
                     !query.withSoftDeleted
                 {
+                    let field = try type.deletedAtField(for: Model.Database.self)
                     try group(.or) { or in
-                        try or.filter(Model.Database.queryField(for: type.deletedAtField()), .equals, .data(Date?.none))
-                        try or.filter(Model.Database.queryField(for: type.deletedAtField()), .greaterThan, .data(Date()))
+                        try or.filter(field, .equals, .data(Date?.none))
+                        try or.filter(field, .greaterThan, .data(Date()))
                     }
                 }
             } catch {

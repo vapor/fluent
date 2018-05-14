@@ -11,10 +11,6 @@ public protocol QuerySupporting: Database {
         on connection: Connection
     ) -> Future<Void>
 
-    /// Handle model events.
-    static func modelEvent<M>(event: ModelEvent, model: M, on connection: Connection) -> Future<M>
-        where M: Model, M.Database == Self
-
     // MARK: Codable
 
     static func queryEncode<E>(_ encodable: E, entity: String) throws -> [QueryField: QueryData]
@@ -24,7 +20,7 @@ public protocol QuerySupporting: Database {
     // MARK: Field
 
     /// This database's native data type.
-    associatedtype QueryField: FluentField
+    associatedtype QueryField: Hashable
 
     /// Creates a `QueryField` for the supplied `ReflectedProperty`.
     static func queryField(for reflectedProperty: ReflectedProperty) throws -> QueryField
@@ -44,11 +40,17 @@ public protocol QuerySupporting: Database {
     /// Parses this db's `QueryDataConvertible` into a native type.
     static func queryDataParse<T>(_ type: T.Type, from data: QueryData) throws -> T?
 
+    // MARK: Filter
+
     /// This database's native filter types.
     associatedtype QueryFilter: Equatable
-}
 
-public protocol FluentField: Hashable { }
+    // MARK: Lifecycle
+
+    /// Handle model events.
+    static func modelEvent<M>(event: ModelEvent, model: M, on connection: Connection) -> Future<M>
+    where M: Model, M.Database == Self
+}
 
 extension QuerySupporting {
     public static func queryField<M, T>(for keyPath: KeyPath<M, T>) throws -> QueryField where M: Model {
