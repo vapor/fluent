@@ -13,7 +13,7 @@ public struct DatabaseSchema<Database> where Database: SchemaSupporting {
     public var removeFields: [String]
 
     /// Allows stored properties in extensions.
-    public var extend: [String: Any]
+    public var extend: Extend
 
     /// Create a new database query.
     public init(entity: String, action: SchemaAction) {

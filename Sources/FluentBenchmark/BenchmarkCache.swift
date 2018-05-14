@@ -54,9 +54,9 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting & 
     /// The schema will be prepared first.
     public func benchmarkCache_withSchema() throws {
         let conn = try test(pool.requestConnection())
-        try test(FluentCacheEntry<Database>.prepare(on: conn))
+        try test(CacheEntry<Database>.prepare(on: conn))
         defer {
-            try? test(FluentCacheEntry<Database>.revert(on: conn))
+            try? test(CacheEntry<Database>.revert(on: conn))
         }
         try self._benchmark(on: conn)
         pool.releaseConnection(conn)
