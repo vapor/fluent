@@ -25,7 +25,7 @@ public struct SchemaReference<Database> where Database: ReferenceSupporting & Sc
 
     /// Convenience init w/ schema field
     public init(base: SchemaField<Database>, referenced: QueryField, actions: ReferentialActions) {
-        self.base = QueryField(entity: nil, name: base.name)
+        self.base = QueryField(entity: nil, path: [base.name])
         self.referenced = referenced
         self.actions = actions
     }

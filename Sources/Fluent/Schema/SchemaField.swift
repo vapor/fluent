@@ -58,7 +58,7 @@ extension SchemaBuilder {
         isIdentifier: Bool = false
     ) throws -> SchemaField<Model.Database> {
         let field = try SchemaField<Model.Database>(
-            name: field.makeQueryField().name,
+            name: field.makeQueryField().path[0],
             type: type,
             isOptional: isOptional,
             isIdentifier: isIdentifier
@@ -87,7 +87,7 @@ extension SchemaBuilder {
 
     /// Removes a field from the schema.
     public func removeField<T>(for field: KeyPath<Model, T>) throws {
-        let name = try field.makeQueryField().name
+        let name = try field.makeQueryField().path[0]
         schema.removeFields.append(name)
     }
 }

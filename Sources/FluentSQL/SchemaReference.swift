@@ -15,14 +15,14 @@ extension DatabaseSchema where Database: ReferenceSupporting {
 
 extension SchemaReference {
     fileprivate var sqlName: String {
-        return "\(base.entity ?? "").\(base.name)_\(referenced.entity ?? "").\(referenced.name)"
+        return "\(base.entity ?? "").\(base.path.joined(separator: "-"))_\(referenced.entity ?? "").\(referenced.path.joined(separator: "-"))"
     }
 
     /// Convert a schema reference to a sql foreign key
     fileprivate func makeForeignKey() -> DataDefinitionForeignKey {
         return .init(
             name: sqlName,
-            local: DataColumn(table: nil, name: base.name),
+            local: DataColumn(table: nil, name: base.path[0]),
             foreign: referenced.makeDataColumn(),
             onUpdate: actions.update?.makeForeignKeyAction(),
             onDelete: actions.delete?.makeForeignKeyAction()

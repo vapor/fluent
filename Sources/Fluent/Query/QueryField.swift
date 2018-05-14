@@ -3,12 +3,17 @@
 public struct QueryField: Hashable {
     /// See `Hashable.hashValue`
     public var hashValue: Int {
-        return (entity ?? "<nil>" + "." + name).hashValue
+        let pathHash = path.reduce(0) { $0 &+ $1.hashValue }
+        if let entity = entity {
+            return entity.hashValue &+ pathHash
+        } else {
+            return pathHash
+        }
     }
 
     /// See `Equatable.==`
     public static func ==(lhs: QueryField, rhs: QueryField) -> Bool {
-        return lhs.name == rhs.name && lhs.entity == rhs.entity
+        return lhs.path == rhs.path && lhs.entity == rhs.entity
     }
 
     /// The entity for this field.
@@ -16,26 +21,26 @@ public struct QueryField: Hashable {
     public var entity: String?
 
     /// The name of the field.
-    public var name: String
+    public var path: [String]
 
     /// Create a new query field.
-    public init(entity: String? = nil, name: String) {
+    public init(entity: String? = nil, path: [String]) {
         self.entity = entity
-        self.name = name
+        self.path = path
     }
 }
 
 extension QueryField: CustomStringConvertible {
-    /// See `CustomStringConvertible.description`
+    /// See `CustomStringConvertible`.
     public var description: String {
-        return (entity ?? "<nil>") + "." + name
+        return (entity ?? "") + "." + path.joined(separator: ".")
     }
 }
 
 extension QueryField: ExpressibleByStringLiteral {
     /// See `ExpressibleByStringLiteral.init(stringLiteral:)`
     public init(stringLiteral value: String) {
-        self.init(name: value)
+        self.init(path: [value])
     }
 }
 
@@ -43,7 +48,7 @@ extension Dictionary where Key == QueryField {
     /// Accesses the _first_ value from this dictionary with a matching field name.
     public func firstValue(forField fieldName: String) -> Value? {
         for (field, value) in self {
-            if field.name == fieldName {
+            if field.path.first == fieldName {
                 return value
             }
         }
@@ -53,7 +58,7 @@ extension Dictionary where Key == QueryField {
     /// Access a `Value` from this dictionary keyed by `QueryField`s
     /// using a field (column) name and entity (table) name.
     public func value(forEntity entity: String, atField field: String) -> Value? {
-        return self[QueryField(entity: entity, name: field)]
+        return self[QueryField(entity: entity, path: [field])]
     }
 
     /// Removes all values that have non-matching entities.
@@ -77,7 +82,7 @@ extension KeyPath where Root: Model {
         guard let key = try Root.reflectProperty(forKey: self) else {
             throw FluentError(identifier: "reflectProperty", reason: "No property reflected for \(self)", source: .capture())
         }
-        return QueryField(entity: Root.entity, name: key.path.first ?? "")
+        return QueryField(entity: Root.entity, path: key.path)
     }
 }
 
@@ -93,7 +98,7 @@ extension Model {
     ///     }
     ///
     public static func field(_ name: String) -> QueryField {
-        return QueryField(entity: Self.entity, name: name)
+        return QueryField(entity: Self.entity, path: [name])
     }
 }
 
@@ -101,22 +106,22 @@ extension Model {
 
 /// Allow query fields to be used as coding keys.
 extension QueryField: CodingKey {
-    /// See CodingKey.stringValue
+    /// See `CodingKey`.
     public var stringValue: String {
-        return name
+        return path[0]
     }
 
-    /// See CodingKey.intValue
+    /// See `CodingKey`.
     public var intValue: Int? {
         return nil
     }
 
-    /// See CodingKey.init(stringValue:)
+    /// See `CodingKey`.
     public init?(stringValue: String) {
-        self.init(name: stringValue)
+        self.init(path: [stringValue])
     }
 
-    /// See CodingKey.init(intValue:)
+    /// See `CodingKey`.
     public init?(intValue: Int) {
         return nil
     }

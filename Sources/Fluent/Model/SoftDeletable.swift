@@ -1,17 +1,19 @@
-import Core
-import Async
-import Foundation
-
-/// Has create and update timestamps.
+/// Capable of being "soft deleted". Instead of actually deleting rows from the database,
+/// soft deleted models have a "deleted at" property set. All queries made on soft-deletable
+/// models will exclude results where the deleted at property is equal to or before the current date.
+///
+/// - note: The deleted at date my be set in the future. The model will continue to be included in
+///         queries until the deleted at date passes.
+///
+/// Use `forceDelete(on:)` to actually delete a soft-deletable model from the database.
+/// Use `withSoftDeleted()` on `QueryBuilder` to include soft-deleted results (excluded by default).
 public protocol SoftDeletable: Model, AnySoftDeletable {
-    /// Key referencing deleted at property.
+    /// Swift `KeyPath` referencing deleted at property.
     typealias DeletedAtKey = WritableKeyPath<Self, Date?>
 
-    /// The date at which this model was deleted.
-    /// nil if the model has not been deleted yet.
-    /// If this property is true, the model will not
-    /// be included in any query results unless
-    /// `.withSoftDeleted()` is used.
+    /// The date at which this model was deleted. `nil` if the model has not been deleted yet.
+    /// If this property is set, the model will not be included in any query results unless
+    /// `withSoftDeleted()` is used on the `QueryBuilder`.
     static var deletedAtKey: DeletedAtKey { get }
 }
 
@@ -42,14 +44,14 @@ extension Model where Self: SoftDeletable, Database: QuerySupporting {
 /// MARK: Future Model
 
 extension Future where T: SoftDeletable, T.Database: QuerySupporting {
-    /// See `Model.forceDelete(on:)`
+    /// See `SoftDeletable`.
     public func forceDelete(on conn: DatabaseConnectable) -> Future<Void> {
         return flatMap(to: Void.self) { model in
             return model.forceDelete(on: conn)
         }
     }
 
-    /// See `Model.restore(on:)`
+    /// See `SoftDeletable`.
     public func restore(on conn: DatabaseConnectable) -> Future<T> {
         return flatMap(to: T.self) { model in
             return model.restore(on: conn)
@@ -60,7 +62,7 @@ extension Future where T: SoftDeletable, T.Database: QuerySupporting {
 // MARK: Query
 
 extension DatabaseQuery {
-    /// If true, soft deleted models should be included.
+    /// If `true`, soft deleted models will be included.
     internal var withSoftDeleted: Bool {
         get { return extend["withSoftDeleted"] as? Bool ?? false }
         set { extend["withSoftDeleted"] = newValue }
@@ -69,14 +71,17 @@ extension DatabaseQuery {
 
 extension QueryBuilder where Model: SoftDeletable {
     /// Includes soft deleted models in the results.
+    ///
+    ///     let users = User.query(on: req).withSoftDeleted().all()
+    ///
     public func withSoftDeleted() -> Self {
         query.withSoftDeleted = true
         return self
     }
 }
 
-/// Unfortunately we need this hack until we have existentials.
-/// note: do not rely on this exterally.
+/// Type-erased `SoftDeletable`. Unfortunately we need this hack until we have existentials.
+/// - warning: Do not rely on this exterally.
 public protocol AnySoftDeletable: AnyModel {
     /// Pointer to type erased key string
     static func deletedAtField() throws -> QueryField
@@ -86,14 +91,11 @@ public protocol AnySoftDeletable: AnyModel {
 }
 
 extension SoftDeletable {
-    /// See `AnySoftDeletable.deletedAtField`
+    /// See `AnySoftDeletable`.
     public static func deletedAtField() throws -> QueryField {
         guard let name = try Self.reflectProperty(forKey: deletedAtKey) else {
             throw FluentError(identifier: "reflectProperty", reason: "No property reflected for \(deletedAtKey)", source: .capture())
         }
-        return QueryField(
-            entity: entity,
-            name: name.path.first ?? ""
-        )
+        return QueryField(entity: entity, path: name.path)
     }
 }

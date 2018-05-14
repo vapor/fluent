@@ -45,7 +45,7 @@ fileprivate struct _QueryDataKeyedDecoder<K, Database>: KeyedDecodingContainerPr
     where K: CodingKey, Database: QuerySupporting
 {
     var allKeys: [K] {
-        return decoder.data.keys.compactMap { K(stringValue: $0.name) }
+        return decoder.data.keys.compactMap { K(stringValue: $0.path[0]) }
     }
     var codingPath: [CodingKey] { return [] }
     let decoder: _QueryDataDecoder<Database>
@@ -70,7 +70,7 @@ fileprivate struct _QueryDataKeyedDecoder<K, Database>: KeyedDecodingContainerPr
         return try Database.queryDataParse(T.self, from: data)
     }
 
-    func contains(_ key: K) -> Bool { return decoder.data.keys.contains { $0.name == key.stringValue } }
+    func contains(_ key: K) -> Bool { return decoder.data.keys.contains { $0.path[0] == key.stringValue } }
     func decodeNil(forKey key: K) throws -> Bool { return _value(forEntity: entity, atField: key.stringValue) == nil }
     func decodeIfPresent(_ type: Int.Type, forKey key: K) throws -> Int? { return try _parse(Int.self, forKey: key) }
     func decodeIfPresent(_ type: Int8.Type, forKey key: K) throws -> Int8? { return try _parse(Int8.self, forKey: key) }

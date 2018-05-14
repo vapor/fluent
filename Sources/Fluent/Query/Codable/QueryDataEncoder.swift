@@ -37,7 +37,7 @@ fileprivate struct _QueryDataKeyedEncoder<K, Database>: KeyedEncodingContainerPr
     }
 
     mutating func _serialize<T>(_ value: T?, forKey key: K) throws {
-        let field = QueryField(entity: nil, name: key.stringValue)
+        let field = QueryField(entity: nil, path: [key.stringValue])
         encoder.data[field] = try Database.queryDataSerialize(data: value)
     }
 

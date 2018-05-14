@@ -1,6 +1,3 @@
-import Async
-import Foundation
-
 /// A Fluent database query builder.
 public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.Database: QuerySupporting {
     /// The query being built.
@@ -44,7 +41,7 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
                 }
             } catch {
                 /// throw this error
-                return connection.map(to: Void.self) { conn in
+                return connection.map { conn in
                     throw error
                 }
             }
@@ -56,7 +53,7 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
             let promise = conn.eventLoop.newPromise(Void.self)
 
             Model.Database.execute(query: q, into: { row, conn in
-                resultTransformer(row, conn).map(to: Void.self) { result in
+                resultTransformer(row, conn).map { result in
                     return try handler(result)
                 }.catch { error in
                     promise.fail(error: error)
