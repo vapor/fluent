@@ -41,7 +41,7 @@ extension QueryBuilder {
     }
 
     /// Internal method for update / create.
-    public func _run(action: QueryAction, _ data: [QueryField: Model.Database.QueryDataConvertible]) throws -> Future<Void> {
+    public func _run(action: DatabaseQuery<Model.Database>.Action, _ data: [QueryField: Model.Database.QueryDataConvertible]) throws -> Future<Void> {
         self.query.data = try data.mapValues { try Model.Database.queryDataSerialize(data: $0) }
         self.query.action = action
         return self.run()

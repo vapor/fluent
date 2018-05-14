@@ -1,7 +1,7 @@
 import Fluent
 import SQL
 
-extension QueryFilterItem where Database.QueryFilter: DataPredicateComparisonConvertible {
+extension DatabaseQuery.Filter where Database.QueryFilter: DataPredicateComparisonConvertible {
     /// Convert query filter to sql data predicate and bind values.
     internal func makeDataPredicateItem() -> (DataPredicateItem, [Database.QueryData]) {
         let item: DataPredicateItem
@@ -38,7 +38,7 @@ extension QueryFilterItem where Database.QueryFilter: DataPredicateComparisonCon
     }
 }
 
-extension QueryGroupRelation {
+extension DatabaseQuery.Filter.GroupRelation {
     internal func makeDataPredicateGroupRelation() -> DataPredicateGroupRelation {
         switch self {
         case .and: return .and

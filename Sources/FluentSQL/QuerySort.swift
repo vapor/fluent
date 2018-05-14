@@ -1,7 +1,4 @@
-import Fluent
-import SQL
-
-extension QuerySort {
+extension DatabaseQuery.Sort {
     /// Convert query sort to sql order by.
     internal func makeDataOrderBy() -> DataOrderBy {
         return DataOrderBy(
@@ -11,7 +8,7 @@ extension QuerySort {
     }
 }
 
-extension QuerySortDirection {
+extension DatabaseQuery.Sort.Direction {
     /// Convert query sort direction to sql order by direction.
     internal func makeOrderByDirection() -> DataOrderByDirection {
         switch self {

@@ -1,11 +1,9 @@
 import Fluent
 import SQL
 
-extension QueryFilterType {
+extension DatabaseQuery.FilterType where Database.QueryFilter: DataPredicateComparisonConvertible {
     /// Convert query comparison to sql predicate comparison.
-    internal func makeDataPredicateComparison<D>(for filter: QueryFilter<D>) -> DataPredicateComparison
-        where D.QueryFilter: DataPredicateComparisonConvertible
-    {
+    internal func makeDataPredicateComparison(for filter: DatabaseQuery<Database>.FilterItem) -> DataPredicateComparison {
         if let custom = filter.type.custom() {
             return custom.convertToDataPredicateComparison()
         } else {
@@ -52,7 +50,7 @@ public protocol DataPredicateComparisonConvertible {
     static func convertFromDataPredicateComparison(_ comparison: DataPredicateComparison) -> Self
 }
 
-extension QueryFilterValue {
+extension DatabaseQuery.FilterValue {
     /// Convert query comparison value to sql data predicate value.
     internal func makeDataPredicateValue() -> DataPredicateValue {
         if let field = self.field() {
@@ -90,10 +88,10 @@ public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws ->
 }
 
 /// Operator helper func.
-private func _contains<M, V>(_ key: KeyPath<M, V>, _ comp: DataPredicateComparison, _ value: QueryFilterValue<M.Database>) throws -> ModelFilter<M>
+private func _contains<M, V>(_ key: KeyPath<M, V>, _ comp: DataPredicateComparison, _ value: DatabaseQuery<M.Database>.FilterValue) throws -> ModelFilter<M>
     where M.Database.QueryFilter: DataPredicateComparisonConvertible
 {
-    let filter = try QueryFilter<M.Database>(
+    let filter = try DatabaseQuery<M.Database>.FilterItem(
         field: key.makeQueryField(),
         type: .custom(.convertFromDataPredicateComparison(comp)),
         value: value

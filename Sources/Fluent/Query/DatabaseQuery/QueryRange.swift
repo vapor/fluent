@@ -1,20 +1,22 @@
-/// Defines a Fluent query limit and offset.
-public struct QueryRange {
-    /// The lower bound of item indexes to return. This should be `0` by default.
-    public var lower: Int
+extension DatabaseQuery {
+    /// Defines a Fluent query limit and offset.
+    public struct Range {
+        /// The lower bound of item indexes to return. This should be `0` by default.
+        public var lower: Int
 
-    /// The upper bound of item indexes to return. If this is `nil`, the range acts as just on offset.
-    /// If it is set, the number of results will have a max possible value (upper - lower).
-    public var upper: Int?
+        /// The upper bound of item indexes to return. If this is `nil`, the range acts as just on offset.
+        /// If it is set, the number of results will have a max possible value (upper - lower).
+        public var upper: Int?
 
-    /// Creates a new limit with a count and offset.
-    ///
-    /// - parameters:
-    ///     - lower: Amount to offset the query by.
-    ///     - upper: `upper` - `lower` = maximum results.
-    public init(lower: Int, upper: Int?) {
-        self.lower = lower
-        self.upper = upper
+        /// Creates a new limit with a count and offset.
+        ///
+        /// - parameters:
+        ///     - lower: Amount to offset the query by.
+        ///     - upper: `upper` - `lower` = maximum results.
+        public init(lower: Int, upper: Int?) {
+            self.lower = lower
+            self.upper = upper
+        }
     }
 }
 
@@ -65,8 +67,7 @@ extension QueryBuilder {
     ///     - lower: Amount to offset the query by.
     ///     - upper: `upper` - `lower` = maximum results.
     public func range(lower: Int = 0, upper: Int? = nil) -> Self {
-        let limit = QueryRange(lower: lower, upper: upper)
-        query.range = limit
+        query.range = .some(.init(lower: lower, upper: upper))
         return self
     }
 }

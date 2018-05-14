@@ -1,4 +1,4 @@
-extension QueryAggregate {
+extension DatabaseQuery.Aggregate {
     /// Convert query aggregate to sql computed field.
     internal func makeDataComputed() -> DataComputedColumn {
         return .init(
@@ -8,7 +8,7 @@ extension QueryAggregate {
     }
 }
 
-extension QueryAggregateMethod {
+extension DatabaseQuery.Aggregate.Method {
     /// Convert query aggregate method to computed function name.
     internal func makeDataComputedFunction() -> String {
         switch self {

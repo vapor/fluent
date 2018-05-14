@@ -4,31 +4,31 @@ public struct DatabaseQuery<Database> where Database: QuerySupporting {
     public let entity: String
 
     /// The action to perform on the database
-    public var action: QueryAction
+    public var action: Action
 
-    /// Result stream will be filtered by these queries.
-    public var filters: [QueryFilterItem<Database>]
-
-    /// Sorts to be applied to the results.
-    public var sorts: [QuerySort]
-    
-    /// Group By to be applied to the results.
-    public var groups: [QueryGroupBy]
-    
     /// Aggregates / computed methods.
-    public var aggregates: [QueryAggregate]
-
-    /// If true, the query will only select distinct rows.
-    public var isDistinct: Bool
+    public var aggregates: [Aggregate]
 
     /// Optional model data to save or update.
     public var data: [QueryField: Database.QueryData]
 
+    /// Result stream will be filtered by these queries.
+    public var filters: [Filter]
+    
+    /// Group By to be applied to the results.
+    public var groups: [GroupBy]
+
+    /// If true, the query will only select distinct rows.
+    public var isDistinct: Bool
+
     /// Limits and offsets the amount of results
-    public var range: QueryRange?
+    public var range: Range?
+
+    /// Sorts to be applied to the results.
+    public var sorts: [Sort]
 
     /// Allows extensions to store properties.
-    public var extend: [String: Any]
+    public var extend: Extend
 
     /// Create a new database query.
     public init(entity: String) {

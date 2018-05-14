@@ -21,10 +21,10 @@ extension QueryBuilder {
 /// Typed wrapper around query filter methods.
 public struct ModelFilter<M> where M: Model, M.Database: QuerySupporting {
     /// The wrapped query filter method.
-    public let filter: QueryFilter<M.Database>
+    public let filter: DatabaseQuery<M.Database>.FilterItem
 
     /// Creates a new model filter method.
-    public init(filter: QueryFilter<M.Database>) {
+    public init(filter: DatabaseQuery<M.Database>.FilterItem) {
         self.filter = filter
     }
 }
@@ -91,11 +91,7 @@ public func !~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: [Value]) throws -
 }
 
 /// Operator helper func.
-private func _compare<M, V>(
-    _ key: KeyPath<M, V>,
-    _ type: QueryFilterType<M.Database>,
-    _ value: QueryFilterValue<M.Database>
-) throws -> ModelFilter<M> {
-    let filter = try QueryFilter(field: key.makeQueryField(), type: type, value: value)
+private func _compare<M, V>(_ key: KeyPath<M, V>, _ type: DatabaseQuery<M.Database>.FilterType, _ value: DatabaseQuery<M.Database>.FilterValue) throws -> ModelFilter<M> {
+    let filter = try DatabaseQuery<M.Database>.FilterItem(field: key.makeQueryField(), type: type, value: value)
     return ModelFilter<M>(filter: filter)
 }

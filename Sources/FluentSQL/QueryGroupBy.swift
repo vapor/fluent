@@ -1,7 +1,7 @@
 import Fluent
 import SQL
 
-extension QueryGroupBy {
+extension DatabaseQuery.GroupBy {
     /// Convert query group by to sql group by.
     internal func makeDataGroupBy() -> DataGroupBy {
         guard let field = field() else {
