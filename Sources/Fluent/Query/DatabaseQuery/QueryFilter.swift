@@ -120,12 +120,12 @@ extension DatabaseQuery {
 
         /// A single value.
         public static func data<T>(_ data: T) throws -> FilterValue {
-            return try .init(storage: .data(Database.queryDataSerialize(data: data)))
+            return try .init(storage: .data(Database.queryDataEncode(data)))
         }
 
         /// A single value.
         public static func array<T>(_ array: [T]) throws -> FilterValue {
-            let array = try array.map { try Database.queryDataSerialize(data: $0) }
+            let array = try array.map { try Database.queryDataEncode($0) }
             return .init(storage: .array(array))
         }
 

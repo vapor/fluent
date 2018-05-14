@@ -30,15 +30,8 @@ public protocol QuerySupporting: Database {
     /// This database's native data type.
     associatedtype QueryData: FluentData
 
-    /// This database's convertible data type.
-    /// This type is used in-place of the `QueryData` type wherever the user can input data.
-    associatedtype QueryDataConvertible
-
     /// Serializes a native type to this db's `QueryDataConvertible`.
-    static func queryDataSerialize<T>(data: T?) throws -> QueryData
-
-    /// Parses this db's `QueryDataConvertible` into a native type.
-    static func queryDataParse<T>(_ type: T.Type, from data: QueryData) throws -> T?
+    static func queryDataEncode<T>(_ data: T?) throws -> QueryData
 
     // MARK: Filter
 

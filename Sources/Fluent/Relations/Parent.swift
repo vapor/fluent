@@ -25,7 +25,7 @@ extension Parent where Child.Database: QuerySupporting {
     /// Create a query for the parent.
     public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Parent, Parent> {
         return try Parent.query(on: conn)
-            .filter(Parent.idKey, .equals, .data(Parent.Database.queryDataSerialize(data: parentID)))
+            .filter(Parent.idKey, .equals, .data(Parent.Database.queryDataEncode(parentID)))
     }
 
     /// Convenience for getting the parent.

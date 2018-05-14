@@ -20,7 +20,7 @@ extension Benchmarker where Database: QuerySupporting {
         // update
         b.bar = "fdsa"
         _ = try test(b.save(on: conn))
-        _ = try test(Foo.query(on: conn).filter(\.id == a.id).update(\Foo<Database>.baz, to: 314 as! Database.QueryDataConvertible))
+        _ = try test(Foo.query(on: conn).filter(\.id == a.id).update(\Foo<Database>.baz, to: Database.queryDataEncode(314)))
 
         // read
         let fetched = try test(Foo<Database>.find(b.requireID(), on: conn))
