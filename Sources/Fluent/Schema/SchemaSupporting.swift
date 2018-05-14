@@ -4,7 +4,7 @@ import Foundation
 // MARK: Protocols
 
 /// Capable of executing a database schema query.
-public protocol SchemaSupporting: Database {
+public protocol SchemaSupporting: QuerySupporting {
     /// See SchemaFieldType
     associatedtype FieldType
 

@@ -1,7 +1,9 @@
 import Fluent
 import SQL
 
-extension DatabaseQuery.Filter where Database.QueryFilter: DataPredicateComparisonConvertible {
+extension DatabaseQuery.Filter
+    where Database.QueryFilter: DataPredicateComparisonConvertible, Database: QuerySupporting, Database.QueryField: DataColumnRepresentable
+{
     /// Convert query filter to sql data predicate and bind values.
     internal func makeDataPredicateItem() -> (DataPredicateItem, [Database.QueryData]) {
         let item: DataPredicateItem

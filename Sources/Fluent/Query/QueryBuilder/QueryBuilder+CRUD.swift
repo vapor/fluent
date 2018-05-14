@@ -44,16 +44,16 @@ extension QueryBuilder {
                 return Model.Database.modelEvent(event: .willCreate, model: copy, on: conn).flatMap { model in
                     return try model.willCreate(on: conn)
                 }.flatMap { model -> Future<Model> in
-                    let encoder = QueryDataEncoder(Model.Database.self)
-                    self.query.data = try encoder.encode(model)
-                    if model.fluentID == nil {
-                        // the id is `nil`, don't pass along a null value
-                        // this can cause some DBs to reject saving a model
-                        // where there is a default value allowed.
-                        var field = try Model.idKey.makeQueryField()
-                        field.entity = nil
-                        self.query.data.removeValue(forKey: field)
-                    }
+                    self.query.data = try Model.Database.queryEncode(model, entity: Model.entity)
+// FIXME:
+//                    if model.fluentID == nil {
+//                        // the id is `nil`, don't pass along a null value
+//                        // this can cause some DBs to reject saving a model
+//                        // where there is a default value allowed.
+//                        var field = try Model.Database.queryField(for: Model.idKey)
+//                        field.entity = nil
+//                        self.query.data.removeValue(forKey: field)
+//                    }
                     return self.run().transform(to: model)
                 }.flatMap { model in
                     return Model.Database.modelEvent(event: .didCreate, model: model, on: conn)
@@ -99,8 +99,7 @@ extension QueryBuilder {
             return Model.Database.modelEvent(event: .willUpdate, model: copy, on: conn).flatMap { model in
                 return try copy.willUpdate(on: conn)
             }.flatMap { model in
-                let encoder = QueryDataEncoder(Model.Database.self)
-                self.query.data = try encoder.encode(model)
+                self.query.data = try Model.Database.queryEncode(model, entity: Model.entity)
                 return self.run().transform(to: model)
             }.flatMap { model -> Future<Model> in
                 return Model.Database.modelEvent(event: .didUpdate, model: model, on: conn)

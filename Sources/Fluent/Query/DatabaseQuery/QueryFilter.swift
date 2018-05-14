@@ -17,7 +17,7 @@ extension DatabaseQuery {
     /// Defines a `Filter` that can be added on fetch, delete, and update operations to limit the set of data affected.
     public struct FilterItem {
         /// The field to filer.
-        public var field: QueryField
+        public var field: Database.QueryField
 
         /// The filter type.
         public var type: FilterType
@@ -26,7 +26,7 @@ extension DatabaseQuery {
         public var value: FilterValue
 
         /// Create a new filter.
-        public init(field: QueryField, type: FilterType, value: FilterValue) {
+        public init(field: Database.QueryField, type: FilterType, value: FilterValue) {
             self.field = field
             self.type = type
             self.value = value
@@ -86,7 +86,7 @@ extension DatabaseQuery {
     /// values or another query whose purpose is to yield an array of values.
     public struct FilterValue {
         enum QueryFilterValueStorage {
-            case field(QueryField)
+            case field(Database.QueryField)
             case data(Database.QueryData)
             case array([Database.QueryData])
             case subquery(DatabaseQuery<Database>)
@@ -97,7 +97,7 @@ extension DatabaseQuery {
         let storage: QueryFilterValueStorage
 
         /// Returns the `QueryField` value if it exists.
-        public func field() -> QueryField? {
+        public func field() -> Database.QueryField? {
             switch storage {
             case .field(let field): return field
             default: return nil
@@ -114,7 +114,7 @@ extension DatabaseQuery {
         }
 
         /// Another query field.
-        public static func field(_ field: QueryField) -> FilterValue {
+        public static func field(_ field: Database.QueryField) -> FilterValue {
             return .init(storage: .field(field))
         }
 
@@ -147,19 +147,19 @@ extension QueryBuilder {
     public func filter<M, T>(_ joined: M.Type, _ key: KeyPath<M, T>, _ type: DatabaseQuery<M.Database>.FilterType, _ value: DatabaseQuery<M.Database>.FilterValue) throws -> Self
         where M: Fluent.Model, M.Database == Model.Database
     {
-        let filter = try DatabaseQuery<M.Database>.FilterItem(field: key.makeQueryField(), type: type, value: value)
+        let filter = try DatabaseQuery<M.Database>.FilterItem(field: M.Database.queryField(for: key), type: type, value: value)
         return addFilter(.single(filter))
     }
 
     /// Applies a comparison filter to this query.
     @discardableResult
     public func filter<T>(_ key: KeyPath<Model, T>, _ type: DatabaseQuery<Model.Database>.FilterType, _ value: DatabaseQuery<Model.Database>.FilterValue) throws -> Self {
-        return try filter(key.makeQueryField(), type, value)
+        return try filter(Model.Database.queryField(for: key), type, value)
     }
 
     /// Applies a comparison filter to this query.
     @discardableResult
-    public func filter(_ field: QueryField, _ type: DatabaseQuery<Model.Database>.FilterType, _ value: DatabaseQuery<Model.Database>.FilterValue) -> Self {
+    public func filter(_ field: Model.Database.QueryField, _ type: DatabaseQuery<Model.Database>.FilterType, _ value: DatabaseQuery<Model.Database>.FilterValue) -> Self {
         let filter = DatabaseQuery<Model.Database>.FilterItem(field: field, type: type, value: value)
         return addFilter(.single(filter))
     }

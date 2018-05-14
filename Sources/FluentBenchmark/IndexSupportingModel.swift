@@ -2,7 +2,7 @@ import Async
 import Fluent
 import Foundation
 
-public final class IndexSupportingModel<D>: Model, Migration where D: QuerySupporting, D: IndexSupporting {
+public final class IndexSupportingModel<D>: Model, Migration where D: IndexSupporting {
     /// See Model.Database
     public typealias Database = D
 

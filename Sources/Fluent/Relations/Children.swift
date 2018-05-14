@@ -5,22 +5,22 @@
 ///
 /// The opposite side of this relation is called `Parent`.
 public struct Children<Parent, Child>
-    where Parent: Model, Child: Model, Parent.Database == Child.Database
+    where Parent: Model, Child: Model, Parent.Database == Child.Database, Parent.Database: QuerySupporting
 {
     /// Reference to the parent's ID
     public var parent: Parent
 
     /// Reference to the foreign key on t(he child.
-    fileprivate var foreignParentField: () throws -> QueryField
+    fileprivate var foreignParentField: () throws -> Child.Database.QueryField
 
     /// Creates a new children relationship.
-    fileprivate init(parent: Parent, foreignParentField: @escaping () throws -> QueryField) {
+    fileprivate init(parent: Parent, foreignParentField: @escaping () throws -> Child.Database.QueryField) {
         self.parent = parent
         self.foreignParentField = foreignParentField
     }
 }
 
-extension Children where Parent.Database: QuerySupporting {
+extension Children {
     /// Create a query for all children.
     public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Child, Child> {
         return try Child.query(on: conn)
@@ -38,7 +38,7 @@ extension Model {
     public func children<Child>(_ parentForeignIDKey: WritableKeyPath<Child, Self.ID>) -> Children<Self, Child> {
         return Children(
             parent: self,
-            foreignParentField: parentForeignIDKey.makeQueryField
+            foreignParentField: { try Self.Database.queryField(for: parentForeignIDKey) }
         )
     }
 
@@ -49,7 +49,7 @@ extension Model {
     public func children<Child>(_ parentForeignIDKey: WritableKeyPath<Child, Self.ID?>) -> Children<Self, Child> {
         return Children(
             parent: self,
-            foreignParentField: parentForeignIDKey.makeQueryField
+            foreignParentField: { try Self.Database.queryField(for: parentForeignIDKey) }
         )
     }
 }

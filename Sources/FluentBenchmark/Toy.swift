@@ -17,11 +17,6 @@ public struct Toy<D>: Model where D: QuerySupporting {
     /// See Model.idKey
     public static var idKey: IDKey { return \.id }
 
-    /// See Model.database
-    public static var database: DatabaseIdentifier<D> {
-        return .init("test")
-    }
-
     /// Foo's identifier
     var id: ID?
 
@@ -32,13 +27,6 @@ public struct Toy<D>: Model where D: QuerySupporting {
     init(id: ID? = nil, name: String) {
         self.id = id
         self.name = name
-    }
-
-    /// See Encodable.encode
-    public func encode(to encoder: Encoder) throws {
-        var container = encodingContainer(for: encoder)
-        try container.encode(key: \Toy<Database>.id)
-        try container.encode(key: \Toy<Database>.name)
     }
 }
 

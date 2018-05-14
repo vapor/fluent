@@ -10,7 +10,7 @@ public struct DatabaseSchema<Database> where Database: SchemaSupporting {
     public var addFields: [SchemaField<Database>]
 
     /// The fields to be removed from this schema.
-    public var removeFields: [String]
+    public var removeFields: [Database.QueryField]
 
     /// Allows stored properties in extensions.
     public var extend: Extend

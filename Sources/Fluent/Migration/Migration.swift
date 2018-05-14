@@ -120,7 +120,7 @@ extension Model where Database: SchemaSupporting {
             }
 
             let field = try SchemaField<Database>(
-                name: property.path.first ?? "",
+                field: Database.queryField(for: property),
                 type: Database.fieldType(for: type),
                 isOptional: isOptional,
                 isIdentifier: property.path == idProperty.path

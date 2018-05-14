@@ -4,7 +4,7 @@ import Core
 /// the overall schema for a given `Model`.
 public struct SchemaField<Database> where Database: SchemaSupporting {
     /// The name of this field.
-    public var name: String
+    public var field: Database.QueryField
 
     /// The type of field.
     public var type: Database.FieldType
@@ -16,8 +16,8 @@ public struct SchemaField<Database> where Database: SchemaSupporting {
     public var isIdentifier: Bool
 
     /// Create a new field.
-    public init(name: String, type: Database.FieldType, isOptional: Bool = false, isIdentifier: Bool = false) {
-        self.name = name
+    public init(field: Database.QueryField, type: Database.FieldType, isOptional: Bool = false, isIdentifier: Bool = false) {
+        self.field = field
         self.type = type
         self.isOptional = isOptional
         self.isIdentifier = isIdentifier
@@ -58,7 +58,7 @@ extension SchemaBuilder {
         isIdentifier: Bool = false
     ) throws -> SchemaField<Model.Database> {
         let field = try SchemaField<Model.Database>(
-            name: field.makeQueryField().path[0],
+            field: Model.Database.queryField(for: field),
             type: type,
             isOptional: isOptional,
             isIdentifier: isIdentifier
@@ -71,12 +71,12 @@ extension SchemaBuilder {
     @discardableResult
     public func addField(
         type: Model.Database.FieldType,
-        name: String,
+        field: Model.Database.QueryField,
         isOptional: Bool = false,
         isIdentifier: Bool = false
     ) -> SchemaField<Model.Database> {
         let field = SchemaField<Model.Database>(
-            name: name,
+            field: field,
             type: type,
             isOptional: isOptional,
             isIdentifier: isIdentifier
@@ -87,7 +87,6 @@ extension SchemaBuilder {
 
     /// Removes a field from the schema.
     public func removeField<T>(for field: KeyPath<Model, T>) throws {
-        let name = try field.makeQueryField().path[0]
-        schema.removeFields.append(name)
+        try schema.removeFields.append(Model.Database.queryField(for: field))
     }
 }

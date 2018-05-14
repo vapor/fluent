@@ -9,13 +9,13 @@ extension DatabaseQuery {
         }
 
         /// The field to sort.
-        public let field: QueryField
+        public let field: Database.QueryField
 
         /// The direction to sort by.
         public let direction: Direction
 
         /// Create a new sort
-        public init(field: QueryField, direction: Direction) {
+        public init(field: Database.QueryField, direction: Direction) {
             self.field = field
             self.direction = direction
         }
@@ -27,7 +27,7 @@ extension DatabaseQuery {
 extension QueryBuilder {
     /// Add a Sort to the Query.
     public func sort<T>(_ field: KeyPath<Model, T>, _ direction: DatabaseQuery<Model.Database>.Sort.Direction = .ascending) throws -> Self {
-        return try addSort(.init(field: field.makeQueryField(), direction: direction))
+        return try addSort(.init(field: Model.Database.queryField(for: field), direction: direction))
     }
     
     /// Add a Sort to the Query.

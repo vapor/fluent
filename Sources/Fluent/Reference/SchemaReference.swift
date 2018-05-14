@@ -2,20 +2,20 @@
 /// that uniquely identifies a row of another table or the same table.
 public struct SchemaReference<Database> where Database: ReferenceSupporting & SchemaSupporting {
     /// The base field.
-    public let base: QueryField
+    public let base: Database.QueryField
 
     /// The field this base field references.
     /// Note: this is a `QueryField` because we have limited info.
     /// we assume it is the same type as the base field.
-    public let referenced: QueryField
+    public let referenced: Database.QueryField
 
     /// The action to take if this reference is modified.
     public let actions: ReferentialActions
 
     /// Creates a new SchemaReference
     public init(
-        base: QueryField,
-        referenced: QueryField,
+        base: Database.QueryField,
+        referenced: Database.QueryField,
         actions: ReferentialActions
     ) {
         self.base = base
@@ -24,8 +24,8 @@ public struct SchemaReference<Database> where Database: ReferenceSupporting & Sc
     }
 
     /// Convenience init w/ schema field
-    public init(base: SchemaField<Database>, referenced: QueryField, actions: ReferentialActions) {
-        self.base = QueryField(entity: nil, path: [base.name])
+    public init(base: SchemaField<Database>, referenced: Database.QueryField, actions: ReferentialActions) {
+        self.base = base.field
         self.referenced = referenced
         self.actions = actions
     }

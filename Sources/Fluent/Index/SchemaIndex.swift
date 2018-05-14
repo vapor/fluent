@@ -12,7 +12,7 @@
 ///
 public struct SchemaIndex<Database> where Database: IndexSupporting & SchemaSupporting {
     /// The indexed fields.
-    public let fields: [QueryField]
+    public let fields: [Database.QueryField]
 
     /// If `true`, this index will also force uniqueness.
     public let isUnique: Bool
@@ -22,7 +22,7 @@ public struct SchemaIndex<Database> where Database: IndexSupporting & SchemaSupp
     /// - parameters:
     ///     - fields: The indexed fields.
     ///     - isUnique: If `true`, this index will also force uniqueness.
-    public init(fields: [QueryField], isUnique: Bool) {
+    public init(fields: [Database.QueryField], isUnique: Bool) {
         assert(fields.count >= 1) // at least one field required
         self.fields = fields
         self.isUnique = isUnique

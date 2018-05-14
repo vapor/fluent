@@ -1,7 +1,7 @@
 import Fluent
 import SQL
 
-extension DatabaseSchema {
+extension DatabaseSchema where Database: QuerySupporting, Database.QueryField: DataColumnRepresentable {
     /// Converts a database schema to sql schema query
     public func makeSchemaQuery(dataTypeFactory: (SchemaField<Database>) -> String) -> DataDefinitionQuery {
         switch action {
@@ -17,7 +17,7 @@ extension DatabaseSchema {
                 statement: .alter,
                 table: entity,
                 addColumns: addFields.map { $0.makeSchemaColumn(dataType: dataTypeFactory($0)) },
-                removeColumns: removeFields,
+                removeColumns: removeFields.map { $0.makeDataColumn().name },
                 addForeignKeys: [],
                 removeForeignKeys: []
             )
@@ -27,7 +27,7 @@ extension DatabaseSchema {
 }
 
 
-extension DatabaseSchema where Database: ReferenceSupporting {
+extension DatabaseSchema where Database: ReferenceSupporting, Database.QueryField: DataColumnRepresentable {
     /// Converts a database schema to sql schema query
     public func applyReferences(to schemaQuery: inout DataDefinitionQuery) {
         switch schemaQuery.statement {

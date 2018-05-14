@@ -1,4 +1,4 @@
-extension DatabaseQuery.Sort {
+extension DatabaseQuery.Sort where Database: QuerySupporting, Database.QueryField: DataColumnRepresentable {
     /// Convert query sort to sql order by.
     internal func makeDataOrderBy() -> DataOrderBy {
         return DataOrderBy(

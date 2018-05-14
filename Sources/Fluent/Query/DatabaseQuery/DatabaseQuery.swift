@@ -10,7 +10,7 @@ public struct DatabaseQuery<Database> where Database: QuerySupporting {
     public var aggregates: [Aggregate]
 
     /// Optional model data to save or update.
-    public var data: [QueryField: Database.QueryData]
+    public var data: [Database.QueryField: Database.QueryData]
 
     /// Result stream will be filtered by these queries.
     public var filters: [Filter]

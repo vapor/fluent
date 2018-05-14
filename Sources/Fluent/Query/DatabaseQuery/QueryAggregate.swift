@@ -19,7 +19,7 @@ extension DatabaseQuery {
         }
 
         /// Optional field to apply this aggreagate to. If `nil`, the aggregate is applied to all fields.
-        public var field: QueryField?
+        public var field: Database.QueryField?
 
         /// The specific aggreatge method to use.
         public var method: Method
@@ -59,7 +59,7 @@ extension QueryBuilder {
     public func aggregate<D, T>(_ method: DatabaseQuery<Model.Database>.Aggregate.Method, field: KeyPath<Model, T>, as type: D.Type = D.self) throws -> Future<D>
         where D: Decodable
     {
-        return try addAggregate(.init(field: field.makeQueryField(), method: method))
+        return try addAggregate(.init(field: Model.Database.queryField(for: field), method: method))
     }
 
     /// Performs the supplied aggregate struct.

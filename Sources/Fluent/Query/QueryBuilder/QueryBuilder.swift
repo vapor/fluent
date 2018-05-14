@@ -33,14 +33,14 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
     public let connection: Future<Model.Database.Connection>
 
     /// Current result transformation.
-    private var resultTransformer: ([QueryField: Model.Database.QueryData], Model.Database.Connection) -> Future<Result>
+    private var resultTransformer: ([Model.Database.QueryField: Model.Database.QueryData], Model.Database.Connection) -> Future<Result>
 
     /// Create a new `QueryBuilder`.
     /// Use `Model.query(on:)` instead.
     private init(
         query: DatabaseQuery<Model.Database>,
         on connection: Future<Model.Database.Connection>,
-        resultTransformer: @escaping ([QueryField: Model.Database.QueryData], Model.Database.Connection) -> Future<Result>
+        resultTransformer: @escaping ([Model.Database.QueryField: Model.Database.QueryData], Model.Database.Connection) -> Future<Result>
     ) {
         self.query = query
         self.connection = connection
@@ -70,8 +70,8 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
                     !query.withSoftDeleted
                 {
                     try group(.or) { or in
-                        try or.filter(type.deletedAtField(), .equals, .data(Date?.none))
-                        try or.filter(type.deletedAtField(), .greaterThan, .data(Date()))
+                        try or.filter(Model.Database.queryField(for: type.deletedAtField()), .equals, .data(Date?.none))
+                        try or.filter(Model.Database.queryField(for: type.deletedAtField()), .greaterThan, .data(Date()))
                     }
                 }
             } catch {
@@ -131,12 +131,9 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
     ///     - entity: Entity name of this decodable type.
     /// - returns: `QueryBuilder` decoding type `(Result, D)`.
     public func alsoDecode<D>(_ type: D.Type, entity: String) -> QueryBuilder<Model, (Result, D)> where D: Decodable {
-        let decoder = QueryDataDecoder(Model.Database.self, entity: entity)
         return transformResult { row, conn, result in
-            let row = row.onlyValues(forEntity: entity)
             return Future.map(on: conn) {
-                let d = try decoder.decode(D.self, from: row)
-                return (result, d)
+                return try (result, Model.Database.queryDecode(row, entity: entity, as: D.self))
             }
         }
     }
@@ -153,11 +150,9 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
     ///     - type: New decodable type `D` to decode.
     /// - returns: `QueryBuilder` decoding type `D`.
     public func decode<D>(_ type: D.Type, entity: String = Model.entity) -> QueryBuilder<Model, D> where D: Decodable {
-        let decoder = QueryDataDecoder(Model.Database.self, entity: entity)
         return changeResult { row, conn in
-            let row = row.onlyValues(forEntity: entity)
             return Future.map(on: conn) {
-                return try decoder.decode(D.self, from: row)
+                return try Model.Database.queryDecode(row, entity: entity, as: D.self)
             }
         }
     }
@@ -172,7 +167,7 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
     /// Replaces the query result handler with the supplied closure.
     static func make(
         on connection: Future<Model.Database.Connection>,
-        with transformer: @escaping ([QueryField: Model.Database.QueryData], Model.Database.Connection) -> Future<Result>
+        with transformer: @escaping ([Model.Database.QueryField: Model.Database.QueryData], Model.Database.Connection) -> Future<Result>
     ) -> QueryBuilder<Model, Result> {
         return QueryBuilder(query: DatabaseQuery(entity: Model.entity), on: connection) { row, conn in
             return transformer(row, conn)
@@ -181,7 +176,7 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
 
     /// Replaces the query result handler with the supplied closure.
     func changeResult<NewResult>(
-        with transformer: @escaping ([QueryField: Model.Database.QueryData], Model.Database.Connection) -> Future<NewResult>
+        with transformer: @escaping ([Model.Database.QueryField: Model.Database.QueryData], Model.Database.Connection) -> Future<NewResult>
     ) -> QueryBuilder<Model, NewResult> {
         return QueryBuilder<Model, NewResult>(query: query, on: connection) { row, conn in
             return transformer(row, conn)
@@ -190,7 +185,7 @@ public final class QueryBuilder<Model, Result> where Model: Fluent.Model, Model.
 
     /// Transforms the previous query result to a new result using the supplied closure.
     func transformResult<NewResult>(
-        with transformer: @escaping ([QueryField: Model.Database.QueryData], Model.Database.Connection, Result) -> Future<NewResult>
+        with transformer: @escaping ([Model.Database.QueryField: Model.Database.QueryData], Model.Database.Connection, Result) -> Future<NewResult>
     ) -> QueryBuilder<Model, NewResult> {
         return QueryBuilder<Model, NewResult>(query: query, on: connection) { row, conn in
             return self.resultTransformer(row, conn).flatMap { result in
@@ -205,8 +200,7 @@ extension Model where Database: QuerySupporting {
     static func query<D>(decoding type: D.Type, on connection: Future<Self.Database.Connection>) -> QueryBuilder<Self, D> where D: Decodable {
         return QueryBuilder<Self, D>.make(on: connection) { row, conn in
             return Future.map(on: conn) {
-                let decoder = QueryDataDecoder(Self.Database.self, entity: Self.entity)
-                return try decoder.decode(D.self, from: row)
+                return try Self.Database.queryDecode(row, entity: entity, as: D.self)
             }
         }
     }

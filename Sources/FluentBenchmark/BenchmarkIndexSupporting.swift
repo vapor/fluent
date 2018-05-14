@@ -3,7 +3,7 @@ import Dispatch
 import Fluent
 import Foundation
 
-extension Benchmarker where Database: IndexSupporting, Database: QuerySupporting {
+extension Benchmarker where Database: IndexSupporting {
     /// The actual benchmark.
     fileprivate func _benchmark(on conn: Database.Connection) throws {
         var a1 = IndexSupportingModel<Database>(name: "a", age: 1)
@@ -27,7 +27,7 @@ extension Benchmarker where Database: IndexSupporting, Database: QuerySupporting
     }
 }
 
-extension Benchmarker where Database: IndexSupporting, Database: QuerySupporting {
+extension Benchmarker where Database: IndexSupporting {
     /// Benchmark fluent relations.
     /// The schema will be prepared first.
     public func benchmarkIndexSupporting_withSchema() throws {

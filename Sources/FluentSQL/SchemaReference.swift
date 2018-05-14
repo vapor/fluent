@@ -1,7 +1,7 @@
 import Fluent
 import SQL
 
-extension DatabaseSchema where Database: ReferenceSupporting {
+extension DatabaseSchema where Database: ReferenceSupporting, Database.QueryField: DataColumnRepresentable  {
     /// Convert schema references to a sql foreign key
     public func makeAddForeignKeys() -> [DataDefinitionForeignKey] {
         return addReferences.map { $0.makeForeignKey() }
@@ -13,16 +13,18 @@ extension DatabaseSchema where Database: ReferenceSupporting {
     }
 }
 
-extension SchemaReference {
+extension SchemaReference where Database: QuerySupporting, Database.QueryField: DataColumnRepresentable  {
     fileprivate var sqlName: String {
-        return "\(base.entity ?? "").\(base.path.joined(separator: "-"))_\(referenced.entity ?? "").\(referenced.path.joined(separator: "-"))"
+        let base = self.base.makeDataColumn()
+        let referenced = self.base.makeDataColumn()
+        return "\(base.table ?? "").\(base.name)_\(referenced.table ?? "").\(referenced.name)"
     }
 
     /// Convert a schema reference to a sql foreign key
     fileprivate func makeForeignKey() -> DataDefinitionForeignKey {
         return .init(
             name: sqlName,
-            local: DataColumn(table: nil, name: base.path[0]),
+            local: base.makeDataColumn(),
             foreign: referenced.makeDataColumn(),
             onUpdate: actions.update?.makeForeignKeyAction(),
             onDelete: actions.delete?.makeForeignKeyAction()

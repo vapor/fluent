@@ -66,8 +66,8 @@ extension SchemaBuilder where Model.Database: ReferenceSupporting {
         where Other: Fluent.Model
     {
         let reference = try SchemaReference<Model.Database>(
-            base: base.makeQueryField(),
-            referenced: referenced.makeQueryField(),
+            base: Model.Database.queryField(for: base),
+            referenced: Model.Database.queryField(for: referenced),
             actions: actions
         )
         schema.addReferences.append(reference)
@@ -102,12 +102,12 @@ extension SchemaBuilder where Model.Database: ReferenceSupporting {
     }
 
     /// Internal remove reference. Does not verify types match.
-    private func _removeReference<T, U, Other>(from field: KeyPath<Model, T>, to referencing: KeyPath<Other, U>) throws
+    private func _removeReference<T, U, Other>(from base: KeyPath<Model, T>, to referenced: KeyPath<Other, U>) throws
         where Other: Fluent.Model
     {
         let reference = try SchemaReference<Model.Database>(
-            base: field.makeQueryField(),
-            referenced: referencing.makeQueryField(),
+            base: Model.Database.queryField(for: base),
+            referenced: Model.Database.queryField(for: referenced),
             actions: .default
         )
         schema.removeReferences.append(reference)

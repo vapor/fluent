@@ -4,21 +4,21 @@ extension DatabaseQuery {
     public struct GroupBy {
         /// Internal storage type.
         enum Storage {
-            case field(QueryField)
+            case field(Database.QueryField)
         }
 
         /// Internal storage.
         let storage: Storage
 
         /// Returns the `QueryField` value.
-        public func field() -> QueryField? {
+        public func field() -> Database.QueryField? {
             switch storage {
             case .field(let field): return field
             }
         }
 
         /// Creates a new `GroupBy` object for a field.
-        public static func field(_ field: QueryField) -> GroupBy {
+        public static func field(_ field: Database.QueryField) -> GroupBy {
             return .init(storage: .field(field))
         }
     }
@@ -29,7 +29,7 @@ extension DatabaseQuery {
 extension QueryBuilder {
     /// Add a Group By to the Query.
     public func group<T>(by field: KeyPath<Model, T>) throws -> Self {
-        return try addGroupBy(.field(field.makeQueryField()))
+        return try addGroupBy(.field(Model.Database.queryField(for: field)))
     }
     
     /// Add a Group By to the Query.

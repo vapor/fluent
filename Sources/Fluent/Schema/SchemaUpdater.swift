@@ -13,8 +13,8 @@ public final class SchemaUpdater<Model>: SchemaBuilder
     }
 
     /// Deletes the field with the supplied name.
-    public func delete(_ name: String) {
-        schema.removeFields.append(name)
+    public func delete(_ field: Model.Database.QueryField) {
+        schema.removeFields.append(field)
     }
 }
 

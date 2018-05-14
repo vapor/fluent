@@ -8,7 +8,9 @@ extension SchemaBuilder where Model.Database: IndexSupporting {
     ///     - isUnique: If `true`, this index will also force uniqueness.
     ///                 `false` by default.
     public func addIndex<T>(to field: KeyPath<Model, T>, isUnique: Bool = false) throws {
-        let index = try SchemaIndex<Model.Database>(fields: [field.makeQueryField()], isUnique: isUnique)
+        let index = try SchemaIndex<Model.Database>(fields: [
+            Model.Database.queryField(for: field)
+        ], isUnique: isUnique)
         schema.addIndexes.append(index)
     }
 
@@ -22,7 +24,10 @@ extension SchemaBuilder where Model.Database: IndexSupporting {
     ///     - isUnique: If `true`, this index will also force uniqueness.
     ///                 `false` by default.
     public func addIndex<T, U>(to fieldA: KeyPath<Model, T>, _ fieldB: KeyPath<Model, U>, isUnique: Bool = false) throws {
-        let index = try SchemaIndex<Model.Database>(fields: [fieldA.makeQueryField(), fieldB.makeQueryField()], isUnique: isUnique)
+        let index = try SchemaIndex<Model.Database>(fields: [
+            Model.Database.queryField(for: fieldA),
+            Model.Database.queryField(for: fieldB)
+        ], isUnique: isUnique)
         schema.addIndexes.append(index)
     }
 
@@ -33,7 +38,9 @@ extension SchemaBuilder where Model.Database: IndexSupporting {
     /// - parameters:
     ///     - field: The field to un-index.
     public func removeIndex<T>(from field: KeyPath<Model, T>) throws {
-        let index = try SchemaIndex<Model.Database>(fields: [field.makeQueryField()], isUnique: false)
+        let index = try SchemaIndex<Model.Database>(fields: [
+            Model.Database.queryField(for: field)
+        ], isUnique: false)
         schema.removeIndexes.append(index)
     }
 
@@ -45,7 +52,10 @@ extension SchemaBuilder where Model.Database: IndexSupporting {
     ///     - fieldA: The first field to un-index.
     ///     - fieldB: The second field to un-index.
     public func removeIndex<T, U>(from fieldA: KeyPath<Model, T>, _ fieldB: KeyPath<Model, U>) throws {
-        let index = try SchemaIndex<Model.Database>(fields: [fieldA.makeQueryField(), fieldB.makeQueryField()], isUnique: false)
+        let index = try SchemaIndex<Model.Database>(fields: [
+            Model.Database.queryField(for: fieldA),
+            Model.Database.queryField(for: fieldB)
+        ], isUnique: false)
         schema.removeIndexes.append(index)
     }
 }

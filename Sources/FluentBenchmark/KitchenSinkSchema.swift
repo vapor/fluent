@@ -25,23 +25,23 @@ internal struct KitchenSinkSchema<D>: Migration where D: QuerySupporting & Schem
         return Database.create(KitchenSink<Database>.self, on: conn) { builder in
             try builder.addField(
                 type: Database.fieldType(for: UUID.self),
-                name: "id"
+                field: Database.queryField(for: ReflectedProperty(UUID.self, at: ["uuid"]))
             )
             try builder.addField(
                 type: Database.fieldType(for: String.self),
-                name: "string"
+                field: Database.queryField(for: ReflectedProperty(String.self, at: ["string"]))
             )
             try builder.addField(
                 type: Database.fieldType(for: Int.self),
-                name: "int"
+                field: Database.queryField(for: ReflectedProperty(Int.self, at: ["int"]))
             )
             try builder.addField(
                 type: Database.fieldType(for: Double.self),
-                name: "double"
+                field: Database.queryField(for: ReflectedProperty(Double.self, at: ["double"]))
             )
             try builder.addField(
                 type: Database.fieldType(for: Date.self),
-                name: "date"
+                field: Database.queryField(for: ReflectedProperty(Date.self, at: ["date"]))
             )
         }
     }

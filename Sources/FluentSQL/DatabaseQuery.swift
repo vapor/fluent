@@ -1,4 +1,4 @@
-extension DatabaseQuery where Database.QueryFilter: DataPredicateComparisonConvertible {
+extension DatabaseQuery where Database.QueryFilter: DataPredicateComparisonConvertible, Database: QuerySupporting, Database.QueryField: DataColumnRepresentable  {
     /// Create a SQL query from this database query.
     /// All Encodable values found while converting the query
     /// will be returned in an array in the order that placeholders

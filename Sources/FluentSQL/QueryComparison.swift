@@ -50,7 +50,7 @@ public protocol DataPredicateComparisonConvertible {
     static func convertFromDataPredicateComparison(_ comparison: DataPredicateComparison) -> Self
 }
 
-extension DatabaseQuery.FilterValue {
+extension DatabaseQuery.FilterValue where Database: QuerySupporting, Database.QueryField: DataColumnRepresentable  {
     /// Convert query comparison value to sql data predicate value.
     internal func makeDataPredicateValue() -> DataPredicateValue {
         if let field = self.field() {
@@ -92,7 +92,7 @@ private func _contains<M, V>(_ key: KeyPath<M, V>, _ comp: DataPredicateComparis
     where M.Database.QueryFilter: DataPredicateComparisonConvertible
 {
     let filter = try DatabaseQuery<M.Database>.FilterItem(
-        field: key.makeQueryField(),
+        field: M.Database.queryField(for: key),
         type: .custom(.convertFromDataPredicateComparison(comp)),
         value: value
     )

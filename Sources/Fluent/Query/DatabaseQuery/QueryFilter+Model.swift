@@ -92,6 +92,6 @@ public func !~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: [Value]) throws -
 
 /// Operator helper func.
 private func _compare<M, V>(_ key: KeyPath<M, V>, _ type: DatabaseQuery<M.Database>.FilterType, _ value: DatabaseQuery<M.Database>.FilterValue) throws -> ModelFilter<M> {
-    let filter = try DatabaseQuery<M.Database>.FilterItem(field: key.makeQueryField(), type: type, value: value)
+    let filter = try DatabaseQuery<M.Database>.FilterItem(field: M.Database.queryField(for: key), type: type, value: value)
     return ModelFilter<M>(filter: filter)
 }

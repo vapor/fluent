@@ -1,4 +1,4 @@
-extension DatabaseQuery.Aggregate {
+extension DatabaseQuery.Aggregate where Database: QuerySupporting, Database.QueryField: DataColumnRepresentable {
     /// Convert query aggregate to sql computed field.
     internal func makeDataComputed() -> DataComputedColumn {
         return .init(
