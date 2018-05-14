@@ -1,33 +1,24 @@
-import Async
-import Foundation
-import Service
-
-/// Represents a migration that has succesfully ran.
+/// Represents a migration that has been prepared.
 final class MigrationLog<D>: Model, Timestampable where D: QuerySupporting {
-    /// See Model.Database
+    /// See `Model`.
     typealias Database = D
 
-    /// See Model.dbID
-    static var database: DatabaseIdentifier<D> {
-        return .init("migration")
-    }
-
-    /// See Model.ID
+    /// See `Model`.
     typealias ID = UUID
 
-    /// See Model.entity
+    /// See `Model`.
     static var entity: String { return "fluent" }
 
-    /// See Model.idKeyPath
+    /// See `Model`.
     static var idKey: IDKey { return \.id }
 
-    /// See Timestampable.createdAtKey
+    /// See `Timestampable`.
     static var createdAtKey: CreatedAtKey { return \.createdAt }
 
-    /// See Timestampable.updatedAtKey
+    /// See `Timestampable`.
     static var updatedAtKey: UpdatedAtKey { return \.updatedAt }
 
-    /// See Model.id
+    /// See `Model`.
     var id: UUID?
 
     /// The unique name of the migration.
@@ -36,13 +27,13 @@ final class MigrationLog<D>: Model, Timestampable where D: QuerySupporting {
     /// The batch number.
     var batch: Int
 
-    /// See Timestampable.createdAt
+    /// When this log was created.
     var createdAt: Date?
 
-    /// See Timestampable.updatedAt
+    /// When this log was last updated.
     var updatedAt: Date?
 
-    /// Create a new migration log
+    /// Create a new `MigrationLog`.
     init(id: UUID? = nil, name: String, batch: Int) {
         self.id = id
         self.name = name
@@ -57,58 +48,44 @@ extension MigrationLog: Migration where D: SchemaSupporting { }
 
 extension MigrationLog {
     /// Prepares all of the supplied migrations that have not already run, assigning an incremented batch number.
-    static func prepareBatch(
-        _ migrations: [MigrationContainer<Database>],
-        on conn: Database.Connection,
-        using container: Container
-    ) -> Future<Void> {
-        return latestBatch(on: conn).flatMap(to: Void.self) { lastBatch in
+    static func prepareBatch(_ migrations: [MigrationContainer<Database>], on conn: Database.Connection, using container: Container) throws -> Future<Void> {
+        return try latestBatch(on: conn).flatMap { lastBatch in
             return migrations.map { migration in
-                return { migration.prepareIfNeeded(batch: lastBatch + 1, on: conn, using: container) }
+                return { try migration.prepareIfNeeded(batch: lastBatch + 1, on: conn, using: container) }
             }.syncFlatten(on: conn)
         }
     }
 
     /// Reverts all of the supplied migrations that ran in the most recent batch.
-    static func revertBatch(
-        _ migrations: [MigrationContainer<Database>],
-        on conn: Database.Connection,
-        using container: Container
-    ) -> Future<Void> {
-        return latestBatch(on: conn).flatMap(to: Void.self) { lastBatch in
+    static func revertBatch(_ migrations: [MigrationContainer<Database>], on conn: Database.Connection, using container: Container) throws -> Future<Void> {
+        return try latestBatch(on: conn).flatMap { lastBatch in
             return migrations.reversed().map { migration in
-                return { return migration.revertIfNeeded(batch: lastBatch, on: conn, using: container) }
+                return { return try migration.revertIfNeeded(batch: lastBatch, on: conn, using: container) }
             }.syncFlatten(on: conn)
         }
     }
 
     /// Reverts all of the supplied migrations (if they have been migrated).
-    static func revertAll(
-        _ migrations: [MigrationContainer<Database>],
-        on conn: Database.Connection,
-        using container: Container
-    ) -> Future<Void> {
+    static func revertAll(_ migrations: [MigrationContainer<Database>], on conn: Database.Connection, using container: Container) -> Future<Void> {
         return migrations.reversed().map { migration in
-            return { return migration.revertIfNeeded(on: conn, using: container) }
+            return { return try migration.revertIfNeeded(on: conn, using: container) }
         }.syncFlatten(on: conn)
     }
 
     /// Returns the latest batch number. Returns 0 if no batches have run yet.
-    static func latestBatch(on conn: Database.Connection) -> Future<Int> {
-        return Future.flatMap(on: conn) {
-            return try conn.query(MigrationLog<Database>.self)
-                .sort(\MigrationLog<Database>.batch, .descending)
-                .first()
-                .map(to: Int.self) { $0?.batch ?? 0 }
-        }
+    static func latestBatch(on conn: Database.Connection) throws -> Future<Int> {
+        return try conn.query(MigrationLog<Database>.self)
+            .sort(\.batch, .descending)
+            .first()
+            .map { $0?.batch ?? 0 }
     }
 
 }
 
 extension MigrationLog where D: SchemaSupporting {
     /// Prepares the connection for storing migration logs.
-    /// note: this is unlike other migrations since we are checking
-    /// for an error instead of asking if the migration has already prepared.
+    /// - note: this is unlike other migrations since we are checking
+    ///         for an error instead of asking if the migration has already prepared.
     internal static func prepareMetadata(on conn: Database.Connection) -> Future<Void> {
         let promise = conn.eventLoop.newPromise(Void.self)
 

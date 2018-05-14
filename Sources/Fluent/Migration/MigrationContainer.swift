@@ -1,9 +1,7 @@
-import Async
 import Logging
-import Service
 
 /// Contains a single migration.
-/// note: we need this type for type erasing purposes.
+/// - note: we need this type for type erasing purposes.
 internal struct MigrationContainer<D> where D: QuerySupporting {
     /// static database type info
     /// note: this is important
@@ -37,79 +35,70 @@ internal struct MigrationContainer<D> where D: QuerySupporting {
     }
 
     /// Prepares the migration if it hasn't previously run.
-    internal func prepareIfNeeded(
-        batch: Int,
-        on connection: Database.Connection,
-        using container: Container
-    ) -> Future<Void> {
-        return hasPrepared(on: connection).flatMap(to: Void.self) { hasPrepared in
-            if hasPrepared {
-                return .done(on: connection)
-            } else {
-                let log = try container.make(Logger.self)
-                log.info("Preparing migration '\(self.name)'")
-                return self.prepare(connection).flatMap(to: Void.self) {
-                    // create the migration log
-                    let log = MigrationLog<Database>(name: self.name, batch: batch)
-                    return MigrationLog<Database>
-                        .query(on: Future.map(on: connection) { connection })
-                        .save(log)
-                        .transform(to: ())
-                }
+    internal func prepareIfNeeded(batch: Int, on conn: Database.Connection, using container: Container) throws -> Future<Void> {
+        return try hasPrepared(on: conn).flatMap { hasPrepared -> Future<Void> in
+            guard !hasPrepared else {
+                return .done(on: conn)
+            }
+
+            let log = try container.make(Logger.self)
+            log.info("Preparing migration '\(self.name)'")
+            return self.prepare(conn).flatMap(to: Void.self) {
+                // create the migration log
+                let log = MigrationLog<Database>(name: self.name, batch: batch)
+                return MigrationLog<Database>
+                    .query(on: conn)
+                    .save(log)
+                    .transform(to: ())
             }
         }
     }
 
     /// Reverts the migration if it was part of the supplied batch number.
-    internal func revertIfNeeded(batch: Int, on connection: Database.Connection, using container: Container) -> Future<Void> {
-        return Future.flatMap(on: connection) {
-            return try MigrationLog<Database>
-                .query(on: connection)
-                .filter(\MigrationLog<Database>.name, .equals, .data(self.name))
-                .filter(\MigrationLog<Database>.batch, .equals, .data(batch))
-                .first()
-        }.flatMap(to: Void.self) { mig in
-            if mig != nil {
-                return self.revertDeletingMetadata(on: connection, using: container)
-            } else {
-                return .done(on: connection)
+    internal func revertIfNeeded(batch: Int, on conn: Database.Connection, using container: Container) throws -> Future<Void> {
+        return try MigrationLog<Database>
+            .query(on: conn)
+            .filter(\.name == name)
+            .filter(\.batch == batch)
+            .first()
+            .flatMap { mig in
+                if mig != nil {
+                    return try self.revertDeletingMetadata(on: conn, using: container)
+                } else {
+                    return .done(on: conn)
+                }
             }
-        }
     }
 
     /// Reverts the migration if it has previously run.
-    internal func revertIfNeeded(on connection: Database.Connection, using container: Container) -> Future<Void> {
-        return hasPrepared(on: connection).flatMap(to: Void.self) { hasPrepared in
+    internal func revertIfNeeded(on conn: Database.Connection, using container: Container) throws -> Future<Void> {
+        return try hasPrepared(on: conn).flatMap { hasPrepared in
             if hasPrepared {
-                return self.revertDeletingMetadata(on: connection, using: container)
+                return try self.revertDeletingMetadata(on: conn, using: container)
             } else {
-                return .done(on: connection)
+                return .done(on: conn)
             }
         }
     }
 
-    func revertDeletingMetadata(on connection: Database.Connection, using container: Container) -> Future<Void> {
-        return Future.flatMap(on: connection) {
-            let log = try container.make(Logger.self)
-            log.info("Reverting migration '\(self.name)'")
-            return self.revert(connection).flatMap(to: Void.self) { _ in
-                // delete the migration log
-                return try MigrationLog<Database>
-                    .query(on: connection)
-                    .filter(\.name, .equals, .data(self.name))
-                    .delete()
-            }
+    func revertDeletingMetadata(on conn: Database.Connection, using container: Container) throws -> Future<Void> {
+        let log = try container.make(Logger.self)
+        log.info("Reverting migration '\(name)'")
+        return revert(conn).flatMap {
+            // delete the migration log
+            return try MigrationLog<Database>
+                .query(on: conn)
+                .filter(\.name == self.name)
+                .delete()
         }
     }
 
     /// returns true if the migration has already been prepared.
-    internal func hasPrepared(on connection: Database.Connection) -> Future<Bool> {
-        return Future.flatMap(on: connection) {
-            return try MigrationLog<Database>
-                .query(on: Future.map(on: connection) { connection })
-                .filter(\.name, .equals, .data(self.name))
-                .first()
-                .map(to: Bool.self) { $0 != nil }
-        }
+    internal func hasPrepared(on conn: Database.Connection) throws -> Future<Bool> {
+        return try MigrationLog<Database>
+            .query(on: conn)
+            .filter(\.name == name)
+            .first()
+            .map { $0 != nil }
     }
 }

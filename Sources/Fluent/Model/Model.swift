@@ -1,133 +1,129 @@
-import Async
-import Core
-import Service
-
-/// Fluent database models. These types can be fetched
-/// from a database connection using a query.
+/// Represents a single table / collection in a Fluent database. Models
+/// are the basis for querying databases (create, read, update, and delete).
 ///
-/// Types conforming to this protocol provide the basis
-/// fetching and saving data to/from Fluent.
+/// Models can also conform to `Migration` to providing prepare and
+/// revert methods for `SchemaSupporting` databases.
+///
+/// Both `struct`s and `class`es can be models. Since Fluent is closure-based,
+/// copied `struct`s will be returned by any methods that must mutate the model.
+///
+/// Here is an example of a simple `User` model.
+///
+///     final class User: Model {
+///         typealias Database = PostgreSQLDatabase
+///         static let idKey: WritableKeyPath<User, UUID?> = \.id
+///         var id: UUID?
+///         var name: String
+///
+///         init(id: UUID? = nil, name: String) {
+///             self.id = id
+///             self.name = name
+///         }
+///     }
+///
+/// To create a `QueryBuilder` for a model, use the `query(on:)` method.
+///
+///     let users = try User.query(on: req).filter(\.name == "Vapor").all()
+///
+/// Models can also implement optional lifecycle methods to hook into Fluent actions.
+///
+///     final class User: Model {
+///         ...
+///         func willDelete(on conn: PostgreSQLConnection) throws -> Future<User> {
+///             print("Deleting user: \(id)")
+///             return conn.eventLoop.newSucceededFuture(result: self)
+///         }
+///     }
+///
 public protocol Model: AnyModel, Reflectable {
+    // MARK: DB
+
     /// The type of database this model can be queried on.
     associatedtype Database: Fluent.Database
 
-    /// The associated Identifier type.
-    /// Usually Int or UUID.
+    // MARK: ID
+
+    /// The associated Identifier type. Usually `Int` or `UUID`. Must conform to `ID`.
     associatedtype ID: Fluent.ID
 
-    /// Key path to identifier
+    /// Typealias for Swift `KeyPath` to an optional ID for this model.
     typealias IDKey = WritableKeyPath<Self, ID?>
 
-    /// This model's id key.
-    /// note: If this is not `id`, you
-    /// will still need to implement `var id`
-    /// on your model as a computed property.
+    /// Swift `KeyPath` to this `Model`'s identifier.
     static var idKey: IDKey { get }
 
+    // MARK: Lifecycle
+
     /// Called before a model is created when saving.
-    /// Throwing will cancel the save.
-    func willCreate(on connection: Database.Connection)  throws -> Future<Self>
+    /// - note: Throwing will cancel the save.
+    /// - parameters:
+    ///     - conn: Current database connection.
+    func willCreate(on conn: Database.Connection)  throws -> Future<Self>
     /// Called after the model is created when saving.
-    func didCreate(on connection: Database.Connection) throws -> Future<Self>
+    /// - parameters:
+    ///     - conn: Current database connection.
+    func didCreate(on conn: Database.Connection) throws -> Future<Self>
 
     /// Called before a model is updated when saving.
-    /// Throwing will cancel the save.
-    func willUpdate(on connection: Database.Connection) throws -> Future<Self>
+    /// - note: Throwing will cancel the save.
+    /// - parameters:
+    ///     - conn: Current database connection.
+    func willUpdate(on conn: Database.Connection) throws -> Future<Self>
     /// Called after the model is updated when saving.
-    func didUpdate(on connection: Database.Connection) throws -> Future<Self>
+    /// - parameters:
+    ///     - conn: Current database connection.
+    func didUpdate(on conn: Database.Connection) throws -> Future<Self>
 
     /// Called before a model is fetched.
-    /// Throwing will cancel the fetch.
-    func willRead(on connection: Database.Connection)  throws -> Future<Self>
+    /// - note: Throwing will cancel the fetch.
+    /// - parameters:
+    ///     - conn: Current database connection.
+    func willRead(on conn: Database.Connection)  throws -> Future<Self>
 
     /// Called before a model is deleted.
-    /// Throwing will cancel the deletion.
-    func willDelete(on connection: Database.Connection) throws -> Future<Self>
+    /// - note: Throwing will cancel the delete.
+    /// - parameters:
+    ///     - conn: Current database connection.
+    func willDelete(on conn: Database.Connection) throws -> Future<Self>
 }
 
-/// Type-erased model.
-/// See Model
-public protocol AnyModel: Codable {
-    /// This model's unique name.
-    static var name: String { get }
-
-    /// This model's collection/table name
-    static var entity: String { get }
-}
-
-extension Model where Database: QuerySupporting {
-    /// Creates a query for this model on the supplied connection.
-    public func query(on conn: DatabaseConnectable) -> QueryBuilder<Self, Self> {
-        return Self.query(on: conn)
-    }
-
-    /// Creates a query for this model on the supplied connection.
-    public static func query(on conn: DatabaseConnectable) -> QueryBuilder<Self, Self> {
-        return query(on: conn.databaseConnection(to: Self.defaultDatabase))
-    }
-}
+// MARK: Optional
 
 extension Model {
-    /// Access the fluent identifier
-    public var fluentID: ID? {
-        get { return self[keyPath: Self.idKey] }
-        set { self[keyPath: Self.idKey] = newValue }
-    }
-}
-
-/// Free implementations.
-extension Model {
-    /// See Model.name
-    public static var name: String {
-        return "\(Self.self)".lowercased()
+    /// See `Model`.
+    public func willCreate(on conn: Database.Connection) throws -> Future<Self> {
+        return conn.eventLoop.newSucceededFuture(result: self)
     }
 
-    /// See Model.entity
-    public static var entity: String {
-        var pluralName = name.replacingOccurrences(of: "([^aeiouy]|qu)y$", with: "$1ie", options: [.regularExpression])
-
-        if pluralName.last != "s" {
-            pluralName += "s"
-        }
-
-        return pluralName
+    /// See `Model`.
+    public func didCreate(on conn: Database.Connection) throws -> Future<Self> {
+        return conn.eventLoop.newSucceededFuture(result: self)
     }
 
-    /// Seee Model.willCreate()
-    public func willCreate(on connection: Database.Connection) throws -> Future<Self> {
-        return Future.map(on: connection) { self }
+    /// See `Model`.
+    public func willUpdate(on conn: Database.Connection) throws -> Future<Self> {
+        return conn.eventLoop.newSucceededFuture(result: self)
+    }
+    /// See `Model`.
+    public func didUpdate(on conn: Database.Connection) throws -> Future<Self> {
+        return conn.eventLoop.newSucceededFuture(result: self)
     }
 
-    /// See Model.didCreate()
-    public func didCreate(on connection: Database.Connection) throws -> Future<Self> {
-        return Future.map(on: connection) { self }
+    /// See `Model`.
+    public func willRead(on conn: Database.Connection) throws -> Future<Self> {
+        return conn.eventLoop.newSucceededFuture(result: self)
     }
 
-    /// See Model.willUpdate()
-    public func willUpdate(on connection: Database.Connection) throws -> Future<Self> {
-        return Future.map(on: connection) { self }
-    }
-    /// See Model.didUpdate()
-    public func didUpdate(on connection: Database.Connection) throws -> Future<Self> {
-        return Future.map(on: connection) { self }
-    }
-
-    /// See Model.willRead()
-    public func willRead(on connection: Database.Connection) throws -> Future<Self> {
-        return Future.map(on: connection) { self }
-    }
-
-    /// See Model.willDelete()
-    public func willDelete(on connection: Database.Connection) throws -> Future<Self> {
-        return Future.map(on: connection) { self }
+    /// See `Model`.
+    public func willDelete(on conn: Database.Connection) throws -> Future<Self> {
+        return conn.eventLoop.newSucceededFuture(result: self)
     }
 }
 
 /// MARK: Convenience
 
 extension Model {
-    /// Returns the ID.
-    /// Throws an error if the model doesn't have an ID.
+    /// Returns the model's ID, throwing an error if the model does not yet have an ID.
     public func requireID() throws -> ID {
         guard let id = self.fluentID else {
             throw FluentError(identifier: "idRequired", reason: "\(Self.self) does not have an identifier.", source: .capture())
@@ -135,78 +131,131 @@ extension Model {
 
         return id
     }
+
+    /// Access the Fluent identifier keyed by `idKey`.
+    public var fluentID: ID? {
+        get { return self[keyPath: Self.idKey] }
+        set { self[keyPath: Self.idKey] = newValue }
+    }
+}
+
+extension Model where Database: QuerySupporting {
+    /// Creates a query for this model on the supplied connection.
+    ///
+    ///     user.query(on: conn).save(user)
+    ///
+    /// - parameters:
+    ///     - conn: Something `DatabaseConnectable` to create the `QueryBuilder` on.
+    public func query(on conn: DatabaseConnectable) -> QueryBuilder<Self, Self> {
+        return Self.query(on: conn)
+    }
+
+    /// Creates a query for this model type on the supplied connection.
+    ///
+    ///     let users = try User.query(on: req).filter(\.name == "Vapor").all()
+    ///
+    /// - parameters:
+    ///     - conn: Something `DatabaseConnectable` to create the `QueryBuilder` on.
+    public static func query(on conn: DatabaseConnectable) -> QueryBuilder<Self, Self> {
+        return query(on: conn.databaseConnection(to: Self.defaultDatabase))
+    }
+
+    /// Attempts to find an instance of this model with the supplied identifier.
+    ///
+    ///     let user = try User.find(42)
+    ///
+    /// - parameters:
+    ///     - id: ID to lookup.
+    ///     - conn: Something `DatabaseConnectable` to create the `QueryBuilder` on.
+    public static func find(_ id: Self.ID, on conn: DatabaseConnectable) throws -> Future<Self?> {
+        return try query(on: conn).filter(idKey == id).first()
+    }
 }
 
 /// MARK: CRUD
 
 extension Model where Database: QuerySupporting {
-    /// Saves the supplied model.
-    /// Calls `create` if the ID is `nil`, and `update` if it exists.
-    /// If you need to create a model with a pre-existing ID,
-    /// call `create` instead.
+    /// Saves the model, calling either `create(...)` or `update(...)` depending on whether
+    /// the model already has an ID.
+    ///
+    /// If you need to create a model with a pre-existing ID, call `create` instead.
+    ///
+    ///     let user = User(...)
+    ///     user.save(on: req)
+    ///
+    /// - parameters:
+    ///     - conn: Database connection to use.
+    /// - returns: Future containing the saved model.
     public func save(on conn: DatabaseConnectable) -> Future<Self> {
         return query(on: conn).save(self)
     }
 
     /// Saves this model as a new item in the database.
     /// This method can auto-generate an ID depending on ID type.
+    ///
+    ///     let user = User(...)
+    ///     user.create(on: req)
+    ///
+    /// - parameters:
+    ///     - conn: Database connection to use.
+    /// - returns: Future containing the created model.
     public func create(on conn: DatabaseConnectable) -> Future<Self> {
         return query(on: conn).create(self)
     }
 
-    /// Updates the model. This requires that
-    /// the model has its ID set.
+    /// Updates the model. This requires that the model has its ID set.
+    ///
+    ///     user.update(on: req, originalID: 42)
+    ///
+    /// - parameters:
+    ///     - conn: Database connection to use.
+    ///     - originalID: Specify the original ID if the ID has changed.
+    /// - returns: Future containing the updated model.
     public func update(on conn: DatabaseConnectable, originalID: ID? = nil) -> Future<Self> {
         return query(on: conn).update(self, originalID: originalID)
     }
 
-    /// Saves this model to the supplied query executor.
-    /// If `shouldCreate` is true, the model will be saved
-    /// as a new item even if it already has an identifier.
+    /// Deletes this model from the database. This requires that the model has its ID set.
+    ///
+    ///     user.delete(on: req)
+    ///
+    /// - parameters:
+    ///     - conn: Database connection to use.
+    /// - returns: Future that will be completed when the delete is done.
     public func delete(on conn: DatabaseConnectable) -> Future<Void> {
         return query(on: conn).delete(self)
     }
 }
 
-/// MARK: Future CRUD
+/// MARK: Future + CRUD
 
 extension Future where T: Model, T.Database: QuerySupporting {
-    /// See `Model.save(on:)`
+    /// See `Model`.
     public func save(on connectable: DatabaseConnectable) -> Future<T> {
         return self.flatMap(to: T.self) { (model) in
             return model.save(on: connectable).transform(to: model)
         }
     }
 
-    /// See `Model.create(on:)`
+    /// See `Model`.
     public func create(on connectable: DatabaseConnectable) -> Future<T> {
         return self.flatMap(to: T.self) { (model) in
             return model.create(on: connectable).transform(to: model)
         }
     }
 
-    /// See `Model.update(on:)`
+    /// See `Model`.
     public func update(on connectable: DatabaseConnectable) -> Future<T> {
         return self.flatMap(to: T.self) { (model) in
             return model.update(on: connectable).transform(to: model)
         }
     }
 
-    /// See `Model.delete(on:)`
+    /// See `Model`.
     public func delete(on connectable: DatabaseConnectable) -> Future<T> {
         return self.flatMap(to: T.self) { (model) in
             return model.delete(on: connectable).transform(to: model)
         }
-    }
-}
-
-/// MARK: Find
-
-extension Model where Database: QuerySupporting {
-    /// Attempts to find an instance of this model w/
-    /// the supplied identifier.
-    public static func find(_ id: Self.ID, on conn: DatabaseConnectable) throws -> Future<Self?> {
-        return try query(on: conn).filter(idKey, .equals, .data(id)).first()
     }
 }
 
@@ -217,14 +266,14 @@ private var _defaultDatabases: [ObjectIdentifier: Any] = [:]
 
 extension Model {
     /// This Model's default database. This will be used
-    /// when no database id is passed (for example, on `Model.query(on:)`,
+    /// when no database id is passed (for example, on `Model.query(on:)`)
     /// or when it is not possible to pass a database (such as static lookup).
     public static var defaultDatabase: DatabaseIdentifier<Database>? {
         get { return _defaultDatabases[ObjectIdentifier(Self.self)] as? DatabaseIdentifier<Database> }
         set { _defaultDatabases[ObjectIdentifier(Self.self)] = newValue }
     }
 
-    /// Returns the `.defaultDatabase` or throws an error.
+    /// Returns the `defaultDatabase` or throws an error.
     public static func requireDefaultDatabase() throws -> DatabaseIdentifier<Database> {
         guard let dbid = Self.defaultDatabase else {
             throw FluentError(
@@ -239,6 +288,7 @@ extension Model {
 }
 
 // MARK: Routing
+
 extension Model where Database: QuerySupporting {
     /// See `Parameter`.
     public static func make(for parameter: String, using container: Container) throws -> Future<Self> {

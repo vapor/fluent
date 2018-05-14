@@ -1,6 +1,3 @@
-import Async
-import Service
-
 /// Internal struct containing migrations for a single database.
 /// - note: This struct is important for maintaining database connection type info.
 internal struct SchemaMigrationConfig<Database>: MigrationRunnable where Database: SchemaSupporting & QuerySupporting {
@@ -19,8 +16,8 @@ internal struct SchemaMigrationConfig<Database>: MigrationRunnable where Databas
     /// See `MigrationRunnable`.
     internal func migrationPrepareBatch(on container: Container) -> Future<Void> {
         return container.withPooledConnection(to: database) { conn in
-            return MigrationLog<Database>.prepareMetadata(on: conn).flatMap(to: Void.self) { _ in
-                return MigrationLog<Database>.prepareBatch(self.migrations, on: conn, using: container)
+            return MigrationLog<Database>.prepareMetadata(on: conn).flatMap { _ in
+                return try MigrationLog<Database>.prepareBatch(self.migrations, on: conn, using: container)
             }
         }
     }
@@ -28,8 +25,8 @@ internal struct SchemaMigrationConfig<Database>: MigrationRunnable where Databas
     /// See `MigrationRunnable`.
     func migrationRevertBatch(on container: Container) -> EventLoopFuture<Void> {
         return container.withPooledConnection(to: database) { conn in
-            return MigrationLog<Database>.prepareMetadata(on: conn).flatMap(to: Void.self) { _ in
-                return MigrationLog<Database>.revertBatch(self.migrations, on: conn, using: container)
+            return MigrationLog<Database>.prepareMetadata(on: conn).flatMap { _ in
+                return try MigrationLog<Database>.revertBatch(self.migrations, on: conn, using: container)
             }
         }
     }
@@ -37,7 +34,7 @@ internal struct SchemaMigrationConfig<Database>: MigrationRunnable where Databas
     /// See `MigrationRunnable`.
     func migrationRevertAll(on container: Container) -> EventLoopFuture<Void> {
         return container.withPooledConnection(to: database) { conn in
-            return MigrationLog<Database>.prepareMetadata(on: conn).flatMap(to: Void.self) { _ in
+            return MigrationLog<Database>.prepareMetadata(on: conn).flatMap { _ in
                 return MigrationLog<Database>.revertAll(self.migrations, on: conn, using: container)
             }
         }

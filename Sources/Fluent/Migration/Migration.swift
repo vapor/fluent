@@ -15,6 +15,8 @@
 /// data into a database or for adding properties to a `Model` in a production database.
 ///
 ///     struct AddAgeProperty: Migration {
+///         typealias Database = PostgreSQLDatabase
+///
 ///         static func prepare(on conn: PostgreSQLConnection) -> Future<Void> {
 ///             return Database.update(User.self, on: conn) { builder in
 ///                 builder.field(for: \.age)

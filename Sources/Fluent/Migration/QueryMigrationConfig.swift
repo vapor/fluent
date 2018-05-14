@@ -13,25 +13,24 @@ internal struct QueryMigrationConfig<Database>: MigrationRunnable where Database
         self.migrations = []
     }
 
-    /// See `MigrationRunnable`
+    /// See `MigrationRunnable`.
     internal func migrationPrepareBatch(on container: Container) -> Future<Void> {
         return container.withPooledConnection(to: database) { conn in
-            return MigrationLog<Database>.prepareBatch(self.migrations, on: conn, using: container)
+            return try MigrationLog<Database>.prepareBatch(self.migrations, on: conn, using: container)
         }
     }
 
-    /// See `MigrationRunnable`
+    /// See `MigrationRunnable`.
     func migrationRevertBatch(on container: Container) -> EventLoopFuture<Void> {
         return container.withPooledConnection(to: database) { conn in
-            return MigrationLog<Database>.revertBatch(self.migrations, on: conn, using: container)
+            return try MigrationLog<Database>.revertBatch(self.migrations, on: conn, using: container)
         }
     }
 
-    /// See `MigrationRunnable`
+    /// See `MigrationRunnable`.
     func migrationRevertAll(on container: Container) -> EventLoopFuture<Void> {
         return container.withPooledConnection(to: database) { conn in
             return MigrationLog<Database>.revertAll(self.migrations, on: conn, using: container)
         }
     }
 }
-

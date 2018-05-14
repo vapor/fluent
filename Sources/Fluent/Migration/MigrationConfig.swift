@@ -1,12 +1,17 @@
-import Async
-import Service
-
-/// Helper struct for configuring Fluent migrations.
+/// Configures `Migration`s for your Fluent databases.
+///
+///     var migrations = MigrationConfig()
+///     migrations.add(model: User.self, database: .psql)
+///     migrations.add(migration: AddAgeProperty.self, database: .psql)
+///     services.register(migrations)
+///
+/// You can configure both `Migration`s and `Model & Migration`s. When you configure
+/// a `Model & Migration`, the `defaultDatabase` property will also be set.
 public struct MigrationConfig: Service {
     /// Internal storage.
     internal var storage: [String: MigrationRunnable]
 
-    /// Create a new migration config helper.
+    /// Create a new, empty `MigrationConfig`.
     public init() {
         self.storage = [:]
     }
@@ -15,7 +20,7 @@ public struct MigrationConfig: Service {
     ///
     ///     migrationConfig.add(migration: CleanupUsers.self, database: .sqlite)
     ///
-    /// Note: This method is for databases that do not conform to `SchemaSupporting`.
+    /// - note: This method is for databases that do not conform to `SchemaSupporting`.
     ///
     /// - parameters:
     ///     - migration: `Migration` type to add.
@@ -39,7 +44,7 @@ public struct MigrationConfig: Service {
     ///
     ///     migrationConfig.add(migration: CleanupUsers.self, database: .sqlite)
     ///
-    /// Note: This method is for databases that conform to `SchemaSupporting`.
+    /// - note: This method is for databases that conform to `SchemaSupporting`.
     ///
     /// - parameters:
     ///     - migration: `Migration` type to add.
@@ -65,21 +70,15 @@ public struct MigrationConfig: Service {
     ///
     /// This method sets the model's `defaultDatabase` property.
     ///
-    /// Note: This method is for databases that conform to `SchemaSupporting`.
+    /// - note: This method is for databases that conform to `SchemaSupporting`.
     ///
     /// - parameters:
     ///     - model: `Model & Migration` type to add.
     ///     - database: Database identifier for the database this should run on.
     ///     - name: Optional unique name for this migration. This will be stored in Fluent's metadata table to detect whether
     ///             the migration has already run or not.
-    public mutating func add<Model> (
-        model: Model.Type,
-        database: DatabaseIdentifier<Model.Database>,
-        name: String = Model.name
-    ) where
-        Model: Fluent.Migration,
-        Model: Fluent.Model,
-        Model.Database: SchemaSupporting & QuerySupporting
+    public mutating func add<Model> (model: Model.Type, database: DatabaseIdentifier<Model.Database>, name: String = Model.name)
+        where Model: Fluent.Migration, Model: Fluent.Model, Model.Database: SchemaSupporting & QuerySupporting
     {
         self.add(migration: Model.self, database: database)
         Model.defaultDatabase = database
@@ -91,21 +90,15 @@ public struct MigrationConfig: Service {
     ///
     /// This method sets the model's `defaultDatabase` property.
     ///
-    /// Note: This method is for databases that do not conform to `SchemaSupporting`.
+    /// - note: This method is for databases that do not conform to `SchemaSupporting`.
     ///
     /// - parameters:
     ///     - model: `Model & Migration` type to add.
     ///     - database: Database identifier for the database this should run on.
     ///     - name: Optional unique name for this migration. This will be stored in Fluent's metadata table to detect whether
     ///             the migration has already run or not.
-    public mutating func add<Model> (
-        model: Model.Type,
-        database: DatabaseIdentifier<Model.Database>,
-        name: String = Model.name
-    ) where
-        Model: Fluent.Migration,
-        Model: Fluent.Model,
-        Model.Database: QuerySupporting
+    public mutating func add<Model> (model: Model.Type, database: DatabaseIdentifier<Model.Database>, name: String = Model.name)
+        where Model: Fluent.Migration, Model: Fluent.Model, Model.Database: QuerySupporting
     {
         self.add(migration: Model.self, database: database)
         Model.defaultDatabase = database
@@ -127,11 +120,9 @@ public struct MigrationConfig: Service {
     ///             the migration has already run or not.
     ///     - database: Database identifier for the database this migration should run on.
     ///     - function: Called to prepare or revert this migration. If reverting, the second parameter will be `true`.
-    public mutating func add<D>(
-        name: String,
-        database: DatabaseIdentifier<D>,
-        function: @escaping (D.Connection, Bool) -> Future<Void>
-    ) where D: QuerySupporting {
+    public mutating func add<D>(name: String, database: DatabaseIdentifier<D>, function: @escaping (D.Connection, Bool) -> Future<Void>)
+        where D: QuerySupporting
+    {
         var config = fetchQueryMigrator(database: database)
         let container = MigrationContainer<D>(name: name, prepare: { function($0, false) }, revert: { function($0, true) })
         config.migrations.append(container)
@@ -156,11 +147,9 @@ public struct MigrationConfig: Service {
     ///             the migration has already run or not.
     ///     - database: Database identifier for the database this migration should run on.
     ///     - function: Called to prepare or revert this migration. If reverting, the second parameter will be `true`.
-    public mutating func add<D>(
-        name: String,
-        database: DatabaseIdentifier<D>,
-        function: @escaping (D.Connection, Bool) -> Future<Void>
-    ) where D: QuerySupporting & SchemaSupporting {
+    public mutating func add<D>(name: String, database: DatabaseIdentifier<D>, function: @escaping (D.Connection, Bool) -> Future<Void>)
+        where D: QuerySupporting & SchemaSupporting
+    {
         var config = fetchSchemaMigrator(database: database)
         let container = MigrationContainer<D>(name: name, prepare: { function($0, false) }, revert: { function($0, true) })
         config.migrations.append(container)
