@@ -37,6 +37,7 @@ public protocol Pivot: Model {
 
 /// A pivot that can be initialized from just the left and right models. This allows
 /// Fluent to automatically create pivots for extended functionality. ex: attaching.
+///
 /// - note: pivots with equal left and right types cannot take advantage of this protocol due to
 ///         ambiguous type errors.
 public protocol ModifiablePivot: Pivot {

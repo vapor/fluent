@@ -11,14 +11,20 @@ extension DatabaseQuery {
     public struct Aggregate {
         /// Possible aggregation types.
         public enum Method {
+            /// Counts the number of matching entities.
             case count
+            /// Adds all values of the chosen field.
             case sum
+            /// Averges all values of the chosen field.
             case average
+            /// Returns the minimum value for the chosen field.
             case min
+            /// Returns the maximum value for the chosen field.
             case max
         }
 
-        /// Optional field to apply this aggreagate to. If `nil`, the aggregate is applied to all fields.
+        /// Optional field to apply this aggreagate to.
+        /// If `nil`, the aggregate is applied to all fields.
         public var field: Database.QueryField?
 
         /// The specific aggreatge method to use.
@@ -27,43 +33,73 @@ extension DatabaseQuery {
 }
 
 extension QueryBuilder {
-    /// Get the number of results for this query.
-    /// Optionally specify a specific field to count.
+    /// Returns the number of results for this query.
     public func count() -> Future<Int> {
-        return addAggregate(.init(field: nil, method: .count))
+        return _aggregate(.init(field: nil, method: .count))
     }
 
-    /// Returns the sum of the supplied field
-    public func sum<T>(_ field: KeyPath<Model, T>) throws -> Future<Double> {
+    /// Returns the sum of all entries for the supplied field.
+    ///
+    ///     let totalLikes = try Post.query(on: conn).sum(\.likes)
+    ///
+    /// - parameters:
+    ///     - field: Field to sum.
+    /// - returns: A `Future` containing the sum.
+    public func sum<T>(_ field: KeyPath<Model, T>) throws -> Future<T> where T: Decodable {
         return try aggregate(.sum, field: field)
     }
 
-    /// Returns the average of the supplied field
-    public func average<T>(_ field: KeyPath<Model, T>) throws -> Future<Double> {
+    /// Returns the average of all entries for the supplied field.
+    ///
+    ///     let averageLikes = try Post.query(on: conn).average(\.likes)
+    ///
+    /// - parameters:
+    ///     - field: Field to average.
+    /// - returns: A `Future` containing the average.
+    public func average<T>(_ field: KeyPath<Model, T>) throws -> Future<T> where T: Decodable {
         return try aggregate(.average, field: field)
     }
 
-    /// Returns the min of the supplied field
-    public func min<T>(_ field: KeyPath<Model, T>) throws -> Future<Double> {
+    /// Returns the minimum value of all entries for the supplied field.
+    ///
+    ///     let leastLikes = try Post.query(on: conn).min(\.likes)
+    ///
+    /// - parameters:
+    ///     - field: Field to find min for.
+    /// - returns: A `Future` containing the min.
+    public func min<T>(_ field: KeyPath<Model, T>) throws -> Future<T> where T: Decodable {
         return try aggregate(.min, field: field)
     }
 
-    /// Returns the max of the supplied field
-    public func max<T>(_ field: KeyPath<Model, T>) throws -> Future<Double> {
+    /// Returns the maximum value of all entries for the supplied field.
+    ///
+    ///     let mostLikes = try Post.query(on: conn).max(\.likes)
+    ///
+    /// - parameters:
+    ///     - field: Field to find max for.
+    /// - returns: A `Future` containing the max.
+    public func max<T>(_ field: KeyPath<Model, T>) throws -> Future<T> where T: Decodable {
         return try aggregate(.max, field: field)
     }
 
-    /// Perform an aggregate action on the supplied field
-    /// on the supplied model.
-    /// Decode as the supplied type.
+    /// Perform an aggregate action on the supplied field. Normally you will use one of
+    /// the convenience methods like `min(...)` or `count(...)` instead.
+    ///
+    ///     let mostLikes = try Post.query(on: conn).aggregate(.max, field: \.likes, as: Int.self)
+    ///
+    /// - parameters:
+    ///     - method: Aggregate method to use.
+    ///     - field: Field to find max for.
+    ///     - type: `Decodable` type to decode the aggregate value as.
+    /// - returns: A `Future` containing the aggregate.
     public func aggregate<D, T>(_ method: DatabaseQuery<Model.Database>.Aggregate.Method, field: KeyPath<Model, T>, as type: D.Type = D.self) throws -> Future<D>
         where D: Decodable
     {
-        return try addAggregate(.init(field: Model.Database.queryField(for: field), method: method))
+        return try _aggregate(.init(field: Model.Database.queryField(for: field), method: method))
     }
 
-    /// Performs the supplied aggregate struct.
-    public func addAggregate<D>(_ aggregate: DatabaseQuery<Model.Database>.Aggregate, as type: D.Type = D.self) -> Future<D>
+    /// Perform an aggregate action.
+    private func _aggregate<D>(_ aggregate: DatabaseQuery<Model.Database>.Aggregate, as type: D.Type = D.self) -> Future<D>
         where D: Decodable
     {
         query.action = .read
@@ -82,7 +118,8 @@ extension QueryBuilder {
     }
 }
 
-/// Aggreagate result structure expected from DB.
-internal struct AggregateResult<D: Decodable>: Decodable {
+/// Aggregate result structure expected from DB.
+internal struct AggregateResult<D>: Decodable where D: Decodable {
+    /// Contains the aggregated value.
     var fluentAggregate: D
 }

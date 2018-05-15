@@ -65,7 +65,7 @@ extension DatabaseQuery.FilterValue where Database: QuerySupporting, Database.Qu
 
 
 /// Has prefix
-public func ~= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
+public func ~= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> OperatorFilter<Model>
     where Model.Database.QueryFilter: DataPredicateComparisonConvertible
 {
     return try _contains(lhs, .like, .data("%\(rhs)"))
@@ -73,7 +73,7 @@ public func ~= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws ->
 
 infix operator =~
 /// Has suffix.
-public func =~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
+public func =~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> OperatorFilter<Model>
     where Model.Database.QueryFilter: DataPredicateComparisonConvertible
 {
     return try _contains(lhs, .like, .data("\(rhs)%"))
@@ -81,14 +81,14 @@ public func =~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws ->
 
 infix operator ~~
 /// Contains.
-public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
+public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> OperatorFilter<Model>
     where Model.Database.QueryFilter: DataPredicateComparisonConvertible
 {
     return try _contains(lhs, .like, .data("%\(rhs)%"))
 }
 
 /// Operator helper func.
-private func _contains<M, V>(_ key: KeyPath<M, V>, _ comp: DataPredicateComparison, _ value: DatabaseQuery<M.Database>.FilterValue) throws -> ModelFilter<M>
+private func _contains<M, V>(_ key: KeyPath<M, V>, _ comp: DataPredicateComparison, _ value: DatabaseQuery<M.Database>.FilterValue) throws -> OperatorFilter<M>
     where M.Database.QueryFilter: DataPredicateComparisonConvertible
 {
     let filter = try DatabaseQuery<M.Database>.FilterItem(
@@ -96,5 +96,5 @@ private func _contains<M, V>(_ key: KeyPath<M, V>, _ comp: DataPredicateComparis
         type: .custom(.convertFromDataPredicateComparison(comp)),
         value: value
     )
-    return ModelFilter<M>(filter: filter)
+    return OperatorFilter<M>(filter: filter)
 }

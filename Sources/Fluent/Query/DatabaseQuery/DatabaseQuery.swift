@@ -1,27 +1,28 @@
 /// A query that can be sent to a Fluent database.
 public struct DatabaseQuery<Database> where Database: QuerySupporting {
-    /// The entity to query
+    /// Table / collection to query.
     public let entity: String
 
-    /// The action to perform on the database
+    /// CURD action to perform on the database.
     public var action: Action
 
     /// Aggregates / computed methods.
     public var aggregates: [Aggregate]
 
-    /// Optional model data to save or update.
+    /// Optional model data to create or update.
+    /// Defaults to an empty dictionary.
     public var data: [Database.QueryField: Database.QueryData]
 
-    /// Result stream will be filtered by these queries.
+    /// Result set will be limited by these filters.
     public var filters: [Filter]
     
-    /// Group By to be applied to the results.
+    /// One or more group bys to filter by.
     public var groups: [GroupBy]
 
-    /// If true, the query will only select distinct rows.
+    /// If `true`, the query will only select distinct rows.
     public var isDistinct: Bool
 
-    /// Limits and offsets the amount of results
+    /// Limits and offsets the amount of results.
     public var range: Range?
 
     /// Sorts to be applied to the results.
