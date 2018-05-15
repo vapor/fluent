@@ -64,7 +64,7 @@ extension Benchmarker where Database: QuerySupporting & SchemaSupporting {
     }
 }
 
-final class BasicUser<D>:  Model where D: QuerySupporting {
+final class BasicUser<D>: Encodable, Model where D: QuerySupporting {
     /// See Model.Database
     typealias Database = D
 

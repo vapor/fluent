@@ -16,8 +16,10 @@ public protocol QuerySupporting: Database {
     // MARK: Codable
 
     static func queryEncode<E>(_ encodable: E, entity: String) throws -> [QueryField: QueryData]
+        where E: Encodable
 
     static func queryDecode<D>(_ data: [QueryField: QueryData], entity: String, as decodable: D.Type) throws -> D
+        where D: Decodable
 
     // MARK: Field
 
@@ -25,7 +27,7 @@ public protocol QuerySupporting: Database {
     associatedtype QueryField: Hashable
 
     /// Creates a `QueryField` for the supplied `ReflectedProperty`.
-    static func queryField(for reflectedProperty: ReflectedProperty) throws -> QueryField
+    static func queryField(for reflectedProperty: ReflectedProperty, entity: String) throws -> QueryField
 
     // MARK: Data
 
@@ -52,7 +54,7 @@ extension QuerySupporting {
         guard let property = try M.reflectProperty(forKey: keyPath) else {
             throw FluentError(identifier: "reflectProperty", reason: "No property reflected for: \(keyPath)", source: .capture())
         }
-        return try queryField(for: property)
+        return try queryField(for: property, entity: M.entity)
     }
 }
 

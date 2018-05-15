@@ -14,6 +14,11 @@ final class KitchenSink<D>: Model where D: QuerySupporting {
 
     /// KitchenSink's identifier
     var id: String?
+    var uuid: UUID
+    var string: String
+    var int: Int
+    var double: Double
+    var date: Date
 }
 
 internal struct KitchenSinkSchema<D>: Migration where D: QuerySupporting & SchemaSupporting {
@@ -23,26 +28,11 @@ internal struct KitchenSinkSchema<D>: Migration where D: QuerySupporting & Schem
     /// See Migration.prepare
     static func prepare(on conn: D.Connection) -> Future<Void> {
         return Database.create(KitchenSink<Database>.self, on: conn) { builder in
-            try builder.addField(
-                type: Database.fieldType(for: UUID.self),
-                field: Database.queryField(for: ReflectedProperty(UUID.self, at: ["uuid"]))
-            )
-            try builder.addField(
-                type: Database.fieldType(for: String.self),
-                field: Database.queryField(for: ReflectedProperty(String.self, at: ["string"]))
-            )
-            try builder.addField(
-                type: Database.fieldType(for: Int.self),
-                field: Database.queryField(for: ReflectedProperty(Int.self, at: ["int"]))
-            )
-            try builder.addField(
-                type: Database.fieldType(for: Double.self),
-                field: Database.queryField(for: ReflectedProperty(Double.self, at: ["double"]))
-            )
-            try builder.addField(
-                type: Database.fieldType(for: Date.self),
-                field: Database.queryField(for: ReflectedProperty(Date.self, at: ["date"]))
-            )
+            try builder.field(for: \.uuid)
+            try builder.field(for: \.string)
+            try builder.field(for: \.int)
+            try builder.field(for: \.double)
+            try builder.field(for: \.date)
         }
     }
 
