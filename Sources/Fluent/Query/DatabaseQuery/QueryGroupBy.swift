@@ -18,6 +18,8 @@ extension DatabaseQuery {
         }
 
         /// Creates a new `GroupBy` object for a field.
+        /// - parameters:
+        ///     - field: QueryField to group by.
         public static func field(_ field: Database.QueryField) -> GroupBy {
             return .init(storage: .field(field))
         }
@@ -27,12 +29,19 @@ extension DatabaseQuery {
 // MARK: Builder
 
 extension QueryBuilder {
-    /// Add a Group By to the Query.
+    /// Adds a group by to the query builder.
+    ///
+    ///     query.group(by: \.name)
+    ///
+    /// - parameters:
+    ///     - field: Swift `KeyPath` to field on model to group by.
+    /// - returns: Query builder for chaining.
     public func group<T>(by field: KeyPath<Model, T>) throws -> Self {
         return try addGroupBy(.field(Model.Database.queryField(for: field)))
     }
     
-    /// Add a Group By to the Query.
+    /// Adds a manually created group by to the query builder.
+    /// - returns: Query builder for chaining.
     public func addGroupBy(_ groupBy: DatabaseQuery<Model.Database>.GroupBy) -> Self {
         query.groups.append(groupBy)
         return self

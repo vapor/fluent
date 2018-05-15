@@ -18,7 +18,6 @@ extension DatabaseQuery {
         }
 
         /// Join type.
-        /// See QueryJoinMethod.
         public let method: Method
 
         /// Table/collection that will be accepting the joined data
@@ -65,7 +64,29 @@ extension DatabaseQuery {
 // MARK: Join on Model.ID
 
 extension QueryBuilder where Model.Database: JoinSupporting {
-    /// Join another model to this query builder.
+    /// Joins another model to this query builder. You can filter your existing query by joined models.
+    ///
+    ///     let users = try User.query(on: conn)
+    ///         .join(Pet.self, field: \.userID, to: \.id)
+    ///         .filter(Pet.self, \.type == .cat)
+    ///         .all()
+    ///     print(users) // Future<[User]>
+    ///
+    /// You can also decode their entities from the result set.
+    ///
+    ///     let usersAndPets = try User.query(on: conn)
+    ///         .join(Pet.self, field: \.userID, to: \.id)
+    ///         .filter(Pet.self, \.type == .cat)
+    ///         .alsoDecode(Pet.self)
+    ///         .all()
+    ///     print(usersAndPets) // Future<[(User, Pet)]>
+    ///
+    /// - parameters:
+    ///     - joinedType: Foreign model to join to this query.
+    ///     - joinedKey: Field on the foreign model to join.
+    ///     - baseKey: Field on the current model to join.
+    ///                This should be the model you used to create this query builder.
+    ///     - method: Join method to use, inner by default.
     public func join<Joined>(
         _ joinedType: Joined.Type = Joined.self,
         field joinedKey: KeyPath<Joined, Model.ID>,
@@ -81,7 +102,29 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         return self
     }
 
-    /// Join another model to this query builder.
+    /// Joins another model to this query builder. You can filter your existing query by joined models.
+    ///
+    ///     let users = try User.query(on: conn)
+    ///         .join(Pet.self, field: \.userID, to: \.id)
+    ///         .filter(Pet.self, \.type == .cat)
+    ///         .all()
+    ///     print(users) // Future<[User]>
+    ///
+    /// You can also decode their entities from the result set.
+    ///
+    ///     let usersAndPets = try User.query(on: conn)
+    ///         .join(Pet.self, field: \.userID, to: \.id)
+    ///         .filter(Pet.self, \.type == .cat)
+    ///         .alsoDecode(Pet.self)
+    ///         .all()
+    ///     print(usersAndPets) // Future<[(User, Pet)]>
+    ///
+    /// - parameters:
+    ///     - joinedType: Foreign model to join to this query.
+    ///     - joinedKey: Field on the foreign model to join.
+    ///     - baseKey: Field on the current model to join.
+    ///                This should be the model you used to create this query builder.
+    ///     - method: Join method to use, inner by default.
     public func join<Joined>(
         _ joinedType: Joined.Type = Joined.self,
         field joinedKey: KeyPath<Joined, Model.ID?>,
@@ -97,7 +140,29 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         return self
     }
 
-    /// Join another model to this query builder.
+    /// Joins another model to this query builder. You can filter your existing query by joined models.
+    ///
+    ///     let users = try User.query(on: conn)
+    ///         .join(Pet.self, field: \.userID, to: \.id)
+    ///         .filter(Pet.self, \.type == .cat)
+    ///         .all()
+    ///     print(users) // Future<[User]>
+    ///
+    /// You can also decode their entities from the result set.
+    ///
+    ///     let usersAndPets = try User.query(on: conn)
+    ///         .join(Pet.self, field: \.userID, to: \.id)
+    ///         .filter(Pet.self, \.type == .cat)
+    ///         .alsoDecode(Pet.self)
+    ///         .all()
+    ///     print(usersAndPets) // Future<[(User, Pet)]>
+    ///
+    /// - parameters:
+    ///     - joinedType: Foreign model to join to this query.
+    ///     - joinedKey: Field on the foreign model to join.
+    ///     - baseKey: Field on the current model to join.
+    ///                This should be the model you used to create this query builder.
+    ///     - method: Join method to use, inner by default.
     public func join<Joined>(
         _ joinedType: Joined.Type = Joined.self,
         field joinedKey: KeyPath<Joined, Model.ID?>,
@@ -113,7 +178,29 @@ extension QueryBuilder where Model.Database: JoinSupporting {
         return self
     }
 
-    /// Join another model to this query builder.
+    /// Joins another model to this query builder. You can filter your existing query by joined models.
+    ///
+    ///     let users = try User.query(on: conn)
+    ///         .join(Pet.self, field: \.userID, to: \.id)
+    ///         .filter(Pet.self, \.type == .cat)
+    ///         .all()
+    ///     print(users) // Future<[User]>
+    ///
+    /// You can also decode their entities from the result set.
+    ///
+    ///     let usersAndPets = try User.query(on: conn)
+    ///         .join(Pet.self, field: \.userID, to: \.id)
+    ///         .filter(Pet.self, \.type == .cat)
+    ///         .alsoDecode(Pet.self)
+    ///         .all()
+    ///     print(usersAndPets) // Future<[(User, Pet)]>
+    ///
+    /// - parameters:
+    ///     - joinedType: Foreign model to join to this query.
+    ///     - joinedKey: Field on the foreign model to join.
+    ///     - baseKey: Field on the current model to join.
+    ///                This should be the model you used to create this query builder.
+    ///     - method: Join method to use, inner by default.
     public func join<Joined>(
         _ joinedType: Joined.Type = Joined.self,
         field joinedKey: KeyPath<Joined, Model.ID>,

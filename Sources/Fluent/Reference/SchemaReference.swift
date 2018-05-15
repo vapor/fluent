@@ -5,7 +5,7 @@ public struct SchemaReference<Database> where Database: ReferenceSupporting & Sc
     public let base: Database.QueryField
 
     /// The field this base field references.
-    /// Note: this is a `QueryField` because we have limited info.
+    /// - note: this is a `QueryField` because we have limited info.
     /// we assume it is the same type as the base field.
     public let referenced: Database.QueryField
 
