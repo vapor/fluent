@@ -3,7 +3,10 @@ extension DatabaseQuery {
     public enum Filter {
         /// Possible relations between items in a group
         public enum GroupRelation {
-            case and, or
+            /// All filters must be satisfied for the group to be satisfied.
+            case and
+            /// At least one of the filters must be satisfied for the group to be satisfied.
+            case or
         }
 
         /// A single `FilterItem` containing type and value.
@@ -14,18 +17,23 @@ extension DatabaseQuery {
         case group(GroupRelation, [Filter])
     }
 
-    /// Defines a `Filter` that can be added on fetch, delete, and update operations to limit the set of data affected.
+    /// Defines a filter that can be added on fetch, delete, and update operations to limit the set of data affected.
     public struct FilterItem {
-        /// The field to filer.
+        /// The field to filter.
         public var field: Database.QueryField
 
         /// The filter type.
         public var type: FilterType
 
-        /// The filter value, possible another field.
+        /// The filter value, possibly another field.
         public var value: FilterValue
 
-        /// Create a new filter.
+        /// Create a new `FilterItem`.
+        ///
+        /// - parameters:
+        ///     - field: Query field to filter.
+        ///     - type: Filter type.
+        ///     - value: Value for the filter type.
         public init(field: Database.QueryField, type: FilterType, value: FilterValue) {
             self.field = field
             self.type = type
@@ -33,7 +41,7 @@ extension DatabaseQuery {
         }
     }
 
-    /// Supported filter comparison types.
+    /// Supported filter types.
     public struct FilterType: Equatable {
         /// Internal storage type.
         internal enum Storage: Equatable {
@@ -82,8 +90,7 @@ extension DatabaseQuery {
         }
     }
 
-    /// Describes the values a subset can have. The subset can be either an array of encodable
-    /// values or another query whose purpose is to yield an array of values.
+    /// Supported filter values.
     public struct FilterValue {
         enum QueryFilterValueStorage {
             case field(Database.QueryField)
@@ -104,7 +111,7 @@ extension DatabaseQuery {
             }
         }
 
-        /// Returns the `Database.QueryData` value if it exists.
+        /// Returns the values as an array of query data, if possible.
         public func data() -> [Database.QueryData]? {
             switch storage {
             case .data(let data): return [data]
@@ -119,11 +126,16 @@ extension DatabaseQuery {
         }
 
         /// A single value.
-        public static func data<T>(_ data: T) throws -> FilterValue {
-            return try .init(storage: .data(Database.queryDataEncode(data)))
+        public static func custom(_ data: Database.QueryData) -> FilterValue {
+            return .init(storage: .data(data))
         }
 
         /// A single value.
+        public static func data<T>(_ data: T) throws -> FilterValue {
+            return try .custom(Database.queryDataEncode(data))
+        }
+
+        /// An array of values.
         public static func array<T>(_ array: [T]) throws -> FilterValue {
             let array = try array.map { try Database.queryDataEncode($0) }
             return .init(storage: .array(array))
@@ -142,7 +154,19 @@ extension DatabaseQuery {
 }
 
 extension QueryBuilder {
-    /// Applies a comparison filter to this query.
+    /// Applies a filter to this query for a joined entity. Usually you will use the filter operators to do this.
+    ///
+    ///     let users = try User.query(on: conn)
+    ///         .join(Pet.self, ...)
+    ///         .filter(Pet.self, \.type, .equals, .data("cat"))
+    ///         .all()
+    ///
+    /// - parameters:
+    ///     - joined: Joined model type to filter.
+    ///     - key: Swift `KeyPath` to a field on the model to filter.
+    ///     - type: Query filter type to use.
+    ///     - value: Value to filter by.
+    /// - returns: Query builder for chaining.
     @discardableResult
     public func filter<M, T>(_ joined: M.Type, _ key: KeyPath<M, T>, _ type: DatabaseQuery<M.Database>.FilterType, _ value: DatabaseQuery<M.Database>.FilterValue) throws -> Self
         where M: Fluent.Model, M.Database == Model.Database
@@ -151,13 +175,33 @@ extension QueryBuilder {
         return addFilter(.single(filter))
     }
 
-    /// Applies a comparison filter to this query.
+    /// Applies a filter to this query. Usually you will use the filter operators to do this.
+    ///
+    ///     let users = try User.query(on: conn)
+    ///         .filter(\.name, .equals, .data("Vapor"))
+    ///         .all()
+    ///
+    /// - parameters:
+    ///     - key: Swift `KeyPath` to a field on the model to filter.
+    ///     - type: Query filter type to use.
+    ///     - value: Value to filter by.
+    /// - returns: Query builder for chaining.
     @discardableResult
     public func filter<T>(_ key: KeyPath<Model, T>, _ type: DatabaseQuery<Model.Database>.FilterType, _ value: DatabaseQuery<Model.Database>.FilterValue) throws -> Self {
         return try filter(Model.Database.queryField(for: key), type, value)
     }
 
-    /// Applies a comparison filter to this query.
+    /// Applies a filter to this query using a custom field. Usually you will use the filter operators to do this.
+    ///
+    ///     let users = try User.query(on: conn)
+    ///         .filter("name", .equals, .data("Vapor"))
+    ///         .all()
+    ///
+    /// - parameters:
+    ///     - key: Swift `KeyPath` to a field on the model to filter.
+    ///     - type: Query filter type to use.
+    ///     - value: Value to filter by.
+    /// - returns: Query builder for chaining.
     @discardableResult
     public func filter(_ field: Model.Database.QueryField, _ type: DatabaseQuery<Model.Database>.FilterType, _ value: DatabaseQuery<Model.Database>.FilterValue) -> Self {
         let filter = DatabaseQuery<Model.Database>.FilterItem(field: field, type: type, value: value)
@@ -168,7 +212,17 @@ extension QueryBuilder {
 /// MARK: Group
 
 extension QueryBuilder {
-    /// Create a query group.
+    /// Creates a sub group for this query. This is useful for grouping multiple filters by `.or` instead of `.and`.
+    ///
+    ///     let users = try User.query(on: conn).filter(.or) { or in
+    ///         or.filter(\.age < 18)
+    ///         or.filter(\.age > 65)
+    ///     }
+    ///
+    /// - parameters:
+    ///     - relation: `.and` or `.or` relation for the filters added in the closure.
+    ///     - closure: A sub-query builder to use for adding grouped filters.
+    /// - returns: Query builder for chaining.
     @discardableResult
     public func group(_ relation: DatabaseQuery<Model.Database>.Filter.GroupRelation, closure: @escaping (QueryBuilder<Model, Result>) throws -> ()) rethrows -> Self {
         let sub = copy()
@@ -179,7 +233,8 @@ extension QueryBuilder {
 }
 
 extension QueryBuilder {
-    /// Manually create and append filter
+    /// Add a manually created filter to the query builder.
+    /// - returns: Query builder for chaining.
     @discardableResult
     public func addFilter(_ filter: DatabaseQuery<Model.Database>.Filter) -> Self {
         query.filters.append(filter)
