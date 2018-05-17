@@ -2,11 +2,7 @@ import Logging
 
 /// Contains a single migration.
 /// - note: we need this type for type erasing purposes.
-internal struct MigrationContainer<D> where D: QuerySupporting {
-    /// static database type info
-    /// note: this is important
-    typealias Database = D
-
+public struct MigrationContainer<Database> where Database: QuerySupporting {
     /// the closure for performing the migration
     var prepare: (Database.Connection) -> Future<Void>
 
@@ -17,14 +13,14 @@ internal struct MigrationContainer<D> where D: QuerySupporting {
     var name: String
 
     /// creates a new migration container for a given migration type
-    init<M>(_ migration: M.Type, name: String) where M: Migration, M.Database == D {
+    public init<M>(_ migration: M.Type, name: String) where M: Migration, M.Database == Database {
         self.prepare = M.prepare
         self.revert = M.revert
         self.name = name
     }
 
     /// creates a new migration container from closures.
-    init(
+    public init(
         name: String,
         prepare: @escaping (Database.Connection) -> Future<Void>,
         revert: @escaping (Database.Connection) -> Future<Void>
@@ -35,8 +31,8 @@ internal struct MigrationContainer<D> where D: QuerySupporting {
     }
 
     /// Prepares the migration if it hasn't previously run.
-    internal func prepareIfNeeded(batch: Int, on conn: Database.Connection, using container: Container) throws -> Future<Void> {
-        return try hasPrepared(on: conn).flatMap { hasPrepared -> Future<Void> in
+    internal func prepareIfNeeded(batch: Int, on conn: Database.Connection, using container: Container) -> Future<Void> {
+        return hasPrepared(on: conn).flatMap { hasPrepared -> Future<Void> in
             guard !hasPrepared else {
                 return .done(on: conn)
             }
@@ -55,8 +51,8 @@ internal struct MigrationContainer<D> where D: QuerySupporting {
     }
 
     /// Reverts the migration if it was part of the supplied batch number.
-    internal func revertIfNeeded(batch: Int, on conn: Database.Connection, using container: Container) throws -> Future<Void> {
-        return try MigrationLog<Database>
+    internal func revertIfNeeded(batch: Int, on conn: Database.Connection, using container: Container) -> Future<Void> {
+        return MigrationLog<Database>
             .query(on: conn)
             .filter(\.name == name)
             .filter(\.batch == batch)
@@ -71,8 +67,8 @@ internal struct MigrationContainer<D> where D: QuerySupporting {
     }
 
     /// Reverts the migration if it has previously run.
-    internal func revertIfNeeded(on conn: Database.Connection, using container: Container) throws -> Future<Void> {
-        return try hasPrepared(on: conn).flatMap { hasPrepared in
+    internal func revertIfNeeded(on conn: Database.Connection, using container: Container) -> Future<Void> {
+        return hasPrepared(on: conn).flatMap { hasPrepared in
             if hasPrepared {
                 return try self.revertDeletingMetadata(on: conn, using: container)
             } else {
@@ -86,7 +82,7 @@ internal struct MigrationContainer<D> where D: QuerySupporting {
         log.info("Reverting migration '\(name)'")
         return revert(conn).flatMap {
             // delete the migration log
-            return try MigrationLog<Database>
+            return MigrationLog<Database>
                 .query(on: conn)
                 .filter(\.name == self.name)
                 .delete()
@@ -94,8 +90,8 @@ internal struct MigrationContainer<D> where D: QuerySupporting {
     }
 
     /// returns true if the migration has already been prepared.
-    internal func hasPrepared(on conn: Database.Connection) throws -> Future<Bool> {
-        return try MigrationLog<Database>
+    internal func hasPrepared(on conn: Database.Connection) -> Future<Bool> {
+        return MigrationLog<Database>
             .query(on: conn)
             .filter(\.name == name)
             .first()

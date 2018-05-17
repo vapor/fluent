@@ -1,7 +1,5 @@
-import Async
-import Dispatch
 import Fluent
-import Foundation
+import FluentSQL
 
 extension Benchmarker where Database: QuerySupporting & TransactionSupporting & KeyedCacheSupporting {
     /// The actual benchmark.

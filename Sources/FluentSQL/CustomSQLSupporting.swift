@@ -1,5 +1,48 @@
 /// Supports mutating SQL before execution using `customSQL(_:)` closures added to `QueryBuilder`.
-public protocol CustomSQLSupporting: QuerySupporting { }
+public protocol CustomSQLSupporting: QuerySupporting where
+    FieldType: DataColumnRepresentable,
+    FilterType: DataPredicateComparisonRepresentable & DataPredicateComparisonInitializable,
+    ValueType: DataPredicateValueRepresentable { }
+
+public protocol DataColumnRepresentable {
+    func convertToDataColumn() -> DataColumn
+}
+
+
+extension DataColumn: DataColumnRepresentable {
+    public func convertToDataColumn() -> DataColumn {
+        return self
+    }
+}
+
+public protocol DataPredicateValueRepresentable {
+    func convertToDataPredicateValue() -> DataPredicateValue
+}
+
+extension DataPredicateValue: DataPredicateValueRepresentable {
+    public func convertToDataPredicateValue() -> DataPredicateValue {
+        return self
+    }
+}
+
+public protocol DataPredicateComparisonInitializable {
+    static func convertFromDataPredicateComparison(_ comparison: DataPredicateComparison) -> Self
+}
+
+public protocol DataPredicateComparisonRepresentable {
+    func convertToDataPredicateComparison() -> DataPredicateComparison
+}
+
+extension DataPredicateComparison: DataPredicateComparisonRepresentable & DataPredicateComparisonInitializable {
+    public static func convertFromDataPredicateComparison(_ comparison: DataPredicateComparison) -> DataPredicateComparison {
+        return comparison
+    }
+    
+    public func convertToDataPredicateComparison() -> DataPredicateComparison {
+        return self
+    }
+}
+
 
 /// A custom SQL transformation.
 public struct CustomSQL {
@@ -7,7 +50,7 @@ public struct CustomSQL {
     public let closure: (inout SQLQuery) -> ()
 }
 
-extension DatabaseQuery where Database: CustomSQLSupporting {
+extension Query where Database: CustomSQLSupporting {
     /// Array of custom SQL transformations for this database query.
     public var customSQL: [CustomSQL] {
         get { return extend["custom-sql"] as? [CustomSQL] ?? [] }
@@ -15,7 +58,7 @@ extension DatabaseQuery where Database: CustomSQLSupporting {
     }
 }
 
-extension DatabaseSchema where Database: CustomSQLSupporting {
+extension Schema where Database: CustomSQLSupporting {
     /// Array of custom SQL transformations for this database query.
     public var customSQL: [CustomSQL] {
         get { return extend["custom-sql"] as? [CustomSQL] ?? [] }
@@ -23,7 +66,7 @@ extension DatabaseSchema where Database: CustomSQLSupporting {
     }
 }
 
-extension QueryBuilder where Model.Database: CustomSQLSupporting {
+extension Query.Builder where Model.Database: CustomSQLSupporting {
     /// Adds a SQL-transforming closure to the `QueryBuilder` that will be
     /// called before the query is executed.
     ///
@@ -41,7 +84,7 @@ extension QueryBuilder where Model.Database: CustomSQLSupporting {
     }
 }
 
-extension SchemaBuilder where Model.Database: CustomSQLSupporting {
+extension Schema.Builder where Model.Database: CustomSQLSupporting {
     /// Adds a SQL-transforming closure to the `SchemaBuilder` that will be
     /// called before the query is executed.
     ///

@@ -1,6 +1,6 @@
 import Async
-import Dispatch
 import Fluent
+import FluentSQL
 import Foundation
 
 extension Benchmarker where Database: IndexSupporting {

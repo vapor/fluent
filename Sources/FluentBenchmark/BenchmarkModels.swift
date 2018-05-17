@@ -1,8 +1,3 @@
-import Async
-import Dispatch
-import Fluent
-import Foundation
-
 extension Benchmarker where Database: QuerySupporting {
     /// The actual benchmark.
     fileprivate func _benchmark(on conn: Database.Connection) throws {
@@ -20,7 +15,7 @@ extension Benchmarker where Database: QuerySupporting {
         // update
         b.bar = "fdsa"
         _ = try test(b.save(on: conn))
-        _ = try test(Foo.query(on: conn).filter(\.id == a.id).update(\Foo<Database>.baz, to: Database.queryDataEncode(314)))
+        _ = try test(Foo.query(on: conn).filter(\Foo<Database>.id == a.id).update(\Foo<Database>.baz, to: 314))
 
         // read
         let fetched = try test(Foo<Database>.find(b.requireID(), on: conn))
@@ -31,8 +26,8 @@ extension Benchmarker where Database: QuerySupporting {
         // make sure that AND queries work as expected - this query should return exactly one result
         let fetchedWithAndQuery = try test(Foo<Database>.query(on: conn)
             .group(.and) { and in
-                try and.filter(\Foo.bar == "asdf")
-                try and.filter(\Foo.baz == 314)
+                and.filter(\Foo.bar == "asdf")
+                and.filter(\Foo.baz == 314)
             }
             .all())
         if fetchedWithAndQuery.count != 1 {
@@ -42,8 +37,8 @@ extension Benchmarker where Database: QuerySupporting {
         // make sure that OR queries work as expected - this query should return exactly two results
         let fetchedWithOrQuery = try test(Foo<Database>.query(on: conn)
             .group(.or) { or in
-                try or.filter(\Foo.bar == "asdf")
-                try or.filter(\Foo.bar == "fdsa")
+                or.filter(\Foo.bar == "asdf")
+                or.filter(\Foo.bar == "fdsa")
             }
             .all())
         if fetchedWithOrQuery.count != 2 {

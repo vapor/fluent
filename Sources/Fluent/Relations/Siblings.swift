@@ -29,11 +29,10 @@ import Async
 ///
 /// It is recommended that you use your own types conforming to `Pivot`
 /// for Siblings pivots as you cannot add additional fields to a `BasicPivot`.
-public struct Siblings<Base: Model, Related: Model, Through: Pivot>
+public struct Siblings<Base, Related, Through>
     where
-        Base.Database == Through.Database,
-        Related.Database == Through.Database,
-        Through.Database: JoinSupporting
+        Base: Model, Related: Model, Through: Pivot,
+        Base.Database == Through.Database, Related.Database == Through.Database, Through.Database: JoinSupporting
 {
     /// The base model which all fetched models
     /// should be related to.
@@ -56,13 +55,7 @@ public struct Siblings<Base: Model, Related: Model, Through: Pivot>
     public let relatedPivotField: RelatedPivotField
 
     /// Create a new Siblings relation.
-    public init(
-        base: Base,
-        related: Related.Type = Related.self,
-        through: Through.Type = Through.self,
-        basePivotField: BasePivotField,
-        relatedPivotField: RelatedPivotField
-    ) {
+    fileprivate init(base: Base, related: Related.Type = Related.self, through: Through.Type = Through.self, basePivotField: BasePivotField, relatedPivotField: RelatedPivotField) {
         self.base = base
         self.basePivotField = basePivotField
         self.relatedPivotField = relatedPivotField
@@ -71,10 +64,10 @@ public struct Siblings<Base: Model, Related: Model, Through: Pivot>
 
 extension Siblings where Base.Database: QuerySupporting {
     /// Creates a `QueryBuilder` for the `Related` model.
-    public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Related, Related> {
+    public func query(on conn: DatabaseConnectable) throws -> Query<Related.Database>.Builder<Related, Related> {
         return try Related.query(on: conn)
-            .join(field: relatedPivotField)
-            .filter(Through.self, basePivotField, .equals, .data(base.requireID()))
+            .join(relatedPivotField, to: Related.idKey)
+            .filter(basePivotField == base.requireID())
     }
 
     /// Create a query for the `Through` (pivot) model. This is useful for manually attaching / detaching pivots.
@@ -82,9 +75,9 @@ extension Siblings where Base.Database: QuerySupporting {
     ///     cat.toys.pivots(on: ...).filter(\.isFavorite == false).delete()
     ///
     /// See also the `detachAll(on:)` method.
-    public func pivots(on conn: DatabaseConnectable) throws -> QueryBuilder<Through, Through> {
+    public func pivots(on conn: DatabaseConnectable) throws -> Query<Related.Database>.Builder<Through, Through> {
         return try Through.query(on: conn)
-            .filter(basePivotField, .equals, .data(base.requireID()))
+            .filter(basePivotField == base.requireID())
     }
 }
 
@@ -96,10 +89,10 @@ extension Siblings where Base.Database: QuerySupporting {
     public func isAttached(_ model: Related, on conn: DatabaseConnectable) -> Future<Bool> {
         return Future.flatMap(on: conn) {
             return try Through.query(on: conn)
-                .filter(self.basePivotField, .equals, .data(self.base.requireID()))
-                .filter(self.relatedPivotField, .equals, .data(model.requireID()))
+                .filter(self.basePivotField, .equal, .encodable(self.base.requireID()))
+                .filter(self.relatedPivotField, .equal, .encodable(model.requireID()))
                 .first()
-                .map(to: Bool.self) { $0 != nil }
+                .map { $0 != nil }
         }
     }
 
@@ -111,8 +104,8 @@ extension Siblings where Base.Database: QuerySupporting {
     public func detach(_ model: Related, on conn: DatabaseConnectable) -> Future<Void> {
         return Future.flatMap(on: conn) {
             return try Through.query(on: conn)
-                .filter(self.basePivotField, .equals, .data(self.base.requireID()))
-                .filter(self.relatedPivotField, .equals, .data(model.requireID()))
+                .filter(self.basePivotField, .equal, .encodable(self.base.requireID()))
+                .filter(self.relatedPivotField, .equal, .encodable(model.requireID()))
                 .delete()
         }
     }

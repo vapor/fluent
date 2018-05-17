@@ -48,8 +48,8 @@ internal struct ToyMigration<D>: Migration where D: QuerySupporting & SchemaSupp
     /// See Migration.prepare
     static func prepare(on connection: Database.Connection) -> Future<Void> {
         return Database.create(Toy<Database>.self, on: connection) { builder in
-            try builder.field(for: \Toy<Database>.id)
-            try builder.field(for: \Toy<Database>.name)
+            builder.field(for: \Toy<Database>.id)
+            builder.field(for: \Toy<Database>.name)
         }
     }
 

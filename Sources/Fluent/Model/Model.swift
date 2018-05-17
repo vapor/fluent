@@ -146,7 +146,7 @@ extension Model where Database: QuerySupporting {
     ///
     /// - parameters:
     ///     - conn: Something `DatabaseConnectable` to create the `QueryBuilder` on.
-    public func query(on conn: DatabaseConnectable) -> QueryBuilder<Self, Self> {
+    public func query(on conn: DatabaseConnectable) -> Query<Database>.Builder<Self, Self> {
         return Self.query(on: conn)
     }
 
@@ -156,7 +156,7 @@ extension Model where Database: QuerySupporting {
     ///
     /// - parameters:
     ///     - conn: Something `DatabaseConnectable` to create the `QueryBuilder` on.
-    public static func query(on conn: DatabaseConnectable) -> QueryBuilder<Self, Self> {
+    public static func query(on conn: DatabaseConnectable) -> Query<Database>.Builder<Self, Self> {
         return query(on: conn.databaseConnection(to: Self.defaultDatabase))
     }
 
@@ -167,8 +167,26 @@ extension Model where Database: QuerySupporting {
     /// - parameters:
     ///     - id: ID to lookup.
     ///     - conn: Something `DatabaseConnectable` to create the `QueryBuilder` on.
-    public static func find(_ id: Self.ID, on conn: DatabaseConnectable) throws -> Future<Self?> {
-        return try query(on: conn).filter(idKey == id).first()
+    public static func find(_ id: Self.ID, on conn: DatabaseConnectable) -> Future<Self?> {
+        return query(on: conn).filter(idKey == id).first()
+    }
+
+    /// Creates a `QueryBuilder` for this model, decoding some non-model decodable type as the result.
+    static func query<D>(decoding type: D.Type, on connection: Future<Self.Database.Connection>) -> Query<Database>.Builder<Self, D> where D: Decodable {
+        return .make(on: connection) { row, conn in
+            return Future.map(on: conn) {
+                return try Self.Database.queryDecode(row, entity: entity, as: D.self)
+            }
+        }
+    }
+
+    /// Creates a `QueryBuilder` for this model, decoding instances of this model as the result.
+    static func query(on connection: Future<Self.Database.Connection>) -> Query<Database>.Builder<Self, Self> {
+        return query(decoding: Self.self, on: connection).transformResult { row, conn, result in
+            return Self.Database.modelEvent(event: .willRead, model: result, on: conn).flatMap(to: Self.self) { model in
+                return try model.willRead(on: conn)
+            }
+        }
     }
 }
 
@@ -223,7 +241,7 @@ extension Model where Database: QuerySupporting {
         }
 
         func findModel(in connection: Database.Connection) throws -> Future<Self> {
-            return try self.find(id, on: connection).map(to: Self.self) { model in
+            return self.find(id, on: connection).map(to: Self.self) { model in
                 guard let model = model else {
                     throw FluentError(identifier: "modelNotFound", reason: "No model with ID \(id) was found", source: .capture())
                 }

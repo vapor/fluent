@@ -1,5 +1,6 @@
 import Async
 import Fluent
+import FluentSQL
 import Foundation
 
 struct Bar<D>: Model, SoftDeletable, Timestampable where D: QuerySupporting {

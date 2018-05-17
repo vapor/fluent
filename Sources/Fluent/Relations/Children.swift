@@ -11,20 +11,18 @@ public struct Children<Parent, Child>
     public var parent: Parent
 
     /// Reference to the foreign key on t(he child.
-    fileprivate var foreignParentField: () throws -> Child.Database.QueryField
+    private var foreignParentField: Query<Child.Database>.Field
 
     /// Creates a new children relationship.
-    fileprivate init(parent: Parent, foreignParentField: @escaping () throws -> Child.Database.QueryField) {
+    fileprivate init(parent: Parent, foreignParentField: Query<Child.Database>.Field) {
         self.parent = parent
         self.foreignParentField = foreignParentField
     }
-}
 
-extension Children {
     /// Create a query for all children.
-    public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Child, Child> {
+    public func query(on conn: DatabaseConnectable) throws -> Query<Child.Database>.Builder<Child, Child> {
         return try Child.query(on: conn)
-            .filter(foreignParentField(), .equals, .data(parent.requireID()))
+            .filter(foreignParentField, .equal, .encodable(parent.requireID()))
     }
 }
 
@@ -38,7 +36,11 @@ extension Model {
     public func children<Child>(_ parentForeignIDKey: WritableKeyPath<Child, Self.ID>) -> Children<Self, Child> {
         return Children(
             parent: self,
-            foreignParentField: { try Self.Database.queryField(for: parentForeignIDKey) }
+            foreignParentField: .field(.init(
+                rootType: Child.self,
+                valueType: Self.ID.self,
+                keyPath: parentForeignIDKey
+            ))
         )
     }
 
@@ -49,7 +51,11 @@ extension Model {
     public func children<Child>(_ parentForeignIDKey: WritableKeyPath<Child, Self.ID?>) -> Children<Self, Child> {
         return Children(
             parent: self,
-            foreignParentField: { try Self.Database.queryField(for: parentForeignIDKey) }
+            foreignParentField: .field(.init(
+                rootType: Child.self,
+                valueType: Self.ID?.self,
+                keyPath: parentForeignIDKey
+            ))
         )
     }
 }

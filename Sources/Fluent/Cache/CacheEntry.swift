@@ -1,10 +1,3 @@
-extension MigrationConfig {
-    /// Prepares the supplied `SchemaSupporting` database for use with `DatabaseKeyedCache`.
-    public mutating func prepareCache<D>(for database: DatabaseIdentifier<D>) where D: SchemaSupporting {
-        add(migration: CacheEntry<D>.self, database: database)
-    }
-}
-
 
 /// Internal Fluent model powering `DatabaseKeyedCache`.
 public final class CacheEntry<D>: Model
@@ -31,6 +24,3 @@ public final class CacheEntry<D>: Model
         self.data = data
     }
 }
-
-/// Dynamically conform to `Migration` where the database is `SchemaSupporting`.
-extension CacheEntry: Migration where D: SchemaSupporting { }

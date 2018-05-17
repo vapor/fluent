@@ -39,9 +39,9 @@ internal struct FooMigration<D>: Migration where D: QuerySupporting & SchemaSupp
     /// See Migration.prepare
     static func prepare(on connection: Database.Connection) -> Future<Void> {
         return Database.create(Foo<Database>.self, on: connection) { builder in
-            try builder.field(for: \Foo<Database>.id)
-            try builder.field(for: \Foo<Database>.bar)
-            try builder.field(for: \Foo<Database>.baz)
+            builder.field(for: \Foo<Database>.id)
+            builder.field(for: \Foo<Database>.bar)
+            builder.field(for: \Foo<Database>.baz)
         }
     }
 

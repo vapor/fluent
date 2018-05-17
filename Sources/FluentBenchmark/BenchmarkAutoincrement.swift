@@ -1,8 +1,5 @@
-import Async
-import Service
-import Dispatch
 import Fluent
-import Foundation
+import FluentSQL
 
 extension Benchmarker where Database: QuerySupporting {
     /// The actual benchmark.

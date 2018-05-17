@@ -1,6 +1,7 @@
 import Async
 import Dispatch
 import Fluent
+import FluentSQL
 import Foundation
 
 extension Benchmarker where Database: JoinSupporting & ReferenceSupporting & QuerySupporting {
@@ -13,12 +14,12 @@ extension Benchmarker where Database: JoinSupporting & ReferenceSupporting & Que
         let ziz = try Pet<Database>(name: "Ziz", ownerID: tanner.requireID())
         _ = try test(ziz.save(on: conn))
 
-        let pets = try test(Pet<Database>.query(on: conn).join(User<Database>.self, field: \.id, to: \.ownerID).all())
+        let pets = try test(Pet<Database>.query(on: conn).join(\User<Database>.id, to: \Pet<Database>.ownerID).all())
         if pets.count != 1 {
             fail("pet count \(pets.count) != 1")
         }
 
-        let owners = try test(User<Database>.query(on: conn).join(Pet<Database>.self, field: \.ownerID).all())
+        let owners = try test(User<Database>.query(on: conn).join(\Pet<Database>.ownerID, to: \User.id).all())
         if owners.count != 1 {
             fail("owner count \(owners.count) != 1")
         }

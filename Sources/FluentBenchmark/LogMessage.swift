@@ -40,9 +40,8 @@ internal struct LogMessageMigration<D>: Migration where D: QuerySupporting & Sch
 
     static func prepare(on connection: D.Connection) -> Future<Void> {
         return Database.create(LogMessage<D>.self, on: connection) { builder in
-            try builder.field(for: \LogMessage<Database>.id)
-
-            try builder.field(for: \LogMessage<Database>.message)
+            builder.field(for: \.id)
+            builder.field(for: \.message)
         }
     }
 

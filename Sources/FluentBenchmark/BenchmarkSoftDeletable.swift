@@ -1,14 +1,7 @@
-//
-//  BenchmarkSoftDeletable.swift
-//  FluentBenchmark
-//
-//  Created by Tanner Nelson on 2/12/18.
-//
-
-import Foundation
 import Async
 import Dispatch
 import Fluent
+import FluentSQL
 import Foundation
 
 extension Benchmarker where Database: QuerySupporting & TransactionSupporting {

@@ -28,11 +28,11 @@ internal struct KitchenSinkSchema<D>: Migration where D: QuerySupporting & Schem
     /// See Migration.prepare
     static func prepare(on conn: D.Connection) -> Future<Void> {
         return Database.create(KitchenSink<Database>.self, on: conn) { builder in
-            try builder.field(for: \.uuid)
-            try builder.field(for: \.string)
-            try builder.field(for: \.int)
-            try builder.field(for: \.double)
-            try builder.field(for: \.date)
+            builder.field(for: \.uuid)
+            builder.field(for: \.string)
+            builder.field(for: \.int)
+            builder.field(for: \.double)
+            builder.field(for: \.date)
         }
     }
 

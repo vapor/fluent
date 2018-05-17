@@ -53,9 +53,9 @@ internal struct PetToyMigration<D>: Migration where D: QuerySupporting & SchemaS
     /// See Migration.prepare
     static func prepare(on connection: Database.Connection) -> Future<Void> {
         return Database.create(PetToy<Database>.self, on: connection) { builder in
-            try builder.field(for: \PetToy<Database>.id)
-            try builder.field(for: \PetToy<Database>.petID)
-            try builder.field(for: \PetToy<Database>.toyID)
+            builder.field(for: \PetToy<Database>.id)
+            builder.field(for: \PetToy<Database>.petID)
+            builder.field(for: \PetToy<Database>.toyID)
         }
     }
 

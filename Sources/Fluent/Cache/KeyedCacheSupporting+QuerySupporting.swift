@@ -1,9 +1,9 @@
 extension KeyedCacheSupporting where Self: QuerySupporting {
     /// See `KeyedCacheSupporting`.
-    public static func keyedCacheGet<D>(_ key: String, as decodable: D.Type, on conn: Self.Connection) throws -> Future<D?>
+    public static func keyedCacheGet<D>(_ key: String, as decodable: D.Type, on conn: Self.Connection) -> Future<D?>
         where D: Decodable
     {
-        return try CacheEntry<Self>.find(key, on: conn).thenThrowing { found in
+        return CacheEntry<Self>.find(key, on: conn).thenThrowing { found in
             guard let entry = found else {
                 return nil
             }
@@ -23,10 +23,10 @@ extension KeyedCacheSupporting where Self: QuerySupporting {
     }
 
     /// See `KeyedCacheSupporting`.
-    public static func keyedCacheRemove(_ key: String, on conn: Self.Connection) throws -> Future<Void>
+    public static func keyedCacheRemove(_ key: String, on conn: Self.Connection) -> Future<Void>
     {
-        return try CacheEntry<Self>.query(on: conn)
-            .filter(\.key, .equals, .data(key))
+        return CacheEntry<Self>.query(on: conn)
+            .filter(\.key == key)
             .delete()
     }
 }

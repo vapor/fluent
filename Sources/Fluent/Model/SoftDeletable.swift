@@ -61,7 +61,7 @@ extension Future where T: SoftDeletable, T.Database: QuerySupporting {
 
 // MARK: Query
 
-extension DatabaseQuery {
+extension Query {
     /// If `true`, soft deleted models will be included.
     internal var withSoftDeleted: Bool {
         get { return extend["withSoftDeleted"] as? Bool ?? false }
@@ -69,7 +69,7 @@ extension DatabaseQuery {
     }
 }
 
-extension QueryBuilder where Model: SoftDeletable {
+extension Query.Builder where Model: SoftDeletable {
     /// Includes soft deleted models in the results.
     ///
     ///     let users = User.query(on: req).withSoftDeleted().all()
@@ -84,15 +84,14 @@ extension QueryBuilder where Model: SoftDeletable {
 /// - warning: Do not rely on this exterally.
 public protocol AnySoftDeletable: AnyModel {
     /// Creates a QueryField for this model.
-    static func deletedAtField<D>(for database: D.Type) throws -> D.QueryField where D: QuerySupporting
+    static var anyDeletedAtKey: AnyKeyPath { get }
 
     /// Access the deleted at property.
     var fluentDeletedAt: Date? { get set }
 }
 
 extension SoftDeletable {
-    /// See `AnySoftDeletable`.
-    public static func deletedAtField<D>(for database: D.Type) throws -> D.QueryField where D: QuerySupporting {
-        return try D.queryField(for: deletedAtKey)
+    public static var anyDeletedAtKey: AnyKeyPath {
+        return deletedAtKey
     }
 }

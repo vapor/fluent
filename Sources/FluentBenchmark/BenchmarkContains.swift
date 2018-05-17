@@ -1,10 +1,4 @@
-import Async
-import Dispatch
-import Fluent
-import FluentSQL
-import Foundation
-
-extension Benchmarker where Database: QuerySupporting, Database.QueryFilter: DataPredicateComparisonConvertible {
+extension Benchmarker where Database: CustomSQLSupporting {
     /// The actual benchmark.
     fileprivate func _benchmark(on conn: Database.Connection) throws {
         // create
@@ -51,7 +45,7 @@ extension Benchmarker where Database: QuerySupporting, Database.QueryFilter: Dat
     }
 }
 
-extension Benchmarker where Database: QuerySupporting & SchemaSupporting, Database.QueryFilter: DataPredicateComparisonConvertible {
+extension Benchmarker where Database: QuerySupporting & SchemaSupporting, Database: CustomSQLSupporting {
     /// Benchmark fluent contains. The schema will be prepared first.
     public func benchmarkContains_withSchema() throws {
         let conn = try test(pool.requestConnection())
