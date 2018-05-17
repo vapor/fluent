@@ -14,8 +14,8 @@ public struct Query<Database> where Database: QuerySupporting {
     
     public enum Field {
         case field(FieldKeyPath)
-        case custom(Database.FieldType)
         case reflected(ReflectedProperty, entity: String)
+        case custom(Database.FieldType)
 
         public static func keyPath<R,V>(_ keyPath: KeyPath<R, V>) -> Field {
             return .field(FieldKeyPath(rootType: R.self, valueType: V.self, keyPath: keyPath))
@@ -30,23 +30,27 @@ public struct Query<Database> where Database: QuerySupporting {
 
     public enum Entity {
         case encodable(Encodable)
-        case field(Field, Value)
+        case batch([(Field, Value)])
         case custom(Database.EntityType)
         case none
+        public static func single(_ field: Field, _ value: Value) -> Entity {
+            return .batch([(field, value)])
+        }
     }
     
     public enum Value {
         case field(FieldKeyPath)
-        case encodables([Encodable])
-        case custom(Database.ValueType)
-
-        public static func encodable(_ encodable: Encodable) -> Value {
-            return .encodables([encodable])
-        }
-
+        case data(Data)
+        case custom(Database.FilterValueType)
         public static func keyPath<R,V>(_ keyPath: KeyPath<R, V>) -> Value {
             return .field(FieldKeyPath(rootType: R.self, valueType: V.self, keyPath: keyPath))
         }
+    }
+
+    public enum Data {
+        case array([Data])
+        case encodable(Encodable)
+        case custom(Database.DataType)
     }
 
     /// Table / collection to query.

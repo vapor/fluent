@@ -72,12 +72,11 @@ extension Query where Database: CustomSQLSupporting {
             let value: DataPredicateValue
             switch filter.value {
             case .custom(let custom): value = custom.convertToDataPredicateValue()
-            case .encodables(let encodables):
-                if encodables.isNull {
-                    value = .none
-                } else {
-                    values += encodables
-                    value = .placeholders(count: encodables.count)
+            case .data(let data):
+                switch data {
+                case .array(let array): value = .placeholders(count: array.count)
+                case .custom(let custom): value = custom.isNull ? .none : .placeholder
+                case .encodable(let encodable): value = encodable.isNil ? .none : .placeholder
                 }
             case .field(let keyPath): value = try .column(keyPath.convertToDataColumn())
             }
@@ -129,12 +128,22 @@ extension Query where Database: CustomSQLSupporting {
         case .equal:
             switch filter.value {
             case .field, .custom: return .equal
-            case .encodables(let encodables): return encodables.isNull ? .isNull : .equal
+            case .data(let data):
+                switch data {
+                case .array: return .equal
+                case .custom(let custom): return custom.isNull ? .isNull : .equal
+                case .encodable(let encodable): return encodable.isNil ? .isNull : .equal
+                }
             }
         case .notEqual:
             switch filter.value {
             case .field, .custom: return .notEqual
-            case .encodables(let encodables): return encodables.isNull ? .isNotNull : .notEqual
+            case .data(let data):
+                switch data {
+                case .array: return .notEqual
+                case .custom(let custom): return custom.isNull ? .isNotNull : .notEqual
+                case .encodable(let encodable): return encodable.isNil ? .isNotNull : .notEqual
+                }
             }
         case .in: return .in
         case .notIn: return .notIn
@@ -192,12 +201,9 @@ extension Query where Database: CustomSQLSupporting {
     }
 }
 
-extension Array where Element == Encodable {
-    var isNull: Bool {
-        guard count > 0 else {
-            return false
-        }
-        guard let optional = self[0] as? AnyOptionalType, optional.anyWrapped == nil else {
+extension Encodable {
+    var isNil: Bool {
+        guard let optional = self as? AnyOptionalType, optional.anyWrapped == nil else {
             return false
         }
         return true

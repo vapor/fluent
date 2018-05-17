@@ -22,7 +22,7 @@ public struct Children<Parent, Child>
     /// Create a query for all children.
     public func query(on conn: DatabaseConnectable) throws -> Query<Child.Database>.Builder<Child, Child> {
         return try Child.query(on: conn)
-            .filter(foreignParentField, .equal, .encodable(parent.requireID()))
+            .filter(foreignParentField, .equal, .data(.encodable(parent.requireID())))
     }
 }
 

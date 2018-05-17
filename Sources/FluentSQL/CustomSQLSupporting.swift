@@ -1,11 +1,16 @@
 /// Supports mutating SQL before execution using `customSQL(_:)` closures added to `QueryBuilder`.
 public protocol CustomSQLSupporting: QuerySupporting where
     FieldType: DataColumnRepresentable,
-    FilterType: DataPredicateComparisonRepresentable & DataPredicateComparisonInitializable,
-    ValueType: DataPredicateValueRepresentable { }
+    FilterMethodType: DataPredicateComparisonRepresentable & DataPredicateComparisonInitializable,
+    FilterValueType: DataPredicateValueRepresentable,
+    DataType: Nullable { }
 
 public protocol DataColumnRepresentable {
     func convertToDataColumn() -> DataColumn
+}
+
+public protocol Nullable {
+    var isNull: Bool { get }
 }
 
 

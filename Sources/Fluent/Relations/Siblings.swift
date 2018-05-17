@@ -89,8 +89,8 @@ extension Siblings where Base.Database: QuerySupporting {
     public func isAttached(_ model: Related, on conn: DatabaseConnectable) -> Future<Bool> {
         return Future.flatMap(on: conn) {
             return try Through.query(on: conn)
-                .filter(self.basePivotField, .equal, .encodable(self.base.requireID()))
-                .filter(self.relatedPivotField, .equal, .encodable(model.requireID()))
+                .filter(self.basePivotField == self.base.requireID())
+                .filter(self.relatedPivotField == model.requireID())
                 .first()
                 .map { $0 != nil }
         }
@@ -104,8 +104,8 @@ extension Siblings where Base.Database: QuerySupporting {
     public func detach(_ model: Related, on conn: DatabaseConnectable) -> Future<Void> {
         return Future.flatMap(on: conn) {
             return try Through.query(on: conn)
-                .filter(self.basePivotField, .equal, .encodable(self.base.requireID()))
-                .filter(self.relatedPivotField, .equal, .encodable(model.requireID()))
+                .filter(self.basePivotField == self.base.requireID())
+                .filter(self.relatedPivotField == model.requireID())
                 .delete()
         }
     }

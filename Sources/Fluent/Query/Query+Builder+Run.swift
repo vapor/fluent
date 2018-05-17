@@ -85,8 +85,8 @@ extension Query.Builder {
                     keyPath: type.anyDeletedAtKey
                     ))
                 group(.or) { or in
-                    or.filter(field, .equal, .encodable(Date?.none))
-                    or.filter(field, .greaterThan, .encodable(Date()))
+                    or.filter(field, .equal, .data(.encodable(Date?.none)))
+                    or.filter(field, .greaterThan, .data(.encodable(Date())))
                 }
             }
         }

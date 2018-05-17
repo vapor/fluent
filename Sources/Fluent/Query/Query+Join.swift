@@ -1,3 +1,6 @@
+/// Supports `join(...)` methods on `Query.Builder`.
+public protocol JoinSupporting: Database { }
+
 extension Query {
     // MARK: Join
 

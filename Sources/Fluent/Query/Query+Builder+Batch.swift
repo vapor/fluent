@@ -37,7 +37,7 @@ extension Query.Builder {
     ///     - value: Value to update to.
     /// - returns: A `Future` that will be completed when the update is done.
     public func update<Value>(_ key: KeyPath<Model, Value>, to value: Value) -> Future<Void> where Value: Encodable {
-        return _run(action: .update, .field(.keyPath(key), .encodable(value)))
+        return _run(action: .update, .single(.keyPath(key), .data(.encodable(value))))
     }
 
     /// Internal method for update / create.

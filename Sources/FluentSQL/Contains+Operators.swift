@@ -2,7 +2,7 @@
 public func ~= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) -> FilterOperator<Model>
     where Model.Database: CustomSQLSupporting, Value: LosslessStringConvertible
 {
-    return .make(lhs, .custom(.convertFromDataPredicateComparison(.like)), .encodable("%\(rhs.description)"))
+    return .make(lhs, .custom(.convertFromDataPredicateComparison(.like)), .data(.encodable("%\(rhs.description)")))
 }
 
 infix operator =~
@@ -10,7 +10,7 @@ infix operator =~
 public func =~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) -> FilterOperator<Model>
     where Model.Database: CustomSQLSupporting, Value: LosslessStringConvertible
 {
-    return .make(lhs, .custom(.convertFromDataPredicateComparison(.like)), .encodable("\(rhs.description)%"))
+    return .make(lhs, .custom(.convertFromDataPredicateComparison(.like)), .data(.encodable("\(rhs.description)%")))
 }
 
 infix operator ~~
@@ -18,5 +18,5 @@ infix operator ~~
 public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) -> FilterOperator<Model>
     where Model.Database: CustomSQLSupporting, Value: LosslessStringConvertible
 {
-    return .make(lhs, .custom(.convertFromDataPredicateComparison(.like)), .encodable("%\(rhs.description)%"))
+    return .make(lhs, .custom(.convertFromDataPredicateComparison(.like)), .data(.encodable("%\(rhs.description)%")))
 }

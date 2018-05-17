@@ -36,7 +36,7 @@ extension Query.Builder {
 ///     - rhs: Value to filter the field by.
 /// - returns: An `OperatorFilter` suitable for passing into `filter(...)`.
 public func == <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterOperator<Model> where Value: Encodable {
-    return .make(lhs, .equal, .encodable(rhs))
+    return .make(lhs, .equal, .data(.encodable(rhs)))
 }
 
 /// Applies an inverse equality filter to the query.
@@ -48,7 +48,7 @@ public func == <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterO
 ///     - rhs: Value to filter the field by.
 /// - returns: An `OperatorFilter` suitable for passing into `filter(...)`.
 public func != <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterOperator<Model> where Value: Encodable {
-    return .make(lhs, .notEqual, .encodable(rhs))
+    return .make(lhs, .notEqual, .data(.encodable(rhs)))
 }
 
 /// Applies a greater than inequality filter to the query.
@@ -60,7 +60,7 @@ public func != <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterO
 ///     - rhs: Value to filter the field by.
 /// - returns: An `OperatorFilter` suitable for passing into `filter(...)`.
 public func > <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterOperator<Model> where Value: Encodable {
-    return .make(lhs, .greaterThan, .encodable(rhs))
+    return .make(lhs, .greaterThan, .data(.encodable(rhs)))
 }
 
 /// Applies a less than inequality filter to the query.
@@ -72,7 +72,7 @@ public func > <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterOp
 ///     - rhs: Value to filter the field by.
 /// - returns: An `OperatorFilter` suitable for passing into `filter(...)`.
 public func < <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterOperator<Model> where Value: Encodable {
-    return .make(lhs, .lessThan, .encodable(rhs))
+    return .make(lhs, .lessThan, .data(.encodable(rhs)))
 }
 
 /// Applies a greater than or equal inequality filter to the query.
@@ -84,7 +84,7 @@ public func < <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterOp
 ///     - rhs: Value to filter the field by.
 /// - returns: An `OperatorFilter` suitable for passing into `filter(...)`.
 public func >= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterOperator<Model> where Value: Encodable {
-    return .make(lhs, .greaterThanOrEqual, .encodable(rhs))
+    return .make(lhs, .greaterThanOrEqual, .data(.encodable(rhs)))
 }
 
 /// Applies a less than or equal inequality filter to the query.
@@ -96,7 +96,7 @@ public func >= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterO
 ///     - rhs: Value to filter the field by.
 /// - returns: An `OperatorFilter` suitable for passing into `filter(...)`.
 public func <= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterOperator<Model> where Value: Encodable {
-    return .make(lhs, .lessThanOrEqual,  .encodable(rhs))
+    return .make(lhs, .lessThanOrEqual, .data(.encodable(rhs)))
 }
 
 infix operator ~~
@@ -112,7 +112,7 @@ infix operator !~
 ///     - rhs: Value to filter the field by.
 /// - returns: An `OperatorFilter` suitable for passing into `filter(...)`.
 public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: [Value]) -> FilterOperator<Model> where Value: Encodable {
-    return .make(lhs, .in, .encodables(rhs))
+    return .make(lhs, .in, .data(.array(rhs.map { .encodable($0) })))
 }
 
 /// Applies an inverse subset filter to the query. Only fields whose values are _not_
@@ -125,7 +125,7 @@ public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: [Value]) -> Filte
 ///     - rhs: Value to filter the field by.
 /// - returns: An `OperatorFilter` suitable for passing into `filter(...)`.
 public func !~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: [Value]) -> FilterOperator<Model> where Value: Encodable {
-    return .make(lhs, .notIn, .encodables(rhs))
+    return .make(lhs, .notIn, .data(.array(rhs.map { .encodable($0) })))
 }
 
 /// Typed wrapper around query filter methods.

@@ -46,7 +46,7 @@ extension Query {
             case lessThanOrEqual
             case `in`
             case notIn
-            case custom(Database.FilterType)
+            case custom(Database.FilterMethodType)
         }
 
         /// A single `FilterItem` containing type and value.
