@@ -23,7 +23,7 @@ public struct Parent<Child, Parent>
 
 extension Parent where Child.Database: QuerySupporting {
     /// Create a query for the parent.
-    public func query(on conn: DatabaseConnectable) -> Query<Child.Database>.Builder<Parent, Parent> {
+    public func query(on conn: DatabaseConnectable) -> QueryBuilder<Parent, Parent> {
         return Parent.query(on: conn)
             .filter(Parent.idKey == parentID)
     }

@@ -1,4 +1,4 @@
-extension Model where Database: QuerySupporting {
+extension Model where Self.Database: QuerySupporting {
     /// Saves the model, calling either `create(...)` or `update(...)` depending on whether
     /// the model already has an ID.
     ///

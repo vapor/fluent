@@ -1,4 +1,4 @@
-extension Query.Builder {
+extension QueryBuilder {
     /// Saves the supplied model. Calls `create(...)` if the ID is `nil`, and `update(...)` if it exists.
     /// If you need to create a model with a pre-existing ID, call `create(...)` instead.
     ///
@@ -26,8 +26,6 @@ extension Query.Builder {
     ///     - model: `Model` to create.
     /// - returns: A `Future` containing the created `Model`.
     public func create(_ model: Model) -> Future<Model> {
-        query.action = .create
-
         // set timestamps
         let copy: Model
         if var timestampable = model as? AnyTimestampable {
@@ -44,7 +42,6 @@ extension Query.Builder {
                 return Model.Database.modelEvent(event: .willCreate, model: copy, on: conn).flatMap { model in
                     return try model.willCreate(on: conn)
                 }.flatMap { model -> Future<Model> in
-                    self.query.data = .encodable(model)
 // FIXME:
 //                    if model.fluentID == nil {
 //                        // the id is `nil`, don't pass along a null value
@@ -54,7 +51,8 @@ extension Query.Builder {
 //                        field.entity = nil
 //                        self.query.data.removeValue(forKey: field)
 //                    }
-                    return self.run().transform(to: model)
+                    self.query.fluentData = try QueryDataEncoder(Model.self).encode(model)
+                    return self.run(.fluentCreate).transform(to: model)
                 }.flatMap { model in
                     return Model.Database.modelEvent(event: .didCreate, model: model, on: conn)
                 }.flatMap { model in
@@ -94,13 +92,11 @@ extension Query.Builder {
 
             // update record w/ matching id
             self.filter(Model.idKey == id)
-            self.query.action = .update
-
             return Model.Database.modelEvent(event: .willUpdate, model: copy, on: conn).flatMap { model in
                 return try copy.willUpdate(on: conn)
             }.flatMap { model in
-                self.query.data = .encodable(model)
-                return self.run().transform(to: model)
+                self.query.fluentData = try QueryDataEncoder(Model.self).encode(model)
+                return self.run(.fluentUpdate).transform(to: model)
             }.flatMap { model -> Future<Model> in
                 return Model.Database.modelEvent(event: .didUpdate, model: model, on: conn)
             }.flatMap { model in
@@ -141,12 +137,10 @@ extension Query.Builder {
 
             // update record w/ matching id
             self.filter(Model.idKey == id)
-            self.query.action = .delete
-
             return Model.Database.modelEvent(event: .willDelete, model: model,on: conn).flatMap { model in
                 return try model.willDelete(on: conn)
             }.flatMap { model in
-                return self.run()
+                return self.run(.fluentDelete)
             }
         }
     }

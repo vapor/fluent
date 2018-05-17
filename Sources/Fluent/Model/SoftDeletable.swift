@@ -61,21 +61,13 @@ extension Future where T: SoftDeletable, T.Database: QuerySupporting {
 
 // MARK: Query
 
-extension Query {
-    /// If `true`, soft deleted models will be included.
-    internal var withSoftDeleted: Bool {
-        get { return extend["withSoftDeleted"] as? Bool ?? false }
-        set { extend["withSoftDeleted"] = newValue }
-    }
-}
-
-extension Query.Builder where Model: SoftDeletable {
+extension QueryBuilder where Model: SoftDeletable {
     /// Includes soft deleted models in the results.
     ///
     ///     let users = User.query(on: req).withSoftDeleted().all()
     ///
     public func withSoftDeleted() -> Self {
-        query.withSoftDeleted = true
+        shouldIncludeSoftDeleted = true
         return self
     }
 }

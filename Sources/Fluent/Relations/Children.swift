@@ -11,18 +11,18 @@ public struct Children<Parent, Child>
     public var parent: Parent
 
     /// Reference to the foreign key on t(he child.
-    private var foreignParentField: Query<Child.Database>.Field
+    private var foreignParentField: Child.Database.Query.Field
 
     /// Creates a new children relationship.
-    fileprivate init(parent: Parent, foreignParentField: Query<Child.Database>.Field) {
+    fileprivate init(parent: Parent, foreignParentField: Child.Database.Query.Field) {
         self.parent = parent
         self.foreignParentField = foreignParentField
     }
 
     /// Create a query for all children.
-    public func query(on conn: DatabaseConnectable) throws -> Query<Child.Database>.Builder<Child, Child> {
+    public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Child, Child> {
         return try Child.query(on: conn)
-            .filter(foreignParentField, .equal, .data(.encodable(parent.requireID())))
+            .filter(foreignParentField, .fluentEqual, parent.requireID())
     }
 }
 
@@ -36,11 +36,7 @@ extension Model {
     public func children<Child>(_ parentForeignIDKey: WritableKeyPath<Child, Self.ID>) -> Children<Self, Child> {
         return Children(
             parent: self,
-            foreignParentField: .field(.init(
-                rootType: Child.self,
-                valueType: Self.ID.self,
-                keyPath: parentForeignIDKey
-            ))
+            foreignParentField: .keyPath(parentForeignIDKey, rootType: Child.self, valueType: Self.ID.self)
         )
     }
 
@@ -51,11 +47,7 @@ extension Model {
     public func children<Child>(_ parentForeignIDKey: WritableKeyPath<Child, Self.ID?>) -> Children<Self, Child> {
         return Children(
             parent: self,
-            foreignParentField: .field(.init(
-                rootType: Child.self,
-                valueType: Self.ID?.self,
-                keyPath: parentForeignIDKey
-            ))
+            foreignParentField: .keyPath(parentForeignIDKey, rootType: Child.self, valueType: Self.ID?.self)
         )
     }
 }

@@ -44,20 +44,20 @@ extension Schema where Database: ReferenceSupporting {
         }
 
         /// The base field.
-        public let base: Query<Database>.Field
+        public let base: Database.Query.Field
 
         /// The field this base field references.
         /// - note: this is a `QueryField` because we have limited info.
         /// we assume it is the same type as the base field.
-        public let referenced: Query<Database>.Field
+        public let referenced: Database.Query.Field
 
         /// The action to take if this reference is modified.
         public let actions: Actions
 
         /// Creates a new SchemaReference
         public init(
-            base: Query<Database>.Field,
-            referenced: Query<Database>.Field,
+            base: Database.Query.Field,
+            referenced: Database.Query.Field,
             actions: Actions
         ) {
             self.base = base
@@ -66,7 +66,7 @@ extension Schema where Database: ReferenceSupporting {
         }
 
         /// Convenience init w/ schema field
-        public init(base: FieldDefinition, referenced: Query<Database>.Field, actions: Actions) {
+        public init(base: Database.FieldDefinition, referenced: Database.Query.Field, actions: Actions) {
             self.base = base.field
             self.referenced = referenced
             self.actions = actions

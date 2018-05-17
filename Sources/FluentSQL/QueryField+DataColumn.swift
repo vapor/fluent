@@ -1,10 +1,9 @@
-extension Query.Field where Database.FieldType: DataColumnRepresentable {
+/*
+extension Query.Field {
     public func convertToDataColumn() throws -> DataColumn {
         switch self {
-        case .custom(let custom): return custom.convertToDataColumn()
         case .field(let keyPath): return try keyPath.convertToDataColumn()
-        case .reflected(let property, let entity):
-            return .init(table: entity, name: property.path.first ?? "")
+        case .reflected(let property, let entity): return .init(table: entity, name: property.path.first ?? "")
         }
     }
 }
@@ -20,3 +19,4 @@ extension Query.FieldKeyPath {
         return .init(table: reflectable.entity, name: property.path.first ?? "")
     }
 }
+*/

@@ -1,4 +1,4 @@
-extension Query.Builder {
+extension QueryBuilder {
     // MARK: Decode
 
     /// Adds an additional type `D` to be decoded when run.
@@ -13,7 +13,7 @@ extension Query.Builder {
     /// - parameters:
     ///     - type: New model type `D` to also decode.
     /// - returns: `QueryBuilder` decoding type `(Result, D)`.
-    public func alsoDecode<M>(_ type: M.Type) -> Query.Builder<Model, (Result, M)> where M: Fluent.Model {
+    public func alsoDecode<M>(_ type: M.Type) -> QueryBuilder<Model, (Result, M)> where M: Fluent.Model {
         return alsoDecode(M.self, entity: M.entity)
     }
 
@@ -30,7 +30,7 @@ extension Query.Builder {
     ///     - type: New decodable type `D` to also decode.
     ///     - entity: Entity name of this decodable type.
     /// - returns: `QueryBuilder` decoding type `(Result, D)`.
-    public func alsoDecode<D>(_ type: D.Type, entity: String) -> Query.Builder<Model, (Result, D)> where D: Decodable {
+    public func alsoDecode<D>(_ type: D.Type, entity: String) -> QueryBuilder<Model, (Result, D)> where D: Decodable {
         return transformResult { row, conn, result in
             return Future.map(on: conn) {
                 return try (result, Model.Database.queryDecode(row, entity: entity, as: D.self))
@@ -49,7 +49,7 @@ extension Query.Builder {
     /// - parameters:
     ///     - type: New decodable type `D` to decode.
     /// - returns: `QueryBuilder` decoding type `D`.
-    public func decode<D>(_ type: D.Type, entity: String = Model.entity) -> Query.Builder<Model, D> where D: Decodable {
+    public func decode<D>(_ type: D.Type, entity: String = Model.entity) -> QueryBuilder<Model, D> where D: Decodable {
         return changeResult { row, conn in
             return Future.map(on: conn) {
                 return try Model.Database.queryDecode(row, entity: entity, as: D.self)
@@ -57,29 +57,35 @@ extension Query.Builder {
         }
     }
 
+    public func decodeRaw() -> QueryBuilder<Model, Model.Database.Output> {
+        return changeResult { output, conn in
+            return conn.eventLoop.newSucceededFuture(result: output)
+        }
+    }
+
     // MARK: Internal
 
     // Create a new `QueryBuilder`. with the same connection.
-    internal func copy() -> Query.Builder<Model, Result> {
+    internal func copy() -> QueryBuilder<Model, Result> {
         return .init(query: query, on: connection, resultTransformer: resultTransformer)
     }
 
     /// Replaces the query result handler with the supplied closure.
-    static func make(on connection: Future<Model.Database.Connection>, with transformer: @escaping (Model.Database.EntityType, Model.Database.Connection) -> Future<Result>) -> Query.Builder<Model, Result> {
-        return .init(query: .init(entity: Model.entity), on: connection) { row, conn in
+    static func make(on conn: Future<Model.Database.Connection>, with transformer: @escaping (Model.Database.Output, Model.Database.Connection) -> Future<Result>) -> QueryBuilder<Model, Result> {
+        return .init(query: .fluentQuery(Model.entity), on: conn) { row, conn in
             return transformer(row, conn)
         }
     }
 
     /// Replaces the query result handler with the supplied closure.
-    func changeResult<NewResult>(with transformer: @escaping (Model.Database.EntityType, Model.Database.Connection) -> Future<NewResult>) -> Query.Builder<Model, NewResult> {
+    func changeResult<NewResult>(with transformer: @escaping (Model.Database.Output, Model.Database.Connection) -> Future<NewResult>) -> QueryBuilder<Model, NewResult> {
         return .init(query: query, on: connection) { row, conn in
             return transformer(row, conn)
         }
     }
 
     /// Transforms the previous query result to a new result using the supplied closure.
-    func transformResult<NewResult>(with transformer: @escaping (Model.Database.EntityType, Model.Database.Connection, Result) -> Future<NewResult>) -> Query.Builder<Model, NewResult> {
+    func transformResult<NewResult>(with transformer: @escaping (Model.Database.Output, Model.Database.Connection, Result) -> Future<NewResult>) -> QueryBuilder<Model, NewResult> {
         return .init(query: query, on: connection) { row, conn in
             return self.resultTransformer(row, conn).flatMap { result in
                 return transformer(row, conn, result)

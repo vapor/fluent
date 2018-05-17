@@ -26,7 +26,7 @@ extension Model where Database: SchemaSupporting {
     ///
     /// - parameters:
     ///     - builder: `SchemaCreator` to add the properties to.
-    public static func addProperties(to builder: Schema<Database>.Creator<Self>) throws {
+    public static func addProperties(to builder: SchemaCreator<Self>) throws {
         guard let idProperty = try Self.reflectProperty(forKey: idKey) else {
             throw FluentError(identifier: "idProperty", reason: "Unable to reflect ID property for `\(Self.self)`.", source: .capture())
         }
@@ -42,12 +42,7 @@ extension Model where Database: SchemaSupporting {
                 isOptional = false
             }
 
-            let field = Schema<Database>.FieldDefinition(
-                field: .reflected(property, entity: entity),
-                dataType: .type(type),
-                isOptional: isOptional,
-                isIdentifier: property.path == idProperty.path
-            )
+            let field = Database.FieldDefinition.unit(.reflected(property, entity: entity), .type(type), isOptional: isOptional, isIdentifier: property.path == idProperty.path)
             builder.schema.addFields.append(field)
         }
     }

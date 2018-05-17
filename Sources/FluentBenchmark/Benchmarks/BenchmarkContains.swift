@@ -1,4 +1,4 @@
-extension Benchmarker where Database: CustomSQLSupporting {
+extension Benchmarker where Database: SQLDatabase {
     /// The actual benchmark.
     fileprivate func _benchmark(on conn: Database.Connection) throws {
         // create
@@ -45,7 +45,7 @@ extension Benchmarker where Database: CustomSQLSupporting {
     }
 }
 
-extension Benchmarker where Database: QuerySupporting & SchemaSupporting, Database: CustomSQLSupporting {
+extension Benchmarker where Database: SQLDatabase {
     /// Benchmark fluent contains. The schema will be prepared first.
     public func benchmarkContains_withSchema() throws {
         let conn = try test(pool.requestConnection())

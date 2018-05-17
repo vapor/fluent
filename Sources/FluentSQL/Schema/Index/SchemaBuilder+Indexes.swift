@@ -1,4 +1,4 @@
-extension Schema.Builder where Database: IndexSupporting {
+extension SchemaBuilder where Self.Database: IndexSupporting {
     /// Adds a `SchemaIndex` to the supplied field.
     ///
     ///     builder.addIndex(to: \.username, isUnique: true)

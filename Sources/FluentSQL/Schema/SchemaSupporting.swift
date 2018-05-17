@@ -6,10 +6,24 @@ import Foundation
 /// Capable of executing a database schema query.
 public protocol SchemaSupporting: QuerySupporting {
     /// Associated schema type for this database.
-    associatedtype SchemaType
+
+    associatedtype FieldDefinition: SchemaFieldDefinition
+        where FieldDefinition.Field == Query.Field
 
     /// Executes the supplied schema on the database connection.
     static func execute(schema: Schema<Self>, on connection: Connection) -> Future<Void>
+}
+
+public protocol SchemaFieldDefinition {
+    associatedtype Field
+    associatedtype DataType: SchemaDataType
+
+    var field: Field { get }
+    static func unit(_ field: Field, _ dataType: DataType, isOptional: Bool, isIdentifier: Bool) -> Self
+}
+
+public protocol SchemaDataType {
+    static func type(_ type: Any.Type) -> Self
 }
 
 // MARK: Convenience
@@ -20,9 +34,9 @@ extension SchemaSupporting {
     public static func create<Model>(
         _ model: Model.Type,
         on connection: Connection,
-        closure: @escaping (Schema<Self>.Creator<Model>) throws -> ()
-    ) -> Future<Void> {
-        let creator = Schema<Self>.Creator(Model.self)
+        closure: @escaping (SchemaCreator<Model>) throws -> ()
+    ) -> Future<Void> where Model.Database == Self {
+        let creator = SchemaCreator(Model.self)
         return Future.flatMap(on: connection) {
             try closure(creator)
             return self.execute(schema: creator.schema, on: connection)
@@ -34,9 +48,9 @@ extension SchemaSupporting {
     public static func update<Model>(
         _ model: Model.Type,
         on connection: Connection,
-        closure: @escaping (Schema<Self>.Updater<Model>) throws -> ()
-    ) -> Future<Void> {
-        let updater = Schema<Self>.Updater(Model.self)
+        closure: @escaping (SchemaUpdater<Model>) throws -> ()
+    ) -> Future<Void> where Model.Database == Self {
+        let updater = SchemaUpdater(Model.self)
         return Future.flatMap(on: connection) {
             try closure(updater)
             return self.execute(schema: updater.schema, on: connection)

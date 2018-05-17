@@ -1,23 +1,23 @@
 /// MARK: Field convenience
 
-extension Schema.Builder where Model.Database: ReferenceSupporting {
+extension SchemaBuilder where Self.Database: ReferenceSupporting {
     /// Adds a field to the schema and creates a reference.
     /// T : T
-    public func field<T, Other>(for key: KeyPath<Model, T>, referencing: KeyPath<Other, T>, actions: Schema.Reference.Actions = .default) where Other: Fluent.Model {
+    public func field<T, Other>(for key: KeyPath<Model, T>, referencing: KeyPath<Other, T>, actions: Schema<Database>.Reference.Actions = .default) where Other: Fluent.Model {
         field(for: key)
         addReference(from: key, to: referencing, actions: actions)
     }
 
     /// Adds a field to the schema and creates a reference.
     /// T : T?
-    public func field<T, Other>(for key: KeyPath<Model, T>, referencing: KeyPath<Other, T?>, actions: Schema.Reference.Actions = .default) where Other: Fluent.Model {
+    public func field<T, Other>(for key: KeyPath<Model, T>, referencing: KeyPath<Other, T?>, actions: Schema<Database>.Reference.Actions = .default) where Other: Fluent.Model {
         field(for: key)
         addReference(from: key, to: referencing, actions: actions)
     }
 
     /// Adds a field to the schema and creates a reference.
     /// T? : T
-    public func field<T, Other>(for key: KeyPath<Model, T?>, referencing: KeyPath<Other, T>, actions: Schema.Reference.Actions = .default)
+    public func field<T, Other>(for key: KeyPath<Model, T?>, referencing: KeyPath<Other, T>, actions: Schema<Database>.Reference.Actions = .default)
         where Other: Fluent.Model
     {
         field(for: key)
@@ -26,7 +26,7 @@ extension Schema.Builder where Model.Database: ReferenceSupporting {
 
     /// Adds a field to the schema and creates a reference.
     /// T? : T?
-    public func field<T, Other>(for key: KeyPath<Model, T?>, referencing: KeyPath<Other, T?>, actions: Schema.Reference.Actions = .default)
+    public func field<T, Other>(for key: KeyPath<Model, T?>, referencing: KeyPath<Other, T?>, actions: Schema<Database>.Reference.Actions = .default)
         where Other: Fluent.Model
     {
         field(for: key)
@@ -36,10 +36,10 @@ extension Schema.Builder where Model.Database: ReferenceSupporting {
 
 /// MARK: Add
 
-extension Schema.Builder where Model.Database: ReferenceSupporting {
+extension SchemaBuilder where Self.Database: ReferenceSupporting {
     /// Adds a reference.
     /// T : T
-    public func addReference<T, Other>(from base: KeyPath<Model, T>, to referenced: KeyPath<Other, T>, actions: Schema.Reference.Actions = .default)
+    public func addReference<T, Other>(from base: KeyPath<Model, T>, to referenced: KeyPath<Other, T>, actions: Schema<Database>.Reference.Actions = .default)
         where Other: Fluent.Model
     {
         _addReference(from: base, to: referenced, actions: actions)
@@ -47,7 +47,7 @@ extension Schema.Builder where Model.Database: ReferenceSupporting {
 
     /// Adds a reference.
     /// T? : T
-    public func addReference<T, Other>(from base: KeyPath<Model, T?>, to referenced: KeyPath<Other, T>, actions: Schema.Reference.Actions = .default)
+    public func addReference<T, Other>(from base: KeyPath<Model, T?>, to referenced: KeyPath<Other, T>, actions: Schema<Database>.Reference.Actions = .default)
         where Other: Fluent.Model
     {
         _addReference(from: base, to: referenced, actions: actions)
@@ -55,14 +55,14 @@ extension Schema.Builder where Model.Database: ReferenceSupporting {
 
     /// Adds a reference.
     /// T : T?
-    public func addReference<T, Other>(from base: KeyPath<Model, T>, to referenced: KeyPath<Other, T?>, actions: Schema.Reference.Actions = .default)
+    public func addReference<T, Other>(from base: KeyPath<Model, T>, to referenced: KeyPath<Other, T?>, actions: Schema<Database>.Reference.Actions = .default)
         where Other: Fluent.Model
     {
         _addReference(from: base, to: referenced, actions: actions)
     }
 
     /// Internal add reference. Does not verify types match.
-    private func _addReference<T, U, Other>(from base: KeyPath<Model, T>, to referenced: KeyPath<Other, U>, actions: Schema.Reference.Actions)
+    private func _addReference<T, U, Other>(from base: KeyPath<Model, T>, to referenced: KeyPath<Other, U>, actions: Schema<Database>.Reference.Actions)
         where Other: Fluent.Model
     {
         let reference = Schema<Model.Database>.Reference(
@@ -76,7 +76,7 @@ extension Schema.Builder where Model.Database: ReferenceSupporting {
 
 /// MARK: Remove
 
-extension Schema.Builder where Model.Database: ReferenceSupporting {
+extension SchemaBuilder where Self.Database: ReferenceSupporting {
     /// Removes a reference.
     /// T : T
     public func removeReference<T, Other>(from field: KeyPath<Model, T>, to referencing: KeyPath<Other, T>)

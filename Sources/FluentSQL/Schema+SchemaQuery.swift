@@ -1,34 +1,31 @@
-extension Schema where Database: CustomSQLSupporting {
+extension Schema where Database: SQLDatabase {
     /// Converts a database schema to sql schema query
-    public func convertToSchemaQuery(dataTypeFactory: (Schema<Database>.FieldDefinition) throws -> String) throws -> DataDefinitionQuery {
+    public func convertToDataDefinitionQuery() throws -> DataDefinitionQuery {
+        let definition: DataDefinitionQuery
         switch action {
         case .create:
-            return try .init(
+            definition = .init(
                 statement: .create,
                 table: entity,
-                addColumns: addFields.map { try convertToSchemaColumn($0, dataType: dataTypeFactory($0)) },
+                addColumns: addFields.map { $0.convertToDataDefinitionColumn() },
                 addForeignKeys: []
             )
         case .update:
-            return try .init(
+            definition = .init(
                 statement: .alter,
                 table: entity,
-                addColumns: addFields.map { try convertToSchemaColumn($0, dataType: dataTypeFactory($0)) },
-                removeColumns: removeFields.map { try $0.convertToDataColumn().name },
+                addColumns: addFields.map { $0.convertToDataDefinitionColumn() },
+                removeColumns: removeFields.map { $0.name },
                 addForeignKeys: [],
                 removeForeignKeys: []
             )
-        case .delete: return .init(statement: .drop, table: entity)
+        case .delete: definition = .init(statement: .drop, table: entity)
         }
-    }
-
-    /// Convert a schema field to a sql schema column.
-    private  func convertToSchemaColumn(_ field: Schema.FieldDefinition, dataType: String) throws -> DataDefinitionColumn {
-        return try .init(name: field.field.convertToDataColumn().name, dataType: dataType)
+        return definition
     }
 }
 
-extension Schema where Database: CustomSQLSupporting & ReferenceSupporting {
+extension Schema where Database: SQLDatabase & ReferenceSupporting {
     /// Converts a database schema to sql schema query
     public func applyReferences(to schemaQuery: inout DataDefinitionQuery) throws {
         switch schemaQuery.statement {
@@ -54,8 +51,8 @@ extension Schema where Database: CustomSQLSupporting & ReferenceSupporting {
     }
 
     private func sqlName(for reference: Schema.Reference) throws -> String {
-        let base = try reference.base.convertToDataColumn()
-        let referenced = try reference.base.convertToDataColumn()
+        let base = reference.base
+        let referenced = reference.base
         return "\(base.table ?? "").\(base.name)_\(referenced.table ?? "").\(referenced.name)"
     }
 
@@ -63,8 +60,8 @@ extension Schema where Database: CustomSQLSupporting & ReferenceSupporting {
     private func convertToForeignKey(_ reference: Schema.Reference) throws -> DataDefinitionForeignKey {
         return try .init(
             name: sqlName(for: reference),
-            local: reference.base.convertToDataColumn(),
-            foreign: reference.referenced.convertToDataColumn(),
+            local: reference.base,
+            foreign: reference.referenced,
             onUpdate: reference.actions.update.flatMap { self.convertToForeignKeyAction($0) },
             onDelete: reference.actions.delete.flatMap { self.convertToForeignKeyAction($0) }
         )

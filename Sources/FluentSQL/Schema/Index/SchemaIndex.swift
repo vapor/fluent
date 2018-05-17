@@ -13,7 +13,7 @@ extension Schema where Database: IndexSupporting {
     ///
     public struct Index {
         /// The indexed fields.
-        public let fields: [Query<Database>.Field]
+        public let fields: [Database.Query.Field]
 
         /// If `true`, this index will also force uniqueness.
         public let isUnique: Bool
@@ -23,7 +23,7 @@ extension Schema where Database: IndexSupporting {
         /// - parameters:
         ///     - fields: The indexed fields.
         ///     - isUnique: If `true`, this index will also force uniqueness.
-        public init(fields: [Query<Database>.Field], isUnique: Bool) {
+        public init(fields: [Database.Query.Field], isUnique: Bool) {
             assert(fields.count >= 1) // at least one field required
             self.fields = fields
             self.isUnique = isUnique

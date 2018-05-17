@@ -1,49 +1,32 @@
-extension Query {
-    /// Aggregates generate data for every row of returned data. They usually aggregate data for a single field,
-    /// but can also operate over most fields. When an aggregate is applied to a query, the aggregate method will apply
-    /// to all rows filtered by the query, but only one row (the aggregate) will actually be returned.
-    ///
-    /// The most common use of aggregates is to get the count of columns.
-    ///
-    ///     let count = User.query(on: ...).count()
-    ///
-    /// They can also be used to generate sums or averages for all values in a column.
-    public struct Aggregate {
-        /// Possible aggregation types.
-        public enum Method {
-            /// Counts the number of matching entities.
-            case count
-            /// Adds all values of the chosen field.
-            case sum
-            /// Averges all values of the chosen field.
-            case average
-            /// Returns the minimum value for the chosen field.
-            case min
-            /// Returns the maximum value for the chosen field.
-            case max
-        }
 
-        /// Aggregate result structure expected from DB.
-        internal struct Result<D>: Decodable where D: Decodable {
-            /// Contains the aggregated value.
-            var fluentAggregate: D
-        }
-
-        /// Optional field to apply this aggreagate to.
-        /// If `nil`, the aggregate is applied to all fields.
-        public var field: Field?
-
-        /// The specific aggreatge method to use.
-        public var method: Method
-    }
+/// Aggregates generate data for every row of returned data. They usually aggregate data for a single field,
+/// but can also operate over most fields. When an aggregate is applied to a query, the aggregate method will apply
+/// to all rows filtered by the query, but only one row (the aggregate) will actually be returned.
+///
+/// The most common use of aggregates is to get the count of columns.
+///
+///     let count = User.query(on: ...).count()
+///
+/// They can also be used to generate sums or averages for all values in a column.
+public enum QueryAggregateMethod {
+    /// Counts the number of matching entities.
+    case count
+    /// Adds all values of the chosen field.
+    case sum
+    /// Averges all values of the chosen field.
+    case average
+    /// Returns the minimum value for the chosen field.
+    case min
+    /// Returns the maximum value for the chosen field.
+    case max
 }
 
-extension Query.Builder {
+extension QueryBuilder {
     // MARK: Aggregate
 
     /// Returns the number of results for this query.
     public func count() -> Future<Int> {
-        return _aggregate(.init(field: nil, method: .count))
+        return _aggregate(.fluentAggregate(.count, field: nil))
     }
 
     /// Returns the sum of all entries for the supplied field.
@@ -100,20 +83,22 @@ extension Query.Builder {
     ///     - field: Field to find max for.
     ///     - type: `Decodable` type to decode the aggregate value as.
     /// - returns: A `Future` containing the aggregate.
-    public func aggregate<D, T>(_ method: Query.Aggregate.Method, field: KeyPath<Model, T>, as type: D.Type = D.self) -> Future<D>
+    public func aggregate<D, T>(_ method: QueryAggregateMethod, field: KeyPath<Model, T>, as type: D.Type = D.self) -> Future<D>
         where D: Decodable
     {
-        return _aggregate(.init(field: .keyPath(field), method: method))
+        return _aggregate(.fluentAggregate(method, field: .keyPath(field)))
     }
 
     /// Perform an aggregate action.
-    private func _aggregate<D>(_ aggregate: Query.Aggregate, as type: D.Type = D.self) -> Future<D>
+    private func _aggregate<D>(_ aggregate: Model.Database.Query.Key, as type: D.Type = D.self) -> Future<D>
         where D: Decodable
     {
-        query.action = .read
-        query.aggregates.append(aggregate)
+        // this should be the only key, or else there may be issues
+        query.fluentKeys = [aggregate]
+
+        // decode the result
         var result: D? = nil
-        return decode(Query.Aggregate.Result<D>.self).run { row in
+        return decode(AggregateResult<D>.self).run(.fluentRead) { row in
             result = row.fluentAggregate
         }.map {
             guard let result = result else {
@@ -123,3 +108,10 @@ extension Query.Builder {
         }
     }
 }
+
+/// Aggregate result structure expected from DB.
+private struct AggregateResult<D>: Decodable where D: Decodable {
+    /// Contains the aggregated value.
+    var fluentAggregate: D
+}
+

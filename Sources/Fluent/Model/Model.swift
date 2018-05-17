@@ -146,7 +146,7 @@ extension Model where Database: QuerySupporting {
     ///
     /// - parameters:
     ///     - conn: Something `DatabaseConnectable` to create the `QueryBuilder` on.
-    public func query(on conn: DatabaseConnectable) -> Query<Database>.Builder<Self, Self> {
+    public func query(on conn: DatabaseConnectable) -> QueryBuilder<Self, Self> {
         return Self.query(on: conn)
     }
 
@@ -156,7 +156,7 @@ extension Model where Database: QuerySupporting {
     ///
     /// - parameters:
     ///     - conn: Something `DatabaseConnectable` to create the `QueryBuilder` on.
-    public static func query(on conn: DatabaseConnectable) -> Query<Database>.Builder<Self, Self> {
+    public static func query(on conn: DatabaseConnectable) -> QueryBuilder<Self, Self> {
         return query(on: conn.databaseConnection(to: Self.defaultDatabase))
     }
 
@@ -172,7 +172,7 @@ extension Model where Database: QuerySupporting {
     }
 
     /// Creates a `QueryBuilder` for this model, decoding some non-model decodable type as the result.
-    static func query<D>(decoding type: D.Type, on connection: Future<Self.Database.Connection>) -> Query<Database>.Builder<Self, D> where D: Decodable {
+    static func query<D>(decoding type: D.Type, on connection: Future<Self.Database.Connection>) -> QueryBuilder<Self, D> where D: Decodable {
         return .make(on: connection) { row, conn in
             return Future.map(on: conn) {
                 return try Self.Database.queryDecode(row, entity: entity, as: D.self)
@@ -181,7 +181,7 @@ extension Model where Database: QuerySupporting {
     }
 
     /// Creates a `QueryBuilder` for this model, decoding instances of this model as the result.
-    static func query(on connection: Future<Self.Database.Connection>) -> Query<Database>.Builder<Self, Self> {
+    static func query(on connection: Future<Self.Database.Connection>) -> QueryBuilder<Self, Self> {
         return query(decoding: Self.self, on: connection).transformResult { row, conn, result in
             return Self.Database.modelEvent(event: .willRead, model: result, on: conn).flatMap(to: Self.self) { model in
                 return try model.willRead(on: conn)

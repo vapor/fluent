@@ -1,28 +1,13 @@
-extension Query {
-    // MARK: Range
-
-    /// Defines a Fluent query limit and offset.
-    public struct Range {
-        /// The lower bound of item indexes to return. This should be `0` by default.
-        public var lower: Int
-
-        /// The upper bound of item indexes to return. If this is `nil`, the range acts as just on offset.
-        /// If it is set, the number of results will have a max possible value (upper - lower).
-        public var upper: Int?
-
-        /// Creates a new limit with a count and offset.
-        ///
-        /// - parameters:
-        ///     - lower: Amount to offset the query by.
-        ///     - upper: `upper` - `lower` = maximum results.
-        public init(lower: Int, upper: Int?) {
-            self.lower = lower
-            self.upper = upper
-        }
-    }
+public protocol QueryRange {
+    /// Creates a new limit with a count and offset.
+    ///
+    /// - parameters:
+    ///     - lower: Amount to offset the query by.
+    ///     - upper: `upper` - `lower` = maximum results.
+    static func fluentRange(lower: Int, upper: Int?) -> Self
 }
 
-extension Query.Builder {
+extension QueryBuilder {
     // MARK: Range
 
     /// Limits the results of this query to the specified range.
@@ -77,7 +62,7 @@ extension Query.Builder {
     ///     - upper: `upper` - `lower` = maximum results.
     /// - returns: Query builder for chaining.
     public func range(lower: Int = 0, upper: Int? = nil) -> Self {
-        return addRange(.init(lower: lower, upper: upper))
+        return addRange(.fluentRange(lower: lower, upper: upper))
     }
 
     /// Adds a custom `Query.Range` to the query builder.
@@ -85,8 +70,8 @@ extension Query.Builder {
     /// - parameters:
     ///     - range: New range to add.
     /// - returns: Query builder for chaining.
-    public func addRange(_ range: Query.Range) -> Self {
-        query.range = range
+    public func addRange(_ range: Model.Database.Query.Range) -> Self {
+        query.fluentRanges.append(range)
         return self
     }
 }

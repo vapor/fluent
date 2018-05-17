@@ -84,6 +84,7 @@ final class BenchmarkLogger: DatabaseLogHandler {
 
     /// See `DatabaseLogHandler`.
     public func record(log: DatabaseLog) {
+        print(log)
         logs.append(log)
     }
 }
