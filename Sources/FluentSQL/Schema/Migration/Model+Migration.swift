@@ -32,18 +32,12 @@ extension Model where Database: SchemaSupporting {
         }
         let properties = try Self.reflectProperties(depth: 0)
         for property in properties {
-            let type: Any.Type
-            let isOptional: Bool
-            if let o = property.type as? AnyOptionalType.Type {
-                type = o.anyWrappedType
-                isOptional = true
-            } else {
-                type = property.type
-                isOptional = false
-            }
-
-            let field = Database.FieldDefinition.unit(.reflected(property, entity: entity), .type(type), isOptional: isOptional, isIdentifier: property.path == idProperty.path)
-            builder.schema.addFields.append(field)
+            let field = Database.Schema.FieldDefinition.fluentFieldDefinition(
+                .reflected(property, entity: entity),
+                .fluentType(property.type),
+                isIdentifier: property.path == idProperty.path
+            )
+            builder.schema.fluentCreateFields.append(field)
         }
     }
 }

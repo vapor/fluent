@@ -62,7 +62,7 @@ extension QueryBuilder {
     ///     - upper: `upper` - `lower` = maximum results.
     /// - returns: Query builder for chaining.
     public func range(lower: Int = 0, upper: Int? = nil) -> Self {
-        return addRange(.fluentRange(lower: lower, upper: upper))
+        return self.range(.fluentRange(lower: lower, upper: upper))
     }
 
     /// Adds a custom `Query.Range` to the query builder.
@@ -70,8 +70,8 @@ extension QueryBuilder {
     /// - parameters:
     ///     - range: New range to add.
     /// - returns: Query builder for chaining.
-    public func addRange(_ range: Model.Database.Query.Range) -> Self {
-        query.fluentRanges.append(range)
+    public func range(_ range: Model.Database.Query.Range) -> Self {
+        query.fluentRange = range
         return self
     }
 }

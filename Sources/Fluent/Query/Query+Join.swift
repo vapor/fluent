@@ -5,7 +5,8 @@ public protocol JoinSupporting: QuerySupporting
 public protocol JoinsContaining: Query {
     associatedtype Join: QueryJoin
         where Join.Field == Field
-    var fluentJoins: [Join] { get set }
+
+    static var fluentJoinsKey: WritableKeyPath<Self, [Join]> { get }
 }
 
 public protocol QueryJoin {
@@ -16,6 +17,13 @@ public protocol QueryJoin {
 
 public protocol QueryJoinMethod {
     static var `default`: Self { get }
+}
+
+extension Query where Self: JoinsContaining {
+    internal var fluentJoins: [Join] {
+        get { return self[keyPath: Self.fluentJoinsKey] }
+        set { self[keyPath: Self.fluentJoinsKey] = newValue }
+    }
 }
 
 extension QueryBuilder where Model.Database: JoinSupporting {

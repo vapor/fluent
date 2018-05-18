@@ -4,7 +4,7 @@ import Fluent
 import FluentSQL
 import Foundation
 
-extension Benchmarker where Database: JoinSupporting & ReferenceSupporting & QuerySupporting {
+extension Benchmarker where Database: JoinSupporting & QuerySupporting {
     /// The actual benchmark.
     fileprivate func _benchmark(on conn: Database.Connection) throws {
         // create
@@ -66,13 +66,12 @@ extension Benchmarker where Database: JoinSupporting & ReferenceSupporting & Que
     /// Benchmark fluent relations.
     public func benchmarkReferentialActions() throws {
         let conn = try test(pool.requestConnection())
-        try test(Database.enableReferences(on: conn))
         try self._benchmark(on: conn)
         self.pool.releaseConnection(conn)
     }
 }
 
-extension Benchmarker where Database: SchemaSupporting & JoinSupporting & ReferenceSupporting & QuerySupporting {
+extension Benchmarker where Database: SchemaSupporting & JoinSupporting & QuerySupporting {
     /// Benchmark fluent relations.
     /// The schema will be prepared first.
     public func benchmarkReferentialActions_withSchema() throws {

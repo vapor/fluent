@@ -6,24 +6,17 @@ import Foundation
 /// Capable of executing a database schema query.
 public protocol SchemaSupporting: QuerySupporting {
     /// Associated schema type for this database.
+    associatedtype Schema: FluentSQL.Schema
+        where Schema.Field == Query.Field
 
-    associatedtype FieldDefinition: SchemaFieldDefinition
-        where FieldDefinition.Field == Query.Field
+    /// Enables references errors.
+    static func enableReferences(on conn: Connection) -> Future<Void>
+
+    /// Disables reference errors.
+    static func disableReferences(on conn: Connection) -> Future<Void>
 
     /// Executes the supplied schema on the database connection.
-    static func execute(schema: Schema<Self>, on connection: Connection) -> Future<Void>
-}
-
-public protocol SchemaFieldDefinition {
-    associatedtype Field
-    associatedtype DataType: SchemaDataType
-
-    var field: Field { get }
-    static func unit(_ field: Field, _ dataType: DataType, isOptional: Bool, isIdentifier: Bool) -> Self
-}
-
-public protocol SchemaDataType {
-    static func type(_ type: Any.Type) -> Self
+    static func execute(schema: Schema, on connection: Connection) -> Future<Void>
 }
 
 // MARK: Convenience
@@ -61,7 +54,8 @@ extension SchemaSupporting {
     public static func delete<Model>(_ model: Model.Type, on connection: Connection) -> Future<Void>
         where Model: Fluent.Model, Model.Database == Self
     {
-        let schema = Schema<Self>(entity: Model.entity, action: .delete)
+        var schema: Model.Database.Schema = .fluentSchema(Model.entity)
+        schema.fluentAction = .fluentDelete
         return execute(schema: schema, on: connection)
     }
 }

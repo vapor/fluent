@@ -11,13 +11,46 @@ public protocol Query {
 
     static func fluentQuery(_ entity: String) -> Self
 
-    var fluentAction: Action { get set }
-    var fluentBinds: [Data] { get set }
-    var fluentData: [Field: Data] { get set}
-    var fluentFilters: [Filter] { get set}
-    var fluentKeys: [Key] { get set }
-    var fluentRanges: [Range] { get set }
-    var fluentSorts: [Sort] { get set }
+    static var fluentActionKey: WritableKeyPath<Self, Action> { get }
+    static var fluentBindsKey: WritableKeyPath<Self, [Data]> { get }
+    static var fluentDataKey: WritableKeyPath<Self, [Field: Data]> { get }
+    static var fluentFiltersKey: WritableKeyPath<Self, [Filter]> { get }
+    static var fluentKeysKey: WritableKeyPath<Self, [Key]> { get }
+    static var fluentRangeKey: WritableKeyPath<Self, Range?> { get }
+    static var fluentSortsKey: WritableKeyPath<Self, [Sort]> { get }
+}
+
+extension Query {
+    // MARK: Internal
+
+    internal var fluentAction: Action {
+        get { return self[keyPath: Self.fluentActionKey] }
+        set { self[keyPath: Self.fluentActionKey] = newValue }
+    }
+    internal var fluentBinds: [Data] {
+        get { return self[keyPath: Self.fluentBindsKey] }
+        set { self[keyPath: Self.fluentBindsKey] = newValue }
+    }
+    internal var fluentData: [Field: Data] {
+        get { return self[keyPath: Self.fluentDataKey] }
+        set { self[keyPath: Self.fluentDataKey] = newValue }
+    }
+    internal var fluentFilters: [Filter] {
+        get { return self[keyPath: Self.fluentFiltersKey] }
+        set { self[keyPath: Self.fluentFiltersKey] = newValue }
+    }
+    internal var fluentKeys: [Key] {
+        get { return self[keyPath: Self.fluentKeysKey] }
+        set { self[keyPath: Self.fluentKeysKey] = newValue }
+    }
+    internal var fluentRange: Range? {
+        get { return self[keyPath: Self.fluentRangeKey] }
+        set { self[keyPath: Self.fluentRangeKey] = newValue }
+    }
+    internal var fluentSorts: [Sort] {
+        get { return self[keyPath: Self.fluentSortsKey] }
+        set { self[keyPath: Self.fluentSortsKey] = newValue }
+    }
 }
 
 ///// A query that can be sent to a Fluent database.

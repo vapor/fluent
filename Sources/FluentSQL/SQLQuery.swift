@@ -1,3 +1,5 @@
+
+
 public enum SQLValue: QueryData {
     public static func fluentEncodable(_ encodable: Encodable) -> SQLValue {
         return .encodable(encodable)
@@ -5,78 +7,87 @@ public enum SQLValue: QueryData {
 
     case encodable(Encodable)
 }
+public protocol SQLQuery: Query & JoinsContaining where
+    Action == SQLStatement,
+    Filter == DataPredicateItem,
+    Data == SQLValue,
+    Key == DataQueryColumn,
+    Range == DataLimitOffset,
+    Sort == DataOrderBy
+{
+    var table: String { get set }
+    var statement: SQLStatement { get set }
+    var binds: [SQLValue] { get set }
+    var data: [DataColumn: SQLValue] { get set }
+    var predicates: [DataPredicateItem] { get set }
+    var columns: [DataQueryColumn] { get set }
+    var limit: Int? { get set }
+    var offset: Int? { get set }
+    var orderBys: [DataOrderBy] { get set }
+    var groupBys: [DataGroupBy] { get set }
+    var joins: [DataJoin] { get set }
+    init(table: String)
+}
 
-public struct SQLQuery: Query, JoinsContaining {
-    public var table: String
-    public var statement: SQLStatement
-    public var binds: [SQLValue]
-    public var data: [DataColumn: SQLValue]
-    public var columns: [DataQueryColumn]
-    public var joins: [DataJoin]
-    public var limit: Int?
-    public var offset: Int?
-    public var orderBys: [DataOrderBy]
-    public var predicates: [DataPredicateItem]
-
-    public init(table: String) {
-        self.table = table
-        self.binds = []
-        self.columns = []
-        self.data = [:]
-        self.joins = []
-        self.orderBys = []
-        self.predicates = []
-        self.statement = .data
+extension SQLQuery {
+    /// See `Query`.
+    public static var fluentActionKey: WritableKeyPath<Self, SQLStatement> {
+        return \.statement
     }
 
-    public static func fluentQuery(_ table: String) -> SQLQuery {
+    /// See `Query`.
+    public static var fluentBindsKey: WritableKeyPath<Self, [SQLValue]> {
+        return \.binds
+    }
+
+    /// See `Query`.
+    public static var fluentDataKey: WritableKeyPath<Self, [DataColumn: SQLValue]> {
+        return \.data
+    }
+
+    /// See `Query`.
+    public static var fluentFiltersKey: WritableKeyPath<Self, [DataPredicateItem]> {
+        return \.predicates
+    }
+
+    /// See `Query`.
+    public static var fluentKeysKey: WritableKeyPath<Self, [DataQueryColumn]> {
+        return \.columns
+    }
+
+    /// See `Query`.
+    public static var fluentRangeKey: WritableKeyPath<Self, DataLimitOffset?> {
+        return \._range
+    }
+
+    /// See `Query`.
+    public static var fluentSortsKey: WritableKeyPath<Self, [DataOrderBy]> {
+        return \.orderBys
+    }
+
+    /// See `Query`.
+    public static var fluentJoinsKey: WritableKeyPath<Self, [DataJoin]> {
+        return \.joins
+    }
+
+    /// See `Query`.
+    public static func fluentQuery(_ table: String) -> Self {
         return .init(table: table)
     }
 
-    public var fluentAction: SQLStatement {
-        get { return statement }
-        set { statement = newValue }
-    }
-
-    public var fluentBinds: [SQLValue] {
-        get { return binds }
-        set { binds = newValue }
-    }
-
-    public var fluentData: [DataColumn: SQLValue] {
-        get { return data }
-        set { data = newValue }
-    }
-
-    public var fluentFilters: [DataPredicateItem] {
-        get { return predicates }
-        set { predicates = newValue }
-    }
-
-    public var fluentKeys: [DataQueryColumn] {
-        get { return columns }
-        set { columns = newValue }
-    }
-
-    public var fluentJoins: [Join] {
-        get { return joins }
-        set { joins = newValue }
-    }
-
-    public var fluentRanges: [DataLimitOffset] {
+    /// Maps limit / offset to a Fluent-compatible type.
+    private var _range: DataLimitOffset? {
         get {
             switch (limit, offset) {
             case (.some(let limit), .some(let offset)):
-                let limit = DataLimitOffset(offset: offset, limit: limit)
-                return [limit]
+                return .init(offset: offset, limit: limit)
             case (.none, .some(let offset)):
-                let limit = DataLimitOffset(offset: offset, limit: nil)
-                return [limit]
-            default: return []
+                return .init(offset: offset, limit: nil)
+            default: return nil
             }
         }
         set {
-            if let first = newValue.first {
+            if let first = newValue {
                 limit = first.limit
                 offset = first.offset
             } else {
@@ -84,11 +95,6 @@ public struct SQLQuery: Query, JoinsContaining {
                 offset = nil
             }
         }
-    }
-
-    public var fluentSorts: [DataOrderBy] {
-        get { return orderBys }
-        set { orderBys = newValue }
     }
 
     public func convertToDataOrManipulationQuery() -> DataOrManipulationQuery {
@@ -100,7 +106,7 @@ public struct SQLQuery: Query, JoinsContaining {
                 joins: joins,
                 predicates: predicates,
                 orderBys: orderBys,
-                groupBys: [] /* FIXME */,
+                groupBys: groupBys,
                 limit: limit,
                 offset: offset
             ))
@@ -115,16 +121,8 @@ public struct SQLQuery: Query, JoinsContaining {
             ))
         }
     }
-
-    public typealias Action = SQLStatement
-    public typealias Field = DataColumn
-    public typealias Filter = DataPredicateItem
-    public typealias Data = SQLValue
-    public typealias Join = DataJoin
-    public typealias Key = DataQueryColumn
-    public typealias Range = DataLimitOffset
-    public typealias Sort = DataOrderBy
 }
+
 
 extension DataJoin: QueryJoin {
     public static func fluentJoin(_ method: DataJoinMethod, base: DataColumn, joined: DataColumn) -> DataJoin {
@@ -276,10 +274,45 @@ public enum SQLStatement {
 }
 
 extension SQLSerializer {
-    public func serialize(_ query: SQLQuery) -> String {
+    public func serialize<Q>(_ query: Q) -> String where Q: SQLQuery {
         switch query.convertToDataOrManipulationQuery() {
         case .manipulation(let m): return serialize(query: m)
         case .data(let q): return serialize(query: q)
         }
     }
 }
+
+extension DataQueryColumn: QueryKey {
+    public typealias Field = DataColumn
+
+    public static var fluentAll: DataQueryColumn {
+        return .all
+    }
+
+    public static func fluentAggregate(_ method: QueryAggregateMethod, field: DataColumn?) -> DataQueryColumn {
+        let function: String
+        switch method {
+        case .average: function = "AVERAGE"
+        case .count: function = "COUNT"
+        case .max: function = "MAX"
+        case .min: function = "MIN"
+        case .sum: function = "SUM"
+        }
+        return .computed(.init(function: function, columns: [field].compactMap { $0 }), key: "fluentAggregate")
+    }
+}
+
+extension DataColumn: Hashable, QueryField {
+    public var hashValue: Int {
+        return (table?.hashValue ?? 0) &+ name.hashValue
+    }
+
+    public static func == (lhs: DataColumn, rhs: DataColumn) -> Bool {
+        return lhs.table == rhs.table && lhs.name == rhs.name
+    }
+
+    public static func fluentProperty(_ property: FluentProperty) -> DataColumn {
+        return .init(table: property.entity, name: property.path.first ?? "")
+    }
+}
+

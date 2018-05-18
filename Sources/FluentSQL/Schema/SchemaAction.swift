@@ -1,6 +1,6 @@
 /// Supported database schema actions.
-public enum SchemaAction {
-    case create
-    case update
-    case delete
+public protocol SchemaAction {
+    static var fluentCreate: Self { get }
+    static var fluentUpdate: Self { get }
+    static var fluentDelete: Self { get }
 }
