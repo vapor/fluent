@@ -43,6 +43,8 @@ public protocol Model: AnyModel, Reflectable {
     /// Called before a model is deleted.
     /// Throwing will cancel the deletion.
     func willDelete(on connection: Database.Connection) throws -> Future<Self>
+    /// Called after a model has been deleted.
+    func didDelete(on connection: Database.Connection) throws -> Future<Void>
 }
 
 /// Type-erased model.
@@ -120,6 +122,11 @@ extension Model {
     /// See Model.willDelete()
     public func willDelete(on connection: Database.Connection) throws -> Future<Self> {
         return Future.map(on: connection) { self }
+    }
+    
+    /// See Model.didDelete()
+    public func didDelete(on connection: Database.Connection) throws -> Future<Void> {
+        return .done(on: connection)
     }
 }
 
