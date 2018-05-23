@@ -71,7 +71,7 @@ internal struct UserMigration<D>: Migration
     /// See Migration.prepare
     static func prepare(on connection: Database.Connection) -> Future<Void> {
         return Database.create(User<Database>.self, on: connection) { builder in
-            builder.field(for: \User<Database>.id)
+            builder.id()
             builder.field(for: \User<Database>.name)
             builder.field(for: \User<Database>.age)
             builder.field(for: \User<Database>.createdAt)

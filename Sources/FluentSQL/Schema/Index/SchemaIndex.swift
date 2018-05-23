@@ -11,24 +11,7 @@
 //    ///
 //    ///     builder.addIndex(to: \.username, isUnique: true)
 //    ///
-//    public struct Index {
-//        /// The indexed fields.
-//        public let fields: [Database.Query.Field]
 //
-//        /// If `true`, this index will also force uniqueness.
-//        public let isUnique: Bool
-//
-//        /// Creates a new `SchemaIndex`.
-//        ///
-//        /// - parameters:
-//        ///     - fields: The indexed fields.
-//        ///     - isUnique: If `true`, this index will also force uniqueness.
-//        public init(fields: [Database.Query.Field], isUnique: Bool) {
-//            assert(fields.count >= 1) // at least one field required
-//            self.fields = fields
-//            self.isUnique = isUnique
-//        }
-//    }
 //
 //    /// Field indexes that should be added for this schema.
 //    public var addIndexes: [Index] {

@@ -57,7 +57,7 @@ extension Pet: Migration where D: SchemaSupporting {
     public static func prepare(on connection: Database.Connection) -> Future<Void> {
         return Database.create(self, on: connection) { builder in
             try addProperties(to: builder)
-            // builder.addReference(from: \.ownerID, to: \User<D>.id, actions: .init(update: .update, delete: .nullify))
+            builder.addReference(from: \.ownerID, to: \User<D>.id)
         }
     }
 }

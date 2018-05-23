@@ -19,6 +19,20 @@ public protocol SchemaSupporting: QuerySupporting {
     static func execute(schema: Schema, on connection: Connection) -> Future<Void>
 }
 
+extension SchemaBuilder {
+    public func customSQL(_ closure: (inout Model.Database.Schema) -> ()) -> Self {
+        closure(&schema)
+        return self
+    }
+}
+
+extension QueryBuilder where Model.Database: SchemaSupporting {
+    public func customSQL(_ closure: (inout Model.Database.Query) -> ()) -> Self {
+        closure(&query)
+        return self
+    }
+}
+
 // MARK: Convenience
 
 extension SchemaSupporting {

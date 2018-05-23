@@ -6,14 +6,22 @@ public protocol Schema {
         where FieldDefinition.Field == Field
     associatedtype Reference: SchemaReference
         where Reference.Field == Field
+    associatedtype Index: SchemaIndex
+        where Index.Field == Field
 
     static func fluentSchema(_ entity: String) -> Self
 
     static var fluentActionKey: WritableKeyPath<Self, Action> { get }
+
+
     static var fluentCreateFieldsKey: WritableKeyPath<Self, [FieldDefinition]> { get }
     static var fluentDeleteFieldsKey: WritableKeyPath<Self, [Field]> { get }
+
     static var fluentCreateReferencesKey: WritableKeyPath<Self, [Reference]> { get }
     static var fluentDeleteReferencesKey: WritableKeyPath<Self, [Reference]> { get }
+
+    static var fluentCreateIndexesKey: WritableKeyPath<Self, [Index]> { get }
+    static var fluentDeleteIndexesKey: WritableKeyPath<Self, [Index]> { get }
 }
 
 
@@ -44,6 +52,16 @@ extension Schema {
         get { return self[keyPath: Self.fluentDeleteReferencesKey] }
         set { self[keyPath: Self.fluentDeleteReferencesKey] = newValue }
     }
+
+    internal var fluentCreateIndexes: [Index] {
+        get { return self[keyPath: Self.fluentCreateIndexesKey] }
+        set { self[keyPath: Self.fluentCreateIndexesKey] = newValue }
+    }
+
+    internal var fluentDeleteIndexes: [Index] {
+        get { return self[keyPath: Self.fluentDeleteIndexesKey] }
+        set { self[keyPath: Self.fluentDeleteIndexesKey] = newValue }
+    }
 }
 
 
@@ -69,6 +87,16 @@ public protocol SchemaReference {
     associatedtype Field: QueryField
 
     static func fluentReference(base: Field, referenced: Field, actions: Actions) -> Self
+}
+
+public protocol SchemaIndex {
+    associatedtype Field: QueryField
+    /// Creates a new `SchemaIndex`.
+    ///
+    /// - parameters:
+    ///     - fields: The indexed fields.
+    ///     - isUnique: If `true`, this index will also force uniqueness.
+    static func fluentIndex(fields: [Field], isUnique: Bool) -> Self
 }
 
 /// Actions that will take place when a reference is modified.
@@ -100,7 +128,7 @@ extension SchemaBuilder {
     /// Adds a field to the schema.
     @discardableResult
     public func field<T>(type: Model.Database.Schema.FieldDefinition.DataType = .fluentType(T.self), for key: KeyPath<Model, T>) -> Model.Database.Schema.FieldDefinition {
-        return field(.fluentFieldDefinition(.keyPath(key), type, isIdentifier: false))
+        return field(.fluentFieldDefinition(.keyPath(key), type, isIdentifier: key == Model.idKey))
     }
 
     /// Adds a field to the schema.
