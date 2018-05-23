@@ -291,23 +291,51 @@ extension SQLSerializer {
 }
 
 extension DataQueryColumn: QueryKey {
+    public typealias AggregateMethod = String
+
+    public static func fluentProperty(_ property: QueryProperty) -> DataQueryColumn {
+        return .column(.fluentProperty(property), key: nil)
+    }
+
     public typealias Field = DataColumn
 
     public static var fluentAll: DataQueryColumn {
         return .all
     }
 
-    public static func fluentAggregate(_ method: QueryAggregateMethod, field: DataColumn?) -> DataQueryColumn {
-        let function: String
-        switch method {
-        case .average: function = "AVERAGE"
-        case .count: function = "COUNT"
-        case .max: function = "MAX"
-        case .min: function = "MIN"
-        case .sum: function = "SUM"
-        }
-        return .computed(.init(function: function, columns: [field].compactMap { $0 }), key: "fluentAggregate")
+    public static func fluentAggregate(_ function: String, fields: [DataQueryColumn]) -> DataQueryColumn {
+        return .computed(.init(function: function, columns: fields.compactMap { col in
+            // FIXME: support nested computed funcs
+            switch col {
+            case .column(let col, _): return col
+            case .computed, .all: return nil
+            }
+        }), key: "fluentAggregate")
     }
+}
+
+extension String: QueryAggregateMethod {
+    public static var fluentCount: String {
+        return "COUNT"
+    }
+
+    public static var fluentSum: String {
+        return "SUM"
+    }
+
+    public static var fluentAverage: String {
+        return "AVERAGE"
+    }
+
+    public static var fluentMinimum: String {
+        return "MIN"
+    }
+
+    public static var fluentMaximum: String {
+        return "MAX"
+    }
+
+
 }
 
 extension DataColumn: Hashable, QueryField {

@@ -7,7 +7,7 @@ extension QueryBuilder {
     ///
     /// - returns: A `Future` containing the count.
     public func count() -> Future<Int> {
-        return _aggregate(.fluentAggregate(.count, field: nil))
+        return _aggregate(.fluentAggregate(.fluentCount, fields: [.fluentAll]))
     }
 
     /// Returns the sum of all entries for the supplied field.
@@ -18,7 +18,7 @@ extension QueryBuilder {
     ///     - field: Field to sum.
     /// - returns: A `Future` containing the sum.
     public func sum<T>(_ field: KeyPath<Model, T>) -> Future<T> where T: Decodable {
-        return aggregate(.sum, field: field)
+        return aggregate(.fluentSum, field: field)
     }
 
     /// Returns the average of all entries for the supplied field.
@@ -29,7 +29,7 @@ extension QueryBuilder {
     ///     - field: Field to average.
     /// - returns: A `Future` containing the average.
     public func average<T>(_ field: KeyPath<Model, T>) -> Future<T> where T: Decodable {
-        return aggregate(.average, field: field)
+        return aggregate(.fluentAverage, field: field)
     }
 
     /// Returns the minimum value of all entries for the supplied field.
@@ -40,7 +40,7 @@ extension QueryBuilder {
     ///     - field: Field to find min for.
     /// - returns: A `Future` containing the min.
     public func min<T>(_ field: KeyPath<Model, T>) -> Future<T> where T: Decodable {
-        return aggregate(.min, field: field)
+        return aggregate(.fluentMinimum, field: field)
     }
 
     /// Returns the maximum value of all entries for the supplied field.
@@ -51,7 +51,7 @@ extension QueryBuilder {
     ///     - field: Field to find max for.
     /// - returns: A `Future` containing the max.
     public func max<T>(_ field: KeyPath<Model, T>) -> Future<T> where T: Decodable {
-        return aggregate(.max, field: field)
+        return aggregate(.fluentMaximum, field: field)
     }
 
     /// Perform an aggregate action on the supplied field. Normally you will use one of
@@ -64,11 +64,13 @@ extension QueryBuilder {
     ///     - field: Field to find max for.
     ///     - type: `Decodable` type to decode the aggregate value as.
     /// - returns: A `Future` containing the aggregate.
-    public func aggregate<D, T>(_ method: QueryAggregateMethod, field: KeyPath<Model, T>, as type: D.Type = D.self) -> Future<D>
+    public func aggregate<D, T>(_ method: Model.Database.Query.Key.AggregateMethod, field: KeyPath<Model, T>, as type: D.Type = D.self) -> Future<D>
         where D: Decodable
     {
-        return _aggregate(.fluentAggregate(method, field: .keyPath(field)))
+        return _aggregate(.fluentAggregate(method, fields: [.keyPath(field)]))
     }
+
+    // MARK: Private
 
     /// Perform an aggregate action.
     private func _aggregate<D>(_ aggregate: Model.Database.Query.Key, as type: D.Type = D.self) -> Future<D>

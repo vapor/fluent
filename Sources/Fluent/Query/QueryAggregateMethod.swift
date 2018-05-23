@@ -7,15 +7,19 @@
 ///     let count = User.query(on: ...).count()
 ///
 /// They can also be used to generate sums or averages for all values in a column.
-public enum QueryAggregateMethod {
+public protocol QueryAggregateMethod {
     /// Counts the number of matching entities.
-    case count
+    static var fluentCount: Self { get }
+
     /// Adds all values of the chosen field.
-    case sum
+    static var fluentSum: Self { get }
+
     /// Averges all values of the chosen field.
-    case average
+    static var fluentAverage: Self { get }
+
     /// Returns the minimum value for the chosen field.
-    case min
+    static var fluentMinimum: Self { get }
+
     /// Returns the maximum value for the chosen field.
-    case max
+    static var fluentMaximum: Self { get }
 }
