@@ -114,7 +114,18 @@ extension QueryBuilder {
         // set timestamps
         if var softDeletable = model as? AnySoftDeletable {
             softDeletable.fluentDeletedAt = Date()
-            return update(softDeletable as! Model).transform(to: ())
+            
+            return connection.flatMap(to: Void.self) { conn in
+                return Model.Database.modelEvent(event: .willDelete, model: model, on: conn).flatMap(to: Model.self) { model in
+                    return try model.willDelete(on: conn)
+                }.flatMap(to: Void.self) { _ in
+                    return self.update(softDeletable as! Model).transform(to: ())
+                }.flatMap { _ in
+                    return Model.Database.modelEvent(event: .didDelete, model: model, on: conn)
+                }.flatMap(to: Void.self) { _ in
+                    return try model.didDelete(on: conn)
+                }
+            }
         } else {
             return _delete(model)
         }
@@ -140,6 +151,10 @@ extension QueryBuilder {
                 return try model.willDelete(on: conn)
             }.flatMap(to: Void.self) { model in
                 return self.run()
+            }.flatMap { _  in
+                return Model.Database.modelEvent(event: .didDelete, model: model, on: conn)
+            }.flatMap(to: Void.self) { _ in
+                return try model.didDelete(on: conn)
             }
         }
     }
