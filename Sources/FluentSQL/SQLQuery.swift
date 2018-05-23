@@ -102,7 +102,29 @@ extension String: DataManipulationColumnsRepresentable {
 
 
 
+extension QueryBuilder where Model.Database: SQLDatabase {
+    // MARK: Group By
 
+    /// Adds a group by to the query builder.
+    ///
+    ///     query.groupBy(\.name)
+    ///
+    /// - parameters:
+    ///     - field: Swift `KeyPath` to field on model to group by.
+    /// - returns: Query builder for chaining.
+    public func groupBy<T>(_ field: KeyPath<Model, T>) -> Self {
+        return groupBy(.column(.keyPath(field)))
+    }
+
+    /// Adds a manually created group by to the query builder.
+    /// - parameters:
+    ///     - groupBy: New `Query.GroupBy` to add.
+    /// - returns: Query builder for chaining.
+    public func groupBy(_ groupBy: DataGroupBy) -> Self {
+        query.groupBys.append(groupBy)
+        return self
+    }
+}
 
 
 
@@ -136,37 +158,37 @@ extension SQLQuery {
         return .init(table: table)
     }
 
-    /// See `Query.
+    /// See `Query`.
     public var fluentAction: SQLStatement {
         get { return statement }
         set { statement = newValue}
     }
 
-    /// See `Query.
+    /// See `Query`.
     public var fluentBinds: [Data] {
         get { return binds }
         set { binds = newValue }
     }
 
-    /// See `Query.
+    /// See `Query`.
     public var fluentData: Input {
         get { return data }
         set { data = newValue }
     }
 
-    /// See `Query.
+    /// See `Query`.
     public var fluentFilters: [DataPredicateItem] {
         get { return predicates }
         set { predicates = newValue }
     }
 
-    /// See `Query.
+    /// See `Query`.
     public var fluentKeys: [DataQueryColumn] {
         get { return columns }
         set { columns = newValue }
     }
 
-    /// See `Query.
+    /// See `Query`.
     public var fluentRange: DataLimitOffset? {
         get {
             switch (limit, offset) {
@@ -193,10 +215,16 @@ extension SQLQuery {
         set { joins = newValue }
     }
 
-    /// See `Query.
+    /// See `Query`.
     public var fluentSorts: [DataOrderBy] {
         get { return orderBys }
         set { orderBys = newValue }
+    }
+
+    /// See `Query`.
+    public var fluentGroupBys: [DataGroupBy] {
+        get{ return groupBys }
+        set { groupBys = newValue }
     }
 }
 
@@ -331,7 +359,7 @@ extension DataPredicateGroupRelation: QueryFilterRelation {
 
 
 extension DataOrderBy: QuerySort {
-    public static func unit(_ field: DataColumn, _ direction: DataOrderByDirection) -> DataOrderBy {
+    public static func fluentSort(_ field: DataColumn, _ direction: DataOrderByDirection) -> DataOrderBy {
         return .init(columns: [field], direction: direction)
     }
 

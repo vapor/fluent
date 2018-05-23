@@ -1,22 +1,3 @@
-/// Supports `join(...)` methods on `Query.Builder`.
-public protocol JoinSupporting: QuerySupporting
-    where Query: JoinsContaining { }
-
-public protocol JoinsContaining: Query {
-    associatedtype Join: QueryJoin
-    var fluentJoins: [Join] { get set }
-}
-
-public protocol QueryJoin {
-    associatedtype Field: PropertySupporting
-    associatedtype Method: QueryJoinMethod
-    static func fluentJoin(_ method: Method, base: Field, joined: Field) -> Self
-}
-
-public protocol QueryJoinMethod {
-    static var `default`: Self { get }
-}
-
 extension QueryBuilder where Model.Database: JoinSupporting {
     // MARK: Join
 

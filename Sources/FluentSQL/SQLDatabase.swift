@@ -1,1 +1,1 @@
-public protocol SQLDatabase: SchemaSupporting where Query: SQLQuery, Schema: SQLSchema { }
+public protocol SQLDatabase: SchemaSupporting & JoinSupporting where Query: SQLQuery, Schema: SQLSchema { }

@@ -23,6 +23,12 @@ public protocol QuerySupporting: Database {
     static func queryDecode<D>(_ output: Query.Output, entity: String, as decodable: D.Type) throws -> D
         where D: Decodable
 
+    /// Encodes an encodable object into this database's input.
+    ///
+    /// - parameters:
+    ///     - encodable: Item to encode.
+    ///     - entity: Entity to encode to (table or collection name).
+    /// - returns: Encoded query input.
     static func queryEncode<E>(_ encodable: E, entity: String) throws -> Query.Input
         where E: Encodable
 

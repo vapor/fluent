@@ -8,7 +8,7 @@ extension QueryBuilder {
     @discardableResult
     public func filter(_ value: FilterOperator<Model>) -> Self {
         query.fluentBinds += value.binds
-        return addFilter(value.filter)
+        return filter(value.filter)
     }
 
     /// Applies a filter from one of the filter operators (==, !=, etc) to a joined model.
@@ -25,7 +25,7 @@ extension QueryBuilder {
         where A.Database == Model.Database
     {
         query.fluentBinds += value.binds
-        return addFilter(value.filter)
+        return filter(value.filter)
     }
 }
 

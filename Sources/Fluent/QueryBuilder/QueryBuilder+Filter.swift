@@ -83,13 +83,13 @@ extension QueryBuilder {
     /// - returns: Query builder for chaining.
     @discardableResult
     private func filter(_ field: Model.Database.Query.Filter.Field, _ method: Model.Database.Query.Filter.Method, _ value: Model.Database.Query.Filter.Value) -> Self {
-        return addFilter(.fluentFilter(field, method, value))
+        return filter(.fluentFilter(field, method, value))
     }
 
     /// Add a manually created filter to the query builder.
     /// - returns: Query builder for chaining.
     @discardableResult
-    public func addFilter(_ filter: Model.Database.Query.Filter) -> Self {
+    public func filter(_ filter: Model.Database.Query.Filter) -> Self {
         query.fluentFilters.append(filter)
         return self
     }

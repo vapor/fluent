@@ -99,4 +99,3 @@ private struct AggregateResult<D>: Decodable where D: Decodable {
     /// Contains the aggregated value.
     var fluentAggregate: D
 }
-
