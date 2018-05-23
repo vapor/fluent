@@ -4,7 +4,7 @@ extension QueryBuilder {
     /// Applies a filter to this query. Usually you will use the filter operators to do this.
     ///
     ///     let users = try User.query(on: conn)
-    ///         .filter(\.name, .equals, .data("Vapor"))
+    ///         .filter(\.name, .equals, "Vapor")
     ///         .all()
     ///
     /// - parameters:
@@ -28,7 +28,7 @@ extension QueryBuilder {
     ///
     ///     let users = try User.query(on: conn)
     ///         .join(Pet.self, ...)
-    ///         .filter(Pet.self, \.type, .equals, .data("cat"))
+    ///         .filter(\Pet.type, .equals, .cat)
     ///         .all()
     ///
     /// - parameters:
@@ -52,7 +52,7 @@ extension QueryBuilder {
     /// Applies a filter to this query using a custom field. Usually you will use the filter operators to do this.
     ///
     ///     let users = try User.query(on: conn)
-    ///         .filter("name", .equals, .data("Vapor"))
+    ///         .filter("name", .equals, "Vapor")
     ///         .all()
     ///
     /// - parameters:
@@ -73,7 +73,7 @@ extension QueryBuilder {
     /// Applies a filter to this query using a custom field. Usually you will use the filter operators to do this.
     ///
     ///     let users = try User.query(on: conn)
-    ///         .filter("name", .equals, .data("Vapor"))
+    ///         .filter("name", .equals, "Vapor")
     ///         .all()
     ///
     /// - parameters:
@@ -83,7 +83,7 @@ extension QueryBuilder {
     /// - returns: Query builder for chaining.
     @discardableResult
     private func filter(_ field: Model.Database.Query.Field, _ method: Model.Database.Query.Filter.Method, _ value: Model.Database.Query.Filter.Value) -> Self {
-        return addFilter(.unit(field, method, value))
+        return addFilter(.fluentFilter(field, method, value))
     }
 
     /// Add a manually created filter to the query builder.
@@ -98,7 +98,7 @@ extension QueryBuilder {
 
     /// Creates a sub group for this query. This is useful for grouping multiple filters by `.or` instead of `.and`.
     ///
-    ///     let users = try User.query(on: conn).filter(.or) { or in
+    ///     let users = try User.query(on: conn).group(.or) { or in
     ///         or.filter(\.age < 18)
     ///         or.filter(\.age > 65)
     ///     }
@@ -118,12 +118,13 @@ extension QueryBuilder {
         try closure(sub)
         // copy binds + filter
         self.query.fluentBinds += sub.query.fluentBinds
-        self.query.fluentFilters += [.group(relation, sub.query.fluentFilters)]
+        self.query.fluentFilters += [.fluentFilterGroup(relation, sub.query.fluentFilters)]
         return self
     }
 }
 
-extension Encodable {
+internal extension Encodable {
+    /// Returns `true` if this `Encodable` is `nil`.
     var isNil: Bool {
         guard let optional = self as? AnyOptionalType, optional.anyWrapped == nil else {
             return false

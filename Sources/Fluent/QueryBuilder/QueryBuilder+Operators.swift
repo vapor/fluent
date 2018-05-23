@@ -146,6 +146,14 @@ public struct FilterOperator<Model> where Model: Fluent.Model, Model.Database: Q
     public static func make<V>(_ key: KeyPath<Model, V>, _ method: Model.Database.Query.Filter.Method, _ value: [V]) -> FilterOperator<Model>
         where V: Encodable
     {
-        return FilterOperator<Model>(filter: .unit(.keyPath(key), method, .fluentBind(value.count)), binds: value.map { .fluentEncodable($0) })
+        if value.count == 1 && value[0].isNil {
+            return FilterOperator<Model>(
+                filter: .fluentFilter(.keyPath(key), method, .fluentNil), binds: []
+            )
+        } else {
+            return FilterOperator<Model>(
+                filter: .fluentFilter(.keyPath(key), method, .fluentBind(value.count)), binds: value.map { .fluentEncodable($0) }
+            )
+        }
     }
 }

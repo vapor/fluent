@@ -9,6 +9,6 @@ public protocol QueryFilter {
     
     associatedtype Relation: QueryFilterRelation
     
-    static func unit(_ field: Field, _ method: Method, _ value: Value) -> Self
-    static func group(_ relation: Relation, _ filters: [Self]) -> Self
+    static func fluentFilter(_ field: Field, _ method: Method, _ value: Value) -> Self
+    static func fluentFilterGroup(_ relation: Relation, _ filters: [Self]) -> Self
 }

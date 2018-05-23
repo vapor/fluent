@@ -186,11 +186,11 @@ extension DataPredicateItem: QueryFilter {
     public typealias Method = DataPredicateComparison
     public typealias Value = DataPredicateValue
     public typealias Relation = DataPredicateGroupRelation
-    public static func unit(_ field: DataColumn, _ method: DataPredicateComparison, _ value: DataPredicateValue) -> DataPredicateItem {
+    public static func fluentFilter(_ field: DataColumn, _ method: DataPredicateComparison, _ value: DataPredicateValue) -> DataPredicateItem {
         return .predicate(.init(column: field, comparison: method, value: value))
     }
 
-    public static func group(_ relation: DataPredicateGroupRelation, _ filters: [DataPredicateItem]) -> DataPredicateItem {
+    public static func fluentFilterGroup(_ relation: DataPredicateGroupRelation, _ filters: [DataPredicateItem]) -> DataPredicateItem {
         return .group(.init(relation: relation, predicates: filters))
     }
 

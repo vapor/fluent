@@ -1,4 +1,12 @@
 public protocol Query {
+    /// Type input into this query when creating or updating data.
+    /// Encoded by `queryEncode(...)` method on `QuerySupporting`.
+    associatedtype Input
+
+    /// Type returned by this query when reading data. Result set type.
+    /// Decoded by `queryDecode(...)` method on `QuerySupporting`.
+    associatedtype Output
+
     /// Associated `QueryAction` type. Determines the type of query.
     associatedtype Action: QueryAction
 
@@ -30,7 +38,7 @@ public protocol Query {
     var fluentBinds: [Data] { get set }
 
     /// Data to create or update. See `QueryField` and `QueryData`.
-    var fluentData: [Field: Data] { get set }
+    var fluentData: Input? { get set }
 
     /// Result set filters. See `QueryFilter`.
     var fluentFilters: [Filter] { get set }

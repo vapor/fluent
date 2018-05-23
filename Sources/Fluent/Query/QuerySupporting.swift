@@ -2,9 +2,6 @@
 public protocol QuerySupporting: Database {
     /// Associated `Query` type. Instances of this type will be supplied to `queryExecute(...)`.
     associatedtype Query: Fluent.Query
-
-    /// Query output type. Can be decoded using `queryDecode(...)`.
-    associatedtype Output
     
     /// Executes the supplied query on the database connection. Results should be streamed into the handler.
     /// When the query is finished, the returned future should be completed.
@@ -14,7 +11,7 @@ public protocol QuerySupporting: Database {
     ///     - handler: Handles query output.
     ///     - conn: Database connection to use.
     /// - returns: A future that will complete when the query has finished.
-    static func queryExecute(_ query: Query, on conn: Connection, into handler: @escaping (Output, Connection) throws -> ()) -> Future<Void>
+    static func queryExecute(_ query: Query, on conn: Connection, into handler: @escaping (Query.Output, Connection) throws -> ()) -> Future<Void>
 
     /// Decodes a decodable type `D` from this database's output.
     ///
@@ -23,8 +20,11 @@ public protocol QuerySupporting: Database {
     ///     - entity: Entity to decode from (table or collection name).
     ///     - decodable: Decodable type to create.
     /// - returns: Decoded type.
-    static func queryDecode<D>(_ output: Output, entity: String, as decodable: D.Type) throws -> D
+    static func queryDecode<D>(_ output: Query.Output, entity: String, as decodable: D.Type) throws -> D
         where D: Decodable
+
+    static func queryEncode<E>(_ encodable: E, entity: String) throws -> Query.Input
+        where E: Encodable
 
     /// This method will be called by Fluent during `Model` lifecycle events.
     /// This gives the database a chance to interact with the model before Fluent encodes it.
