@@ -44,4 +44,5 @@ public enum ModelEvent {
     case didUpdate
     case willRead
     case willDelete
+    case didDelete
 }
