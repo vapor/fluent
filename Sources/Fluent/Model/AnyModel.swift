@@ -1,11 +1,9 @@
 /// Type-erased model. See `Model`.
 public protocol AnyModel: Codable {
-    /// This model's unique name.
-    /// Lowercased type name by default.
+    /// This model's unique name. Lowercased type name by default.
     static var name: String { get }
 
-    /// This model's collection/table name.
-    /// `name + "s"` by default.
+    /// This model's collection/table name. `name + "s"` by default.
     static var entity: String { get }
 }
 

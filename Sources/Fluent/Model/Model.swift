@@ -120,13 +120,13 @@ extension Model {
     }
 }
 
-/// MARK: Convenience
+/// MARK: ID
 
 extension Model {
     /// Returns the model's ID, throwing an error if the model does not yet have an ID.
     public func requireID() throws -> ID {
         guard let id = self.fluentID else {
-            throw FluentError(identifier: "idRequired", reason: "\(Self.self) does not have an identifier.", source: .capture())
+            throw FluentError(identifier: "idRequired", reason: "\(Self.self) does not have an identifier.")
         }
 
         return id
@@ -138,6 +138,8 @@ extension Model {
         set { self[keyPath: Self.idKey] = newValue }
     }
 }
+
+// MARK: Query
 
 extension Model where Database: QuerySupporting {
     /// Creates a query for this model on the supplied connection.
@@ -210,8 +212,7 @@ extension Model {
             throw FluentError(
                 identifier: "noDefaultDatabase",
                 reason: "A default database is required if no database ID is passed to `\(Self.self).query(_:on:)` or if `\(Self.self)` is being looked up statically.",
-                suggestedFixes: ["Set `\(Self.self).defaultDatabase` or to fix this error."],
-                source: .capture()
+                suggestedFixes: ["Set `\(Self.self).defaultDatabase` or to fix this error."]
             )
         }
         return dbid
@@ -227,23 +228,21 @@ extension Model where Database: QuerySupporting {
             throw FluentError(
                 identifier: "invalidIDType",
                 reason: "Could not convert string to ID.",
-                suggestedFixes: ["Conform `\(ID.self)` to `LosslessStringConvertible` to fix this error."],
-                source: .capture()
+                suggestedFixes: ["Conform `\(ID.self)` to `LosslessStringConvertible` to fix this error."]
             )
         }
 
         guard let id = idType.init(parameter) as? ID else {
             throw FluentError(
                 identifier: "invalidID",
-                reason: "Could not convert parameter \(parameter) to type `\(ID.self)`",
-                source: .capture()
+                reason: "Could not convert parameter \(parameter) to type `\(ID.self)`"
             )
         }
 
         func findModel(in connection: Database.Connection) throws -> Future<Self> {
             return self.find(id, on: connection).map(to: Self.self) { model in
                 guard let model = model else {
-                    throw FluentError(identifier: "modelNotFound", reason: "No model with ID \(id) was found", source: .capture())
+                    throw FluentError(identifier: "modelNotFound", reason: "No model with ID \(id) was found")
                 }
                 return model
             }

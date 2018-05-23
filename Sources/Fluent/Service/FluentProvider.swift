@@ -1,35 +1,28 @@
-import Async
-import Console
-import Command
-import Service
-import Logging
-
 /// Registers Fluent related services.
 public final class FluentProvider: Provider {
-    /// See `Provider.repositoryName`
-    public static var repositoryName: String = "fluent"
+    /// If `true`, the provider will automatically run migrations during app boot.
+    public let autoMigrate: Bool
 
-    /// Creates a new Fluent provider.
-    public init() { }
+    /// Creates a new `FluentProvider`.
+    ///
+    /// - parameters:
+    ///     - autoMigration: If `true`, the provider will automatically run migrations during app boot.
+    public init(autoMigrate: Bool = true) {
+        self.autoMigrate = autoMigrate
+    }
 
-    /// See `Provider.register(_:)`
+    /// See `Provider`.
     public func register(_ services: inout Services) throws {
         try services.register(DatabaseKitProvider())
         services.register(RevertCommand())
     }
 
-    /// See `Provider.didBoot(_:)`
+    /// See `Provider`.
     public func didBoot(_ container: Container) throws -> Future<Void> {
-        let migrations = try container.make(MigrationConfig.self)
-        let logger = try container.make(Logger.self)
-
-        return migrations.storage.map { (uid, migration) in
-            return {
-                logger.info("Migrating '\(uid)' database")
-                return migration.migrationPrepareBatch(on: container)
-            }
-        }.syncFlatten(on: container).map(to: Void.self) {
-            logger.info("Migrations complete")
+        if autoMigrate {
+            return try MigrateCommand.migrate(on: container)
+        } else {
+            return container.eventLoop.newSucceededFuture(result: ())
         }
     }
 }

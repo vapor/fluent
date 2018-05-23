@@ -32,7 +32,7 @@ extension Parent where Child.Database: QuerySupporting {
     public func get(on conn: DatabaseConnectable) -> Future<Parent> {
         return self.query(on: conn).first().map { first in
             guard let parent = first else {
-                throw FluentError(identifier: "parentRequired", reason: "This parent relationship could not be resolved", source: .capture())
+                throw FluentError(identifier: "parentRequired", reason: "This parent relationship could not be resolved.")
             }
             return parent
         }

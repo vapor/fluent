@@ -52,7 +52,7 @@ extension Pet where D: JoinSupporting {
 
 // MARK: Migration
 
-extension Pet: Migration where D: SchemaSupporting {
+extension Pet: Migration, AnyMigration where D: SchemaSupporting {
     /// See `Migration.prepare(on:)`
     public static func prepare(on connection: Database.Connection) -> Future<Void> {
         return Database.create(self, on: connection) { builder in

@@ -78,7 +78,7 @@ extension QueryBuilder {
         /// if the model is soft deletable, and soft deleted
         /// models were not requested, then exclude them
         if let type = Model.self as? AnySoftDeletable.Type, !shouldIncludeSoftDeleted, !query.fluentAction.fluentIsCreate {
-            let field: Model.Database.Query.Field = .keyPath(type.anyDeletedAtKey, rootType: Model.self, valueType: Date?.self)
+            let field: Model.Database.Query.Field = .keyPath(any: type.fluentDeletedAtKey, rootType: Model.self, valueType: Date?.self)
             group(.fluentOr) { or in
                 or.filter(field, .fluentEqual, Date?.none)
                 or.filter(field, .fluentGreaterThan, Date())
@@ -90,13 +90,13 @@ extension QueryBuilder {
         return connection.flatMap(to: Void.self) { conn in
             let promise = conn.eventLoop.newPromise(Void.self)
 
-            Model.Database.execute(query: q, into: { row, conn in
+            Model.Database.queryExecute(q, on: conn) { row, conn in
                 resultTransformer(row, conn).map { result in
                     return try handler(result)
                     }.catch { error in
                         promise.fail(error: error)
                 }
-            }, on: conn).cascade(promise: promise)
+            }.cascade(promise: promise)
 
             return promise.futureResult
         }

@@ -1,3 +1,4 @@
+/// Provides free `KeyedCacheSupporting` to `Database`s that conform to `QuerySupporting`.
 extension KeyedCacheSupporting where Self: QuerySupporting {
     /// See `KeyedCacheSupporting`.
     public static func keyedCacheGet<D>(_ key: String, as decodable: D.Type, on conn: Self.Connection) -> Future<D?>

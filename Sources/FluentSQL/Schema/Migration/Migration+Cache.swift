@@ -6,4 +6,4 @@ extension MigrationConfig {
 }
 
 /// Dynamically conform to `Migration` where the database is `SchemaSupporting`.
-extension CacheEntry: Migration where D: SchemaSupporting { }
+extension CacheEntry: Migration where Database: SchemaSupporting { }

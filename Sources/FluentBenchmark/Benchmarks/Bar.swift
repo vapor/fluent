@@ -1,12 +1,6 @@
-import Async
-import Fluent
 import FluentSQL
-import Foundation
 
-struct Bar<D>: Model, SoftDeletable, Timestampable where D: QuerySupporting {
-    /// See Model.Database
-    typealias Database = D
-
+struct Bar<Database>: Model, SoftDeletable, Timestampable where Database: QuerySupporting {
     /// See Model.ID
     typealias ID = UUID
 
@@ -53,4 +47,4 @@ struct Bar<D>: Model, SoftDeletable, Timestampable where D: QuerySupporting {
     }
 }
 
-extension Bar: Migration where D: SchemaSupporting { }
+extension Bar: Migration, AnyMigration where Database: SchemaSupporting { }

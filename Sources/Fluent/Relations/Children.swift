@@ -36,7 +36,7 @@ extension Model {
     public func children<Child>(_ parentForeignIDKey: WritableKeyPath<Child, Self.ID>) -> Children<Self, Child> {
         return Children(
             parent: self,
-            foreignParentField: .keyPath(parentForeignIDKey, rootType: Child.self, valueType: Self.ID.self)
+            foreignParentField: .keyPath(any: parentForeignIDKey, rootType: Child.self, valueType: Self.ID.self)
         )
     }
 
@@ -47,7 +47,7 @@ extension Model {
     public func children<Child>(_ parentForeignIDKey: WritableKeyPath<Child, Self.ID?>) -> Children<Self, Child> {
         return Children(
             parent: self,
-            foreignParentField: .keyPath(parentForeignIDKey, rootType: Child.self, valueType: Self.ID?.self)
+            foreignParentField: .keyPath(any: parentForeignIDKey, rootType: Child.self, valueType: Self.ID?.self)
         )
     }
 }

@@ -86,4 +86,4 @@ final class BasicUser<D>: Encodable, Model where D: QuerySupporting {
     }
 }
 
-extension BasicUser: Migration where D: SchemaSupporting { }
+extension BasicUser: Migration, AnyMigration where D: SchemaSupporting { }

@@ -83,11 +83,7 @@ extension QueryBuilder {
 
         return connection.flatMap { conn -> Future<Model> in
             guard let id = originalID ?? model.fluentID else {
-                throw FluentError(
-                    identifier: "idRequired",
-                    reason: "No ID was set on updated model, it is required for updating.",
-                    source: .capture()
-                )
+                throw FluentError(identifier: "idRequired", reason: "No ID was set on updated model, it is required for updating.")
             }
 
             // update record w/ matching id
@@ -128,11 +124,7 @@ extension QueryBuilder {
     internal func _delete(_ model: Model) -> Future<Void> {
         return connection.flatMap { conn in
             guard let id = model.fluentID else {
-                throw FluentError(
-                    identifier: "idRequired",
-                    reason: "No ID was set on updated model, it is required for updating.",
-                    source: .capture()
-                )
+                throw FluentError(identifier: "idRequired", reason: "No ID was set on updated model, it is required for updating.")
             }
 
             // update record w/ matching id

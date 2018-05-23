@@ -1,4 +1,4 @@
-extension Model where Self: Migration, Database: SchemaSupporting {
+extension Migration where Self: Model, Database: SchemaSupporting {
     /// See `Migration`.
     public static func prepare(on connection: Database.Connection) -> Future<Void> {
         return Database.create(self, on: connection) { builder in
@@ -28,12 +28,12 @@ extension Model where Database: SchemaSupporting {
     ///     - builder: `SchemaCreator` to add the properties to.
     public static func addProperties(to builder: SchemaCreator<Self>) throws {
         guard let idProperty = try Self.reflectProperty(forKey: idKey) else {
-            throw FluentError(identifier: "idProperty", reason: "Unable to reflect ID property for `\(Self.self)`.", source: .capture())
+            throw FluentError(identifier: "idProperty", reason: "Unable to reflect ID property for `\(Self.self)`.")
         }
         let properties = try Self.reflectProperties(depth: 0)
         for property in properties {
             let field = Database.Schema.FieldDefinition.fluentFieldDefinition(
-                .reflected(property, entity: entity),
+                .reflected(property, rootType: self),
                 .fluentType(property.type),
                 isIdentifier: property.path == idProperty.path
             )

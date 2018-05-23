@@ -1,8 +1,8 @@
 /// MARK: Migration
-extension MigrationLog: Migration where D: SchemaSupporting { }
+extension MigrationLog: Migration where Database: SchemaSupporting { }
 
 
-extension MigrationLog where D: SchemaSupporting {
+extension MigrationLog where Database: SchemaSupporting {
     /// Prepares the connection for storing migration logs.
     /// - note: this is unlike other migrations since we are checking
     ///         for an error instead of asking if the migration has already prepared.
@@ -11,9 +11,9 @@ extension MigrationLog where D: SchemaSupporting {
 
         conn.query(MigrationLog<Database>.self).count().do { count in
             promise.succeed()
-            }.catch { err in
-                // table needs to be created
-                prepare(on: conn).cascade(promise: promise)
+        }.catch { err in
+            // table needs to be created
+            prepare(on: conn).cascade(promise: promise)
         }
 
         return promise.futureResult

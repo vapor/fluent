@@ -4,7 +4,7 @@ import Foundation
 // MARK: Protocols
 
 /// Capable of executing a database schema query.
-public protocol SchemaSupporting: QuerySupporting {
+public protocol SchemaSupporting: QuerySupporting & MigrationSupporting {
     /// Associated schema type for this database.
     associatedtype Schema: FluentSQL.Schema
         where Schema.Field == Query.Field
@@ -17,6 +17,13 @@ public protocol SchemaSupporting: QuerySupporting {
 
     /// Executes the supplied schema on the database connection.
     static func execute(schema: Schema, on connection: Connection) -> Future<Void>
+}
+
+extension SchemaSupporting {
+    /// See `MigrationSupporting`.
+    public static func prepareMigrationMetadata(on conn: Connection) -> Future<Void> {
+        return MigrationLog<Self>.prepareMetadata(on: conn)
+    }
 }
 
 extension SchemaBuilder {

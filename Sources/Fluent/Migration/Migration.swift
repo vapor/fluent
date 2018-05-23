@@ -37,10 +37,10 @@
 ///     migrations.add(migration: AddAgeProperty.self, database: .psql)
 ///     services.register(migrations)
 ///
-public protocol Migration {
+public protocol Migration: AnyMigration {
     /// The type of database this migration will run on.
     /// Migrations require at least a `QuerySupporting` database as they must be able to query the `MigrationLog` model.
-    associatedtype Database: Fluent.Database
+    associatedtype Database: MigrationSupporting
 
     /// Runs this migration's changes on the database.
     /// This is usually creating a table, or updating an existing one. You may also save new entries
@@ -56,7 +56,7 @@ public protocol Migration {
     ///     - conn: Database connection to perform the preparation on.
     /// - returns: A `Future` that should complete when the migration has finished.
     ///            The next migration (if one exists) will start when this future completes.
-    static func prepare(on connection: Database.Connection) -> Future<Void>
+    static func prepare(on conn: Database.Connection) -> Future<Void>
 
     /// Reverts this migration's changes on the database.
     /// This is usually dropping a created table. If it is not possible
@@ -72,5 +72,5 @@ public protocol Migration {
     ///     - conn: Database connection to perform the revert on.
     /// - returns: A `Future` that should complete when the revert has finished.
     ///            The next revert (if one exists) will start when this future completes.
-    static func revert(on connection: Database.Connection) -> Future<Void>
+    static func revert(on conn: Database.Connection) -> Future<Void>
 }

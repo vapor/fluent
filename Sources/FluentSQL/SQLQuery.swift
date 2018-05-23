@@ -1,11 +1,19 @@
 
 
-public enum SQLValue: QueryData {
+public enum SQLValue: QueryData, ExpressibleByStringLiteral, ExpressibleByIntegerLiteral {
     public static func fluentEncodable(_ encodable: Encodable) -> SQLValue {
         return .encodable(encodable)
     }
 
     case encodable(Encodable)
+
+    public init(stringLiteral value: String) {
+        self = .encodable(value)
+    }
+
+    public init(integerLiteral value: Int) {
+        self = .encodable(value)
+    }
 }
 public protocol SQLQuery: Query & JoinsContaining where
     Action == SQLStatement,
@@ -211,7 +219,7 @@ extension DataPredicateValue: QueryFilterValue {
         return .null
     }
 
-    public static func fluentProperty(_ property: FluentProperty) -> DataPredicateValue {
+    public static func fluentProperty(_ property: QueryProperty) -> DataPredicateValue {
         return .column(.fluentProperty(property))
     }
 }
@@ -311,8 +319,11 @@ extension DataColumn: Hashable, QueryField {
         return lhs.table == rhs.table && lhs.name == rhs.name
     }
 
-    public static func fluentProperty(_ property: FluentProperty) -> DataColumn {
-        return .init(table: property.entity, name: property.path.first ?? "")
+    public static func fluentProperty(_ property: QueryProperty) -> DataColumn {
+        guard let model = property.rootType as? AnyModel.Type else {
+            fatalError("`\(property.rootType)` does not conform to `Model`.")
+        }
+        return .init(table: model.entity, name: property.path.first ?? "")
     }
 }
 
