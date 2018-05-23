@@ -1,5 +1,5 @@
 public protocol QueryFilter {
-    associatedtype Field
+    associatedtype Field: PropertySupporting
     
     /// Custom filter type. Supported by `Query.Filter.Method`.
     associatedtype Method: QueryFilterMethod

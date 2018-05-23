@@ -11,10 +11,10 @@ public struct Children<Parent, Child>
     public var parent: Parent
 
     /// Reference to the foreign key on t(he child.
-    private var foreignParentField: Child.Database.Query.Field
+    private var foreignParentField: Child.Database.Query.Filter.Field
 
     /// Creates a new children relationship.
-    fileprivate init(parent: Parent, foreignParentField: Child.Database.Query.Field) {
+    fileprivate init(parent: Parent, foreignParentField: Child.Database.Query.Filter.Field) {
         self.parent = parent
         self.foreignParentField = foreignParentField
     }

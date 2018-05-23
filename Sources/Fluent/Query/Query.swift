@@ -13,14 +13,11 @@ public protocol Query {
     /// Associated `QueryData` type. Compatible data type.
     associatedtype Data: QueryData
 
-    /// Associated `QueryField` type. Used for filtering and key-value data.
-    associatedtype Field: QueryField
-
     /// Associated `QueryFilter` type. Used to filter query builders.
-    associatedtype Filter: QueryFilter where Filter.Field == Field
+    associatedtype Filter: QueryFilter
 
     /// Associated `QueryKey` type. Used for reading computed or generated query data.
-    associatedtype Key: QueryKey where Key.Field == Field
+    associatedtype Key: QueryKey
 
     /// Associated `QueryRange` type. Used to limit query builder result set.
     associatedtype Range: QueryRange
@@ -37,8 +34,8 @@ public protocol Query {
     /// Bound data values. See `QueryData`.
     var fluentBinds: [Data] { get set }
 
-    /// Data to create or update. See `QueryField` and `QueryData`.
-    var fluentData: Input? { get set }
+    /// Data to create or update.
+    var fluentData: Input { get set }
 
     /// Result set filters. See `QueryFilter`.
     var fluentFilters: [Filter] { get set }

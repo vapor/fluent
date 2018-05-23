@@ -84,13 +84,13 @@ private extension DataDefinitionForeignKey {
 
 public protocol SchemaReference {
     associatedtype Actions: SchemaReferenceActions
-    associatedtype Field: QueryField
+    associatedtype Field: PropertySupporting
 
     static func fluentReference(base: Field, referenced: Field, actions: Actions) -> Self
 }
 
 public protocol SchemaIndex {
-    associatedtype Field: QueryField
+    associatedtype Field: PropertySupporting
     /// Creates a new `SchemaIndex`.
     ///
     /// - parameters:
@@ -133,7 +133,7 @@ extension SchemaBuilder {
 
     /// Adds a field to the schema.
     @discardableResult
-    public func field(type: Model.Database.Schema.FieldDefinition.DataType, field: Model.Database.Query.Field, isIdentifier: Bool = false) -> Model.Database.Schema.FieldDefinition {
+    public func field(type: Model.Database.Schema.FieldDefinition.DataType, field: Model.Database.Schema.Reference.Field, isIdentifier: Bool = false) -> Model.Database.Schema.FieldDefinition {
         return self.field(.fluentFieldDefinition(field, type, isIdentifier: false))
     }
 
@@ -178,7 +178,7 @@ public final class SchemaUpdater<Model>: SchemaBuilder
     }
 
     /// Deletes the field with the supplied name.
-    public func removeField(_ field: Model.Database.Query.Field) {
+    public func removeField(_ field: Model.Database.Schema.Field) {
         schema.fluentDeleteFields.append(field)
     }
 }

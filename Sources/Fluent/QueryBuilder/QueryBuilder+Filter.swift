@@ -61,7 +61,7 @@ extension QueryBuilder {
     ///     - value: Value to filter by.
     /// - returns: Query builder for chaining.
     @discardableResult
-    public func filter(_ field: Model.Database.Query.Field, _ method: Model.Database.Query.Filter.Method, _ value: Encodable) -> Self {
+    public func filter(_ field: Model.Database.Query.Filter.Field, _ method: Model.Database.Query.Filter.Method, _ value: Encodable) -> Self {
         if value.isNil {
             return filter(field, method, .fluentNil)
         } else {
@@ -82,7 +82,7 @@ extension QueryBuilder {
     ///     - value: Value to filter by.
     /// - returns: Query builder for chaining.
     @discardableResult
-    private func filter(_ field: Model.Database.Query.Field, _ method: Model.Database.Query.Filter.Method, _ value: Model.Database.Query.Filter.Value) -> Self {
+    private func filter(_ field: Model.Database.Query.Filter.Field, _ method: Model.Database.Query.Filter.Method, _ value: Model.Database.Query.Filter.Value) -> Self {
         return addFilter(.fluentFilter(field, method, value))
     }
 

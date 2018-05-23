@@ -1,5 +1,5 @@
 public protocol QuerySort {
-    associatedtype Field: QueryField
+    associatedtype Field: PropertySupporting
     associatedtype Direction: QuerySortDirection
     static func unit(_ field: Field, _ direction: Direction) -> Self
 }

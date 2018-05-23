@@ -3,12 +3,11 @@ public protocol GroupBySupporting: QuerySupporting
 
 public protocol GroupBysContaining: Query {
     associatedtype GroupBy: QueryGroupBy
-        where GroupBy.Field == Field
     var groupBys: [GroupBy] { get set }
 }
 
 public protocol QueryGroupBy {
-    associatedtype Field
+    associatedtype Field: PropertySupporting
     static func fluentGroupBy(field: Field) -> Self
 }
 

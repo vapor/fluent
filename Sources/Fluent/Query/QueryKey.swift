@@ -1,9 +1,6 @@
 /// Represents a field to fetch from the database during a query.
 /// This can be regular fields, computed fields (such as aggregates), or special values like "all fields".
 public protocol QueryKey: PropertySupporting {
-    /// Associated field type.
-    associatedtype Field
-
     /// Associated `QueryAggregateMethod` type.
     associatedtype AggregateMethod: QueryAggregateMethod
 

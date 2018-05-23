@@ -78,7 +78,7 @@ extension QueryBuilder {
         /// if the model is soft deletable, and soft deleted
         /// models were not requested, then exclude them
         if let type = Model.self as? AnySoftDeletable.Type, !shouldIncludeSoftDeleted, !query.fluentAction.fluentIsCreate {
-            let field: Model.Database.Query.Field = .keyPath(any: type.fluentDeletedAtKey, rootType: Model.self, valueType: Date?.self)
+            let field: Model.Database.Query.Filter.Field = .keyPath(any: type.fluentDeletedAtKey, rootType: Model.self, valueType: Date?.self)
             group(.fluentOr) { or in
                 or.filter(field, .fluentEqual, Date?.none)
                 or.filter(field, .fluentGreaterThan, Date())

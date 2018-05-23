@@ -7,7 +7,6 @@ import Foundation
 public protocol SchemaSupporting: QuerySupporting & MigrationSupporting {
     /// Associated schema type for this database.
     associatedtype Schema: FluentSQL.Schema
-        where Schema.Field == Query.Field
 
     /// Enables references errors.
     static func enableReferences(on conn: Connection) -> Future<Void>

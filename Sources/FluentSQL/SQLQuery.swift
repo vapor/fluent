@@ -1,32 +1,126 @@
 
+public struct FooDatabase: QuerySupporting {
 
-public enum SQLValue: QueryData, ExpressibleByStringLiteral, ExpressibleByIntegerLiteral {
-    public static func fluentEncodable(_ encodable: Encodable) -> SQLValue {
-        return .encodable(encodable)
+    public typealias Query = FooQuery
+    public typealias Connection = FooConnection
+
+
+    public static func queryExecute(_ query: FooQuery, on conn: Connection, into handler: @escaping (String, Connection) throws -> ()) -> Future<Void> {
+        fatalError()
     }
 
-    case encodable(Encodable)
-
-    public init(stringLiteral value: String) {
-        self = .encodable(value)
+    public static func queryDecode<D>(_ output: String, entity: String, as decodable: D.Type) throws -> D
+        where D: Decodable
+    {
+        fatalError()
     }
 
-    public init(integerLiteral value: Int) {
-        self = .encodable(value)
+    public static func queryEncode<E>(_ encodable: E, entity: String) throws -> String
+        where E: Encodable
+    {
+        fatalError()
+    }
+
+    public static func modelEvent<M>(event: ModelEvent, model: M, on conn: Connection) -> Future<M>
+        where FooDatabase == M.Database, M : Model
+    {
+        fatalError()
+    }
+
+    public func newConnection(on worker: Worker) -> Future<FooConnection> {
+        fatalError()
     }
 }
+
+public final class FooConnection: DatabaseConnection {
+    public var isClosed: Bool
+    public var extend: Extend
+
+    init() {
+        self.isClosed = false
+        self.extend = [:]
+    }
+
+    public func close() {
+        fatalError()
+    }
+
+
+    public func next() -> EventLoop {
+        fatalError()
+    }
+
+    public func shutdownGracefully(queue: DispatchQueue, _ callback: @escaping (Error?) -> Void) {
+        fatalError()
+    }
+}
+
+public struct FooQuery: SQLQuery {
+    public typealias Data = String
+    public typealias Input = String
+    public typealias Output = String
+
+    public init(table: String) {
+        self.table = table
+        self.statement = .insert
+        self.binds = []
+        self.data = ""
+        self.predicates = []
+        self.columns = []
+        self.limit = nil
+        self.offset = nil
+        self.orderBys = []
+        self.groupBys = []
+        self.joins = []
+    }
+
+    public var table: String
+    public var statement: SQLStatement
+    public var binds: [String]
+    public var data: String
+    public var predicates: [DataPredicateItem]
+    public var columns: [DataQueryColumn]
+    public var limit: Int?
+    public var offset: Int?
+    public var orderBys: [DataOrderBy]
+    public var groupBys: [DataGroupBy]
+    public var joins: [DataJoin]
+}
+
+extension String: QueryData {
+    public static func fluentEncodable(_ encodable: Encodable) -> String {
+        fatalError()
+    }
+}
+
+extension String: DataManipulationColumnsRepresentable {
+    public func convertToDataManipulationColumns() -> [DataManipulationColumn] {
+        fatalError()
+    }
+}
+
+
+
+
+
+
+
+
 public protocol SQLQuery: Query & JoinsContaining where
     Action == SQLStatement,
+    Input: DataManipulationColumnsRepresentable,
     Filter == DataPredicateItem,
-    Data == SQLValue,
     Key == DataQueryColumn,
     Range == DataLimitOffset,
+    Join == DataJoin,
     Sort == DataOrderBy
 {
+    init(table: String)
+
     var table: String { get set }
     var statement: SQLStatement { get set }
-    var binds: [SQLValue] { get set }
-    var data: [DataColumn: SQLValue] { get set }
+    var binds: [Data] { get set }
+    var data: Input { get set }
     var predicates: [DataPredicateItem] { get set }
     var columns: [DataQueryColumn] { get set }
     var limit: Int? { get set }
@@ -34,57 +128,46 @@ public protocol SQLQuery: Query & JoinsContaining where
     var orderBys: [DataOrderBy] { get set }
     var groupBys: [DataGroupBy] { get set }
     var joins: [DataJoin] { get set }
-    init(table: String)
 }
 
 extension SQLQuery {
-    /// See `Query`.
-    public static var fluentActionKey: WritableKeyPath<Self, SQLStatement> {
-        return \.statement
-    }
-
-    /// See `Query`.
-    public static var fluentBindsKey: WritableKeyPath<Self, [SQLValue]> {
-        return \.binds
-    }
-
-    /// See `Query`.
-    public static var fluentDataKey: WritableKeyPath<Self, [DataColumn: SQLValue]> {
-        return \.data
-    }
-
-    /// See `Query`.
-    public static var fluentFiltersKey: WritableKeyPath<Self, [DataPredicateItem]> {
-        return \.predicates
-    }
-
-    /// See `Query`.
-    public static var fluentKeysKey: WritableKeyPath<Self, [DataQueryColumn]> {
-        return \.columns
-    }
-
-    /// See `Query`.
-    public static var fluentRangeKey: WritableKeyPath<Self, DataLimitOffset?> {
-        return \._range
-    }
-
-    /// See `Query`.
-    public static var fluentSortsKey: WritableKeyPath<Self, [DataOrderBy]> {
-        return \.orderBys
-    }
-
-    /// See `Query`.
-    public static var fluentJoinsKey: WritableKeyPath<Self, [DataJoin]> {
-        return \.joins
-    }
-
     /// See `Query`.
     public static func fluentQuery(_ table: String) -> Self {
         return .init(table: table)
     }
 
-    /// Maps limit / offset to a Fluent-compatible type.
-    private var _range: DataLimitOffset? {
+    /// See `Query.
+    public var fluentAction: SQLStatement {
+        get { return statement }
+        set { statement = newValue}
+    }
+
+    /// See `Query.
+    public var fluentBinds: [Data] {
+        get { return binds }
+        set { binds = newValue }
+    }
+
+    /// See `Query.
+    public var fluentData: Input {
+        get { return data }
+        set { data = newValue }
+    }
+
+    /// See `Query.
+    public var fluentFilters: [DataPredicateItem] {
+        get { return predicates }
+        set { predicates = newValue }
+    }
+
+    /// See `Query.
+    public var fluentKeys: [DataQueryColumn] {
+        get { return columns }
+        set { columns = newValue }
+    }
+
+    /// See `Query.
+    public var fluentRange: DataLimitOffset? {
         get {
             switch (limit, offset) {
             case (.some(let limit), .some(let offset)):
@@ -104,7 +187,24 @@ extension SQLQuery {
             }
         }
     }
+    /// See `JoinsContaining`.
+    public var fluentJoins: [DataJoin] {
+        get { return joins }
+        set { joins = newValue }
+    }
 
+    /// See `Query.
+    public var fluentSorts: [DataOrderBy] {
+        get { return orderBys }
+        set { orderBys = newValue }
+    }
+}
+
+public protocol DataManipulationColumnsRepresentable {
+    func convertToDataManipulationColumns() -> [DataManipulationColumn]
+}
+
+extension SQLQuery {
     public func convertToDataOrManipulationQuery() -> DataOrManipulationQuery {
         switch statement {
         case .data:
@@ -122,7 +222,7 @@ extension SQLQuery {
             return .manipulation(.init(
                 statement: statement,
                 table: table,
-                columns: data.keys.map { .init(column: $0) },
+                columns: data.convertToDataManipulationColumns(),
                 joins: joins,
                 predicates: predicates,
                 limit: limit
@@ -338,7 +438,7 @@ extension String: QueryAggregateMethod {
 
 }
 
-extension DataColumn: Hashable, QueryField {
+extension DataColumn: Hashable, PropertySupporting {
     public var hashValue: Int {
         return (table?.hashValue ?? 0) &+ name.hashValue
     }
