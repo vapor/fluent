@@ -35,9 +35,7 @@ public final class IndexSupportingModel<D>: Model, Migration where D: SQLDatabas
     public static func prepare(on connection: Database.Connection) -> Future<Void> {
         return Database.create(self, on: connection) { builder in
             try addProperties(to: builder)
-//            builder.addIndex(to: \.name, \.age, isUnique: true)
-//            builder.addIndex(to: \.name)
-//            builder.addIndex(to: \.age)
+            builder.unique(on: \.name, \.age)
         }
     }
 }
