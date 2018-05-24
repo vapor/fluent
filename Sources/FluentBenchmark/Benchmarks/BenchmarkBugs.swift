@@ -50,7 +50,7 @@ extension Benchmarker where Database: QuerySupporting {
     }
 }
 
-extension Benchmarker where Database: QuerySupporting & SchemaSupporting {
+extension Benchmarker where Database: QuerySupporting & SQLDatabase {
     /// Benchmarks misc bugs, preparing the schema first.
     public func benchmarkBugs_withSchema() throws {
         let conn = try test(pool.requestConnection())
@@ -86,4 +86,4 @@ final class BasicUser<D>: Encodable, Model where D: QuerySupporting {
     }
 }
 
-extension BasicUser: Migration, AnyMigration where D: SchemaSupporting { }
+extension BasicUser: Migration, AnyMigration where D: SQLDatabase { }

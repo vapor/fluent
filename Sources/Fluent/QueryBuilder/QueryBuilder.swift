@@ -33,7 +33,7 @@ public final class QueryBuilder<Model, Result>
     public let connection: Future<Model.Database.Connection>
 
     /// Current result transformation.
-    internal var resultTransformer: (Model.Database.Query.Output, Model.Database.Connection) -> Future<Result>
+    internal var resultTransformer: (Model.Database.Output, Model.Database.Connection) -> Future<Result>
 
     /// If `true`, soft deleted models will be included.
     internal var shouldIncludeSoftDeleted: Bool
@@ -43,7 +43,7 @@ public final class QueryBuilder<Model, Result>
     internal init(
         query: Model.Database.Query,
         on connection: Future<Model.Database.Connection>,
-        resultTransformer: @escaping (Model.Database.Query.Output, Model.Database.Connection) -> Future<Result>
+        resultTransformer: @escaping (Model.Database.Output, Model.Database.Connection) -> Future<Result>
     ) {
         self.query = query
         self.connection = connection

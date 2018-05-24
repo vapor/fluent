@@ -61,7 +61,7 @@ extension Benchmarker where Database: QuerySupporting {
     }
 }
 
-extension Benchmarker where Database: SchemaSupporting & QuerySupporting {
+extension Benchmarker where Database: SQLDatabase & QuerySupporting {
     /// Benchmark result chunking
     /// The schema will be prepared first.
     public func benchmarkChunking_withSchema() throws {

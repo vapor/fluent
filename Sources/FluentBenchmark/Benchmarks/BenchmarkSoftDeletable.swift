@@ -55,7 +55,7 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
     }
 }
 
-extension Benchmarker where Database: QuerySupporting & TransactionSupporting & SchemaSupporting {
+extension Benchmarker where Database: QuerySupporting & TransactionSupporting & SQLDatabase {
     /// Benchmark fluent transactions.
     /// The schema will be prepared first.
     public func benchmarkSoftDeletable_withSchema() throws {

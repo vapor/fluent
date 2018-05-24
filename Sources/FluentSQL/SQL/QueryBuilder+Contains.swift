@@ -5,6 +5,7 @@ public func ~= <Model>(lhs: KeyPath<Model, String>, rhs: String) -> FilterOperat
 {
     return .make(lhs, .like, ["%" + rhs])
 }
+/// Has prefix
 public func ~= <Model>(lhs: KeyPath<Model, String?>, rhs: String) -> FilterOperator<Model>
     where Model.Database: SQLDatabase
 {
@@ -18,6 +19,7 @@ public func =~ <Model>(lhs: KeyPath<Model, String>, rhs: String) -> FilterOperat
 {
     return .make(lhs, .like, [rhs + "%"])
 }
+/// Has suffix.
 public func =~ <Model>(lhs: KeyPath<Model, String?>, rhs: String) -> FilterOperator<Model>
     where Model.Database: SQLDatabase
 {
@@ -31,6 +33,7 @@ public func ~~ <Model>(lhs: KeyPath<Model, String>, rhs: String) -> FilterOperat
 {
     return .make(lhs, .like, ["%" + rhs + "%"])
 }
+/// Contains.
 public func ~~ <Model>(lhs: KeyPath<Model, String?>, rhs: String) -> FilterOperator<Model>
     where Model.Database: SQLDatabase
 {

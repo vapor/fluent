@@ -19,8 +19,7 @@ extension QueryBuilder {
         if value.isNil {
             return filter(.keyPath(key), method, .fluentNil)
         } else {
-            query.fluentBinds.append(.fluentEncodable(value))
-            return filter(.keyPath(key), method, .fluentBind(1))
+            return filter(.keyPath(key), method, .fluentEncodables([value]))
         }
     }
 
@@ -44,8 +43,7 @@ extension QueryBuilder {
         if value.isNil {
             return filter(.keyPath(key), method, .fluentNil)
         } else {
-            query.fluentBinds.append(.fluentEncodable(value))
-            return filter(.keyPath(key), method, value)
+            return filter(.keyPath(key), method, .fluentEncodables([value]))
         }
     }
 
@@ -65,8 +63,7 @@ extension QueryBuilder {
         if value.isNil {
             return filter(field, method, .fluentNil)
         } else {
-            query.fluentBinds.append(.fluentEncodable(value))
-            return filter(field, method, .fluentBind(1))
+            return filter(field, method, .fluentEncodables([value]))
         }
     }
 
@@ -113,11 +110,9 @@ extension QueryBuilder {
         let sub = copy()
         // clear the subquery
         sub.query.fluentFilters.removeAll()
-        sub.query.fluentBinds.removeAll()
         // run
         try closure(sub)
         // copy binds + filter
-        self.query.fluentBinds += sub.query.fluentBinds
         self.query.fluentFilters += [.fluentFilterGroup(relation, sub.query.fluentFilters)]
         return self
     }

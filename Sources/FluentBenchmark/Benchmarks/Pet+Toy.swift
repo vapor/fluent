@@ -46,7 +46,7 @@ public final class PetToy<D>: ModifiablePivot where D: QuerySupporting {
     }
 }
 
-internal struct PetToyMigration<D>: Migration where D: QuerySupporting & SchemaSupporting {
+internal struct PetToyMigration<D>: Migration where D: QuerySupporting & SQLDatabase {
     /// See Migration.database
     typealias Database = D
 

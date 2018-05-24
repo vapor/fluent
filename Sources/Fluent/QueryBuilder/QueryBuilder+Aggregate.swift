@@ -7,7 +7,7 @@ extension QueryBuilder {
     ///
     /// - returns: A `Future` containing the count.
     public func count() -> Future<Int> {
-        return _aggregate(.fluentAggregate(.fluentCount, fields: [.fluentAll]))
+        return _aggregate(.fluentAggregate(.fluentCount, [.fluentAll]))
     }
 
     /// Returns the sum of all entries for the supplied field.
@@ -67,7 +67,7 @@ extension QueryBuilder {
     public func aggregate<D, T>(_ method: Model.Database.Query.Key.AggregateMethod, field: KeyPath<Model, T>, as type: D.Type = D.self) -> Future<D>
         where D: Decodable
     {
-        return _aggregate(.fluentAggregate(method, fields: [.keyPath(field)]))
+        return _aggregate(.fluentAggregate(method, [.keyPath(field)]))
     }
 
     // MARK: Private

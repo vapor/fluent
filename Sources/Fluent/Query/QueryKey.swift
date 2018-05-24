@@ -12,5 +12,5 @@ public protocol QueryKey: PropertySupporting {
     /// - parameters:
     ///     - method: Aggregate method to use.
     ///     - field: Keys to aggregate. Can be zero.
-    static func fluentAggregate(_ method: AggregateMethod, fields: [Self]) -> Self
+    static func fluentAggregate(_ method: AggregateMethod, _ fields: [Self]) -> Self
 }

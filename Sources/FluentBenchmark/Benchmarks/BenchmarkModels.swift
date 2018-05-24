@@ -60,7 +60,7 @@ extension Benchmarker where Database: QuerySupporting {
     }
 }
 
-extension Benchmarker where Database: QuerySupporting & SchemaSupporting {
+extension Benchmarker where Database: QuerySupporting & SQLDatabase {
     /// Benchmark the basic model CRUD.
     /// The schema will be prepared first.
     public func benchmarkModels_withSchema() throws {

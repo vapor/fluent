@@ -27,7 +27,7 @@ public struct MigrationConfig: Service {
     /// - parameters:
     ///     - model: `Model & Migration` type to add.
     ///     - database: Database identifier for the database this should run on.
-    public mutating func add<Model> (model: Model.Type, database: DatabaseIdentifier<Model.Database>)
+    public mutating func add<Model>(model: Model.Type, database: DatabaseIdentifier<Model.Database>)
         where Model: Fluent.Migration & Fluent.Model
     {
         add(migration: Model.self, database: database)
@@ -43,7 +43,9 @@ public struct MigrationConfig: Service {
     /// - parameters:
     ///     - migration: `Migration` type to add.
     ///     - database: Database identifier for the database this should run on.
-    public mutating func add<Migration>(migration: Migration.Type, database: DatabaseIdentifier<Migration.Database>) where Migration: Fluent.Migration {
+    public mutating func add<Migration>(migration: Migration.Type, database: DatabaseIdentifier<Migration.Database>)
+        where Migration: Fluent.Migration
+    {
         var config: Migrations<Migration.Database>
         if let existing = storage[database.uid] as? Migrations<Migration.Database> {
             config = existing

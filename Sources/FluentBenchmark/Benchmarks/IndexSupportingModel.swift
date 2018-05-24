@@ -1,6 +1,6 @@
 import FluentSQL
 
-public final class IndexSupportingModel<D>: Model, Migration where D: SchemaSupporting {
+public final class IndexSupportingModel<D>: Model, Migration where D: SQLDatabase {
     /// See Model.Database
     public typealias Database = D
 
@@ -35,9 +35,9 @@ public final class IndexSupportingModel<D>: Model, Migration where D: SchemaSupp
     public static func prepare(on connection: Database.Connection) -> Future<Void> {
         return Database.create(self, on: connection) { builder in
             try addProperties(to: builder)
-            builder.addIndex(to: \.name, \.age, isUnique: true)
-            builder.addIndex(to: \.name)
-            builder.addIndex(to: \.age)
+//            builder.addIndex(to: \.name, \.age, isUnique: true)
+//            builder.addIndex(to: \.name)
+//            builder.addIndex(to: \.age)
         }
     }
 }

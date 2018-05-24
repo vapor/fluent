@@ -47,7 +47,7 @@ struct FooCache: Codable {
     var baz: Int
 }
 
-extension Benchmarker where Database: QuerySupporting & TransactionSupporting & SchemaSupporting & KeyedCacheSupporting {
+extension Benchmarker where Database: QuerySupporting & TransactionSupporting & SQLDatabase & KeyedCacheSupporting {
     /// Benchmark fluent transactions.
     /// The schema will be prepared first.
     public func benchmarkCache_withSchema() throws {

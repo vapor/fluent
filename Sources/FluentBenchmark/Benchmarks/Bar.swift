@@ -47,4 +47,4 @@ struct Bar<Database>: Model, SoftDeletable, Timestampable where Database: QueryS
     }
 }
 
-extension Bar: Migration, AnyMigration where Database: SchemaSupporting { }
+extension Bar: Migration, AnyMigration where Database: SQLDatabase { }

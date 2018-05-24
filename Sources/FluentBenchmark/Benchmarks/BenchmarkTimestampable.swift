@@ -90,7 +90,7 @@ extension Benchmarker where Database: QuerySupporting {
     }
 }
 
-extension Benchmarker where Database: QuerySupporting & SchemaSupporting {
+extension Benchmarker where Database: QuerySupporting & SQLDatabase {
     /// Benchmark the Timestampable protocol
     /// The schema will be prepared first.
     public func benchmarkTimestampable_withSchema() throws {

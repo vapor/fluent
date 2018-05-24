@@ -7,7 +7,6 @@ extension QueryBuilder {
     ///         when filtering using key paths.
     @discardableResult
     public func filter(_ value: FilterOperator<Model>) -> Self {
-        query.fluentBinds += value.binds
         return filter(value.filter)
     }
 
@@ -24,7 +23,6 @@ extension QueryBuilder {
     public func filter<A>(_ value: FilterOperator<A>) -> Self
         where A.Database == Model.Database
     {
-        query.fluentBinds += value.binds
         return filter(value.filter)
     }
 }
@@ -139,21 +137,14 @@ public struct FilterOperator<Model> where Model: Fluent.Model, Model.Database: Q
     /// The wrapped query filter method.
     fileprivate let filter: Model.Database.Query.Filter
 
-    /// The binds.
-    fileprivate let binds: [Model.Database.Query.Data]
-
     /// Operator helper func.
-    public static func make<V>(_ key: KeyPath<Model, V>, _ method: Model.Database.Query.Filter.Method, _ value: [V]) -> FilterOperator<Model>
+    public static func make<V>(_ key: KeyPath<Model, V>, _ method: Model.Database.Query.Filter.Method, _ values: [V]) -> FilterOperator<Model>
         where V: Encodable
     {
-        if value.count == 1 && value[0].isNil {
-            return FilterOperator<Model>(
-                filter: .fluentFilter(.keyPath(key), method, .fluentNil), binds: []
-            )
+        if values.count == 1 && values[0].isNil {
+            return FilterOperator<Model>(filter: .fluentFilter(.keyPath(key), method, .fluentNil))
         } else {
-            return FilterOperator<Model>(
-                filter: .fluentFilter(.keyPath(key), method, .fluentBind(value.count)), binds: value.map { .fluentEncodable($0) }
-            )
+            return FilterOperator<Model>(filter: .fluentFilter(.keyPath(key), method, .fluentEncodables(values)))
         }
     }
 }
