@@ -2,8 +2,7 @@
 public protocol SQLDatabase: QuerySupporting & JoinSupporting & MigrationSupporting
     where Query == DataManipulationQuery
 {
-    /// Determines a `DataDefinitionDataType` for the supplied Swift type.
-    static func schemaDataType(for type: Any.Type) -> DataDefinitionDataType
+    static func schemaDataType(for type: Any.Type, primaryKey: Bool) -> DataDefinitionDataType
 
     /// Executes the supplied schema on the database connection.
     static func schemaExecute(_ ddl: DataDefinitionQuery, on connection: Connection) -> Future<Void>

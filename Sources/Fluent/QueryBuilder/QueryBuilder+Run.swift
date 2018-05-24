@@ -93,8 +93,8 @@ extension QueryBuilder {
             Model.Database.queryExecute(q, on: conn) { row, conn in
                 resultTransformer(row, conn).map { result in
                     return try handler(result)
-                    }.catch { error in
-                        promise.fail(error: error)
+                }.catch { error in
+                    promise.fail(error: error)
                 }
             }.cascade(promise: promise)
 

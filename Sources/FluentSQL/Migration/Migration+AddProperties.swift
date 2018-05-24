@@ -32,7 +32,10 @@ extension Model where Database: SQLDatabase {
         }
         let properties = try Self.reflectProperties(depth: 0)
         for property in properties {
-            builder.field(type: Database.schemaDataType(for: property.type), column: .reflected(property, rootType: self), isIdentifier: property.path == idProperty.path)
+            builder.field(
+                for: .reflected(property, rootType: self),
+                dataType: Database.schemaDataType(for: property.type, primaryKey: idProperty.path == property.path)
+            )
         }
     }
 }

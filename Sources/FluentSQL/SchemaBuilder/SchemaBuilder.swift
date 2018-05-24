@@ -4,7 +4,7 @@
 /// Use `Database.create(...)`, `Database.update(...)`, and `Database.delete(...)` to create schema builders.
 ///
 ///     PostgreSQLDatabase.create(User.self) { builder in
-///         builder.id()
+///         builder.field(for: \.id)
 ///         builder.field(for: \.name)
 ///     }
 ///
@@ -25,20 +25,6 @@ public protocol SchemaBuilder: class {
 extension SchemaBuilder {
     // MARK: Field
 
-    /// Adds an ID field. This field is always added to the `\.id` keypath.
-    ///
-    ///     builder.id()
-    ///
-    /// You can specify an optional data type for the field.
-    ///
-    ///     builder.field(type: .integer)
-    ///
-    /// - parameters:
-    ///     - type: Data type for the field. Defaults to a generally appropriate type.
-    public func id(type: DataDefinitionDataType = Model.Database.schemaDataType(for: Model.ID.self)) {
-        self.field(type: type, column: .keyPath(Model.idKey), isIdentifier: true)
-    }
-
     /// Adds a field.
     ///
     ///     builder.field(for: \.name)
@@ -50,13 +36,12 @@ extension SchemaBuilder {
     /// - parameters:
     ///     - type: Data type for the field. Defaults to a generally appropriate type.
     ///     - keyPath: `KeyPath` to the field.
-    public func field<T>(type: DataDefinitionDataType = Model.Database.schemaDataType(for: Model.ID.self), for keyPath: KeyPath<Model, T>) {
-        self.field(type: type, column: .keyPath(keyPath), isIdentifier: keyPath == Model.idKey)
+    public func field<T>(for keyPath: KeyPath<Model, T>, primaryKey: Bool? = nil) {
+        field(for: .keyPath(keyPath), dataType: Model.Database.schemaDataType(for: T.self, primaryKey: primaryKey ?? (keyPath == Model.idKey)))
     }
 
-    /// Internal method for adding a field to the schema.
-    internal func field(type: DataDefinitionDataType, column: DataColumn, isIdentifier: Bool = false) {
-        schema.createColumns.append(.init(name: column.name, dataType: type, attributes: isIdentifier ? ["PRIMARY KEY"] : []))
+    public func field(for column: DataColumn, dataType: DataDefinitionDataType) {
+        schema.createColumns.append(.init(name: column.name, dataType: dataType))
     }
 
     // MARK: ForeignKey
