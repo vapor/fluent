@@ -12,9 +12,9 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
         _ = try test(tanner.save(on: conn))
 
         do {
-            _ = try Database.transaction(on: conn) { conn in
+            try Database.transactionExecute({ conn -> Future<Void> in
                 let user = User<Database>(name: "User #1", age: 1)
-                return user.save(on: conn).flatMap(to: Void.self) { _ in
+                return user.save(on: conn).flatMap { _ in
                     return conn.query(User<Database>.self).count().map(to: Void.self) { count in
                         if count != 2 {
                             self.fail("count \(count) != 2")
@@ -23,8 +23,7 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
                         throw FluentBenchmarkError(identifier: "test", reason: "rollback", source: .capture())
                     }
                 }
-
-            }.wait()
+            }, on: conn).wait()
         } catch is FluentBenchmarkError {
             // expected
         }
