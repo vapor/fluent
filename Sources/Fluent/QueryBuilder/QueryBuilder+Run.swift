@@ -8,7 +8,7 @@ extension QueryBuilder {
     /// - returns: A `Future` containing the results.
     public func all() -> Future<[Result]> {
         var results: [Result] = []
-        return run(.fluentRead) { result in
+        return run(Database.queryActionRead) { result in
             results.append(result)
         }.map {
             return results
@@ -30,7 +30,7 @@ extension QueryBuilder {
     ///
     /// - returns: A `Future` that will be completed when the delete is done.
     public func delete() -> Future<Void> {
-        return run(.fluentDelete)
+        return run(Database.queryActionDelete)
     }
 
     /// Convenience for chunking model results.
@@ -49,7 +49,7 @@ extension QueryBuilder {
     public func chunk(max: Int, closure: @escaping ([Result]) throws -> ()) -> Future<Void> {
         var partial: [Result] = []
         partial.reserveCapacity(max)
-        return run(.fluentRead) { row in
+        return run(Database.queryActionRead) { row in
             partial.append(row)
             if partial.count >= max {
                 try closure(partial)
@@ -71,17 +71,19 @@ extension QueryBuilder {
     /// - parameters:
     ///     - handler: Optional closure to handle results.
     /// - returns: A `Future` that will be completed when the query has finished.
-    public func run(_ action: Model.Database.Query.Action, into handler: @escaping (Result) throws -> () = { _ in }) -> Future<Void> {
+    public func run(_ action: Database.QueryAction, into handler: @escaping (Result) throws -> () = { _ in }) -> Future<Void> {
         // replace action
-        query.fluentAction = action
+        Database.queryActionApply(action, to: &query)
 
         /// if the model is soft deletable, and soft deleted
         /// models were not requested, then exclude them
-        if let type = Model.self as? AnySoftDeletable.Type, !shouldIncludeSoftDeleted, !query.fluentAction.fluentIsCreate {
-            let field: Model.Database.Query.Filter.Field = .keyPath(any: type.fluentDeletedAtKey, rootType: Model.self, valueType: Date?.self)
-            group(.fluentOr) { or in
-                or.filter(field, .fluentEqual, Date?.none)
-                or.filter(field, .fluentGreaterThan, Date())
+        if let type = Model.self as? AnySoftDeletable.Type, !shouldIncludeSoftDeleted, !Database.queryActionIsCreate(action) {
+            let field: Database.QueryField = Model.Database.queryField(
+                .keyPath(any: type.fluentDeletedAtKey, rootType: Model.self, valueType: Date?.self)
+            )
+            group(Database.queryFilterRelationOr) { or in
+                or.filter(field, Database.queryFilterMethodEqual, Date?.none)
+                or.filter(field, Database.queryFilterMethodGreaterThan, Date())
             }
         }
 

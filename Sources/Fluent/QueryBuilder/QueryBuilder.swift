@@ -25,6 +25,9 @@
 public final class QueryBuilder<Model, Result>
     where Model: Fluent.Model, Model.Database: QuerySupporting
 {
+    /// Convenience type to access model database.
+    public typealias Database = Model.Database
+
     /// The `DatabaseQuery` being built.
     public var query: Model.Database.Query
 

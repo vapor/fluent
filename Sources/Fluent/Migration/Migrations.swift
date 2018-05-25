@@ -90,7 +90,7 @@ private extension MigrationLog where Database: QuerySupporting {
     /// Returns the latest batch number. Returns 0 if no batches have run yet.
     static func latestBatch(on conn: Database.Connection) throws -> Future<Int> {
         return conn.query(MigrationLog<Database>.self)
-            .sort(\.batch, .fluentDescending)
+            .sort(\.batch, Database.querySortDirectionDescending)
             .first()
             .map { $0?.batch ?? 0 }
     }

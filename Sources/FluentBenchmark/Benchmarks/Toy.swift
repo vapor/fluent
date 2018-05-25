@@ -41,7 +41,7 @@ extension Toy where Database: JoinSupporting {
 
 // MARK: Migration
 
-internal struct ToyMigration<D>: Migration where D: QuerySupporting & SQLDatabase {
+internal struct ToyMigration<D>: Migration where D: QuerySupporting & SQLSupporting {
     /// See Migration.database
     typealias Database = D
 

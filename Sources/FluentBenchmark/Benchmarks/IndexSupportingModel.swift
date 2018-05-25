@@ -1,6 +1,6 @@
 import FluentSQL
 
-public final class IndexSupportingModel<D>: Model, Migration where D: SQLDatabase {
+public final class IndexSupportingModel<D>: Model, Migration where D: SQLSupporting {
     /// See Model.Database
     public typealias Database = D
 

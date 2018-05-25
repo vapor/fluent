@@ -24,10 +24,10 @@ extension QueryBuilder where Model.Database: JoinSupporting {
     ///     - baseKey: Field on the current model to join.
     ///                This should be the model you used to create this query builder.
     ///     - method: Join method to use, inner by default.
-    public func join<A, B, C>(_ joinedKey: KeyPath<A, C>, to baseKey: KeyPath<B, C>, method: Model.Database.Query.Join.Method = .default) -> Self
+    public func join<A, B, C>(_ joinedKey: KeyPath<A, C>, to baseKey: KeyPath<B, C>, method: Database.QueryJoinMethod = Database.queryJoinMethodDefault) -> Self
         where A: Fluent.Model, B: Fluent.Model, A.Database == B.Database, A.Database == Model.Database
     {
-        query.fluentJoins.append(.fluentJoin(method, base: .keyPath(baseKey), joined: .keyPath(joinedKey)))
+        Database.queryJoinApply(Database.queryJoin(method, base: Database.queryField(.keyPath(baseKey)), joined: Database.queryField(.keyPath(joinedKey))), to: &query)
         return self
     }
 
@@ -54,10 +54,10 @@ extension QueryBuilder where Model.Database: JoinSupporting {
     ///     - baseKey: Field on the current model to join.
     ///                This should be the model you used to create this query builder.
     ///     - method: Join method to use, inner by default.
-    public func join<A, B, C>(_ joinedKey: KeyPath<A, C>, to baseKey: KeyPath<B, C?>, method: Model.Database.Query.Join.Method = .default) -> Self
+    public func join<A, B, C>(_ joinedKey: KeyPath<A, C>, to baseKey: KeyPath<B, C?>, method: Model.Database.QueryJoinMethod = Database.queryJoinMethodDefault) -> Self
         where A: Fluent.Model, B: Fluent.Model, A.Database == B.Database, A.Database == Model.Database
     {
-        query.fluentJoins.append(.fluentJoin(method, base: .keyPath(baseKey), joined: .keyPath(joinedKey)))
+        Database.queryJoinApply(Database.queryJoin(method, base: Database.queryField(.keyPath(baseKey)), joined: Database.queryField(.keyPath(joinedKey))), to: &query)
         return self
     }
 
@@ -84,10 +84,10 @@ extension QueryBuilder where Model.Database: JoinSupporting {
     ///     - baseKey: Field on the current model to join.
     ///                This should be the model you used to create this query builder.
     ///     - method: Join method to use, inner by default.
-    public func join<A, B, C>(_ joinedKey: KeyPath<A, C?>, to baseKey: KeyPath<B, C>, method: Model.Database.Query.Join.Method = .default) -> Self
+    public func join<A, B, C>(_ joinedKey: KeyPath<A, C?>, to baseKey: KeyPath<B, C>, method: Model.Database.QueryJoinMethod = Database.queryJoinMethodDefault) -> Self
         where A: Fluent.Model, B: Fluent.Model, A.Database == B.Database, A.Database == Model.Database
     {
-        query.fluentJoins.append(.fluentJoin(method, base: .keyPath(baseKey), joined: .keyPath(joinedKey)))
+        Database.queryJoinApply(Database.queryJoin(method, base: Database.queryField(.keyPath(baseKey)), joined: Database.queryField(.keyPath(joinedKey))), to: &query)
         return self
     }
 }

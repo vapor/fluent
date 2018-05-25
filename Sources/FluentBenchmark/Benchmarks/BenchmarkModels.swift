@@ -25,7 +25,7 @@ extension Benchmarker where Database: QuerySupporting {
 
         // make sure that AND queries work as expected - this query should return exactly one result
         let fetchedWithAndQuery = try test(Foo<Database>.query(on: conn)
-            .group(.fluentAnd) { and in
+            .group(Database.queryFilterRelationAnd) { and in
                 and.filter(\Foo.bar == "asdf")
                 and.filter(\Foo.baz == 314)
             }
@@ -36,7 +36,7 @@ extension Benchmarker where Database: QuerySupporting {
 
         // make sure that OR queries work as expected - this query should return exactly two results
         let fetchedWithOrQuery = try test(Foo<Database>.query(on: conn)
-            .group(.fluentOr) { or in
+            .group(Database.queryFilterRelationOr) { or in
                 or.filter(\Foo.bar == "asdf")
                 or.filter(\Foo.bar == "fdsa")
             }
@@ -60,7 +60,7 @@ extension Benchmarker where Database: QuerySupporting {
     }
 }
 
-extension Benchmarker where Database: QuerySupporting & SQLDatabase {
+extension Benchmarker where Database: QuerySupporting & SQLSupporting {
     /// Benchmark the basic model CRUD.
     /// The schema will be prepared first.
     public func benchmarkModels_withSchema() throws {

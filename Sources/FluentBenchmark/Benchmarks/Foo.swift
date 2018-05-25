@@ -32,7 +32,7 @@ internal final class Foo<D>: Model where D: QuerySupporting {
     }
 }
 
-internal struct FooMigration<D>: Migration where D: QuerySupporting & SQLDatabase {
+internal struct FooMigration<D>: Migration where D: QuerySupporting & SQLSupporting {
     /// See Migration.database
     typealias Database = D
 

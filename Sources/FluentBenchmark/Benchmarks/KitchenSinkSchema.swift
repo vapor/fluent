@@ -21,7 +21,7 @@ final class KitchenSink<D>: Model where D: QuerySupporting {
     var date: Date
 }
 
-internal struct KitchenSinkSchema<D>: Migration where D: QuerySupporting & SQLDatabase {
+internal struct KitchenSinkSchema<D>: Migration where D: QuerySupporting & SQLSupporting {
     /// See Migration.Database
     typealias Database = D
 

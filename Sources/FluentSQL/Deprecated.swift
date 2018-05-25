@@ -25,4 +25,4 @@ extension SchemaBuilder {
 }
 
 @available(*, deprecated, renamed: "SQLDatabase")
-public typealias SchemaSupporting = SQLDatabase
+public typealias SchemaSupporting = SQLSupporting

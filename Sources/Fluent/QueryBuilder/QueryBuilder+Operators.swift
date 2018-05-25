@@ -36,7 +36,7 @@ extension QueryBuilder {
 ///     - rhs: Value to filter the field by.
 /// - returns: An `OperatorFilter` suitable for passing into `filter(...)`.
 public func == <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterOperator<Model> where Value: Encodable {
-    return .make(lhs, .fluentEqual, [rhs])
+    return .make(lhs, Model.Database.queryFilterMethodEqual, [rhs])
 }
 
 /// Applies an inverse equality filter to the query.
@@ -48,7 +48,7 @@ public func == <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterO
 ///     - rhs: Value to filter the field by.
 /// - returns: An `OperatorFilter` suitable for passing into `filter(...)`.
 public func != <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterOperator<Model> where Value: Encodable {
-    return .make(lhs, .fluentNotEqual, [rhs])
+    return .make(lhs, Model.Database.queryFilterMethodNotEqual, [rhs])
 }
 
 /// Applies a greater than inequality filter to the query.
@@ -60,7 +60,7 @@ public func != <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterO
 ///     - rhs: Value to filter the field by.
 /// - returns: An `OperatorFilter` suitable for passing into `filter(...)`.
 public func > <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterOperator<Model> where Value: Encodable {
-    return .make(lhs, .fluentGreaterThan, [rhs])
+    return .make(lhs, Model.Database.queryFilterMethodGreaterThan, [rhs])
 }
 
 /// Applies a less than inequality filter to the query.
@@ -72,7 +72,7 @@ public func > <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterOp
 ///     - rhs: Value to filter the field by.
 /// - returns: An `OperatorFilter` suitable for passing into `filter(...)`.
 public func < <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterOperator<Model> where Value: Encodable {
-    return .make(lhs, .fluentLessThan, [rhs])
+    return .make(lhs, Model.Database.queryFilterMethodLessThan, [rhs])
 }
 
 /// Applies a greater than or equal inequality filter to the query.
@@ -84,7 +84,7 @@ public func < <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterOp
 ///     - rhs: Value to filter the field by.
 /// - returns: An `OperatorFilter` suitable for passing into `filter(...)`.
 public func >= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterOperator<Model> where Value: Encodable {
-    return .make(lhs, .fluentGreaterThanOrEqual, [rhs])
+    return .make(lhs, Model.Database.queryFilterMethodGreaterThanOrEqual, [rhs])
 }
 
 /// Applies a less than or equal inequality filter to the query.
@@ -96,7 +96,7 @@ public func >= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterO
 ///     - rhs: Value to filter the field by.
 /// - returns: An `OperatorFilter` suitable for passing into `filter(...)`.
 public func <= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value) -> FilterOperator<Model> where Value: Encodable {
-    return .make(lhs, .fluentLessThanOrEqual, [rhs])
+    return .make(lhs, Model.Database.queryFilterMethodLessThanOrEqual, [rhs])
 }
 
 infix operator ~~
@@ -112,7 +112,7 @@ infix operator !~
 ///     - rhs: Value to filter the field by.
 /// - returns: An `OperatorFilter` suitable for passing into `filter(...)`.
 public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: [Value]) -> FilterOperator<Model> where Value: Encodable {
-    return .make(lhs, .fluentInSubset, rhs)
+    return .make(lhs, Model.Database.queryFilterMethodInSubset, rhs)
 }
 
 /// Applies an inverse subset filter to the query. Only fields whose values are _not_
@@ -125,7 +125,7 @@ public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: [Value]) -> Filte
 ///     - rhs: Value to filter the field by.
 /// - returns: An `OperatorFilter` suitable for passing into `filter(...)`.
 public func !~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: [Value]) -> FilterOperator<Model> where Value: Encodable {
-    return .make(lhs, .fluentNotInSubset, rhs)
+    return .make(lhs, Model.Database.queryFilterMethodNotInSubset, rhs)
 }
 
 /// Typed wrapper around query filter methods.
@@ -135,16 +135,20 @@ public func !~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: [Value]) -> Filte
 /// Used with the `filter(...)` overload that accepts typed operators.
 public struct FilterOperator<Model> where Model: Fluent.Model, Model.Database: QuerySupporting {
     /// The wrapped query filter method.
-    fileprivate let filter: Model.Database.Query.Filter
+    fileprivate let filter: Model.Database.QueryFilter
 
     /// Operator helper func.
-    public static func make<V>(_ key: KeyPath<Model, V>, _ method: Model.Database.Query.Filter.Method, _ values: [V]) -> FilterOperator<Model>
+    public static func make<V>(_ key: KeyPath<Model, V>, _ method: Model.Database.QueryFilterMethod, _ values: [V]) -> FilterOperator<Model>
         where V: Encodable
     {
         if values.count == 1 && values[0].isNil {
-            return FilterOperator<Model>(filter: .fluentFilter(.keyPath(key), method, .fluentNil))
+            return FilterOperator<Model>(
+                filter: Model.Database.queryFilter(Model.Database.queryField(.keyPath(key)), method, Model.Database.queryFilterValueNil)
+            )
         } else {
-            return FilterOperator<Model>(filter: .fluentFilter(.keyPath(key), method, .fluentEncodables(values)))
+            return FilterOperator<Model>(
+                filter: Model.Database.queryFilter(Model.Database.queryField(.keyPath(key)), method, Model.Database.queryFilterValue(values))
+            )
         }
     }
 }

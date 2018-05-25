@@ -13,13 +13,13 @@ extension QueryBuilder {
     ///     - value: Value to filter by.
     /// - returns: Query builder for chaining.
     @discardableResult
-    public func filter<T>(_ key: KeyPath<Model, T>, _ method: Model.Database.Query.Filter.Method, _ value: T) -> Self
+    public func filter<T>(_ key: KeyPath<Model, T>, _ method: Model.Database.QueryFilterMethod, _ value: T) -> Self
         where T: Encodable
     {
         if value.isNil {
-            return filter(.keyPath(key), method, .fluentNil)
+            return filter(Database.queryField(.keyPath(key)), method, Database.queryFilterValueNil)
         } else {
-            return filter(.keyPath(key), method, .fluentEncodables([value]))
+            return filter(Database.queryField(.keyPath(key)), method, Database.queryFilterValue([value]))
         }
     }
 
@@ -37,13 +37,13 @@ extension QueryBuilder {
     ///     - value: Value to filter by.
     /// - returns: Query builder for chaining.
     @discardableResult
-    public func filter<A, T>(_ key: KeyPath<A, T>, _ method: Model.Database.Query.Filter.Method, _ value: Encodable) -> Self
+    public func filter<A, T>(_ key: KeyPath<A, T>, _ method: Model.Database.QueryFilterMethod, _ value: Encodable) -> Self
         where A: Fluent.Model, A.Database == Model.Database
     {
         if value.isNil {
-            return filter(.keyPath(key), method, .fluentNil)
+            return filter(Database.queryField(.keyPath(key)), method, Database.queryFilterValueNil)
         } else {
-            return filter(.keyPath(key), method, .fluentEncodables([value]))
+            return filter(Database.queryField(.keyPath(key)), method, Database.queryFilterValue([value]))
         }
     }
 
@@ -59,11 +59,11 @@ extension QueryBuilder {
     ///     - value: Value to filter by.
     /// - returns: Query builder for chaining.
     @discardableResult
-    public func filter(_ field: Model.Database.Query.Filter.Field, _ method: Model.Database.Query.Filter.Method, _ value: Encodable) -> Self {
+    public func filter(_ field: Model.Database.QueryField, _ method: Model.Database.QueryFilterMethod, _ value: Encodable) -> Self {
         if value.isNil {
-            return filter(field, method, .fluentNil)
+            return filter(field, method, Database.queryFilterValueNil)
         } else {
-            return filter(field, method, .fluentEncodables([value]))
+            return filter(field, method, Database.queryFilterValue([value]))
         }
     }
 
@@ -79,15 +79,15 @@ extension QueryBuilder {
     ///     - value: Value to filter by.
     /// - returns: Query builder for chaining.
     @discardableResult
-    private func filter(_ field: Model.Database.Query.Filter.Field, _ method: Model.Database.Query.Filter.Method, _ value: Model.Database.Query.Filter.Value) -> Self {
-        return filter(.fluentFilter(field, method, value))
+    private func filter(_ field: Model.Database.QueryField, _ method: Model.Database.QueryFilterMethod, _ value: Model.Database.QueryFilterValue) -> Self {
+        return filter(Database.queryFilter(field, method, value))
     }
 
     /// Add a manually created filter to the query builder.
     /// - returns: Query builder for chaining.
     @discardableResult
-    public func filter(_ filter: Model.Database.Query.Filter) -> Self {
-        query.fluentFilters.append(filter)
+    public func filter(_ filter: Model.Database.QueryFilter) -> Self {
+        Database.queryFilterApply(filter, to: &query)
         return self
     }
 
@@ -105,15 +105,20 @@ extension QueryBuilder {
     ///     - closure: A sub-query builder to use for adding grouped filters.
     /// - returns: Query builder for chaining.
     @discardableResult
-    public func group(_ relation: Model.Database.Query.Filter.Relation, closure: @escaping (QueryBuilder<Model, Result>) throws -> ()) rethrows -> Self {
-        // FIXME: more efficient copy?
-        let sub = copy()
-        // clear the subquery
-        sub.query.fluentFilters.removeAll()
+    public func group(_ relation: Model.Database.QueryFilterRelation, closure: @escaping (QueryBuilder<Model, Result>) throws -> ()) rethrows -> Self {
+        // switch this query builder to an empty query, saving the main query
+        let main = query
+        query = Database.query(Model.entity)
+
         // run
-        try closure(sub)
-        // copy binds + filter
-        self.query.fluentFilters += [.fluentFilterGroup(relation, sub.query.fluentFilters)]
+        try closure(self)
+
+        // switch back to the query, saving the subquery
+        let sub = query
+        query = main
+
+        // apply the sub-filters as a group
+        Database.queryFilterApply(Database.queryFilterGroup(relation, Database.queryFilters(for: sub)), to: &query)
         return self
     }
 }

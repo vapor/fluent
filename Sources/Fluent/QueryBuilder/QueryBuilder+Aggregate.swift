@@ -1,15 +1,6 @@
 extension QueryBuilder {
     // MARK: Aggregate
 
-    /// Returns the number of results for this query.
-    ///
-    ///     let numPosts = try Post.query(on: conn).count()
-    ///
-    /// - returns: A `Future` containing the count.
-    public func count() -> Future<Int> {
-        return _aggregate(.fluentAggregate(.fluentCount, [.fluentAll]))
-    }
-
     /// Returns the sum of all entries for the supplied field.
     ///
     ///     let totalLikes = try Post.query(on: conn).sum(\.likes)
@@ -18,7 +9,7 @@ extension QueryBuilder {
     ///     - field: Field to sum.
     /// - returns: A `Future` containing the sum.
     public func sum<T>(_ field: KeyPath<Model, T>) -> Future<T> where T: Decodable {
-        return aggregate(.fluentSum, field: field)
+        return aggregate(Database.queryAggregateSum, field: field)
     }
 
     /// Returns the average of all entries for the supplied field.
@@ -29,7 +20,7 @@ extension QueryBuilder {
     ///     - field: Field to average.
     /// - returns: A `Future` containing the average.
     public func average<T>(_ field: KeyPath<Model, T>) -> Future<T> where T: Decodable {
-        return aggregate(.fluentAverage, field: field)
+        return aggregate(Database.queryAggregateAverage, field: field)
     }
 
     /// Returns the minimum value of all entries for the supplied field.
@@ -40,7 +31,7 @@ extension QueryBuilder {
     ///     - field: Field to find min for.
     /// - returns: A `Future` containing the min.
     public func min<T>(_ field: KeyPath<Model, T>) -> Future<T> where T: Decodable {
-        return aggregate(.fluentMinimum, field: field)
+        return aggregate(Database.queryAggregateMinimum, field: field)
     }
 
     /// Returns the maximum value of all entries for the supplied field.
@@ -51,7 +42,7 @@ extension QueryBuilder {
     ///     - field: Field to find max for.
     /// - returns: A `Future` containing the max.
     public func max<T>(_ field: KeyPath<Model, T>) -> Future<T> where T: Decodable {
-        return aggregate(.fluentMaximum, field: field)
+        return aggregate(Database.queryAggregateMaximum, field: field)
     }
 
     /// Perform an aggregate action on the supplied field. Normally you will use one of
@@ -64,24 +55,33 @@ extension QueryBuilder {
     ///     - field: Field to find max for.
     ///     - type: `Decodable` type to decode the aggregate value as.
     /// - returns: A `Future` containing the aggregate.
-    public func aggregate<D, T>(_ method: Model.Database.Query.Key.AggregateMethod, field: KeyPath<Model, T>, as type: D.Type = D.self) -> Future<D>
+    public func aggregate<D, T>(_ method: Database.QueryAggregate, field: KeyPath<Model, T>, as type: D.Type = D.self) -> Future<D>
         where D: Decodable
     {
-        return _aggregate(.fluentAggregate(method, [.keyPath(field)]))
+        return _aggregate(Database.queryAggregate(method, [Database.queryKey(Database.queryField(.keyPath(field)))]))
+    }
+
+    /// Returns the number of results for this query.
+    ///
+    ///     let numPosts = try Post.query(on: conn).count()
+    ///
+    /// - returns: A `Future` containing the count.
+    public func count() -> Future<Int> {
+        return _aggregate(Database.queryAggregate(Database.queryAggregateCount, [Database.queryKeyAll]))
     }
 
     // MARK: Private
 
     /// Perform an aggregate action.
-    private func _aggregate<D>(_ aggregate: Model.Database.Query.Key, as type: D.Type = D.self) -> Future<D>
+    private func _aggregate<D>(_ aggregate: Database.QueryKey, as type: D.Type = D.self) -> Future<D>
         where D: Decodable
     {
         // this should be the only key, or else there may be issues
-        query.fluentKeys = [aggregate]
+        Database.queryKeyApply(aggregate, to: &query)
 
         // decode the result
         var result: D? = nil
-        return decode(AggregateResult<D>.self).run(.fluentRead) { row in
+        return decode(AggregateResult<D>.self).run(Database.queryActionRead) { row in
             result = row.fluentAggregate
         }.map {
             guard let result = result else {

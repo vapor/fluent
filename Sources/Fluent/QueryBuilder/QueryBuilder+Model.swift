@@ -44,7 +44,7 @@ extension QueryBuilder {
                 return Model.Database.modelEvent(event: .willCreate, model: copy, on: conn).flatMap { model in
                     return try model.willCreate(on: conn)
                 }.flatMap { model -> Future<Model> in
-                    self.query.fluentData = try Model.Database.queryEncode(model, entity: Model.entity)
+                    try Database.queryDataApply(Database.queryEncode(model, entity: Model.entity), to: &self.query)
                     return self.create(data: model).transform(to: model)
                 }.flatMap { model in
                     return Model.Database.modelEvent(event: .didCreate, model: model, on: conn)
@@ -124,7 +124,7 @@ extension QueryBuilder {
             return Model.Database.modelEvent(event: .willDelete, model: model,on: conn).flatMap { model in
                 return try model.willDelete(on: conn)
             }.flatMap { model in
-                return self.run(.fluentDelete)
+                return self.run(Database.queryActionDelete)
             }
         }
     }

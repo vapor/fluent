@@ -73,7 +73,7 @@ extension QueryBuilder {
 
     /// Replaces the query result handler with the supplied closure.
     static func make(on conn: Future<Model.Database.Connection>, with transformer: @escaping (Model.Database.Output, Model.Database.Connection) -> Future<Result>) -> QueryBuilder<Model, Result> {
-        return .init(query: .fluentQuery(Model.entity), on: conn) { row, conn in
+        return .init(query: Database.query(Model.entity), on: conn) { row, conn in
             return transformer(row, conn)
         }
     }

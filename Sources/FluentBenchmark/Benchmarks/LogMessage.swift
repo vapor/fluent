@@ -35,7 +35,7 @@ public final class LogMessage<D>: Model where D: QuerySupporting {
     }
 }
 
-internal struct LogMessageMigration<D>: Migration where D: QuerySupporting & SQLDatabase {
+internal struct LogMessageMigration<D>: Migration where D: QuerySupporting & SQLSupporting {
     typealias Database = D
 
     static func prepare(on connection: D.Connection) -> Future<Void> {

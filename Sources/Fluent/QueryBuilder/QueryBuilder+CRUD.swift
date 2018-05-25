@@ -12,7 +12,7 @@ extension QueryBuilder {
     ///     - data: Encodable data to create.
     /// - returns: A `Future` that will be completed when the create is done.
     public func create<E>(data: E) -> Future<Void> where E: Encodable {
-        return crud(.fluentCreate, data)
+        return crud(Database.queryActionCreate, data)
     }
 
     /// Performs an `update` action on the database with the supplied data.
@@ -26,15 +26,15 @@ extension QueryBuilder {
     ///     - data: Encodable data to update.
     /// - returns: A `Future` that will be completed when the update is done.
     public func update<E>(data: E) -> Future<Void> where E: Encodable {
-        return crud(.fluentUpdate, data)
+        return crud(Database.queryActionUpdate, data)
     }
 
     // MARK: Private
 
     /// Internal CRUD implementation.
-    private func crud<E>(_ action: Model.Database.Query.Action, _ data: E) -> Future<Void> where E: Encodable {
+    private func crud<E>(_ action: Database.QueryAction, _ data: E) -> Future<Void> where E: Encodable {
         return connection.flatMap { conn in
-            self.query.fluentData = try Model.Database.queryEncode(data, entity: Model.entity)
+            try Database.queryDataApply(Database.queryEncode(data, entity: Model.entity), to: &self.query)
             return self.run(action)
         }
     }

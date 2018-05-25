@@ -6,11 +6,11 @@ extension QueryBuilder {
     ///     let users = try User.query(on: conn).sort(\.name, .ascending)
     ///
     /// - parameters:
-    ///     - field: Swift `KeyPath` to field on model to sort.
+    ///     - key: Swift `KeyPath` to field on model to sort.
     ///     - direction: Direction to sort the fields, ascending or descending.
     /// - returns: Query builder for chaining.
-    public func sort<T>(_ field: KeyPath<Model, T>, _ direction: Model.Database.Query.Sort.Direction = .fluentAscending) -> Self {
-        return sort(.fluentSort(.keyPath(field), direction))
+    public func sort<T>(_ key: KeyPath<Model, T>, _ direction: Database.QuerySortDirection = Database.querySortDirectionAscending) -> Self {
+        return sort(Database.querySort(Model.Database.queryField(.keyPath(key)), direction))
     }
 
     /// Adds a custom sort to the query builder.
@@ -18,8 +18,8 @@ extension QueryBuilder {
     /// - parameters:
     ///     - sort: Custom sort to add.
     /// - returns: Query builder for chaining.
-    public func sort(_ sort: Model.Database.Query.Sort) -> Self {
-        query.fluentSorts.append(sort)
+    public func sort(_ sort: Database.QuerySort) -> Self {
+        Database.querySortApply(sort, to: &query)
         return self
     }
 }
