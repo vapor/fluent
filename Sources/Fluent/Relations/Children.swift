@@ -10,19 +10,28 @@ public struct Children<Parent, Child>
     /// Reference to the parent's ID
     public var parent: Parent
 
+    enum ParentIDStorage {
+        case optional(WritableKeyPath<Child, Parent.ID?>)
+        case required(WritableKeyPath<Child, Parent.ID>)
+    }
+
     /// Reference to the foreign key on t(he child.
-    private var foreignParentField: Child.Database.QueryField
+    internal var parentID: ParentIDStorage
 
     /// Creates a new children relationship.
-    fileprivate init(parent: Parent, foreignParentField: Child.Database.QueryField) {
+    fileprivate init(parent: Parent, parentID: ParentIDStorage) {
         self.parent = parent
-        self.foreignParentField = foreignParentField
+        self.parentID = parentID
     }
 
     /// Create a query for all children.
     public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Child, Child> {
-        return try Child.query(on: conn)
-            .filter(foreignParentField, Child.Database.queryFilterMethodEqual, parent.requireID())
+        let builder = Child.query(on: conn)
+        switch parentID {
+        case .optional(let parentID): try builder.filter(parentID == parent.requireID())
+        case .required(let parentID): try builder.filter(parentID == parent.requireID())
+        }
+        return builder
     }
 }
 
@@ -33,25 +42,15 @@ extension Model {
     ///
     /// The `foreignField` should refer to the field
     /// on the child entity that contains the parent's ID.
-    public func children<Child>(_ parentForeignIDKey: WritableKeyPath<Child, Self.ID>) -> Children<Self, Child> {
-        return Children(
-            parent: self,
-            foreignParentField: Child.Database.queryField(
-                .keyPath(any: parentForeignIDKey, rootType: Child.self, valueType: Self.ID.self)
-            )
-        )
+    public func children<Child>(_ parentID: WritableKeyPath<Child, Self.ID>) -> Children<Self, Child> {
+        return Children(parent: self, parentID: .required(parentID))
     }
 
     /// Create a children relation for this model.
     ///
     /// The `foreignField` should refer to the field
     /// on the child entity that contains the parent's ID.
-    public func children<Child>(_ parentForeignIDKey: WritableKeyPath<Child, Self.ID?>) -> Children<Self, Child> {
-        return Children(
-            parent: self,
-            foreignParentField: Child.Database.queryField(
-                .keyPath(any: parentForeignIDKey, rootType: Child.self, valueType: Self.ID?.self)
-            )
-        )
+    public func children<Child>(_ parentID: WritableKeyPath<Child, Self.ID?>) -> Children<Self, Child> {
+        return Children(parent: self, parentID: .optional(parentID))
     }
 }
