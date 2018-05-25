@@ -90,6 +90,8 @@ public protocol QuerySupporting: Database {
     /// Encoded by `queryEncode(...)` method on `QuerySupporting`.
     associatedtype QueryData
 
+    static func queryDataSet(_ field: QueryField, to data: Encodable, on query: inout Query)
+
     static func queryDataApply(_ data: QueryData, to query: inout Query)
 
     // MARK: Field

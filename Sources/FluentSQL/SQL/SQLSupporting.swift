@@ -80,8 +80,12 @@ extension SQLSupporting {
 // MARK: Data
 
 extension SQLSupporting where Query == DataManipulationQuery, QueryData == [DataManipulationColumn] {
-    public static func queryDataApply(_ columns: [DataManipulationColumn], to query: inout Query) {
+    public static func queryDataApply(_ columns: [DataManipulationColumn], to query: inout DataManipulationQuery) {
         query.columns = columns
+    }
+
+    public static func queryDataSet(_ field: DataColumn, to data: Encodable, on query: inout DataManipulationQuery) {
+        query.columns.append(.init(column: field, value: .bind(data)))
     }
 }
 

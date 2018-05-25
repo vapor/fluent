@@ -30,7 +30,15 @@ extension QueryBuilder {
     ///
     /// - returns: A `Future` that will be completed when the delete is done.
     public func delete() -> Future<Void> {
-        return run(Database.queryActionDelete)
+        if let softDeletable = Model.self as? AnySoftDeletable.Type {
+            let field: Database.QueryField = Model.Database.queryField(
+                .keyPath(any: softDeletable.fluentDeletedAtKey, rootType: Model.self, valueType: Date?.self)
+            )
+            Database.queryDataSet(field, to: Date?.none, on: &query)
+            return run(Database.queryActionUpdate)
+        } else {
+            return run(Database.queryActionDelete)
+        }
     }
 
     /// Convenience for chunking model results.
