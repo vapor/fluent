@@ -1,8 +1,6 @@
 /// A schema builder specifically for creating
 /// new tables and collections.
-public final class SchemaCreator<Model>: SchemaBuilder
-    where Model: Fluent.Model, Model.Database: SQLSupporting
-{
+public final class SchemaCreator<Model>: SchemaBuilder where Model: Fluent.Model, Model.Database: SQLSupporting {
     /// See `SchemaBuilder`.
     public var schema: DataDefinitionQuery
 

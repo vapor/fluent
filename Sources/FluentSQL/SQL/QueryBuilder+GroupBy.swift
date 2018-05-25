@@ -1,6 +1,4 @@
-extension QueryBuilder
-    where Model.Database: SQLSupporting, Model.Database.Query == DataManipulationQuery, Model.Database.QueryField == DataColumn
-{
+extension QueryBuilder where Model.Database: SQLSupporting {
     // MARK: Group By
 
     /// Adds a group by to the query builder.

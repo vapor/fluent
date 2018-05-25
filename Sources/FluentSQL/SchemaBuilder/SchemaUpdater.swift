@@ -1,7 +1,5 @@
 /// Updates schemas, capable of deleting fields.
-public final class SchemaUpdater<Model>: SchemaBuilder
-    where Model: Fluent.Model, Model.Database: SQLSupporting, Model.Database.QueryField == DataColumn
-{
+public final class SchemaUpdater<Model>: SchemaBuilder where Model: Fluent.Model, Model.Database: SQLSupporting {
     /// See `SchemaBuilder`.
     public var schema: DataDefinitionQuery
 

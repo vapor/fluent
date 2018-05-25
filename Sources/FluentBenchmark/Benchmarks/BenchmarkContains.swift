@@ -1,4 +1,4 @@
-extension Benchmarker where Database: QuerySupporting, Database.QueryFilterMethod == DataPredicateComparison {
+extension Benchmarker where Database: SQLSupporting {
     /// The actual benchmark.
     fileprivate func _benchmark(on conn: Database.Connection) throws {
         // create
@@ -43,9 +43,7 @@ extension Benchmarker where Database: QuerySupporting, Database.QueryFilterMetho
         try self._benchmark(on: conn)
         pool.releaseConnection(conn)
     }
-}
 
-extension Benchmarker where Database: SQLSupporting, Database.QueryFilterMethod == DataPredicateComparison {
     /// Benchmark fluent contains. The schema will be prepared first.
     public func benchmarkContains_withSchema() throws {
         let conn = try test(pool.requestConnection())
