@@ -85,7 +85,13 @@ extension QueryBuilder {
             result = row.fluentAggregate
         }.map {
             guard let result = result else {
-                throw FluentError(identifier: "aggregate", reason: "The driver closed successfully without a result")
+                throw FluentError(
+                    identifier: "aggregate",
+                    reason: "The driver closed successfully without a result",
+                    suggestedFixes: [
+                        "Check the result set count using `count()` before requesting an aggregate."
+                    ]
+                )
             }
             return result
         }

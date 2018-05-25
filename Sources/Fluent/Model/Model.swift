@@ -64,6 +64,12 @@ public protocol Model: AnyModel, Reflectable {
     ///     - conn: Current database connection.
     func didCreate(on conn: Database.Connection) throws -> Future<Self>
 
+    /// Called before a model is fetched.
+    /// - note: Throwing will cancel the fetch.
+    /// - parameters:
+    ///     - conn: Current database connection.
+    func willRead(on conn: Database.Connection)  throws -> Future<Self>
+
     /// Called before a model is updated when saving.
     /// - note: Throwing will cancel the save.
     /// - parameters:
@@ -74,17 +80,37 @@ public protocol Model: AnyModel, Reflectable {
     ///     - conn: Current database connection.
     func didUpdate(on conn: Database.Connection) throws -> Future<Self>
 
-    /// Called before a model is fetched.
-    /// - note: Throwing will cancel the fetch.
-    /// - parameters:
-    ///     - conn: Current database connection.
-    func willRead(on conn: Database.Connection)  throws -> Future<Self>
-
     /// Called before a model is deleted.
     /// - note: Throwing will cancel the delete.
     /// - parameters:
     ///     - conn: Current database connection.
     func willDelete(on conn: Database.Connection) throws -> Future<Self>
+    /// Called after the model is deleted.
+    /// - parameters:
+    ///     - conn: Current database connection.
+    func didDelete(on conn: Database.Connection) throws -> Future<Self>
+
+
+    /// Called before a model is restored (from being soft deleted).
+    /// - note: Throwing will cancel the restore.
+    /// - parameters:
+    ///     - conn: Current database connection.
+    func willRestore(on conn: Database.Connection) throws -> Future<Self>
+    /// Called after the model is restored (from being soft deleted.
+    /// - parameters:
+    ///     - conn: Current database connection.
+    func didRestore(on conn: Database.Connection) throws -> Future<Self>
+
+
+    /// Called before a model is soft deleted.
+    /// - note: Throwing will cancel the soft delete.
+    /// - parameters:
+    ///     - conn: Current database connection.
+    func willSoftDelete(on conn: Database.Connection) throws -> Future<Self>
+    /// Called after the model is soft deleted.
+    /// - parameters:
+    ///     - conn: Current database connection.
+    func didSoftDelete(on conn: Database.Connection) throws -> Future<Self>
 }
 
 // MARK: Optional
@@ -92,31 +118,52 @@ public protocol Model: AnyModel, Reflectable {
 extension Model {
     /// See `Model`.
     public func willCreate(on conn: Database.Connection) throws -> Future<Self> {
-        return conn.eventLoop.newSucceededFuture(result: self)
+        return conn.future(self)
     }
 
     /// See `Model`.
     public func didCreate(on conn: Database.Connection) throws -> Future<Self> {
-        return conn.eventLoop.newSucceededFuture(result: self)
+        return conn.future(self)
     }
 
     /// See `Model`.
     public func willUpdate(on conn: Database.Connection) throws -> Future<Self> {
-        return conn.eventLoop.newSucceededFuture(result: self)
+        return conn.future(self)
     }
     /// See `Model`.
     public func didUpdate(on conn: Database.Connection) throws -> Future<Self> {
-        return conn.eventLoop.newSucceededFuture(result: self)
+        return conn.future(self)
     }
 
     /// See `Model`.
     public func willRead(on conn: Database.Connection) throws -> Future<Self> {
-        return conn.eventLoop.newSucceededFuture(result: self)
+        return conn.future(self)
     }
 
     /// See `Model`.
     public func willDelete(on conn: Database.Connection) throws -> Future<Self> {
-        return conn.eventLoop.newSucceededFuture(result: self)
+        return conn.future(self)
+    }
+    /// See `Model`.
+    public func didDelete(on conn: Database.Connection) throws -> Future<Self> {
+        return conn.future(self)
+    }
+
+    /// See `Model`.
+    public func willRestore(on conn: Database.Connection) throws -> Future<Self> {
+        return conn.future(self)
+    }
+    /// See `Model`.
+    public func didRestore(on conn: Database.Connection) throws -> Future<Self> {
+        return conn.future(self)
+    }
+    /// See `Model`.
+    public func willSoftDelete(on conn: Database.Connection) throws -> Future<Self> {
+        return conn.future(self)
+    }
+    /// See `Model`.
+    public func didSoftDelete(on conn: Database.Connection) throws -> Future<Self> {
+        return conn.future(self)
     }
 }
 

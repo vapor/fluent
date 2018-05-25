@@ -74,9 +74,16 @@ extension Model where Self: SoftDeletable, Database: QuerySupporting {
     ///     - conn: Used to fetch a database connection.
     /// - returns: A future that will return the succesfully restored model.
     public func restore(on conn: DatabaseConnectable) -> Future<Self> {
-        var copy = self
-        copy.fluentDeletedAt = nil
-        return query(on: conn).withSoftDeleted().update(copy)
+        let builder = query(on: conn)
+        return builder.connection.flatMap { conn in
+            return try self.willRestore(on: conn).flatMap { model -> Future<Self> in
+                var copy = model
+                copy.fluentDeletedAt = nil
+                return builder.withSoftDeleted().update(copy)
+            }.flatMap { model in
+                return try model.didRestore(on: conn)
+            }
+        }
     }
 }
 

@@ -25,6 +25,7 @@ public final class MigrateCommand: Command, Service {
             }
         } else {
             logger.info("No migrations configured.")
+            return .done(on: container)
         }
     }
 
