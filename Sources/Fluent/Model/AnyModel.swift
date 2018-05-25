@@ -12,11 +12,11 @@ public protocol AnyModel: Codable {
 extension AnyModel {
     /// See `AnyModel`.
     public static var name: String {
-        return "\(Self.self)".lowercased()
+        return "\(Self.self)"
     }
 
     /// See `AnyModel`.
     public static var entity: String {
-        return name + "s"
+        return name
     }
 }
