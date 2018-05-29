@@ -81,7 +81,7 @@ public struct MigrationConfig: Service {
         Model: Fluent.Model,
         Model.Database: SchemaSupporting & QuerySupporting
     {
-        self.add(migration: Model.self, database: database)
+        self.add(migration: Model.self, database: database, name: name)
         Model.defaultDatabase = database
     }
 
@@ -107,7 +107,7 @@ public struct MigrationConfig: Service {
         Model: Fluent.Model,
         Model.Database: QuerySupporting
     {
-        self.add(migration: Model.self, database: database)
+        self.add(migration: Model.self, database: database, name: name)
         Model.defaultDatabase = database
     }
 
