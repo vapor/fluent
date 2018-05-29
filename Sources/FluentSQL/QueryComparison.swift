@@ -70,7 +70,7 @@ extension QueryFilterValue {
 public func ~= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
     where Model.Database.QueryFilter: DataPredicateComparisonConvertible
 {
-    return try _contains(lhs, .like, .data("%\(rhs)"))
+    return try _contains(lhs, .like, .data("%" + rhs))
 }
 
 infix operator =~
@@ -78,7 +78,7 @@ infix operator =~
 public func =~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
     where Model.Database.QueryFilter: DataPredicateComparisonConvertible
 {
-    return try _contains(lhs, .like, .data("\(rhs)%"))
+    return try _contains(lhs, .like, .data(rhs + "%"))
 }
 
 infix operator ~~
@@ -86,7 +86,7 @@ infix operator ~~
 public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
     where Model.Database.QueryFilter: DataPredicateComparisonConvertible
 {
-    return try _contains(lhs, .like, .data("%\(rhs)%"))
+    return try _contains(lhs, .like, .data("%" + rhs + "%"))
 }
 
 /// Operator helper func.

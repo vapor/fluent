@@ -79,7 +79,7 @@ extension Model {
 extension Model {
     /// See Model.name
     public static var name: String {
-        return "\(Self.self)".lowercased()
+        return String(describing: Self.self).lowercased()
     }
 
     /// See Model.entity
