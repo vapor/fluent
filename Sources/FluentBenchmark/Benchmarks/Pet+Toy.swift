@@ -3,13 +3,7 @@ import Fluent
 import Foundation
 
 /// A pivot between pet and toy.
-public final class PetToy<D>: ModifiablePivot where D: QuerySupporting {
-    /// See Model.database
-    public typealias Database = D
-
-    /// See Model.ID
-    public typealias ID = UUID
-
+public final class PetToy<Database>: ModifiablePivot where Database: QuerySupporting {
     /// See Pivot.Left
     public typealias Left = Pet<Database>
 
@@ -17,18 +11,13 @@ public final class PetToy<D>: ModifiablePivot where D: QuerySupporting {
     public typealias Right = Toy<Database>
 
     /// See Model.idKey
-    public static var idKey: IDKey { return \.id }
+    public static var idKey: WritableKeyPath<PetToy<Database>, UUID?> { return \.id }
 
     /// See Pivot.leftIDKey
-    public static var leftIDKey: LeftIDKey { return \.petID }
+    public static var leftIDKey: WritableKeyPath<PetToy<Database>, UUID> { return \.petID }
 
     /// See Pivot.rightIDKey
-    public static var rightIDKey: RightIDKey { return \.toyID }
-
-    /// See Model.database
-    public static var database: DatabaseIdentifier<D> {
-        return .init("test")
-    }
+    public static var rightIDKey: WritableKeyPath<PetToy<Database>, UUID> { return \.toyID }
 
     /// PetToy's identifier
     var id: UUID?
@@ -46,10 +35,7 @@ public final class PetToy<D>: ModifiablePivot where D: QuerySupporting {
     }
 }
 
-internal struct PetToyMigration<D>: Migration where D: QuerySupporting & SQLSupporting {
-    /// See Migration.database
-    typealias Database = D
-
+internal struct PetToyMigration<Database>: Migration where Database: QuerySupporting & SQLSupporting {
     /// See Migration.prepare
     static func prepare(on connection: Database.Connection) -> Future<Void> {
         return Database.create(PetToy<Database>.self, on: connection) { builder in

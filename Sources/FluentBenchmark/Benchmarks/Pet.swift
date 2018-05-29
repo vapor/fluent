@@ -2,32 +2,21 @@ import Async
 import Fluent
 import Foundation
 
-public final class Pet<D>: Model where D: QuerySupporting {
-    /// See Model.Database
-    public typealias Database = D
-
-    /// See Model.ID
-    public typealias ID = UUID
-
-    /// See Model.name
-    public static var name: String {
-        return "pet"
-    }
-
+public final class Pet<Database>: Model where Database: QuerySupporting {
     /// See Model.idKey
-    public static var idKey: IDKey { return \.id }
+    public static var idKey: WritableKeyPath<Pet<Database>, UUID?> { return \.id }
 
     /// Foo's identifier
-    var id: ID?
+    var id: UUID?
 
     /// Name string
     var name: String
 
     /// Age int
-    var ownerID: User<Database>.ID?
+    var ownerID: UUID?
 
     /// Creates a new `Pet`
-    init(id: ID? = nil, name: String, ownerID: User<Database>.ID?) {
+    init(id: UUID? = nil, name: String, ownerID: UUID?) {
         self.id = id
         self.name = name
         self.ownerID = ownerID
@@ -43,7 +32,7 @@ extension Pet {
     }
 }
 
-extension Pet where D: JoinSupporting {
+extension Pet where Database: JoinSupporting {
     /// A relation to this pet's toys.
     var toys: Siblings<Pet, Toy<Database>, PetToy<Database>> {
         return siblings()
@@ -52,12 +41,12 @@ extension Pet where D: JoinSupporting {
 
 // MARK: Migration
 
-extension Pet: Migration, AnyMigration where D: SQLSupporting {
+extension Pet: Migration, AnyMigration where Database: SQLSupporting {
     /// See `Migration.prepare(on:)`
     public static func prepare(on connection: Database.Connection) -> Future<Void> {
         return Database.create(self, on: connection) { builder in
             try addProperties(to: builder)
-            builder.foreignKey(from: \.ownerID, to: \User<D>.id)
+            builder.foreignKey(from: \.ownerID, to: \User<Database>.id)
         }
     }
 }
