@@ -53,7 +53,7 @@ extension Model where Database: QuerySupporting {
 
 /// MARK: Future + CRUD
 
-extension Future where T: Model, T.Database: QuerySupporting {
+extension Future where T: Model {
     /// See `Model`.
     public func save(on connectable: DatabaseConnectable) -> Future<T> {
         return self.flatMap(to: T.self) { (model) in

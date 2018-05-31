@@ -21,9 +21,13 @@
 ///         }
 ///     }
 ///
+/// ## Query
+///
 /// To create a `QueryBuilder` for a model, use the `query(on:)` method.
 ///
 ///     let users = try User.query(on: req).filter(\.name == "Vapor").all()
+///
+/// ## Lifecycle
 ///
 /// Models can also implement optional lifecycle methods to hook into Fluent actions.
 ///
@@ -35,11 +39,26 @@
 ///         }
 ///     }
 ///
+/// ## Timestamps
+///
+/// Stores timestamps representing when this model was first created and when it was last updated.
+/// Fluent automatically updates these timestamps whenever changes to the database are made.
+///
+///     final class User: Model {
+///         static let createdAtKey: TimestampKey? = \User.createdAt
+///         static let updatedAtKey: TimestampKey? = \User.updatedAt
+///         ...
+///         var createdAt: Date?
+///         var updatedAt: Date?
+///     }
+///
+/// Add timestamp keys allows Fluent to automatically update the values when interacting with your models.
+/// You can set key paths for one or both of the keys per model.
 public protocol Model: AnyModel, Reflectable {
     // MARK: DB
 
     /// The type of database this model can be queried on.
-    associatedtype Database: Fluent.Database
+    associatedtype Database: QuerySupporting
 
     // MARK: ID
 
@@ -51,6 +70,19 @@ public protocol Model: AnyModel, Reflectable {
 
     /// Swift `KeyPath` to this `Model`'s identifier.
     static var idKey: IDKey { get }
+    
+    // MARK: Timestamps
+    
+    /// Timestamp key.
+    typealias TimestampKey = WritableKeyPath<Self, Date?>
+    
+    /// The date at which this model was created.
+    /// `nil` if the model has not been created yet.
+    static var createdAtKey: TimestampKey? { get }
+    
+    /// The date at which this model was last updated.
+    /// `nil` if the model has not been created yet.
+    static var updatedAtKey: TimestampKey? { get }
 
     // MARK: Lifecycle
 
@@ -89,28 +121,6 @@ public protocol Model: AnyModel, Reflectable {
     /// - parameters:
     ///     - conn: Current database connection.
     func didDelete(on conn: Database.Connection) throws -> Future<Self>
-
-
-    /// Called before a model is restored (from being soft deleted).
-    /// - note: Throwing will cancel the restore.
-    /// - parameters:
-    ///     - conn: Current database connection.
-    func willRestore(on conn: Database.Connection) throws -> Future<Self>
-    /// Called after the model is restored (from being soft deleted.
-    /// - parameters:
-    ///     - conn: Current database connection.
-    func didRestore(on conn: Database.Connection) throws -> Future<Self>
-
-
-    /// Called before a model is soft deleted.
-    /// - note: Throwing will cancel the soft delete.
-    /// - parameters:
-    ///     - conn: Current database connection.
-    func willSoftDelete(on conn: Database.Connection) throws -> Future<Self>
-    /// Called after the model is soft deleted.
-    /// - parameters:
-    ///     - conn: Current database connection.
-    func didSoftDelete(on conn: Database.Connection) throws -> Future<Self>
 }
 
 // MARK: Optional
@@ -148,26 +158,19 @@ extension Model {
     public func didDelete(on conn: Database.Connection) throws -> Future<Self> {
         return conn.future(self)
     }
-
-    /// See `Model`.
-    public func willRestore(on conn: Database.Connection) throws -> Future<Self> {
-        return conn.future(self)
+    
+    /// See `Timestampable`.
+    public static var createdAtKey: WritableKeyPath<Self, Date?>? {
+        return nil
     }
-    /// See `Model`.
-    public func didRestore(on conn: Database.Connection) throws -> Future<Self> {
-        return conn.future(self)
-    }
-    /// See `Model`.
-    public func willSoftDelete(on conn: Database.Connection) throws -> Future<Self> {
-        return conn.future(self)
-    }
-    /// See `Model`.
-    public func didSoftDelete(on conn: Database.Connection) throws -> Future<Self> {
-        return conn.future(self)
+    
+    /// See `Timestampable`.
+    public static var updatedAtKey: WritableKeyPath<Self, Date?>? {
+        return nil
     }
 }
 
-/// MARK: ID
+/// MARK: Key Access
 
 extension Model {
     /// Returns the model's ID, throwing an error if the model does not yet have an ID.
@@ -190,6 +193,38 @@ extension Model {
             self[keyPath: path] = newValue
         }
     }
+    
+    /// See `Model`.
+    public var fluentCreatedAt: Date? {
+        get {
+            guard let createdAt = Self.createdAtKey else {
+                return nil
+            }
+            return self[keyPath: createdAt]
+        }
+        set {
+            guard let createdAt = Self.createdAtKey else {
+                return
+            }
+            self[keyPath: createdAt] = newValue
+        }
+    }
+    
+    /// See `Model`.
+    public var fluentUpdatedAt: Date? {
+        get {
+            guard let updatedAt = Self.updatedAtKey else {
+                return nil
+            }
+            return self[keyPath: updatedAt]
+        }
+        set {
+            guard let updatedAt = Self.updatedAtKey else {
+                return
+            }
+            self[keyPath: updatedAt] = newValue
+        }
+    }
 }
 
 // MARK: Query
@@ -201,7 +236,7 @@ extension Model where Database: QuerySupporting {
     ///
     /// - parameters:
     ///     - conn: Something `DatabaseConnectable` to create the `QueryBuilder` on.
-    public func query(on conn: DatabaseConnectable) -> QueryBuilder<Self, Self> {
+    public func query(on conn: DatabaseConnectable) -> QueryBuilder<Self.Database, Self> {
         return Self.query(on: conn)
     }
 
@@ -211,7 +246,7 @@ extension Model where Database: QuerySupporting {
     ///
     /// - parameters:
     ///     - conn: Something `DatabaseConnectable` to create the `QueryBuilder` on.
-    public static func query(on conn: DatabaseConnectable) -> QueryBuilder<Self, Self> {
+    public static func query(on conn: DatabaseConnectable) -> QueryBuilder<Self.Database, Self> {
         return query(on: conn.databaseConnection(to: Self.defaultDatabase))
     }
 
@@ -226,19 +261,10 @@ extension Model where Database: QuerySupporting {
         return query(on: conn).filter(idKey == id).first()
     }
 
-    /// Creates a `QueryBuilder` for this model, decoding some non-model decodable type as the result.
-    static func query<D>(decoding type: D.Type, on connection: Future<Self.Database.Connection>) -> QueryBuilder<Self, D> where D: Decodable {
-        return .make(on: connection) { row, conn in
-            return Future.map(on: conn) {
-                return try Self.Database.queryDecode(row, entity: entity, as: D.self)
-            }
-        }
-    }
-
     /// Creates a `QueryBuilder` for this model, decoding instances of this model as the result.
-    static func query(on connection: Future<Self.Database.Connection>) -> QueryBuilder<Self, Self> {
-        return query(decoding: Self.self, on: connection).transformResult { row, conn, result in
-            return Self.Database.modelEvent(event: .willRead, model: result, on: conn).flatMap(to: Self.self) { model in
+    static func query(on connection: Future<Self.Database.Connection>) -> QueryBuilder<Self.Database, Self> {
+        return QueryBuilder<Self.Database, Self.Database.Output>.raw(entity: Self.entity, on: connection).decode(Self.self).transformResult { row, conn, result in
+            return Self.Database.modelEvent(event: .willRead, model: result, on: conn).flatMap { model -> Future<Self> in
                 return try model.willRead(on: conn)
             }
         }

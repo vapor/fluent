@@ -49,7 +49,7 @@ extension Pet: Migration, AnyMigration where Database: SQLSupporting {
     public static func prepare(on connection: Database.Connection) -> Future<Void> {
         return Database.create(self, on: connection) { builder in
             try addProperties(to: builder)
-            builder.foreignKey(from: \.ownerID, to: \User<Database>.id)
+            builder.foreignKey(from: \.ownerID, to: \User<Database>.id, onDelete: .setNull)
         }
     }
 }

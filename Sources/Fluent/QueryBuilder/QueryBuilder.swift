@@ -4,64 +4,64 @@
 /// for user in users {
 ///     let pets = user.pet.fetch(from: cache)
 /// }
-
-public struct EagerLoadRequest<Model>
-    where Model: Fluent.Model, Model.Database: QuerySupporting
-{
-    let closure: ([Model.ID], Model.Database.Connection) -> Future<Void>
-}
-
-public final class EagerLoadCache<Model>
-    where Model: Fluent.Model, Model.Database: QuerySupporting
-{
-    var data: [Model]
-    init() {
-        self.data = []
-    }
-}
-
-public struct EagerLoad<A, B> where A: Model, B: Model, A.Database: QuerySupporting, B.Database: QuerySupporting {
-    public let request: EagerLoadRequest<A>
-    public let cache: EagerLoadCache<B>
-}
-
-extension Model {
-    public static func eagerLoad<Child>(children parentID: KeyPath<Child, Self.ID?>) -> EagerLoad<Self, Child>
-        where Child: Model, Child.Database == Database, Child.ID: Hashable
-    {
-        let cache: EagerLoadCache<Child> = .init()
-        let req: EagerLoadRequest<Self> = .init { ids, conn in
-            return Child.query(on: conn).filter(parentID ~~ ids).all().map { rows -> Void in
-                cache.data = rows
-            }
-        }
-        return .init(request: req, cache: cache)
-    }
-}
-
-extension QueryBuilder where Model == Result {
-    public func all(eagerLoading: EagerLoadRequest<Model>...) -> Future<[Model]> {
-        return connection.flatMap { conn in
-            return self.all().flatMap { rows in
-                let ids: [Model.ID] = try rows.map { try $0.requireID() }
-                return eagerLoading.map { $0.closure(ids, conn) }
-                    .flatten(on: conn)
-                    .transform(to: rows)
-            }
-        }
-    }
-}
-
-extension Children {
-    public func get(from cache: EagerLoadCache<Child>) throws -> [Child] {
-        return try cache.data.filter  { child in
-            switch parentID {
-            case .optional(let parentID): return try child[keyPath: parentID] == parent.requireID()
-            case .required(let parentID): return try child[keyPath: parentID] == parent.requireID()
-            }
-        }
-    }
-}
+//
+//public struct EagerLoadRequest<Model>
+//    where Model: Fluent.Model, Model.Database: QuerySupporting
+//{
+//    let closure: ([Model.ID], Model.Database.Connection) -> Future<Void>
+//}
+//
+//public final class EagerLoadCache<Model>
+//    where Model: Fluent.Model, Model.Database: QuerySupporting
+//{
+//    var data: [Model]
+//    init() {
+//        self.data = []
+//    }
+//}
+//
+//public struct EagerLoad<A, B> where A: Model, B: Model, A.Database: QuerySupporting, B.Database: QuerySupporting {
+//    public let request: EagerLoadRequest<A>
+//    public let cache: EagerLoadCache<B>
+//}
+//
+//extension Model {
+//    public static func eagerLoad<Child>(children parentID: KeyPath<Child, Self.ID?>) -> EagerLoad<Self, Child>
+//        where Child: Model, Child.Database == Database, Child.ID: Hashable
+//    {
+//        let cache: EagerLoadCache<Child> = .init()
+//        let req: EagerLoadRequest<Self> = .init { ids, conn in
+//            return Child.query(on: conn).filter(parentID ~~ ids).all().map { rows -> Void in
+//                cache.data = rows
+//            }
+//        }
+//        return .init(request: req, cache: cache)
+//    }
+//}
+//
+//extension QueryBuilder where Model == Result {
+//    public func all(eagerLoading: EagerLoadRequest<Model>...) -> Future<[Model]> {
+//        return connection.flatMap { conn in
+//            return self.all().flatMap { rows in
+//                let ids: [Model.ID] = try rows.map { try $0.requireID() }
+//                return eagerLoading.map { $0.closure(ids, conn) }
+//                    .flatten(on: conn)
+//                    .transform(to: rows)
+//            }
+//        }
+//    }
+//}
+//
+//extension Children {
+//    public func get(from cache: EagerLoadCache<Child>) throws -> [Child] {
+//        return try cache.data.filter  { child in
+//            switch parentID {
+//            case .optional(let parentID): return try child[keyPath: parentID] == parent.requireID()
+//            case .required(let parentID): return try child[keyPath: parentID] == parent.requireID()
+//            }
+//        }
+//    }
+//}
 
 /// Helper for constructing and executing `DatabaseQuery`s.
 ///
@@ -87,35 +87,26 @@ extension Children {
 ///         .all()
 ///     print(joined) // Future<[(User, Pet)]>
 ///
-public final class QueryBuilder<Model, Result>
-    where Model: Fluent.Model, Model.Database: QuerySupporting
-{
-    /// Convenience type to access model database.
-    public typealias Database = Model.Database
-
+public final class QueryBuilder<Database, Result> where Database: QuerySupporting {
     /// The `DatabaseQuery` being built.
-    public var query: Model.Database.Query
+    public var query: Database.Query
 
     /// The connection this query will be excuted on.
     /// - warning: Avoid using the connection manually.
-    public let connection: Future<Model.Database.Connection>
+    public let connection: Future<Database.Connection>
 
     /// Current result transformation.
-    internal var resultTransformer: (Model.Database.Output, Model.Database.Connection) -> Future<Result>
-
-    /// If `true`, soft deleted models will be included.
-    internal var shouldIncludeSoftDeleted: Bool
+    internal var resultTransformer: (Database.Output, Database.Connection) -> Future<Result>
 
     /// Create a new `QueryBuilder`.
     /// Use `Model.query(on:)` instead.
     internal init(
-        query: Model.Database.Query,
-        on connection: Future<Model.Database.Connection>,
-        resultTransformer: @escaping (Model.Database.Output, Model.Database.Connection) -> Future<Result>
+        query: Database.Query,
+        on connection: Future<Database.Connection>,
+        resultTransformer: @escaping (Database.Output, Database.Connection) -> Future<Result>
     ) {
         self.query = query
         self.connection = connection
         self.resultTransformer = resultTransformer
-        self.shouldIncludeSoftDeleted = false
     }
 }

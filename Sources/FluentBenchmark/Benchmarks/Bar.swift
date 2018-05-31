@@ -1,6 +1,6 @@
 import FluentSQL
 
-struct Bar<Database>: Model, SoftDeletable, Timestampable where Database: QuerySupporting {
+struct Bar<Database>: Model, SoftDeletable where Database: QuerySupporting {
     /// See Model.ID
     typealias ID = UUID
 
@@ -11,12 +11,12 @@ struct Bar<Database>: Model, SoftDeletable, Timestampable where Database: QueryS
     static var idKey: IDKey { return \.id }
 
     /// See `Timestampable.createdAtKey`
-    static var createdAtKey: CreatedAtKey {
+    static var createdAtKey: TimestampKey? {
         return \.createdAt
     }
 
     /// See `Timestampable.updatedAtKey`
-    static var updatedAtKey: UpdatedAtKey {
+    static var updatedAtKey: TimestampKey? {
         return \.updatedAt
     }
 

@@ -32,7 +32,13 @@ extension Benchmarker where Database: JoinSupporting & QuerySupporting {
 
         let originalID = tanner.id
         tanner.id = UUID() // change id
-        tanner = try test(tanner.update(on: conn, originalID: originalID))
+        do {
+            tanner = try tanner.update(on: conn, originalID: originalID).wait()
+            self.fail("should have failed")
+        } catch {
+            // failed
+        }
+        tanner.id = originalID
 
         count = try test(tanner.pets.query(on: conn).count())
         if count != 1 {

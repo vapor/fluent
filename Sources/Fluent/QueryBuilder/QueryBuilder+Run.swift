@@ -30,15 +30,7 @@ extension QueryBuilder {
     ///
     /// - returns: A `Future` that will be completed when the delete is done.
     public func delete() -> Future<Void> {
-        if let softDeletable = Model.self as? AnySoftDeletable.Type {
-            let field: Database.QueryField = Model.Database.queryField(
-                .keyPath(any: softDeletable.fluentDeletedAtKey, rootType: Model.self, valueType: Date?.self)
-            )
-            Database.queryDataSet(field, to: Date?.none, on: &query)
-            return run(Database.queryActionUpdate)
-        } else {
-            return run(Database.queryActionDelete)
-        }
+        return run(Database.queryActionDelete)
     }
 
     /// Convenience for chunking model results.
@@ -83,24 +75,12 @@ extension QueryBuilder {
         // replace action
         Database.queryActionApply(action, to: &query)
 
-        /// if the model is soft deletable, and soft deleted
-        /// models were not requested, then exclude them
-        if let type = Model.self as? AnySoftDeletable.Type, !shouldIncludeSoftDeleted, !Database.queryActionIsCreate(action) {
-            let field: Database.QueryField = Model.Database.queryField(
-                .keyPath(any: type.fluentDeletedAtKey, rootType: Model.self, valueType: Date?.self)
-            )
-            group(Database.queryFilterRelationOr) { or in
-                or.filter(field, Database.queryFilterMethodEqual, Date?.none)
-                or.filter(field, Database.queryFilterMethodGreaterThan, Date())
-            }
-        }
-
         let q = self.query
         let resultTransformer = self.resultTransformer
         return connection.flatMap(to: Void.self) { conn in
             let promise = conn.eventLoop.newPromise(Void.self)
 
-            Model.Database.queryExecute(q, on: conn) { row, conn in
+            Database.queryExecute(q, on: conn) { row, conn in
                 resultTransformer(row, conn).map { result in
                     return try handler(result)
                 }.catch { error in

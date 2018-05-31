@@ -34,7 +34,7 @@ extension QueryBuilder {
     /// Internal CRUD implementation.
     private func crud<E>(_ action: Database.QueryAction, _ data: E) -> Future<Void> where E: Encodable {
         return connection.flatMap { conn in
-            try Database.queryDataApply(Database.queryEncode(data, entity: Model.entity), to: &self.query)
+            try Database.queryDataApply(Database.queryEncode(data, entity: Database.queryEntity(for: self.query)), to: &self.query)
             return self.run(action)
         }
     }

@@ -64,7 +64,7 @@ public struct Siblings<Base, Related, Through>
 
 extension Siblings where Base.Database: QuerySupporting {
     /// Creates a `QueryBuilder` for the `Related` model.
-    public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Related, Related> {
+    public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Base.Database, Related> {
         return try Related.query(on: conn)
             .join(relatedPivotField, to: Related.idKey)
             .filter(basePivotField == base.requireID())
@@ -75,7 +75,7 @@ extension Siblings where Base.Database: QuerySupporting {
     ///     cat.toys.pivots(on: ...).filter(\.isFavorite == false).delete()
     ///
     /// See also the `detachAll(on:)` method.
-    public func pivots(on conn: DatabaseConnectable) throws -> QueryBuilder<Through, Through> {
+    public func pivots(on conn: DatabaseConnectable) throws -> QueryBuilder<Base.Database, Through> {
         return try Through.query(on: conn)
             .filter(basePivotField == base.requireID())
     }

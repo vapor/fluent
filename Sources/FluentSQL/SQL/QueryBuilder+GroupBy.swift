@@ -1,4 +1,4 @@
-extension QueryBuilder where Model.Database: SQLSupporting {
+extension QueryBuilder where Database: SQLSupporting {
     // MARK: Group By
 
     /// Adds a group by to the query builder.
@@ -8,7 +8,7 @@ extension QueryBuilder where Model.Database: SQLSupporting {
     /// - parameters:
     ///     - field: Swift `KeyPath` to field on model to group by.
     /// - returns: Query builder for chaining.
-    public func groupBy<T>(_ field: KeyPath<Model, T>) -> Self {
+    public func groupBy<T>(_ field: KeyPath<Result, T>) -> Self {
         return groupBy(.column(Database.queryField(.keyPath(field))))
     }
 

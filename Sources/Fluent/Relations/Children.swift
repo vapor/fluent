@@ -5,7 +5,7 @@
 ///
 /// The opposite side of this relation is called `Parent`.
 public struct Children<Parent, Child>
-    where Parent: Model, Child: Model, Parent.Database == Child.Database, Parent.Database: QuerySupporting
+    where Parent: Model, Child: Model, Parent.Database == Child.Database
 {
     /// Reference to the parent's ID
     public var parent: Parent
@@ -25,7 +25,7 @@ public struct Children<Parent, Child>
     }
 
     /// Create a query for all children.
-    public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Child, Child> {
+    public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Child.Database, Child> {
         let builder = Child.query(on: conn)
         switch parentID {
         case .optional(let parentID): try builder.filter(parentID == parent.requireID())

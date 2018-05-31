@@ -24,6 +24,20 @@ extension SchemaBuilder {
     }
 }
 
+extension Model {
+    /// - warning: Deprecated.
+    @available(*, deprecated, renamed: "TimestampKey")
+    public typealias CreatedAtKey = TimestampKey
+    
+    /// - warning: Deprecated.
+    @available(*, deprecated, renamed: "TimestampKey")
+    public typealias UpdatedAtKey = TimestampKey
+}
+
+@available(*, deprecated, renamed: "Model")
+public protocol Timestampable { }
+
+
 extension SchemaBuilder {
     /// - warning: Deprecated.
     @available(*, deprecated, renamed: "unique(on:)")

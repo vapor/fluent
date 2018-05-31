@@ -19,7 +19,7 @@ extension Benchmarker where Database: JoinSupporting & QuerySupporting {
             fail("pet count \(pets.count) != 1")
         }
 
-        let owners = try test(User<Database>.query(on: conn).join(\Pet<Database>.ownerID, to: \User.id).all())
+        let owners = try test(User<Database>.query(on: conn).join(\Pet<Database>.ownerID, to: \.id).all())
         if owners.count != 1 {
             fail("owner count \(owners.count) != 1")
         }

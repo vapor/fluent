@@ -15,34 +15,34 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
         }
 
         bar = try test(bar.save(on: conn))
+        if try test(Bar<Database>.query(on: conn).excludeSoftDeleted().count()) != 1 {
+            fail("count should have been 1")
+        }
         if try test(Bar<Database>.query(on: conn).count()) != 1 {
             fail("count should have been 1")
         }
-        if try test(Bar<Database>.query(on: conn).withSoftDeleted().count()) != 1 {
-            fail("count should have been 1")
-        }
 
-        try test(bar.delete(on: conn))
-        if try test(Bar<Database>.query(on: conn).count()) != 0 {
+        try test(bar.softDelete(on: conn))
+        if try test(Bar<Database>.query(on: conn).excludeSoftDeleted().count()) != 0 {
             fail("count should have been 0")
         }
-        if try test(Bar<Database>.query(on: conn).withSoftDeleted().count()) != 1 {
+        if try test(Bar<Database>.query(on: conn).count()) != 1 {
             fail("count should have been 1")
         }
 
         bar = try test(bar.restore(on: conn))
+        if try test(Bar<Database>.query(on: conn).excludeSoftDeleted().count()) != 1 {
+            fail("count should have been 1")
+        }
         if try test(Bar<Database>.query(on: conn).count()) != 1 {
             fail("count should have been 1")
         }
-        if try test(Bar<Database>.query(on: conn).withSoftDeleted().count()) != 1 {
-            fail("count should have been 1")
-        }
 
-        try test(bar.forceDelete(on: conn))
-        if try test(Bar<Database>.query(on: conn).count()) != 0 {
+        try test(bar.delete(on: conn))
+        if try test(Bar<Database>.query(on: conn).excludeSoftDeleted().count()) != 0 {
             fail("count should have been 0")
         }
-        if try test(Bar<Database>.query(on: conn).withSoftDeleted().count()) != 0 {
+        if try test(Bar<Database>.query(on: conn).count()) != 0 {
             fail("count should have been 0")
         }
     }

@@ -9,8 +9,8 @@ extension QueryBuilder {
     ///     - key: Swift `KeyPath` to field on model to sort.
     ///     - direction: Direction to sort the fields, ascending or descending.
     /// - returns: Query builder for chaining.
-    public func sort<T>(_ key: KeyPath<Model, T>, _ direction: Database.QuerySortDirection = Database.querySortDirectionAscending) -> Self {
-        return sort(Database.querySort(Model.Database.queryField(.keyPath(key)), direction))
+    public func sort<T>(_ key: KeyPath<Result, T>, _ direction: Database.QuerySortDirection = Database.querySortDirectionAscending) -> Self {
+        return sort(Database.querySort(Database.queryField(.keyPath(key)), direction))
     }
 
     /// Adds a custom sort to the query builder.

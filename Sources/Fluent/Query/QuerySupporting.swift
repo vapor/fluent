@@ -5,6 +5,9 @@ public protocol QuerySupporting: Database {
 
     /// Creates a new instance of self using the supplied entity `String`.
     static func query(_ entity: String) -> Query
+    
+    /// Returns the entity for this query
+    static func queryEntity(for query: Query) -> String
 
     /// Type returned by this query when reading data. Result set type.
     /// Decoded by `queryDecode(...)` method on `QuerySupporting`.

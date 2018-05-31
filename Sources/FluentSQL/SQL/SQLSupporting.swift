@@ -84,6 +84,10 @@ extension SQLSupporting {
     public static func query(_ entity: String) -> DataManipulationQuery {
         return .init(table: entity)
     }
+    
+    public static func queryEntity(for query: DataManipulationQuery) -> String {
+        return query.table
+    }
 
     // MARK: Data
 
@@ -263,8 +267,8 @@ extension SchemaBuilder {
     }
 }
 
-extension QueryBuilder where Model.Database: SQLSupporting {
-    public func customSQL(_ closure: (inout Model.Database.Query) -> ()) -> Self {
+extension QueryBuilder where Database: SQLSupporting {
+    public func customSQL(_ closure: (inout Database.Query) -> ()) -> Self {
         closure(&query)
         return self
     }

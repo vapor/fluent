@@ -2,7 +2,7 @@
 /// This information is used to determine which migrations need to be run
 /// when the app boots. It is also used to determine which migrations to revert when
 /// using the `RevertCommand`.
-public final class MigrationLog<Database>: Model, Timestampable where Database: Fluent.Database {
+public final class MigrationLog<Database>: Model where Database: QuerySupporting {
     /// See `Model`.
     public typealias ID = UUID
 
@@ -13,10 +13,10 @@ public final class MigrationLog<Database>: Model, Timestampable where Database: 
     public static var idKey: IDKey { return \.id }
 
     /// See `Timestampable`.
-    public static var createdAtKey: CreatedAtKey { return \.createdAt }
+    public static var createdAtKey: TimestampKey? { return \.createdAt }
 
     /// See `Timestampable`.
-    public static var updatedAtKey: UpdatedAtKey { return \.updatedAt }
+    public static var updatedAtKey: TimestampKey? { return \.updatedAt }
 
     /// See `Model`.
     public var id: UUID?

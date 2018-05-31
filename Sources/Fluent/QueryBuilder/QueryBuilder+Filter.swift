@@ -13,7 +13,7 @@ extension QueryBuilder {
     ///     - value: Value to filter by.
     /// - returns: Query builder for chaining.
     @discardableResult
-    public func filter<T>(_ key: KeyPath<Model, T>, _ method: Model.Database.QueryFilterMethod, _ value: T) -> Self
+    public func filter<T>(_ key: KeyPath<Result, T>, _ method: Database.QueryFilterMethod, _ value: T) -> Self
         where T: Encodable
     {
         if value.isNil {
@@ -37,9 +37,7 @@ extension QueryBuilder {
     ///     - value: Value to filter by.
     /// - returns: Query builder for chaining.
     @discardableResult
-    public func filter<A, T>(_ key: KeyPath<A, T>, _ method: Model.Database.QueryFilterMethod, _ value: Encodable) -> Self
-        where A: Fluent.Model, A.Database == Model.Database
-    {
+    public func filter<A, T>(_ key: KeyPath<A, T>, _ method: Database.QueryFilterMethod, _ value: Encodable) -> Self {
         if value.isNil {
             return filter(Database.queryField(.keyPath(key)), method, Database.queryFilterValueNil)
         } else {
@@ -59,7 +57,7 @@ extension QueryBuilder {
     ///     - value: Value to filter by.
     /// - returns: Query builder for chaining.
     @discardableResult
-    public func filter(_ field: Model.Database.QueryField, _ method: Model.Database.QueryFilterMethod, _ value: Encodable) -> Self {
+    public func filter(_ field: Database.QueryField, _ method: Database.QueryFilterMethod, _ value: Encodable) -> Self {
         if value.isNil {
             return filter(field, method, Database.queryFilterValueNil)
         } else {
@@ -79,14 +77,14 @@ extension QueryBuilder {
     ///     - value: Value to filter by.
     /// - returns: Query builder for chaining.
     @discardableResult
-    private func filter(_ field: Model.Database.QueryField, _ method: Model.Database.QueryFilterMethod, _ value: Model.Database.QueryFilterValue) -> Self {
+    private func filter(_ field: Database.QueryField, _ method: Database.QueryFilterMethod, _ value: Database.QueryFilterValue) -> Self {
         return filter(Database.queryFilter(field, method, value))
     }
 
     /// Add a manually created filter to the query builder.
     /// - returns: Query builder for chaining.
     @discardableResult
-    public func filter(_ filter: Model.Database.QueryFilter) -> Self {
+    public func filter(_ filter: Database.QueryFilter) -> Self {
         Database.queryFilterApply(filter, to: &query)
         return self
     }
@@ -105,10 +103,10 @@ extension QueryBuilder {
     ///     - closure: A sub-query builder to use for adding grouped filters.
     /// - returns: Query builder for chaining.
     @discardableResult
-    public func group(_ relation: Model.Database.QueryFilterRelation, closure: @escaping (QueryBuilder<Model, Result>) throws -> ()) rethrows -> Self {
+    public func group(_ relation: Database.QueryFilterRelation, closure: @escaping (QueryBuilder<Database, Result>) throws -> ()) rethrows -> Self {
         // switch this query builder to an empty query, saving the main query
         let main = query
-        query = Database.query(Model.entity)
+        query = Database.query(Database.queryEntity(for: query))
 
         // run
         try closure(self)

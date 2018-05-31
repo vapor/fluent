@@ -8,7 +8,7 @@ extension QueryBuilder {
     /// - parameters:
     ///     - field: Field to sum.
     /// - returns: A `Future` containing the sum.
-    public func sum<T>(_ field: KeyPath<Model, T>) -> Future<T> where T: Decodable {
+    public func sum<T>(_ field: KeyPath<Result, T>) -> Future<T> where T: Decodable {
         return aggregate(Database.queryAggregateSum, field: field)
     }
 
@@ -19,7 +19,7 @@ extension QueryBuilder {
     /// - parameters:
     ///     - field: Field to average.
     /// - returns: A `Future` containing the average.
-    public func average<T>(_ field: KeyPath<Model, T>) -> Future<T> where T: Decodable {
+    public func average<T>(_ field: KeyPath<Result, T>) -> Future<T> where T: Decodable {
         return aggregate(Database.queryAggregateAverage, field: field)
     }
 
@@ -30,7 +30,7 @@ extension QueryBuilder {
     /// - parameters:
     ///     - field: Field to find min for.
     /// - returns: A `Future` containing the min.
-    public func min<T>(_ field: KeyPath<Model, T>) -> Future<T> where T: Decodable {
+    public func min<T>(_ field: KeyPath<Result, T>) -> Future<T> where T: Decodable {
         return aggregate(Database.queryAggregateMinimum, field: field)
     }
 
@@ -41,7 +41,7 @@ extension QueryBuilder {
     /// - parameters:
     ///     - field: Field to find max for.
     /// - returns: A `Future` containing the max.
-    public func max<T>(_ field: KeyPath<Model, T>) -> Future<T> where T: Decodable {
+    public func max<T>(_ field: KeyPath<Result, T>) -> Future<T> where T: Decodable {
         return aggregate(Database.queryAggregateMaximum, field: field)
     }
 
@@ -55,7 +55,7 @@ extension QueryBuilder {
     ///     - field: Field to find max for.
     ///     - type: `Decodable` type to decode the aggregate value as.
     /// - returns: A `Future` containing the aggregate.
-    public func aggregate<D, T>(_ method: Database.QueryAggregate, field: KeyPath<Model, T>, as type: D.Type = D.self) -> Future<D>
+    public func aggregate<D, T>(_ method: Database.QueryAggregate, field: KeyPath<Result, T>, as type: D.Type = D.self) -> Future<D>
         where D: Decodable
     {
         return _aggregate(Database.queryAggregate(method, [Database.queryKey(Database.queryField(.keyPath(field)))]))
@@ -81,7 +81,7 @@ extension QueryBuilder {
 
         // decode the result
         var result: D? = nil
-        return decode(AggregateResult<D>.self).run(Database.queryActionRead) { row in
+        return decode(AggregateResult<D>.self, at: Database.queryEntity(for: query)).run(Database.queryActionRead) { row in
             result = row.fluentAggregate
         }.map {
             guard let result = result else {

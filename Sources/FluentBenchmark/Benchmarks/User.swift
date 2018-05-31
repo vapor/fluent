@@ -2,7 +2,7 @@ import Async
 import Fluent
 import Foundation
 
-public final class User<D>: Model, Timestampable where D: QuerySupporting {
+public final class User<D>: Model where D: QuerySupporting {
     /// See Model.Database
     public typealias Database = D
 
@@ -13,10 +13,10 @@ public final class User<D>: Model, Timestampable where D: QuerySupporting {
     public static var idKey: IDKey { return \.id }
 
     /// See Timestampable.createdAtKey
-    public static var createdAtKey: CreatedAtKey { return \.createdAt }
+    public static var createdAtKey: TimestampKey? { return \.createdAt }
 
     /// See Timestampable.updatedAtKey
-    public static var updatedAtKey: UpdatedAtKey { return \.updatedAt }
+    public static var updatedAtKey: TimestampKey? { return \.updatedAt }
 
     /// See Model.name
     public static var entity: String {
