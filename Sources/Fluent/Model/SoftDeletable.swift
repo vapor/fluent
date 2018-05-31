@@ -171,8 +171,7 @@ extension QueryBuilder where Result: SoftDeletable, Result.Database == Database 
     ///
     /// - returns: A future that will complete when the query has finished.
     public func softDelete() -> Future<Void> {
-        let field: Database.QueryField = Database.queryField(.keyPath(Result.deletedAtKey))
-        Database.queryDataSet(field, to: Date?.none, on: &query)
+        Database.queryDataSet(Database.queryField(.keyPath(Result.deletedAtKey)), to: Date?.none, on: &query)
         return run(Database.queryActionUpdate)
     }
     

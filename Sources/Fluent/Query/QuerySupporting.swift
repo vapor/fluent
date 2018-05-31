@@ -3,10 +3,18 @@ public protocol QuerySupporting: Database {
     /// Associated `Query` type. Instances of this type will be supplied to `queryExecute(...)`.
     associatedtype Query
 
-    /// Creates a new instance of self using the supplied entity `String`.
+    /// Creates a new instance of `Query` using the supplied entity `String`. The resulting
+    /// query will be stored on the `QueryBuilder` and modified via the other methods on this protocol
+    ///
+    /// - parameters:
+    ///     - entity: Table / collection name to query.
     static func query(_ entity: String) -> Query
     
-    /// Returns the entity for this query
+    /// Returns the entity for the supplied query. Fluent will use this method to help filter decode
+    /// results and to create copies of the query builder.
+    ///
+    /// - parameters:
+    ///     - query: Query to return entity for.
     static func queryEntity(for query: Query) -> String
 
     /// Type returned by this query when reading data. Result set type.
@@ -18,12 +26,13 @@ public protocol QuerySupporting: Database {
     ///
     /// - parameters:
     ///     - query: Query to execute.
-    ///     - handler: Handles query output.
     ///     - conn: Database connection to use.
+    ///     - handler: Handles query output.
     /// - returns: A future that will complete when the query has finished.
     static func queryExecute(_ query: Query, on conn: Connection, into handler: @escaping (Output, Connection) throws -> ()) -> Future<Void>
 
-    /// Decodes a decodable type `D` from this database's output.
+    /// Decodes a decodable type `D` from this database's output. This method will be used by Fluent to
+    /// convert database output into usable types as determined by the `QueryBuilder` result transformation pipeline.
     ///
     /// - parameters:
     ///     - output: Query output to decode.
@@ -33,7 +42,8 @@ public protocol QuerySupporting: Database {
     static func queryDecode<D>(_ output: Output, entity: String, as decodable: D.Type) throws -> D
         where D: Decodable
 
-    /// Encodes an encodable object into this database's input.
+    /// Encodes an encodable object into this database's input. This will be used by Fluent to encode types
+    /// supplied by the user into an appropriate format for storing on the Query. See `queryDataApply(...)`.
     ///
     /// - parameters:
     ///     - encodable: Item to encode.
@@ -44,6 +54,12 @@ public protocol QuerySupporting: Database {
 
     /// This method will be called by Fluent during `Model` lifecycle events.
     /// This gives the database a chance to interact with the model before Fluent encodes it.
+    ///
+    /// - parameters:
+    ///     - event: Specific `ModelEvent` taking place.
+    ///     - model: The instance of `Model` that is undergoing the event.
+    ///     - conn: Database connection to use.
+    /// - returns: A potentially updated copy of the `Model`.
     static func modelEvent<M>(event: ModelEvent, model: M, on conn: Connection) -> Future<M>
         where M: Model, M.Database == Self
 
@@ -52,11 +68,29 @@ public protocol QuerySupporting: Database {
     /// Specific query type, usually create, read, update, delete.
     associatedtype QueryAction
 
+    /// Appropriate `QueryAction` for creating data.
     static var queryActionCreate: QueryAction { get }
+
+    /// Appropriate `QueryAction` for reading data.
     static var queryActionRead: QueryAction { get }
+    
+    /// Appropriate `QueryAction` for updating data.
     static var queryActionUpdate: QueryAction { get }
+    
+    /// Appropriate `QueryAction` for deleting data.
     static var queryActionDelete: QueryAction { get }
+    
+    /// Returns `true` if the supplied `QueryAction` is for creating data.
+    ///
+    /// - parameters:
+    ///     - action: `QueryAction` in question.
     static func queryActionIsCreate(_ action: QueryAction) -> Bool
+    
+    /// Applies a new `QueryAction` to the supplied, mutable query.
+    ///
+    /// - parameters:
+    ///     - action: New `QueryAction` to set on the query.
+    ///     - query: Mutable `Query` to update with the new query action.
     static func queryActionApply(_ action: QueryAction, to query: inout Query)
 
     // MARK: Aggregate
@@ -93,14 +127,30 @@ public protocol QuerySupporting: Database {
     /// Encoded by `queryEncode(...)` method on `QuerySupporting`.
     associatedtype QueryData
 
+    /// Sets a singular field / value pair on the supplied query.
+    ///
+    /// - parameters:
+    ///     - field: Field in the data to update.
+    ///     - data: New encodable data to set.
+    ///     - query: Mutable query to set the new data to.
     static func queryDataSet(_ field: QueryField, to data: Encodable, on query: inout Query)
 
+    /// Updates the query's input data to the supplied value.
+    ///
+    /// - parameters:
+    ///     - data: New input data to set on the query.
+    ///     - query: Mutable query to update with the new input data.
     static func queryDataApply(_ data: QueryData, to query: inout Query)
 
     // MARK: Field
 
+    /// Associated query field type. Query fields represent a single property on a model.
     associatedtype QueryField
 
+    /// Creates an instance of `QueryField` from a `FluentProperty`.
+    ///
+    /// - paramters:
+    ///     - property: `FluentProperty` struct to use.
     static func queryField(_ property: FluentProperty) -> QueryField
 
     // MARK: Filter
@@ -136,6 +186,9 @@ public protocol QuerySupporting: Database {
     associatedtype QueryFilterValue
 
     /// One or more bound values.
+    ///
+    /// - parameters:
+    ///     - encodables: Array of `Encodable` items to convert to filter bind values.
     static func queryFilterValue(_ encodables: [Encodable]) -> QueryFilterValue
 
     /// Indicates a `nil` filter value.
@@ -144,7 +197,7 @@ public protocol QuerySupporting: Database {
     /// Nestable query filter type.
     associatedtype QueryFilter
 
-    /// Creates an instance of self from a field method and value.
+    /// Creates an instance of `QueryFilter` from a field method and value.
     ///
     /// - parameters:
     ///     - field: Field to filter.
@@ -152,8 +205,17 @@ public protocol QuerySupporting: Database {
     ///     - value: Value type.
     static func queryFilter(_ field: QueryField, _ method: QueryFilterMethod, _ value: QueryFilterValue) -> QueryFilter
 
+    /// Returns all of the query's filters.
+    ///
+    /// - parameters:
+    ///     - query: Query to return filters for.
     static func queryFilters(for query: Query) -> [QueryFilter]
 
+    /// Applies an instance of `QueryFilter` to the mutable query.
+    ///
+    /// - parameters:
+    ///     - filter: New filter to apply.
+    ///     - query: Mutable query to apply the new filter to.
     static func queryFilterApply(_ filter: QueryFilter, to query: inout Query)
 
     /// Associated filter group relation type. Describes how filters can be related.
@@ -165,7 +227,7 @@ public protocol QuerySupporting: Database {
     /// ||
     static var queryFilterRelationOr: QueryFilterRelation { get }
 
-    /// Creates an instance of self from a relation and an array of other filters.
+    /// Creates an instance of `QueryFilter` from a relation and an array of other filters.
     ///
     /// - parameters:
     ///     - relation: How to relate the grouped filters.
@@ -188,8 +250,18 @@ public protocol QuerySupporting: Database {
     ///     - field: Keys to aggregate. Can be zero.
     static func queryAggregate(_ aggregate: QueryAggregate, _ fields: [QueryKey]) -> QueryKey
 
+    /// Creates a new `QueryKey` from an existing `QueryField`.
+    ///
+    /// - parameters:
+    ///     - field: `QueryField` to use for creating the `QueryKey`.
+    /// - returns: Newly created `QueryKey`.
     static func queryKey(_ field: QueryField) -> QueryKey
 
+    /// Applies a new `QueryKey` to the mutable `Query`.
+    ///
+    /// - parameters:
+    ///     - key: New `QueryKey` to apply.
+    ///     - query: Mutable `Query` to apply the new `QueryKey` to.
     static func queryKeyApply(_ key: QueryKey, to query: inout Query)
 
     // MARK: Range
@@ -203,10 +275,30 @@ public protocol QuerySupporting: Database {
 
     // MARK: Sort
 
+    /// Associated sort data structure.
     associatedtype QuerySort
+    
+    /// Associated sort direction data structure.
     associatedtype QuerySortDirection
+    
+    /// Creates a new `QuerySort` from a field and direction.
+    ///
+    /// - parameters:
+    ///     - field: `QueryField` to sort.
+    ///     - direction: `QuerySortDirection` to sort the field in.
+    /// - returns: Newly created `QuerySort` type.
     static func querySort(_ field: QueryField, _ direction: QuerySortDirection) -> QuerySort
+    
+    /// Represents an ascending sorted `QuerySortDirection`.
     static var querySortDirectionAscending: QuerySortDirection { get }
+    
+    /// Represents a descending sorted `QuerySortDirection`.
     static var querySortDirectionDescending: QuerySortDirection { get }
+    
+    /// Applies a new `QuerySort` to the mutable `Query`.
+    ///
+    /// - parameters:
+    ///     - sort: New `QuerySort` to apply.
+    ///     - query: Mutable `Query` to apply the sort to.
     static func querySortApply(_ sort: QuerySort, to query: inout Query)
 }
