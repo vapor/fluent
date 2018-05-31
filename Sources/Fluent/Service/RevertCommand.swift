@@ -11,15 +11,15 @@
 ///     swift run Run revert
 ///
 public final class RevertCommand: Command, Service {
-    /// See `Command.arguments`
+    /// See `Command`.
     public var arguments: [CommandArgument] { return [] }
 
-    /// See `Command.options`
+    /// See `Command`.
     public var options: [CommandOption] { return [
         CommandOption.flag(name: "all", short: "a", help: ["Reverts all migrations, not just the latest batch."])
     ]}
 
-    /// See `Command.help`
+    /// See `Command`.
     public var help: [String] { return [
         "Reverts migrations that have been previously prepared.",
         "By default, only the latest batch of migrations will be reverted."
@@ -28,7 +28,7 @@ public final class RevertCommand: Command, Service {
     /// Creates a new `RevertCommand`
     public init() {}
 
-    /// See `Command.run(using:)`
+    /// See `Command`.
     public func run(using context: CommandContext) throws -> Future<Void> {
         let migrations = try context.container.make(MigrationConfig.self)
         let logger = try context.container.make(Logger.self)
