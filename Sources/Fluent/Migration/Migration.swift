@@ -23,11 +23,11 @@ public protocol Migration {
 
 extension Model where Database: SchemaSupporting {
     /// Automatically adds `SchemaField`s for each of this `Model`s properties.
-    public static func addProperties(to builder: SchemaCreator<Self>) throws {
+    public static func addProperties(to builder: SchemaCreator<Self>, excluding excludedProperties: [[String]] = []) throws {
         guard let idProperty = try Self.reflectProperty(forKey: idKey) else {
             throw FluentError(identifier: "idProperty", reason: "Unable to reflect ID property for \(Self.self).", source: .capture())
         }
-        let properties = try Self.reflectProperties()
+        let properties = try Self.reflectProperties().filter { !excludedProperties.contains($0.path) }
 
         for property in properties {
             guard property.path.count == 1 else {
