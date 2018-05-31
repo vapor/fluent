@@ -10,7 +10,7 @@ extension QueryBuilder where Result: Model, Result.Database == Database {
     /// - parameters:
     ///     - model: `Model` to save.
     /// - returns: A `Future` containing the saved `Model`.
-    public func save(_ model: Result) -> Future<Result> {
+    internal func save(_ model: Result) -> Future<Result> {
         if model.fluentID != nil {
             return update(model)
         } else {
@@ -27,7 +27,7 @@ extension QueryBuilder where Result: Model, Result.Database == Database {
     /// - parameters:
     ///     - model: `Model` to create.
     /// - returns: A `Future` containing the created `Model`.
-    public func create(_ model: Result) -> Future<Result> {
+    internal func create(_ model: Result) -> Future<Result> {
         var copy: Result
         if Result.createdAtKey != nil || Result.updatedAtKey != nil {
             // set timestamps
@@ -64,7 +64,7 @@ extension QueryBuilder where Result: Model, Result.Database == Database {
     ///     - model: `Model` to update.
     ///     - originalID: Specify the original ID if the ID has changed.
     /// - returns: A `Future` containing the created `Model`.
-    public func update(_ model: Result, originalID: Result.ID? = nil) -> Future<Result> {
+    internal func update(_ model: Result, originalID: Result.ID? = nil) -> Future<Result> {
         var copy: Result
         if Result.updatedAtKey != nil {
             // set timestamps
@@ -101,7 +101,7 @@ extension QueryBuilder where Result: Model, Result.Database == Database {
     /// - parameters:
     ///     - model: `Model` to delete.
     /// - returns: A `Future` containing the created `Model`.
-    public func delete(_ model: Result) -> Future<Void> {
+    internal func delete(_ model: Result) -> Future<Void> {
         return connection.flatMap { conn in
             guard let id = model.fluentID else {
                 throw FluentError(identifier: "idRequired", reason: "No ID was set on updated model, it is required for updating.")

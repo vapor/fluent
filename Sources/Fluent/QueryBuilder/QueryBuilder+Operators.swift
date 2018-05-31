@@ -13,7 +13,7 @@ extension QueryBuilder {
     /// Applies a filter from one of the filter operators (==, !=, etc) to a joined model.
     ///
     ///     let usersWithCats = try User.query(on: conn)
-    ///         .join(Pet.self, ...)
+    ///         .join(\Pet.userID, to: \User.id)
     ///         .filter(\Pet.type == .cat)
     ///         .all()
     ///

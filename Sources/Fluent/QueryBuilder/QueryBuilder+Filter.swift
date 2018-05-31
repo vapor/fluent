@@ -4,7 +4,7 @@ extension QueryBuilder {
     /// Applies a filter to this query. Usually you will use the filter operators to do this.
     ///
     ///     let users = try User.query(on: conn)
-    ///         .filter(\.name, .equals, "Vapor")
+    ///         .filter(\.name, .equal, "Vapor")
     ///         .all()
     ///
     /// - parameters:
@@ -27,7 +27,7 @@ extension QueryBuilder {
     ///
     ///     let users = try User.query(on: conn)
     ///         .join(Pet.self, ...)
-    ///         .filter(\Pet.type, .equals, .cat)
+    ///         .filter(\Pet.type, .equal, .cat)
     ///         .all()
     ///
     /// - parameters:
@@ -48,7 +48,7 @@ extension QueryBuilder {
     /// Applies a filter to this query using a custom field. Usually you will use the filter operators to do this.
     ///
     ///     let users = try User.query(on: conn)
-    ///         .filter("name", .equals, "Vapor")
+    ///         .filter("name", .equal, "Vapor")
     ///         .all()
     ///
     /// - parameters:
@@ -68,7 +68,7 @@ extension QueryBuilder {
     /// Applies a filter to this query using a custom field. Usually you will use the filter operators to do this.
     ///
     ///     let users = try User.query(on: conn)
-    ///         .filter("name", .equals, "Vapor")
+    ///         .filter("name", .equal, "Vapor")
     ///         .all()
     ///
     /// - parameters:
@@ -120,6 +120,8 @@ extension QueryBuilder {
         return self
     }
 }
+
+// MARK: Internal
 
 internal extension Encodable {
     /// Returns `true` if this `Encodable` is `nil`.

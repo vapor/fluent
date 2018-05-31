@@ -4,7 +4,7 @@ extension QueryBuilder {
     /// Performs an `create` action on the database with the supplied data.
     ///
     ///     // creates a new User with custom data.
-    ///     User.query(on: conn).create(["name": "Vapor"])
+    ///     User.query(on: conn).create(data: ["name": "Vapor"])
     ///
     /// - warning: This method will not invoke model lifecycle hooks.
     ///
@@ -18,7 +18,7 @@ extension QueryBuilder {
     /// Performs an `update` action on the database with the supplied data.
     ///
     ///     // set all users' names to "Vapor"
-    ///     User.query(on: conn).update(["name": "Vapor"])
+    ///     User.query(on: conn).update(data: ["name": "Vapor"])
     ///
     /// - warning: This method will not invoke model lifecycle hooks.
     ///

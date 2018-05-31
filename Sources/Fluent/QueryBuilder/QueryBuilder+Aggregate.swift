@@ -71,17 +71,24 @@ extension QueryBuilder {
     }
 
     // MARK: Private
+    
+    /// Aggregate result structure expected from DB.
+    private struct AggregateResult<D>: Decodable where D: Decodable {
+        /// Contains the aggregated value.
+        var fluentAggregate: D
+    }
 
     /// Perform an aggregate action.
     private func _aggregate<D>(_ aggregate: Database.QueryKey, as type: D.Type = D.self) -> Future<D>
         where D: Decodable
     {
+        
         // this should be the only key, or else there may be issues
         Database.queryKeyApply(aggregate, to: &query)
 
         // decode the result
         var result: D? = nil
-        return decode(AggregateResult<D>.self, at: Database.queryEntity(for: query)).run(Database.queryActionRead) { row in
+        return decode(AggregateResult<D>.self, Database.queryEntity(for: query)).run(Database.queryActionRead) { row in
             result = row.fluentAggregate
         }.map {
             guard let result = result else {
@@ -96,12 +103,4 @@ extension QueryBuilder {
             return result
         }
     }
-}
-
-// MARK: Private
-
-/// Aggregate result structure expected from DB.
-private struct AggregateResult<D>: Decodable where D: Decodable {
-    /// Contains the aggregated value.
-    var fluentAggregate: D
 }

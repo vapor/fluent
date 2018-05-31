@@ -286,7 +286,7 @@ extension Decodable {
     public static func query<C>(_ entity: String, on conn: C) -> QueryBuilder<C.Database, Self>
         where C: DatabaseConnection
     {
-        return QueryBuilder<C.Database, C.Database.Output>.raw(entity: entity, on: conn.future(conn)).decode(Self.self, at: entity)
+        return QueryBuilder<C.Database, C.Database.Output>.raw(entity: entity, on: conn.future(conn)).decode(Self.self, entity)
     }
 }
 

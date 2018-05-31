@@ -5,7 +5,7 @@ extension QueryBuilder {
     /// The new result for this query will be a tuple containing the previous result and this new result.
     ///
     ///     let joined = try User.query(on: req)
-    ///         .join(Pet.self, field: \.userID, to: \.id)
+    ///         .join(\Pet.userID, to: \User.id)
     ///         .alsoDecode(Pet.self)
     ///         .all()
     ///     print(joined) // Future<[(User, Pet)]>
@@ -14,15 +14,15 @@ extension QueryBuilder {
     ///     - type: New model type `D` to also decode.
     /// - returns: `QueryBuilder` decoding type `(Result, D)`.
     public func alsoDecode<M>(_ type: M.Type) -> QueryBuilder<Database, (Result, M)> where M: Fluent.Model {
-        return alsoDecode(M.self, at: M.entity)
+        return alsoDecode(M.self, M.entity)
     }
 
     /// Adds an additional type `D` to be decoded when run.
     /// The new result for this query will be a tuple containing the previous result and this new result.
     ///
     ///     let joined = try User.query(on: req)
-    ///         .join(Pet.self, field: \.userID, to: \.id)
-    ///         .alsoDecode(PetDetail.self, entity: "pets")
+    ///         .join(\Pet.userID, to: \User.id)
+    ///         .alsoDecode(PetDetail.self, "pets")
     ///         .all()
     ///     print(joined) // Future<[(User, PetDetail)]>
     ///
@@ -30,7 +30,7 @@ extension QueryBuilder {
     ///     - type: New decodable type `D` to also decode.
     ///     - entity: Entity name of this decodable type.
     /// - returns: `QueryBuilder` decoding type `(Result, D)`.
-    public func alsoDecode<D>(_ type: D.Type, at entity: String) -> QueryBuilder<Database, (Result, D)> where D: Decodable {
+    public func alsoDecode<D>(_ type: D.Type, _ entity: String) -> QueryBuilder<Database, (Result, D)> where D: Decodable {
         return transformResult { row, conn, result in
             return Future.map(on: conn) {
                 return try (result, Database.queryDecode(row, entity: entity, as: D.self))
@@ -50,21 +50,21 @@ extension QueryBuilder {
     ///     - type: New decodable type `D` to decode.
     /// - returns: `QueryBuilder` decoding type `D`.
     public func decode<Model>(_ type: Model.Type) -> QueryBuilder<Database, Model> where Model: Fluent.Model {
-        return decode(Model.self, at: Model.entity)
+        return decode(Model.self, Model.entity)
     }
     
     /// Sets the query to decode type `D` when run.
     ///
     ///     let joined = try User.query(on: req)
     ///         .join(Pet.self, field: \.userID, to: \.id)
-    ///         .decode(Pet.self, at: "pets")
+    ///         .decode(Pet.self, "pets")
     ///         .all()
     ///     print(joined) // Future<[Pet]>
     ///
     /// - parameters:
     ///     - type: New decodable type `D` to decode.
     /// - returns: `QueryBuilder` decoding type `D`.
-    public func decode<D>(_ type: D.Type, at entity: String) -> QueryBuilder<Database, D> where D: Decodable {
+    public func decode<D>(_ type: D.Type, _ entity: String) -> QueryBuilder<Database, D> where D: Decodable {
         return changeResult { row, conn in
             return Future.map(on: conn) {
                 return try Database.queryDecode(row, entity: entity, as: D.self)
@@ -73,19 +73,25 @@ extension QueryBuilder {
     }
 
     /// Sets the query to decode raw output from the database when run.
+    ///
+    ///     let raw = try User.query(on: req).decodeRaw().all()
+    ///     print(raw) // Future<[MySQLColumn: MySQLData]>
+    ///
     public func decodeRaw() -> QueryBuilder<Database, Database.Output> {
         return changeResult { output, conn in
             return conn.eventLoop.newSucceededFuture(result: output)
         }
     }
     
-    public static func raw(entity: String, on conn: Future<Database.Connection>) -> QueryBuilder<Database, Database.Output> {
+    // MARK: Internal
+    
+    /// Creates a new `QueryBuilder` decoding raw DB output.
+    static func raw(entity: String, on conn: Future<Database.Connection>) -> QueryBuilder<Database, Database.Output> {
         return .init(query: Database.query(entity), on: conn) { row, conn in
             return conn.future(row)
         }
     }
 
-    // MARK: Internal
 
     /// Replaces the query result handler with the supplied closure.
     func changeResult<NewResult>(with transformer: @escaping (Database.Output, Database.Connection) -> Future<NewResult>) -> QueryBuilder<Database, NewResult> {

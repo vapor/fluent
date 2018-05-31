@@ -181,7 +181,7 @@ extension QueryBuilder where Result: SoftDeletable, Result.Database == Database 
     ///     User.query(on: conn).softDelete(user)
     ///
     /// - returns: A future that will complete when the query has finished.
-    public func softDelete(_ model: Result) -> Future<Void> {
+    internal func softDelete(_ model: Result) -> Future<Void> {
         return connection.flatMap { conn in
             return try model.willSoftDelete(on: conn).flatMap { model -> Future<Result> in
                 var copy = model
