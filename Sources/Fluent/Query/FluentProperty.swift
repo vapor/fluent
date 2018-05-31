@@ -1,4 +1,5 @@
-/// Represents a query property, potentially nested.
+/// Represents a query property, potentially nested. These properties can be created from key paths, coding keys,
+/// and reflected properties. This type is at the root of Fluent's model reflection and keypath-based filtering.
 public struct FluentProperty {
     /// Creates self from a generic `KeyPath`.
     public static func keyPath<R,V>(_ keyPath: KeyPath<R, V>) -> FluentProperty {

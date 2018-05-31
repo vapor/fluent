@@ -1,8 +1,8 @@
 /// Represents a single table / collection in a Fluent database. Models
 /// are the basis for querying databases (create, read, update, and delete).
 ///
-/// Models can also conform to `Migration` to providing prepare and
-/// revert methods for `SchemaSupporting` databases.
+/// Models can also conform to `Migration` to providing prepare and revert methods for performing actions
+/// on the database before the application boots.
 ///
 /// Both `struct`s and `class`es can be models. Since Fluent is closure-based,
 /// copied `struct`s will be returned by any methods that must mutate the model.
@@ -21,28 +21,34 @@
 ///         }
 ///     }
 ///
+/// Most of the time, you should use the Fluent driver's sub-protocols for conforming to `Model` instead of
+/// using the protocol directly.
+///
 /// ## Query
 ///
 /// To create a `QueryBuilder` for a model, use the `query(on:)` method.
 ///
 ///     let users = try User.query(on: req).filter(\.name == "Vapor").all()
 ///
+/// You can also create `QueryBuilder`s for any `Decodable` type. However, `QueryBuilder`s created for `Model`s
+/// have some extra methods and functionality.
+///
 /// ## Lifecycle
 ///
-/// Models can also implement optional lifecycle methods to hook into Fluent actions.
+/// Models can implement optional lifecycle methods to hook into Fluent actions.
 ///
 ///     final class User: Model {
 ///         ...
 ///         func willDelete(on conn: PostgreSQLConnection) throws -> Future<User> {
 ///             print("Deleting user: \(id)")
-///             return conn.eventLoop.newSucceededFuture(result: self)
+///             return conn.future(self)
 ///         }
 ///     }
 ///
 /// ## Timestamps
 ///
-/// Stores timestamps representing when this model was first created and when it was last updated.
-/// Fluent automatically updates these timestamps whenever changes to the database are made.
+/// Models are capable of storing timestamps representing when this model was first created and when it was last updated.
+/// If you decide to store timestamps on your model, Fluent will automatically update them whenever changes to the database are made.
 ///
 ///     final class User: Model {
 ///         static let createdAtKey: TimestampKey? = \User.createdAt
@@ -52,7 +58,7 @@
 ///         var updatedAt: Date?
 ///     }
 ///
-/// Add timestamp keys allows Fluent to automatically update the values when interacting with your models.
+/// Add timestamp keys pointing to the properties on your model to let Fluent automatically update the values.
 /// You can set key paths for one or both of the keys per model.
 public protocol Model: AnyModel, Reflectable {
     // MARK: DB
@@ -76,12 +82,12 @@ public protocol Model: AnyModel, Reflectable {
     /// Timestamp key.
     typealias TimestampKey = WritableKeyPath<Self, Date?>
     
-    /// The date at which this model was created.
-    /// `nil` if the model has not been created yet.
+    /// The date at which this model was created. `nil` if the model has not been created yet.
+    /// By default, Fluent will assume your model does not have a created at key.
     static var createdAtKey: TimestampKey? { get }
     
-    /// The date at which this model was last updated.
-    /// `nil` if the model has not been created yet.
+    /// The date at which this model was last updated. `nil` if the model has not been created yet.
+    /// By default, Fluent will assume your model does not have an updated at key.
     static var updatedAtKey: TimestampKey? { get }
 
     // MARK: Lifecycle
@@ -194,7 +200,7 @@ extension Model {
         }
     }
     
-    /// See `Model`.
+    /// Access the Fluent timestamp keyed by `createdAtKey`.
     public var fluentCreatedAt: Date? {
         get {
             guard let createdAt = Self.createdAtKey else {
@@ -210,7 +216,7 @@ extension Model {
         }
     }
     
-    /// See `Model`.
+    /// Access the Fluent timestamp keyed by `updatedAtKey`.
     public var fluentUpdatedAt: Date? {
         get {
             guard let updatedAt = Self.updatedAtKey else {
@@ -230,22 +236,13 @@ extension Model {
 // MARK: Query
 
 extension Model where Database: QuerySupporting {
-    /// Creates a query for this model on the supplied connection.
-    ///
-    ///     user.query(on: conn).save(user)
-    ///
-    /// - parameters:
-    ///     - conn: Something `DatabaseConnectable` to create the `QueryBuilder` on.
-    public func query(on conn: DatabaseConnectable) -> QueryBuilder<Self.Database, Self> {
-        return Self.query(on: conn)
-    }
-
     /// Creates a query for this model type on the supplied connection.
     ///
     ///     let users = try User.query(on: req).filter(\.name == "Vapor").all()
     ///
     /// - parameters:
     ///     - conn: Something `DatabaseConnectable` to create the `QueryBuilder` on.
+    /// - returns: A new `QueryBuilder` for this model.
     public static func query(on conn: DatabaseConnectable) -> QueryBuilder<Self.Database, Self> {
         return query(on: conn.databaseConnection(to: Self.defaultDatabase))
     }
@@ -257,6 +254,7 @@ extension Model where Database: QuerySupporting {
     /// - parameters:
     ///     - id: ID to lookup.
     ///     - conn: Something `DatabaseConnectable` to create the `QueryBuilder` on.
+    /// - returns: A future containing the model, if found.
     public static func find(_ id: Self.ID, on conn: DatabaseConnectable) -> Future<Self?> {
         return query(on: conn).filter(idKey == id).first()
     }
@@ -271,15 +269,41 @@ extension Model where Database: QuerySupporting {
     }
 }
 
+extension Decodable {
+    /// Creates a `QueryBuilder` for a generic `Decodable` type on a given connection.
+    ///
+    ///     struct User: Codable {
+    ///         var id: Int
+    ///         var name: String
+    ///     }
+    ///
+    ///     try SimpleUser.query("users", on: conn).count()
+    ///
+    /// - parameters:
+    ///     - entity: Entity (table or collection name) to use for the query.
+    ///     - conn: Connection to use.
+    /// - returns: Newly created `QueryBuilder`.
+    public static func query<C>(_ entity: String, on conn: C) -> QueryBuilder<C.Database, Self>
+        where C: DatabaseConnection
+    {
+        return QueryBuilder<C.Database, C.Database.Output>.raw(entity: entity, on: conn.future(conn)).decode(Self.self, at: entity)
+    }
+}
+
 // MARK: Default Database
 
 /// Private static default database storage.
 private var _defaultDatabases: [ObjectIdentifier: Any] = [:]
 
 extension Model {
-    /// This Model's default database. This will be used
-    /// when no database id is passed (for example, on `Model.query(on:)`)
+    /// This Model's default database. This will be used when no database id is passed (for example, on `Model.query(on:)`)
     /// or when it is not possible to pass a database (such as static lookup).
+    ///
+    /// You can set this property manually for each model. This is especially useful if you are not using migrations.
+    ///
+    ///     User.defaultDatabase = .mysql
+    ///
+    /// Make sure to set this property _before_ running any queries using your model.
     public static var defaultDatabase: DatabaseIdentifier<Database>? {
         get { return _defaultDatabases[ObjectIdentifier(Self.self)] as? DatabaseIdentifier<Database> }
         set { _defaultDatabases[ObjectIdentifier(Self.self)] = newValue }
@@ -297,6 +321,8 @@ extension Model {
         return dbid
     }
 }
+
+// Note: The below code is required so that Models can automatically be parameterizable. It's kind of a hack, don't touch it.
 
 // MARK: Routing
 

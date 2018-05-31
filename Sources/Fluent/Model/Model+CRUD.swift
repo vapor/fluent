@@ -11,7 +11,7 @@ extension Model where Database: QuerySupporting {
     ///     - conn: Database connection to use.
     /// - returns: Future containing the saved model.
     public func save(on conn: DatabaseConnectable) -> Future<Self> {
-        return query(on: conn).save(self)
+        return Self.query(on: conn).save(self)
     }
 
     /// Saves this model as a new item in the database.
@@ -24,7 +24,7 @@ extension Model where Database: QuerySupporting {
     ///     - conn: Database connection to use.
     /// - returns: Future containing the created model.
     public func create(on conn: DatabaseConnectable) -> Future<Self> {
-        return query(on: conn).create(self)
+        return Self.query(on: conn).create(self)
     }
 
     /// Updates the model. This requires that the model has its ID set.
@@ -36,7 +36,7 @@ extension Model where Database: QuerySupporting {
     ///     - originalID: Specify the original ID if the ID has changed.
     /// - returns: Future containing the updated model.
     public func update(on conn: DatabaseConnectable, originalID: ID? = nil) -> Future<Self> {
-        return query(on: conn).update(self, originalID: originalID)
+        return Self.query(on: conn).update(self, originalID: originalID)
     }
 
     /// Deletes this model from the database. This requires that the model has its ID set.
@@ -47,7 +47,7 @@ extension Model where Database: QuerySupporting {
     ///     - conn: Database connection to use.
     /// - returns: Future that will be completed when the delete is done.
     public func delete(on conn: DatabaseConnectable) -> Future<Void> {
-        return query(on: conn).delete(self)
+        return Self.query(on: conn).delete(self)
     }
 }
 

@@ -7,7 +7,7 @@ extension Benchmarker where Database: QuerySupporting {
         
         _ = try test(a.save(on: conn))
         _ = try test(b.save(on: conn))
-        var count = try test(conn.query(Foo<Database>.self).count())
+        var count = try test(Foo<Database>.query(on: conn).count())
         if count != 2 {
             self.fail("count should have been 2")
         }
@@ -46,7 +46,7 @@ extension Benchmarker where Database: QuerySupporting {
         }
 
         try test(b.delete(on: conn))
-        count = try test(conn.query(Foo<Database>.self).count())
+        count = try test(Foo<Database>.query(on: conn).count())
         if count != 1 {
             self.fail("count should have been 1")
         }

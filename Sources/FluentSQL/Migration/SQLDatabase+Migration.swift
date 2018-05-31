@@ -16,7 +16,7 @@ private extension MigrationLog where Database: SQLSupporting {
     static func prepareMetadata(on conn: Database.Connection) -> Future<Void> {
         let promise = conn.eventLoop.newPromise(Void.self)
 
-        conn.query(MigrationLog<Database>.self).count().do { count in
+        MigrationLog<Database>.query(on: conn).count().do { count in
             promise.succeed()
         }.catch { err in
             // table needs to be created

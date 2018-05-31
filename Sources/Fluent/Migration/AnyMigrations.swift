@@ -1,7 +1,5 @@
 /// Type-erased container around migration config. Represents something capable of running migrations when supplied a `Container`.
 /// We need this protocol because we lose database type info in our `MigrationConfig` storage.
-///
-/// See `QueryMigrationConfig`.
 internal protocol AnyMigrations {
     /// Prepares a single batch of migrations.
     ///

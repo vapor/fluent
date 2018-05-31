@@ -1,3 +1,5 @@
+/// This file contains all of the logic for running migrations.
+
 /// Internal struct containing migrations for a single database.
 /// - note: This struct is important for maintaining database connection type info.
 internal struct Migrations<Database>: AnyMigrations where Database: MigrationSupporting {
@@ -89,7 +91,7 @@ private extension MigrationLog where Database: QuerySupporting {
 
     /// Returns the latest batch number. Returns 0 if no batches have run yet.
     static func latestBatch(on conn: Database.Connection) throws -> Future<Int> {
-        return conn.query(MigrationLog<Database>.self)
+        return MigrationLog<Database>.query(on: conn)
             .sort(\.batch, Database.querySortDirectionDescending)
             .first()
             .map { $0?.batch ?? 0 }

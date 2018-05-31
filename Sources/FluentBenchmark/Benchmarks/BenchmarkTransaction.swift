@@ -15,7 +15,7 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
             try Database.transactionExecute({ conn -> Future<Void> in
                 let user = User<Database>(name: "User #1", age: 1)
                 return user.save(on: conn).flatMap { _ in
-                    return conn.query(User<Database>.self).count().map(to: Void.self) { count in
+                    return User<Database>.query(on: conn).count().map(to: Void.self) { count in
                         if count != 2 {
                             self.fail("count \(count) != 2")
                         }
@@ -28,7 +28,7 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
             // expected
         }
 
-        let count = try test(conn.query(User<Database>.self).count())
+        let count = try test(User<Database>.query(on: conn).count())
         if count != 1 {
             self.fail("count must have been restored to one")
             return

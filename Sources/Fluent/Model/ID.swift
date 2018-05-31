@@ -1,4 +1,4 @@
-/// A Fluent compatible identifier.
+/// A Fluent compatible identifier. See `Model`.
 public protocol ID: Codable, Equatable { }
 
 // MARK: Default conformances

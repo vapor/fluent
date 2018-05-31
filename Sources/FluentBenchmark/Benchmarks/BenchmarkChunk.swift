@@ -16,7 +16,7 @@ extension Benchmarker where Database: QuerySupporting {
             _ = try test(user.save(on: conn))
         }
 
-        try test(conn.query(User<Database>.self).chunk(max: 64) { chunk in
+        try test(User<Database>.query(on: conn).chunk(max: 64) { chunk in
             if chunk.count == 0 {
                 print("[warning] zero length chunk. there is probably an extraneous close happening")
                 return
@@ -32,7 +32,7 @@ extension Benchmarker where Database: QuerySupporting {
             self.fail("did not fetch all - only \(fetched64.count) out of 512")
         }
 
-        _ = try test(conn.query(User<Database>.self).chunk(max: 511) { chunk in
+        _ = try test(User<Database>.query(on: conn).chunk(max: 511) { chunk in
             if chunk.count == 0 {
                 print("[warning] zero length chunk. there is probably an extraneous close happening")
                 return

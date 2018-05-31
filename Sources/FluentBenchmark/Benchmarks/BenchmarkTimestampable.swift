@@ -28,7 +28,7 @@ extension Benchmarker where Database: QuerySupporting {
             fail("new updated at should be greater")
         }
 
-        let f = try test(conn.query(Bar<Database>.self).filter(\.baz == 1).first())
+        let f = try test(Bar<Database>.self.query(on: conn).filter(\.baz == 1).first())
         guard let fetched = f else {
             fail("could not fetch bar")
             return
@@ -64,7 +64,7 @@ extension Benchmarker where Database: QuerySupporting {
             self.fail("new updated at should be greater")
         }
 
-        let f = try test(conn.query(User<Database>.self).filter(\.name == "Tanner").first())
+        let f = try test(User<Database>.query(on: conn).filter(\.name == "Tanner").first())
         guard let fetched = f else {
             self.fail("could not fetch user")
             return

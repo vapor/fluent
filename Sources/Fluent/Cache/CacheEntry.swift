@@ -1,4 +1,5 @@
 /// Fluent model powering default implementation for `KeyedCacheSupporting` where self is `QuerySupporting`.
+/// You can use this type to interact with the cache table if it has been configured.
 ///
 /// See `DatabaseKeyedCache` for more information.
 public final class CacheEntry<Database>: Model where Database: QuerySupporting {
