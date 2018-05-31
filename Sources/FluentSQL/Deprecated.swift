@@ -38,6 +38,14 @@ extension SchemaBuilder {
     }
 }
 
+extension QueryBuilder where Database: SQLSupporting {
+    /// - warning: Deprecated.
+    @available(*, deprecated, renamed: "groupBy(_:)")
+    public func group<T>(by field: KeyPath<Result, T>) -> Self {
+        return groupBy(field)
+    }
+}
+
 /// - warning: Deprecated.
 @available(*, deprecated, renamed: "SQLDatabase")
 public typealias SchemaSupporting = SQLSupporting
