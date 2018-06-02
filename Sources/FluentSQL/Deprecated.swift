@@ -45,7 +45,3 @@ extension QueryBuilder where Database: SQLSupporting {
         return groupBy(field)
     }
 }
-
-/// - warning: Deprecated.
-@available(*, deprecated, renamed: "SQLDatabase")
-public typealias SchemaSupporting = SQLSupporting

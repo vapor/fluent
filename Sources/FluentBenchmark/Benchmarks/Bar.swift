@@ -1,6 +1,6 @@
 import FluentSQL
 
-struct Bar<Database>: Model, SoftDeletable where Database: QuerySupporting {
+struct Bar<Database>: Model where Database: QuerySupporting {
     /// See Model.ID
     typealias ID = UUID
 
@@ -21,7 +21,7 @@ struct Bar<Database>: Model, SoftDeletable where Database: QuerySupporting {
     }
 
     /// See `SoftDeletable.deletedAtKey`
-    static var deletedAtKey: DeletedAtKey {
+    static var deletedAtKey: TimestampKey? {
         return \.deletedAt
     }
 

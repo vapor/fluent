@@ -39,3 +39,35 @@ extension QueryBuilder {
         }
     }
 }
+
+extension QueryBuilder where Result: Model, Result.Database == Database {
+    /// Deletes all entities that would be fetched by this query.
+    ///
+    ///     try User.query(on: conn).filter(\.name == "foo").delete()
+    ///
+    /// - returns: A `Future` that will be completed when the delete is done.
+    public func delete(force: Bool = false) -> Future<Void> {
+        if !force, let deletedAtKey = Result.deletedAtKey {
+            Database.queryDataSet(Database.queryField(.keyPath(deletedAtKey)), to: Date(), on: &query)
+            return run(Database.queryActionUpdate)
+        } else {
+            return run(Database.queryActionDelete)
+        }
+    }
+    
+    /// Restores all soft-deleted entities that would be fetched by this query.
+    ///
+    ///     try User.query(on: conn, withSoftDeleted: true).filter(\.name == "foo").restore()
+    ///
+    /// - returns: A `Future` that will be completed when the delete is done.
+    public func restore() -> Future<Void> {
+        if let deletedAtKey = Result.deletedAtKey {
+            Database.queryDataSet(Database.queryField(.keyPath(deletedAtKey)), to: Date?.none, on: &query)
+            return run(Database.queryActionUpdate)
+        } else {
+            return connection.map { conn in
+                throw FluentError(identifier: "deletedAtKey", reason: "No `deletedAtKey` on \(Result.self).")
+            }
+        }
+    }
+}

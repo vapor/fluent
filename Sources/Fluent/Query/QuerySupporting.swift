@@ -38,8 +38,9 @@ public protocol QuerySupporting: Database {
     ///     - output: Query output to decode.
     ///     - entity: Entity to decode from (table or collection name).
     ///     - decodable: Decodable type to create.
+    ///     - connection: Connection to use for decoding the output.
     /// - returns: Decoded type.
-    static func queryDecode<D>(_ output: Output, entity: String, as decodable: D.Type) throws -> D
+    static func queryDecode<D>(_ output: Output, entity: String, as decodable: D.Type, on conn: Connection) -> Future<D>
         where D: Decodable
 
     /// Encodes an encodable object into this database's input. This will be used by Fluent to encode types
@@ -277,7 +278,7 @@ public protocol QuerySupporting: Database {
 
     /// Associated sort data structure.
     associatedtype QuerySort
-    
+
     /// Associated sort direction data structure.
     associatedtype QuerySortDirection
     
@@ -302,3 +303,4 @@ public protocol QuerySupporting: Database {
     ///     - query: Mutable `Query` to apply the sort to.
     static func querySortApply(_ sort: QuerySort, to query: inout Query)
 }
+

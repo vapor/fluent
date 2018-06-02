@@ -1,7 +1,7 @@
 /// Updates schemas, capable of deleting fields.
 public final class SchemaUpdater<Model>: SchemaBuilder where Model: Fluent.Model, Model.Database: SQLSupporting {
     /// See `SchemaBuilder`.
-    public var schema: DataDefinitionQuery
+    public var schema: SQLQuery.DDL
 
     /// See `SchemaBuilder`.
     public init(_ type: Model.Type = Model.self) {
@@ -14,7 +14,7 @@ public final class SchemaUpdater<Model>: SchemaBuilder where Model: Fluent.Model
     }
 
     /// Deletes the field with the supplied name.
-    public func removeField(_ column: DataColumn) {
+    public func removeField(_ column: SQLQuery.DML.Column) {
         schema.deleteColumns.append(column)
     }
 }

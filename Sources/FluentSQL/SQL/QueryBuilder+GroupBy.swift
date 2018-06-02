@@ -16,7 +16,7 @@ extension QueryBuilder where Database: SQLSupporting {
     /// - parameters:
     ///     - groupBy: New `Query.GroupBy` to add.
     /// - returns: Query builder for chaining.
-    public func groupBy(_ groupBy: DataGroupBy) -> Self {
+    public func groupBy(_ groupBy: SQLQuery.DML.GroupBy) -> Self {
         query.groupBys.append(groupBy)
         return self
     }

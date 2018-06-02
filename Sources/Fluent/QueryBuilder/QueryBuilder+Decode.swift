@@ -32,9 +32,7 @@ extension QueryBuilder {
     /// - returns: `QueryBuilder` decoding type `(Result, D)`.
     public func alsoDecode<D>(_ type: D.Type, _ entity: String) -> QueryBuilder<Database, (Result, D)> where D: Decodable {
         return transformResult { row, conn, result in
-            return Future.map(on: conn) {
-                return try (result, Database.queryDecode(row, entity: entity, as: D.self))
-            }
+            return Database.queryDecode(row, entity: entity, as: D.self, on: conn).map { (result, $0) }
         }
     }
 
@@ -66,9 +64,7 @@ extension QueryBuilder {
     /// - returns: `QueryBuilder` decoding type `D`.
     public func decode<D>(_ type: D.Type, _ entity: String) -> QueryBuilder<Database, D> where D: Decodable {
         return changeResult { row, conn in
-            return Future.map(on: conn) {
-                return try Database.queryDecode(row, entity: entity, as: D.self)
-            }
+            return Database.queryDecode(row, entity: entity, as: D.self, on: conn)
         }
     }
 

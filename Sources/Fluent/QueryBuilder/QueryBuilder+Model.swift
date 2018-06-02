@@ -100,22 +100,55 @@ extension QueryBuilder where Result: Model, Result.Database == Database {
     ///
     /// - parameters:
     ///     - model: `Model` to delete.
+    ///     - force: If `true`, the model will be deleted from the database even if it has a `deletedAtKey`.
+    ///              This is `false` by default.
     /// - returns: A `Future` containing the created `Model`.
-    internal func delete(_ model: Result) -> Future<Void> {
-        return connection.flatMap { conn in
-            guard let id = model.fluentID else {
-                throw FluentError(identifier: "idRequired", reason: "No ID was set on updated model, it is required for updating.")
-            }
-
-            // update record w/ matching id
-            self.filter(Result.idKey == id)
-            return Database.modelEvent(event: .willDelete, model: model,on: conn).flatMap { model in
-                return try model.willDelete(on: conn)
-            }.flatMap { model in
-                return self.run(Database.queryActionDelete).transform(to: model)
-            }.flatMap { model in
-                return try model.didDelete(on: conn)
+    internal func delete(_ model: Result, force: Bool) -> Future<Void> {
+        if !force, let _ = Result.deletedAtKey {
+            return connection.flatMap { conn in
+                return try model.willSoftDelete(on: conn).flatMap { model -> Future<Result> in
+                    var copy = model
+                    copy.fluentDeletedAt = Date()
+                    return self.update(copy)
+                }.flatMap { model in
+                    return try model.didSoftDelete(on: conn)
+                }
             }.transform(to: ())
+        } else {
+            return connection.flatMap { conn in
+                guard let id = model.fluentID else {
+                    throw FluentError(identifier: "idRequired", reason: "No ID was set on updated model, it is required for updating.")
+                }
+                // update record w/ matching id
+                self.filter(Result.idKey == id)
+                return Database.modelEvent(event: .willDelete, model: model,on: conn).flatMap { model in
+                    return try model.willDelete(on: conn)
+                }.flatMap { model in
+                    return self.run(Database.queryActionDelete).transform(to: model)
+                }.flatMap { model in
+                    return try model.didDelete(on: conn)
+                }.transform(to: ())
+            }
+        }
+    }
+    
+    /// Restores a soft deleted model.
+    ///
+    ///     let user: User = ...
+    ///     User.query(on: conn).restore(user)
+    ///
+    /// - parameters:
+    ///     - model: `Model` to restore.
+    /// - returns: A future that will return the succesfully restored model.
+    internal func restore(_ model: Result) -> Future<Result> {
+        return connection.flatMap { conn in
+            return try model.willRestore(on: conn).flatMap { model -> Future<Result> in
+                var copy = model
+                copy.fluentDeletedAt = nil
+                return self.update(copy)
+            }.flatMap { model in
+                return try model.didRestore(on: conn)
+            }
         }
     }
 }

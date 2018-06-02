@@ -24,15 +24,6 @@ extension QueryBuilder {
         return range(...1).all().map { $0.first }
     }
 
-    /// Deletes all entities that would be fetched by this query.
-    ///
-    ///     try User.query(on: conn).filter(\.name == "foo").delete()
-    ///
-    /// - returns: A `Future` that will be completed when the delete is done.
-    public func delete() -> Future<Void> {
-        return run(Database.queryActionDelete)
-    }
-
     /// Convenience for chunking model results.
     ///
     ///     try User.query(on: conn).chunk(max: 32) { chunk in

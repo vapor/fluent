@@ -34,7 +34,7 @@ extension Model where Database: SQLSupporting {
         for property in properties {
             builder.field(
                 for: .fluentProperty(.reflected(property, rootType: self)),
-                dataType: Database.schemaDataType(for: property.type, primaryKey: idProperty.path == property.path)
+                type: Database.schemaColumnType(for: property.type, primaryKey: idProperty.path == property.path)
             )
         }
     }

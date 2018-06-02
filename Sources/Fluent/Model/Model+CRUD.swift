@@ -44,10 +44,23 @@ extension Model where Database: QuerySupporting {
     ///     user.delete(on: req)
     ///
     /// - parameters:
+    ///     - force: If `true`, the model will be deleted from the database even if it has a `deletedAtKey`.
+    ///              This is `false` by default.
     ///     - conn: Database connection to use.
     /// - returns: Future that will be completed when the delete is done.
-    public func delete(on conn: DatabaseConnectable) -> Future<Void> {
-        return Self.query(on: conn).delete(self)
+    public func delete(force: Bool = false, on conn: DatabaseConnectable) -> Future<Void> {
+        return Self.query(on: conn).delete(self, force: force)
+    }
+    
+    /// Restores a soft deleted model.
+    ///
+    ///     user.restore(on: req)
+    ///
+    /// - parameters:
+    ///     - conn: Used to fetch a database connection.
+    /// - returns: A future that will return the succesfully restored model.
+    public func restore(on conn: DatabaseConnectable) -> Future<Self> {
+        return Self.query(on: conn, withSoftDeleted: true).restore(self)
     }
 }
 

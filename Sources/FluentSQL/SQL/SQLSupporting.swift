@@ -1,22 +1,24 @@
 /// SQL database.
-public protocol SQLSupporting: QuerySupporting & JoinSupporting & MigrationSupporting where
-    Query == DataManipulationQuery,
-    QueryAction == DataManipulationStatement,
+public protocol SQLSupporting: QuerySupporting & JoinSupporting & MigrationSupporting & TransactionSupporting & KeyedCacheSupporting where
+    Query == SQLQuery.DML,
+    QueryAction == SQLQuery.DML.Statement,
     QueryAggregate == String,
-    QueryData == [DataManipulationColumn],
-    QueryField == DataColumn,
-    QueryFilterMethod == DataPredicateComparison,
-    QueryFilterValue == DataManipulationValue,
-    QueryFilter == DataPredicates,
-    QueryFilterRelation == DataPredicateGroupRelation,
-    QueryKey == DataManipulationKey,
-    QuerySort == DataOrderBy,
-    QuerySortDirection == DataOrderByDirection
+    QueryData == [SQLQuery.DML.Column: SQLQuery.DML.Value],
+    QueryField == SQLQuery.DML.Column,
+    QueryFilterMethod == SQLQuery.DML.Predicate.Comparison,
+    QueryFilterValue == SQLQuery.DML.Value,
+    QueryFilter == SQLQuery.DML.Predicate,
+    QueryFilterRelation == SQLQuery.DML.Predicate.Relation,
+    QueryKey == SQLQuery.DML.Key,
+    QuerySort == SQLQuery.DML.OrderBy,
+    QuerySortDirection == SQLQuery.DML.OrderBy.Direction,
+    QueryJoin == SQLQuery.DML.Join,
+    QueryJoinMethod == SQLQuery.DML.Join.Method
 {
-    static func schemaDataType(for type: Any.Type, primaryKey: Bool) -> DataDefinitionDataType
+    static func schemaColumnType(for type: Any.Type, primaryKey: Bool) -> SQLQuery.DDL.ColumnDefinition.ColumnType
 
     /// Executes the supplied schema on the database connection.
-    static func schemaExecute(_ ddl: DataDefinitionQuery, on connection: Connection) -> Future<Void>
+    static func schemaExecute(_ ddl: SQLQuery.DDL, on conn: Connection) -> Future<Void>
 
     /// Enables references errors.
     static func enableReferences(on conn: Connection) -> Future<Void>
@@ -28,118 +30,132 @@ public protocol SQLSupporting: QuerySupporting & JoinSupporting & MigrationSuppo
 extension SQLSupporting {
     // MARK: Action
 
-    public static var queryActionCreate: DataManipulationStatement {
-        return .insert()
+    /// See `QuerySupporting.`
+    public static var queryActionCreate: QueryAction {
+        return .insert
     }
 
-    public static var queryActionRead: DataManipulationStatement {
-        return .select()
+    /// See `QuerySupporting.`
+    public static var queryActionRead: QueryAction {
+        return .select
     }
 
-    public static var queryActionUpdate: DataManipulationStatement {
-        return .update()
+    /// See `QuerySupporting.`
+    public static var queryActionUpdate: QueryAction {
+        return .update
     }
 
-    public static var queryActionDelete: DataManipulationStatement {
-        return .delete()
+    /// See `QuerySupporting.`
+    public static var queryActionDelete: QueryAction {
+        return .delete
     }
 
-    public static func queryActionIsCreate(_ statement: DataManipulationStatement) -> Bool {
+    /// See `QuerySupporting.`
+    public static func queryActionIsCreate(_ statement: QueryAction) -> Bool {
         switch statement.verb {
         case "INSERT": return true
         default: return false
         }
     }
 
-    public static func queryActionApply(_ statement: DataManipulationStatement, to query: inout DataManipulationQuery) {
+    /// See `QuerySupporting.`
+    public static func queryActionApply(_ statement: QueryAction, to query: inout Query) {
         query.statement = statement
     }
 
     // MARK: Aggregate
 
+    /// See `QuerySupporting.`
     public static var queryAggregateCount: QueryAggregate {
         return "COUNT"
     }
 
+    /// See `QuerySupporting.`
     public static var queryAggregateSum: QueryAggregate {
         return "SUM"
     }
 
+    /// See `QuerySupporting.`
     public static var queryAggregateAverage: QueryAggregate {
         return "AVERAGE"
     }
 
+    /// See `QuerySupporting.`
     public static var queryAggregateMinimum: QueryAggregate {
         return "MIN"
     }
 
+    /// See `QuerySupporting.`
     public static var queryAggregateMaximum: QueryAggregate {
         return "MAX"
     }
 
-    public static func queryAggregate(_ function: String, _ keys: [DataManipulationKey]) -> DataManipulationKey {
-        return .computed(.init(function: function, keys: keys), key: "fluentAggregate")
+    /// See `QuerySupporting.`
+    public static func queryAggregate(_ function: String, _ keys: [QueryKey]) -> QueryKey {
+        return .computed(.init(function: function, keys: keys), as: "fluentAggregate")
     }
 
-    public static func query(_ entity: String) -> DataManipulationQuery {
-        return .init(table: entity)
+    /// See `QuerySupporting.`
+    public static func query(_ entity: String) -> Query {
+        return .init(statement: .select, table: entity)
     }
     
-    public static func queryEntity(for query: DataManipulationQuery) -> String {
+    /// See `QuerySupporting.`
+    public static func queryEntity(for query: Query) -> String {
         return query.table
     }
 
     // MARK: Data
 
-    public static func queryDataApply(_ columns: [DataManipulationColumn], to query: inout DataManipulationQuery) {
+    public static func queryDataApply(_ columns: QueryData, to query: inout Query) {
         query.columns = columns
     }
 
-    public static func queryDataSet(_ field: DataColumn, to data: Encodable, on query: inout DataManipulationQuery) {
-        query.columns.append(.init(column: field, value: .bind(data)))
+    public static func queryDataSet(_ field: QueryField, to data: Encodable, on query: inout Query) {
+        query.columns[field] = .bind(data)
     }
 
     // MARK: Field
 
-    public static func queryField(_ property: FluentProperty) -> DataColumn {
+    public static func queryField(_ property: FluentProperty) -> QueryField {
         return .fluentProperty(property)
     }
 
     // MARK: Filter
 
-    public static var queryFilterMethodEqual: DataPredicateComparison {
+    public static var queryFilterMethodEqual: QueryFilterMethod {
         return .equal
     }
 
-    public static var queryFilterMethodNotEqual: DataPredicateComparison {
+    public static var queryFilterMethodNotEqual: QueryFilterMethod {
         return .notEqual
     }
 
-    public static var queryFilterMethodGreaterThan: DataPredicateComparison {
+    public static var queryFilterMethodGreaterThan: QueryFilterMethod {
         return .greaterThan
     }
 
-    public static var queryFilterMethodLessThan: DataPredicateComparison {
+    public static var queryFilterMethodLessThan: QueryFilterMethod {
         return .lessThan
     }
 
-    public static var queryFilterMethodGreaterThanOrEqual: DataPredicateComparison {
+    public static var queryFilterMethodGreaterThanOrEqual: QueryFilterMethod {
         return .greaterThanOrEqual
     }
 
-    public static var queryFilterMethodLessThanOrEqual: DataPredicateComparison {
+    public static var queryFilterMethodLessThanOrEqual: QueryFilterMethod {
         return .lessThanOrEqual
     }
 
-    public static var queryFilterMethodInSubset: DataPredicateComparison {
+    public static var queryFilterMethodInSubset: QueryFilterMethod {
         return .in
     }
 
-    public static var queryFilterMethodNotInSubset: DataPredicateComparison {
+    public static var queryFilterMethodNotInSubset: QueryFilterMethod {
         return .notIn
     }
 
-    public static func queryFilterValue(_ encodables: [Encodable]) -> DataManipulationValue {
+    public static func queryFilterValue(_ encodables: [Encodable]) -> QueryFilterValue {
         return .binds(encodables)
     }
 
@@ -147,7 +163,7 @@ extension SQLSupporting {
         return .null
     }
 
-    public static func queryFilters(for query: Query) -> [DataPredicates] {
+    public static func queryFilters(for query: Query) -> [QueryFilter] {
         return query.predicates
     }
 
@@ -155,53 +171,56 @@ extension SQLSupporting {
         query.predicates.append(filter)
     }
 
-    public static func queryFilter(_ column: DataColumn, _ comparison: QueryFilterMethod, _ value: DataManipulationValue) -> DataPredicates {
-        return .predicate(.init(column: column, comparison: comparison, value: value))
+    public static func queryFilter(_ column: QueryField, _ comparison: QueryFilterMethod, _ value: QueryFilterValue) -> QueryFilter {
+        return .predicate(column, comparison, value)
     }
 
-    public static var queryFilterRelationAnd: DataPredicateGroupRelation {
+    public static var queryFilterRelationAnd: QueryFilterRelation {
         return .and
     }
 
-    public static var queryFilterRelationOr: DataPredicateGroupRelation {
+    public static var queryFilterRelationOr: QueryFilterRelation {
         return .or
     }
 
-    public static func queryFilterGroup(_ relation: QueryFilterRelation, _ predicates: [QueryFilter]) -> DataPredicates {
-        return .group(.init(relation: relation, predicates: predicates))
+    public static func queryFilterGroup(_ relation: QueryFilterRelation, _ predicates: [QueryFilter]) -> QueryFilter {
+        return .group(relation, predicates)
     }
 
     // MARK: Join
 
-    public static var queryJoinMethodDefault: DataJoinMethod {
+    /// See `SQLSupporting`.
+    public static var queryJoinMethodDefault: QueryJoinMethod {
         return .inner
     }
 
-    public static func queryJoin(_ method: DataJoinMethod, base: DataColumn, joined: DataColumn) -> DataJoin {
+    /// See `SQLSupporting`.
+    public static func queryJoin(_ method: QueryJoinMethod, base: QueryField, joined: QueryField) -> QueryJoin {
         return .init(method: method, local: base, foreign: joined)
     }
 
-    public static func queryJoinApply(_ join: DataJoin, to query: inout DataManipulationQuery) {
+    /// See `SQLSupporting`.
+    public static func queryJoinApply(_ join: QueryJoin, to query: inout Query) {
         query.joins.append(join)
     }
 
     // MARK: Key
 
-    public static var queryKeyAll: DataManipulationKey {
+    public static var queryKeyAll: QueryKey {
         return .all(table: nil)
     }
 
-    public static func queryKey(_ column: DataColumn) -> DataManipulationKey {
-        return .column(column, key: nil)
+    public static func queryKey(_ column: QueryField) -> QueryKey {
+        return .column(column)
     }
 
-    public static func queryKeyApply(_ key: DataManipulationKey, to query: inout DataManipulationQuery) {
+    public static func queryKeyApply(_ key: QueryKey, to query: inout Query) {
         query.keys.append(key)
     }
 
     // MARK: Range
 
-    public static func queryRangeApply(lower: Int, upper: Int?, to query: inout DataManipulationQuery) {
+    public static func queryRangeApply(lower: Int, upper: Int?, to query: inout Query) {
         query.offset = lower
         if let upper = upper {
             query.limit = upper - lower
@@ -210,7 +229,7 @@ extension SQLSupporting {
 
     // MARK: Sort
 
-    public static func querySort(_ column: DataColumn, _ direction: DataOrderByDirection) -> DataOrderBy {
+    public static func querySort(_ column: QueryField, _ direction: QuerySortDirection) -> QuerySort {
         return .init(columns: [column], direction: direction)
     }
 
@@ -222,8 +241,15 @@ extension SQLSupporting {
         return .descending
     }
 
-    public static func querySortApply(_ orderBy: DataOrderBy, to query: inout DataManipulationQuery) {
+    public static func querySortApply(_ orderBy: QuerySort, to query: inout Query) {
         query.orderBys.append(orderBy)
+    }
+    
+    // MARK: Encode
+    
+    /// See `SQLDatabase`.
+    public static func queryEncode<E>(_ encodable: E, entity: String) throws -> QueryData where E: Encodable {
+        return try SQLRowEncoder<Self>().encode(encodable, tableName: entity)
     }
 
     // MARK: Convenience
@@ -256,26 +282,12 @@ extension SQLSupporting {
     public static func delete<Model>(_ model: Model.Type, on conn: Connection) -> Future<Void>
         where Model: Fluent.Model, Model.Database == Self
     {
-        return schemaExecute(.init(statement: .drop, table: Model.entity), on: conn)
+        return schemaExecute(.init(statement: .drop, table: Model.entity, createColumns: [], deleteColumns: [], createConstraints: [], deleteConstraints: []), on: conn)
     }
 }
 
-extension SchemaBuilder {
-    public func customSQL(_ closure: (inout DataDefinitionQuery) -> ()) -> Self {
-        closure(&schema)
-        return self
-    }
-}
-
-extension QueryBuilder where Database: SQLSupporting {
-    public func customSQL(_ closure: (inout Database.Query) -> ()) -> Self {
-        closure(&query)
-        return self
-    }
-}
-
-extension DataColumn {
-    public static func fluentProperty(_ property: FluentProperty) -> DataColumn {
+extension SQLQuery.DML.Column {
+    public static func fluentProperty(_ property: FluentProperty) -> SQLQuery.DML.Column {
         guard let model = property.rootType as? AnyModel.Type else {
             fatalError("`\(property.rootType)` does not conform to `Model`.")
         }

@@ -2,7 +2,7 @@
 /// new tables and collections.
 public final class SchemaCreator<Model>: SchemaBuilder where Model: Fluent.Model, Model.Database: SQLSupporting {
     /// See `SchemaBuilder`.
-    public var schema: DataDefinitionQuery
+    public var schema: SQLQuery.DDL
 
     /// See `SchemaBuilder`.
     public init(_ type: Model.Type = Model.self) {
