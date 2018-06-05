@@ -38,6 +38,20 @@ extension SchemaBuilder {
     }
 }
 
+extension SchemaUpdater {
+    /// - warning: Deprecated.
+    @available(*, deprecated, renamed: "deleteField(for:)")
+    public func removeField<T>(for field: KeyPath<Model, T>) {
+        self.deleteField(for: field)
+    }
+    
+    /// - warning: Deprecated.
+    @available(*, deprecated, renamed: "deleteField(_:)")
+    public func removeField(_ column: SQLQuery.DML.Column) {
+        self.deleteField(column)
+    }
+}
+
 extension QueryBuilder where Database: SQLSupporting {
     /// - warning: Deprecated.
     @available(*, deprecated, renamed: "groupBy(_:)")

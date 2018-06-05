@@ -9,12 +9,12 @@ public final class SchemaUpdater<Model>: SchemaBuilder where Model: Fluent.Model
     }
 
     /// Removes a field from the schema.
-    public func removeField<T>(for field: KeyPath<Model, T>) {
-        removeField(Model.Database.queryField(.keyPath(field)))
+    public func deleteField<T>(for field: KeyPath<Model, T>) {
+        deleteField(Model.Database.queryField(.keyPath(field)))
     }
 
     /// Deletes the field with the supplied name.
-    public func removeField(_ column: SQLQuery.DML.Column) {
+    public func deleteField(_ column: SQLQuery.DML.Column) {
         schema.deleteColumns.append(column)
     }
 }
