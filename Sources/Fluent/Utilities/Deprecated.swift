@@ -39,8 +39,12 @@ extension Model {
 }
 
 /// - warning: Deprecated.
-@available(*, deprecated, renamed: "Model")
+@available(*, deprecated, message: "Model now supports timestamps via an _optional_ static key.")
 public protocol Timestampable { }
+
+/// - warning: Deprecated.
+@available(*, deprecated, message: "Model now supports soft-deletion via an _optional_ static key.")
+public protocol SoftDeletable { }
 
 extension DatabaseConnectable {
     /// - warning: Deprecated.
