@@ -1,3 +1,14 @@
+extension DatabasesConfig {
+    public mutating func enableForeignKeys<D>(on db: DatabaseIdentifier<D>) where D: SQLSupporting {
+        appendConfigurationHandler(on: db) { D.enableForeignKeys(on: $0) }
+    }
+    
+    public mutating func disableForeignKeys<D>(on db: DatabaseIdentifier<D>) where D: SQLSupporting {
+        appendConfigurationHandler(on: db) { D.disableForeignKeys(on: $0) }
+    }
+}
+
+
 /// SQL database.
 public protocol SQLSupporting: QuerySupporting & JoinSupporting & MigrationSupporting & TransactionSupporting & KeyedCacheSupporting where
     Query == SQLQuery.DML,
@@ -21,10 +32,10 @@ public protocol SQLSupporting: QuerySupporting & JoinSupporting & MigrationSuppo
     static func schemaExecute(_ ddl: SQLQuery.DDL, on conn: Connection) -> Future<Void>
 
     /// Enables references errors.
-    static func enableReferences(on conn: Connection) -> Future<Void>
+    static func enableForeignKeys(on conn: Connection) -> Future<Void>
 
     /// Disables reference errors.
-    static func disableReferences(on conn: Connection) -> Future<Void>
+    static func disableForeignKeys(on conn: Connection) -> Future<Void>
 }
 
 extension SQLSupporting {

@@ -84,7 +84,7 @@ extension Benchmarker where Database: SQLSupporting & JoinSupporting {
     /// The schema will be prepared first.
     public func benchmarkRelations_withSchema() throws {
         let conn = try test(pool.requestConnection())
-        try test(Database.enableReferences(on: conn))
+        try test(Database.enableForeignKeys(on: conn))
 
         defer {
             try? test(PetToyMigration<Database>.revert(on: conn))

@@ -7,7 +7,7 @@ extension SQLSupporting {
 
 // MARK: Private
 
-extension MigrationLog: Migration where Database: SQLSupporting { }
+extension MigrationLog: AnyMigration, Migration where Database: SQLSupporting { }
 
 private extension MigrationLog where Database: SQLSupporting {
     /// Prepares the connection for storing migration logs.

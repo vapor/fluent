@@ -6,4 +6,4 @@ extension MigrationConfig {
 }
 
 /// Dynamically conform to `Migration` where the database is `SQLDatabase`.
-extension CacheEntry: Migration where Database: SQLSupporting { }
+extension CacheEntry: AnyMigration, Migration where Database: SQLSupporting { }
