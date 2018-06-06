@@ -1,8 +1,4 @@
-import Async
-import Dispatch
 import Fluent
-import FluentSQL
-import Foundation
 
 extension Benchmarker where Database: QuerySupporting & SchemaSupporting & MigrationSupporting {
     /// Benchmark the basic schema creations.

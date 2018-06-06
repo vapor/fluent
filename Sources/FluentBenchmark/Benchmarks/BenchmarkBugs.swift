@@ -1,5 +1,4 @@
 import Fluent
-import FluentSQL
 
 extension Benchmarker where Database: QuerySupporting {
     /// Benchmarking pipelining saves.

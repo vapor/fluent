@@ -1,7 +1,6 @@
 // Lifecycle tests courtesy of the wonderful @mcdappdev
 
 import Fluent
-import FluentSQL
 
 extension Benchmarker where Database: QuerySupporting {
     fileprivate func _benchmark(on conn: Database.Connection) throws {

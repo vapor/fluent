@@ -1,5 +1,3 @@
-import FluentSQL
-
 struct Bar<Database>: Model where Database: QuerySupporting {
     /// See Model.ID
     typealias ID = UUID

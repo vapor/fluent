@@ -1,6 +1,4 @@
-import Async
 import Fluent
-import Foundation
 
 internal final class Foo<D>: Model where D: QuerySupporting {
     /// See Model.Database

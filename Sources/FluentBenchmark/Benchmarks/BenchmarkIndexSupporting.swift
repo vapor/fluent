@@ -1,4 +1,4 @@
-import FluentSQL
+import Fluent
 
 extension Benchmarker where Database: SchemaSupporting & MigrationSupporting {
     /// The actual benchmark.

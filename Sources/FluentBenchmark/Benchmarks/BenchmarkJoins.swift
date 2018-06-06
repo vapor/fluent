@@ -1,8 +1,4 @@
-import Async
-import Dispatch
 import Fluent
-import FluentSQL
-import Foundation
 
 extension Benchmarker where Database: JoinSupporting & QuerySupporting {
     /// The actual benchmark.
@@ -38,7 +34,7 @@ extension Benchmarker where Database: SchemaSupporting & MigrationSupporting & J
     /// The schema will be prepared first.
     public func benchmarkJoins_withSchema() throws {
         let conn = try test(pool.requestConnection())
-        try test(Database.enableForeignKeys(on: conn))
+        try test(Database.enableReferences(on: conn))
 
         try test(UserMigration<Database>.prepare(on: conn))
         try test(Pet<Database>.prepare(on: conn))

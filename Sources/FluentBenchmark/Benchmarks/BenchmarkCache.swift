@@ -1,5 +1,4 @@
 import Fluent
-import FluentSQL
 
 extension Benchmarker where Database: QuerySupporting & TransactionSupporting & KeyedCacheSupporting {
     /// The actual benchmark.
