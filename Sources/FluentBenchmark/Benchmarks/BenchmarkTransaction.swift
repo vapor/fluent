@@ -43,7 +43,7 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
     }
 }
 
-extension Benchmarker where Database: QuerySupporting & TransactionSupporting & SQLSupporting {
+extension Benchmarker where Database: QuerySupporting & TransactionSupporting & SchemaSupporting & MigrationSupporting {
     /// Benchmark fluent transactions.
     /// The schema will be prepared first.
     public func benchmarkTransactions_withSchema() throws {

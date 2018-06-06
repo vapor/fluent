@@ -30,7 +30,7 @@ extension Toy where Database: JoinSupporting {
 
 // MARK: Migration
 
-internal struct ToyMigration<Database>: Migration where Database: QuerySupporting & SQLSupporting {
+internal struct ToyMigration<Database>: Migration where Database: QuerySupporting & SchemaSupporting & MigrationSupporting {
     /// See Migration.prepare
     static func prepare(on connection: Database.Connection) -> Future<Void> {
         return Database.create(Toy<Database>.self, on: connection) { builder in

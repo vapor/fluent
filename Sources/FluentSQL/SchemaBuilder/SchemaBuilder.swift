@@ -11,10 +11,10 @@
 public protocol SchemaBuilder: class {
     /// Associated `Model` type this builder is using.
     associatedtype Model
-        where Model: Fluent.Model, Model.Database: SQLSupporting
+        where Model: Fluent.Model, Model.Database: SchemaSupporting
 
     /// The schema query being built.
-    var schema: SQLQuery.DDL { get set }
+    var schema: Model.Database.Schema { get set }
 
     /// Create a new `SchemaBuilder`.
     ///
@@ -30,62 +30,73 @@ extension SchemaBuilder {
     ///
     ///     builder.field(for: \.name)
     ///
-    /// You can specify an optional data type for the field.
+    /// You can specify identifier fields as well.
     ///
-    ///     builder.field(type: .varChar(255), for: \.name)
+    ///     builder.field(for: \.name, isIdentifier: true)
     ///
     /// - parameters:
-    ///     - type: Data type for the field. Defaults to a generally appropriate type.
     ///     - key: `KeyPath` to the field.
-    public func field<T>(for key: KeyPath<Model, T>, primaryKey: Bool? = nil) {
-        field(for: .fluentProperty(.keyPath(key)), type: Model.Database.schemaColumnType(for: T.self, primaryKey: primaryKey ?? (key == Model.idKey)))
+    ///     - isIdentifier: If `true`, this field will have appropriate attributes for storing an identifier.
+    public func field<T>(for key: KeyPath<Model, T>, isIdentifier: Bool? = nil) {
+        let isIdentifier = isIdentifier ?? (key == Model.idKey)
+        let field = Model.Database.schemaField(for: T.self, isIdentifier: isIdentifier, Model.Database.queryField(.keyPath(key)))
+        self.field(field)
+        
     }
 
-    public func field(for column: SQLQuery.DML.Column, type: SQLQuery.DDL.ColumnDefinition.ColumnType) {
-        schema.createColumns.append(.column(column.name, type))
+    public func field<T>(for key: KeyPath<Model, T>, type: Model.Database.SchemaFieldType) {
+        let field = Model.Database.schemaField(Model.Database.queryField(.keyPath(key)), type)
+        self.field(field)
+    }
+    
+    public func field(_ field: Model.Database.SchemaField) {
+        Model.Database.schemaFieldCreate(field, to: &schema)
+    }
+    
+    // MARK: Constraint
+    
+    public func constraint(_ constraint: Model.Database.SchemaConstraint) {
+        Model.Database.schemaConstraintCreate(constraint, to: &schema)
     }
 
-    // MARK: ForeignKey
+    // MARK: Reference
 
-    /// Adds a `FOREIGN KEY` constraint to a field.
+    /// Adds a reference constraint from one field to another.
     ///
-    ///     builder.foreignKey(from: \.userID, to: \User.id)
+    ///     builder.reference(from: \.userID, to: \User.id)
     ///
     /// - parameters:
     ///     - from: `KeyPath` to the local field.
     ///     - to: `KeyPath` to the foreign field.
-    ///     - onUpdate: `DataDefinitionForeignKeyAction` to apply when the related model is updated. `nil` by default.
-    ///     - onDelete: `DataDefinitionForeignKeyAction` to apply when the related model is deleted. `nil` by default.
-    public func foreignKey<T, U, Other>(from: KeyPath<Model, T>, to: KeyPath<Other, U>, onUpdate: SQLQuery.DDL.Constraint.ForeignKey.Action? = nil, onDelete: SQLQuery.DDL.Constraint.ForeignKey.Action? = nil)
-        where Other: Fluent.Model
-    {
-        schema.createConstraints.append(.foreignKey(from: .fluentProperty(.keyPath(from)), to: .fluentProperty(.keyPath(to)), onUpdate: onUpdate, onDelete: onDelete))
-    }
-
-    /// Deletes a `FOREIGN KEY` constraint from a field.
-    ///
-    ///     builder.deleteForeignKey(from: \.userID, to: \User.id)
-    ///
-    /// - parameters:
-    ///     - from: `KeyPath` to the local field.
-    ///     - to: `KeyPath` to the foreign field.
-    public func deleteForeignKey<T, U, Other>(from: KeyPath<Model, T>, to: KeyPath<Other, U>) where Other: Fluent.Model {
-        schema.deleteConstraints.append(.foreignKey(from: .fluentProperty(.keyPath(from)), to: .fluentProperty(.keyPath(to))))
+    ///     - onUpdate: Schema reference action to apply when the related model is updated. `nil` by default.
+    ///     - onDelete: Schema reference action to apply when the related model is deleted. `nil` by default.
+    public func reference<T, U, Other>(
+        from: KeyPath<Model, T>,
+        to: KeyPath<Other, U>,
+        onUpdate: Model.Database.SchemaReferenceAction? = nil,
+        onDelete: Model.Database.SchemaReferenceAction? = nil
+    ) where Other: Fluent.Model {
+        let from = Model.Database.queryField(.keyPath(from))
+        let to = Model.Database.queryField(.keyPath(to))
+        let reference = Model.Database.schemaReference(from: from, to: to, onUpdate: onUpdate, onDelete: onDelete)
+        constraint(reference)
     }
 
     // MARK: Unique
 
-    /// Adds a `UNIQUE` constraint to a field.
+    /// Adds a unique constraint to a field.
     ///
     ///     builder.unique(on: \.email)
     ///
     /// - parameters:
     ///     - key: `KeyPath` to the unique field.
     public func unique<T>(on key: KeyPath<Model, T>) {
-        schema.createConstraints.append(.unique([.fluentProperty(.keyPath(key))]))
+        let field = Model.Database.queryField(.keyPath(key))
+        let unique = Model.Database.schemaUnique(on: [field])
+        constraint(unique)
     }
 
-    /// Adds a `UNIQUE` constraint to two fields.
+    /// Adds a unique constraint to two fields.
     ///
     ///     builder.unique(on: \.email, \.username)
     ///
@@ -93,27 +104,9 @@ extension SchemaBuilder {
     ///     - a: `KeyPath` to the first unique field.
     ///     - b: `KeyPath` to the second unique field.
     public func unique<T, U>(on a: KeyPath<Model, T>, _ b: KeyPath<Model, U>) {
-        schema.createConstraints.append(.unique([.fluentProperty(.keyPath(a)), .fluentProperty(.keyPath(b))]))
-    }
-
-    /// Removes a `UNIQUE` constraint from a field.
-    ///
-    ///     builder.deleteUnique(from: \.email)
-    ///
-    /// - parameters:
-    ///     - keyPath: `KeyPath` to the unique field.
-    public func deleteUnique<T>(from key: KeyPath<Model, T>) {
-        schema.deleteConstraints.append(.unique([.fluentProperty(.keyPath(key))]))
-    }
-
-    /// Removes a `UNIQUE` constraint from two fields.
-    ///
-    ///     builder.deleteUnique(from: \.email, \.username)
-    ///
-    /// - parameters:
-    ///     - a: `KeyPath` to the first unique field.
-    ///     - b: `KeyPath` to the second unique field.
-    public func deleteUnique<T, U>(from a: KeyPath<Model, T>, _ b: KeyPath<Model, U>) {
-        schema.deleteConstraints.append(.unique([.fluentProperty(.keyPath(a)), .fluentProperty(.keyPath(b))]))
+        let a = Model.Database.queryField(.keyPath(a))
+        let b = Model.Database.queryField(.keyPath(b))
+        let unique = Model.Database.schemaUnique(on: [a, b])
+        constraint(unique)
     }
 }

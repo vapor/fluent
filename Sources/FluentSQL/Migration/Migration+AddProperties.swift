@@ -1,4 +1,4 @@
-extension Migration where Self: Model, Database: SQLSupporting {
+extension Migration where Self: Model, Database: SchemaSupporting {
     /// See `Migration`.
     public static func prepare(on connection: Database.Connection) -> Future<Void> {
         return Database.create(self, on: connection) { builder in
@@ -14,7 +14,7 @@ extension Migration where Self: Model, Database: SQLSupporting {
 
 /// MARK: Auto Migration
 
-extension Model where Database: SQLSupporting {
+extension Model where Database: SchemaSupporting {
     /// Automatically adds `SchemaField`s for each of this `Model`s properties.
     ///
     ///     PostgreSQLDatabase.create(User.self, on: conn) { builder in
@@ -32,10 +32,12 @@ extension Model where Database: SQLSupporting {
         }
         let properties = try Self.reflectProperties(depth: 0)
         for property in properties {
-            builder.field(
-                for: .fluentProperty(.reflected(property, rootType: self)),
-                type: Database.schemaColumnType(for: property.type, primaryKey: idProperty.path == property.path)
+            let field = Database.schemaField(
+                for: property.type,
+                isIdentifier: idProperty.path == property.path,
+                Database.queryField(.reflected(property, rootType: self))
             )
+            Database.schemaFieldCreate(field, to: &builder.schema)
         }
     }
 }

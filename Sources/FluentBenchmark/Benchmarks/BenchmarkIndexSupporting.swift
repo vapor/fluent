@@ -1,6 +1,6 @@
 import FluentSQL
 
-extension Benchmarker where Database: SQLSupporting {
+extension Benchmarker where Database: SchemaSupporting & MigrationSupporting {
     /// The actual benchmark.
     fileprivate func _benchmark(on conn: Database.Connection) throws {
         var a1 = IndexSupportingModel<Database>(name: "a", age: 1)
@@ -24,7 +24,7 @@ extension Benchmarker where Database: SQLSupporting {
     }
 }
 
-extension Benchmarker where Database: SQLSupporting {
+extension Benchmarker where Database: SchemaSupporting & MigrationSupporting {
     /// Benchmark fluent relations.
     /// The schema will be prepared first.
     public func benchmarkIndexSupporting_withSchema() throws {

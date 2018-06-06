@@ -4,7 +4,7 @@ import Fluent
 import FluentSQL
 import Foundation
 
-extension Benchmarker where Database: QuerySupporting & SQLSupporting {
+extension Benchmarker where Database: QuerySupporting & SchemaSupporting & MigrationSupporting {
     /// Benchmark the basic schema creations.
     public func benchmarkSchema() throws {
         let conn = try test(pool.requestConnection())

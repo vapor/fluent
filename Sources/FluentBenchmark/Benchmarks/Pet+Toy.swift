@@ -35,7 +35,7 @@ public final class PetToy<Database>: ModifiablePivot where Database: QuerySuppor
     }
 }
 
-internal struct PetToyMigration<Database>: Migration where Database: QuerySupporting & SQLSupporting {
+internal struct PetToyMigration<Database>: Migration where Database: QuerySupporting & SchemaSupporting & MigrationSupporting {
     /// See Migration.prepare
     static func prepare(on connection: Database.Connection) -> Future<Void> {
         return Database.create(PetToy<Database>.self, on: connection) { builder in

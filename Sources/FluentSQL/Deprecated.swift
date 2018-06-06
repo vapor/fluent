@@ -4,7 +4,7 @@ extension SchemaBuilder {
     public func addReference<T, Other>(from base: KeyPath<Model, T>, to referenced: KeyPath<Other, T>)
         where Other: Fluent.Model
     {
-        foreignKey(from: base, to: referenced)
+        reference(from: base, to: referenced)
     }
 
     /// - warning: Deprecated.
@@ -12,7 +12,7 @@ extension SchemaBuilder {
     public func addReference<T, Other>(from base: KeyPath<Model, T?>, to referenced: KeyPath<Other, T>)
         where Other: Fluent.Model
     {
-        foreignKey(from: base, to: referenced)
+        reference(from: base, to: referenced)
     }
 
     /// - warning: Deprecated.
@@ -20,7 +20,7 @@ extension SchemaBuilder {
     public func addReference<T, Other>(from base: KeyPath<Model, T>, to referenced: KeyPath<Other, T?>)
         where Other: Fluent.Model
     {
-        foreignKey(from: base, to: referenced)
+        reference(from: base, to: referenced)
     }
 }
 
@@ -47,15 +47,7 @@ extension SchemaUpdater {
     
     /// - warning: Deprecated.
     @available(*, deprecated, renamed: "deleteField(_:)")
-    public func removeField(_ column: SQLQuery.DML.Column) {
+    public func removeField(_ column: Model.Database.QueryField) {
         self.deleteField(column)
-    }
-}
-
-extension QueryBuilder where Database: SQLSupporting {
-    /// - warning: Deprecated.
-    @available(*, deprecated, renamed: "groupBy(_:)")
-    public func group<T>(by field: KeyPath<Result, T>) -> Self {
-        return groupBy(field)
     }
 }

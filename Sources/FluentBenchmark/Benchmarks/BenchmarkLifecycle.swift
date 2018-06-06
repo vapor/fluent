@@ -36,7 +36,7 @@ extension Benchmarker where Database: QuerySupporting {
     }
 }
 
-extension Benchmarker where Database: SQLSupporting {
+extension Benchmarker where Database: SchemaSupporting & MigrationSupporting {
     /// Benchmarks misc bugs, preparing the schema first.
     public func benchmarkLifecycle_withSchema() throws {
         let conn = try test(pool.requestConnection())
@@ -111,4 +111,4 @@ class LifecycleUserStateTracking {
     static var didDeleteCalled = false
 }
 
-extension LifecycleUser: Migration, AnyMigration where D: SQLSupporting { }
+extension LifecycleUser: Migration, AnyMigration where D: SchemaSupporting & MigrationSupporting { }

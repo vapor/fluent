@@ -3,7 +3,7 @@
 
 
 
-public struct SQLRowEncoder<Database> where Database: SQLSupporting {
+public struct SQLRowEncoder<Database> where Database: SchemaSupporting {
     public init() { }
     
     public func encode<E>(_ encodable: E, tableName: String? = nil) throws -> [SQLQuery.DML.Column: SQLQuery.DML.Value]

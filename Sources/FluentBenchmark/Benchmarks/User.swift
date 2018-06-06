@@ -63,7 +63,7 @@ extension User {
 // MARK: Migration
 
 internal struct UserMigration<D>: Migration
-    where D: QuerySupporting & SQLSupporting
+    where D: QuerySupporting & SchemaSupporting & MigrationSupporting
 {
     /// See Migration.database
     typealias Database = D

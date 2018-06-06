@@ -1,4 +1,4 @@
-extension SQLSupporting {
+extension SchemaSupporting where Self: MigrationSupporting {
     /// See `MigrationSupporting`.
     public static func prepareMigrationMetadata(on conn: Connection) -> Future<Void> {
         return MigrationLog<Self>.prepareMetadata(on: conn)
@@ -7,9 +7,9 @@ extension SQLSupporting {
 
 // MARK: Private
 
-extension MigrationLog: AnyMigration, Migration where Database: SQLSupporting { }
+extension MigrationLog: AnyMigration, Migration where Database: MigrationSupporting & SchemaSupporting { }
 
-private extension MigrationLog where Database: SQLSupporting {
+private extension MigrationLog where Database: MigrationSupporting & SchemaSupporting {
     /// Prepares the connection for storing migration logs.
     /// - note: this is unlike other migrations since we are checking
     ///         for an error instead of asking if the migration has already prepared.

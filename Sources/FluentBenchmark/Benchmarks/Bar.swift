@@ -47,4 +47,4 @@ struct Bar<Database>: Model where Database: QuerySupporting {
     }
 }
 
-extension Bar: Migration, AnyMigration where Database: SQLSupporting { }
+extension Bar: Migration, AnyMigration where Database: SchemaSupporting & MigrationSupporting { }

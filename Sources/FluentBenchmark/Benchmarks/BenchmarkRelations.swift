@@ -79,7 +79,7 @@ extension Benchmarker where Database: JoinSupporting & QuerySupporting {
     }
 }
 
-extension Benchmarker where Database: SQLSupporting & JoinSupporting {
+extension Benchmarker where Database: SchemaSupporting & MigrationSupporting & JoinSupporting {
     /// Benchmark fluent relations.
     /// The schema will be prepared first.
     public func benchmarkRelations_withSchema() throws {

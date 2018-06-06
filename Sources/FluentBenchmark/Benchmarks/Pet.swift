@@ -44,12 +44,12 @@ extension Pet where Database: JoinSupporting {
 
 // MARK: Migration
 
-extension Pet: Migration, AnyMigration where Database: SQLSupporting {
+extension Pet: Migration, AnyMigration where Database: SchemaSupporting & MigrationSupporting {
     /// See `Migration.prepare(on:)`
     public static func prepare(on connection: Database.Connection) -> Future<Void> {
         return Database.create(self, on: connection) { builder in
             try addProperties(to: builder)
-            builder.foreignKey(from: \.ownerID, to: \User<Database>.id, onDelete: .setNull)
+            builder.reference(from: \.ownerID, to: \User<Database>.id)
         }
     }
 }
