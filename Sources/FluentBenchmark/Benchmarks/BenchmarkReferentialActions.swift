@@ -56,16 +56,11 @@ extension Benchmarker where Database: JoinSupporting & QuerySupporting {
             }
         }
 
-        try test(tanner.delete(on: conn))
         do {
-            guard let zizFetch = try test(Pet<Database>.query(on: conn).first()) else {
-                fail("could not fetch pet")
-                return
-            }
-
-            if zizFetch.ownerID != nil {
-                fail("owner id did not get nullified")
-            }
+            try tanner.delete(on: conn).wait()
+            fail("Delete should have been prevented.")
+        } catch {
+            // success
         }
     }
 

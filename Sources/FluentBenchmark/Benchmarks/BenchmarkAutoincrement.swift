@@ -4,13 +4,13 @@ import FluentSQL
 extension Benchmarker where Database: QuerySupporting {
     /// The actual benchmark.
     fileprivate func _benchmark(on conn: Database.Connection) throws {
-        let message = LogMessage<Database>(message: "hello")
+        var message = LogMessage<Database>(message: "hello")
 
         if message.id != nil {
             fail("message ID was incorrectly set")
         }
 
-        _ = try test(message.save(on: conn))
+        message = try test(message.save(on: conn))
         if message.id == nil {
             fail("message ID was not set")
         }

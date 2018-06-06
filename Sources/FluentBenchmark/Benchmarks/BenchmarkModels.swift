@@ -66,9 +66,7 @@ extension Benchmarker where Database: QuerySupporting & SchemaSupporting & Migra
     public func benchmarkModels_withSchema() throws {
         let conn = try test(pool.requestConnection())
         try test(FooMigration<Database>.prepare(on: conn))
-        defer {
-            try? test(FooMigration<Database>.revert(on: conn))
-        }
+        defer { try? test(FooMigration<Database>.revert(on: conn)) }
         try self._benchmark(on: conn)
         pool.releaseConnection(conn)
     }

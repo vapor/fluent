@@ -4,15 +4,13 @@ import FluentSQL
 extension Benchmarker where Database: QuerySupporting {
     /// Benchmarking pipelining saves.
     fileprivate func _benchmarkPipelining(on conn: Database.Connection) throws {
-        let one = BasicUser<Database>(name: "one")
-        let two = BasicUser<Database>(name: "two")
-        let three = BasicUser<Database>(name: "three")
+        var one = BasicUser<Database>(name: "one")
+        var two = BasicUser<Database>(name: "two")
+        var three = BasicUser<Database>(name: "three")
 
-        _ = try test([
-            one.save(on: conn),
-            two.save(on: conn),
-            three.save(on: conn),
-        ].flatten(on: conn))
+        one = try test(one.save(on: conn))
+        two = try test(two.save(on: conn))
+        three = try test(three.save(on: conn))
         if one.id == two.id || one.id == three.id || two.id == three.id {
             fail("ids are equal")
         }
