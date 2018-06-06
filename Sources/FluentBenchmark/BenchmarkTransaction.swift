@@ -11,16 +11,16 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
         _ = try test(tanner.save(on: conn))
 
         do {
-            _ = try Database.transaction(on: conn) { conn in
+            _ = try Database.transaction(on: conn) { conn -> Future<User<Database>> in
                 let user = User<Database>(name: "User #1", age: 1)
-                return user.save(on: conn).flatMap(to: Void.self) { _ in
+                return user.save(on: conn).flatMap(to: User<Database>.self) { user in
                     return conn.query(User<Database>.self).count().map(to: Void.self) { count in
                         if count != 2 {
                             self.fail("count \(count) != 2")
                         }
 
                         throw FluentBenchmarkError(identifier: "test", reason: "rollback", source: .capture())
-                    }
+                    }.transform(to: user)
                 }
 
             }.wait()
