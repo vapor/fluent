@@ -134,7 +134,8 @@ public protocol QuerySupporting: Database {
     ///     - field: Field in the data to update.
     ///     - data: New encodable data to set.
     ///     - query: Mutable query to set the new data to.
-    static func queryDataSet(_ field: QueryField, to data: Encodable, on query: inout Query)
+    static func queryDataSet<E>(_ field: QueryField, to data: E, on query: inout Query)
+        where E: Encodable
 
     /// Updates the query's input data to the supplied value.
     ///

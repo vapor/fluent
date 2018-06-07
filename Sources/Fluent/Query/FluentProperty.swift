@@ -14,18 +14,36 @@ public struct FluentProperty {
         guard let property = try! reflectable.anyReflectProperty(valueType: valueType, keyPath: keyPath) else {
             fatalError("Could not reflect property `\(keyPath)`.")
         }
-        return .init(path: property.path, rootType: rootType, valueType: valueType)
+        return .init(
+            entity: (rootType as? AnyModel.Type)?.entity,
+            path: property.path,
+            rootType: rootType,
+            valueType: valueType
+        )
     }
 
     /// Creates self from a `CodingKey`.
     public static func codingKey(_ key: CodingKey, rootType: Any.Type, valueType: Any.Type) -> FluentProperty {
-        return .init(path: [key.stringValue], rootType: rootType, valueType: valueType)
+        return .init(
+            entity: (rootType as? AnyModel.Type)?.entity,
+            path: [key.stringValue],
+            rootType: rootType,
+            valueType: valueType
+        )
     }
 
     /// Creates self from a `ReflectedProperty`.
     public static func reflected(_ property: ReflectedProperty, rootType: Any.Type) -> FluentProperty {
-        return .init(path: property.path, rootType: rootType, valueType: property.type)
+        return .init(
+            entity: (rootType as? AnyModel.Type)?.entity,
+            path: property.path,
+            rootType: rootType,
+            valueType: property.type
+        )
     }
+    
+    /// Entity name, if exists.
+    public var entity: String?
 
     /// String path to the property.
     public var path: [String]
