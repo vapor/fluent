@@ -18,16 +18,6 @@ public final class User<D>: Model where D: QuerySupporting {
     /// See Timestampable.updatedAtKey
     public static var updatedAtKey: TimestampKey? { return \.updatedAt }
 
-    /// See Model.name
-    public static var entity: String {
-        return "users"
-    }
-
-    /// See Model.database
-    public static var database: DatabaseIdentifier<D> {
-        return .init("test")
-    }
-
     /// Foo's identifier
     var id: UUID?
 

@@ -191,7 +191,8 @@ public protocol QuerySupporting: Database {
     ///
     /// - parameters:
     ///     - encodables: Array of `Encodable` items to convert to filter bind values.
-    static func queryFilterValue(_ encodables: [Encodable]) -> QueryFilterValue
+    static func queryFilterValue<E>(_ encodables: [E]) -> QueryFilterValue
+        where E: Encodable
 
     /// Indicates a `nil` filter value.
     static var queryFilterValueNil: QueryFilterValue { get }
@@ -228,6 +229,8 @@ public protocol QuerySupporting: Database {
 
     /// ||
     static var queryFilterRelationOr: QueryFilterRelation { get }
+    
+    static func queryDefaultFilterRelation(_ relation: QueryFilterRelation, on: inout Query)
 
     /// Creates an instance of `QueryFilter` from a relation and an array of other filters.
     ///

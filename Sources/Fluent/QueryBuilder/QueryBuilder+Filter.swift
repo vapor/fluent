@@ -37,7 +37,9 @@ extension QueryBuilder {
     ///     - value: Value to filter by.
     /// - returns: Query builder for chaining.
     @discardableResult
-    public func filter<A, T>(_ key: KeyPath<A, T>, _ method: Database.QueryFilterMethod, _ value: Encodable) -> Self {
+    public func filter<A, T>(_ key: KeyPath<A, T>, _ method: Database.QueryFilterMethod, _ value: T) -> Self
+        where T: Encodable
+    {
         if value.isNil {
             return filter(Database.queryField(.keyPath(key)), method, Database.queryFilterValueNil)
         } else {
@@ -57,7 +59,9 @@ extension QueryBuilder {
     ///     - value: Value to filter by.
     /// - returns: Query builder for chaining.
     @discardableResult
-    public func filter(_ field: Database.QueryField, _ method: Database.QueryFilterMethod, _ value: Encodable) -> Self {
+    public func filter<T>(_ field: Database.QueryField, _ method: Database.QueryFilterMethod, _ value: T) -> Self
+        where T: Encodable
+    {
         if value.isNil {
             return filter(field, method, Database.queryFilterValueNil)
         } else {
@@ -107,6 +111,7 @@ extension QueryBuilder {
         // switch this query builder to an empty query, saving the main query
         let main = query
         query = Database.query(Database.queryEntity(for: query))
+        Database.queryDefaultFilterRelation(relation, on: &query)
 
         // run
         try closure(self)

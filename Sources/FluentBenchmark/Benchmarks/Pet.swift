@@ -5,9 +5,6 @@ import Foundation
 public final class Pet<Database>: Model where Database: QuerySupporting {
     /// See Model.idKey
     public static var idKey: WritableKeyPath<Pet<Database>, UUID?> { return \.id }
-    
-    /// See `Model`.
-    public static var entity: String { return "pets" }
 
     /// Foo's identifier
     var id: UUID?
