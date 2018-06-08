@@ -105,3 +105,20 @@ extension QueryBuilder {
         }
     }
 }
+
+extension QueryBuilder where Result: Model {
+    /// Sets the query to decode type `D` when run.
+    ///
+    ///     let joined = try User.query(on: req)
+    ///         .join(Pet.self, field: \.userID, to: \.id)
+    ///         .decode(Pet.self, "pets")
+    ///         .all()
+    ///     print(joined) // Future<[Pet]>
+    ///
+    /// - parameters:
+    ///     - type: New decodable type `D` to decode.
+    /// - returns: `QueryBuilder` decoding type `D`.
+    public func decode<D>(_ type: D.Type) -> QueryBuilder<Database, D> where D: Decodable {
+        return decode(D.self, Result.entity)
+    }
+}
