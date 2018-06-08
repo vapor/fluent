@@ -29,6 +29,13 @@ public final class CacheEntry<Database>: Model where Database: QuerySupporting {
     }
 }
 
+extension CacheEntry: CustomStringConvertible {
+    /// See `CustomStringConvertible`.
+    public var description: String {
+        return (key ?? "nil") + ":" + data.description
+    }
+}
+
 extension MigrationConfig {
     /// Prepares the supplied `SQLDatabase` database for use with `DatabaseKeyedCache`.
     public mutating func prepareCache<D>(for database: DatabaseIdentifier<D>) where D: SchemaSupporting & MigrationSupporting {
