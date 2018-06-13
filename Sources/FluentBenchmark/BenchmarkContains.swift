@@ -41,6 +41,21 @@ extension Benchmarker where Database: QuerySupporting, Database.QueryFilter: Dat
         if notner != 2 {
             fail("nertan == \(tas)")
         }
+
+        let notrp = try test(User<Database>.query(on: conn).filter(\.name !~= "r").count())
+        if notrp != 1 {
+            fail("notpr == \(notrp)")
+        }
+
+        let nottas = try test(User<Database>.query(on: conn).filter(\.name !=~ "ta").count())
+        if nottas != 1 {
+            fail("nottas == \(nottas)")
+        }
+
+        let notan = try test(User<Database>.query(on: conn).filter(\.name !~~ "an").count())
+        if notan != 1 {
+            fail("notan == \(notan)")
+        }
     }
 
     /// Benchmark fluent contains.
