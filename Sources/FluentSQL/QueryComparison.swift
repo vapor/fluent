@@ -89,6 +89,31 @@ public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws ->
     return try _contains(lhs, .like, .data("%\(rhs)%"))
 }
 
+infix operator !~=
+/// Has not prefix
+public func !~= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
+  where Model.Database.QueryFilter: DataPredicateComparisonConvertible
+{
+  return try _contains(lhs, .notLike, .data("%\(rhs)"))
+}
+
+
+infix operator !=~
+/// Has not suffix.
+public func !=~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
+  where Model.Database.QueryFilter: DataPredicateComparisonConvertible
+{
+  return try _contains(lhs, .notLike, .data("\(rhs)%"))
+}
+
+infix operator !~~
+/// Not Contains.
+public func !~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: String) throws -> ModelFilter<Model>
+  where Model.Database.QueryFilter: DataPredicateComparisonConvertible
+{
+  return try _contains(lhs, .notLike, .data("%\(rhs)%"))
+}
+
 /// Operator helper func.
 private func _contains<M, V>(_ key: KeyPath<M, V>, _ comp: DataPredicateComparison, _ value: QueryFilterValue<M.Database>) throws -> ModelFilter<M>
     where M.Database.QueryFilter: DataPredicateComparisonConvertible

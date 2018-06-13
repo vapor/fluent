@@ -78,13 +78,12 @@ public func <= <Model, Value>(lhs: KeyPath<Model, Value>, rhs: Value?) throws ->
 }
 
 infix operator ~~
-infix operator !~
-
 /// Subset: IN.
 public func ~~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: [Value]) throws -> ModelFilter<Model> {
     return try _compare(lhs, .in, .array(rhs))
 }
 
+infix operator !~
 /// Subset: NOT IN.
 public func !~ <Model, Value>(lhs: KeyPath<Model, Value>, rhs: [Value]) throws -> ModelFilter<Model> {
     return try _compare(lhs, .notIn, .array(rhs))
