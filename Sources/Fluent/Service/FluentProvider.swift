@@ -15,6 +15,7 @@ public final class FluentProvider: Provider {
     public func register(_ services: inout Services) throws {
         try services.register(DatabaseKitProvider())
         services.register(RevertCommand())
+        services.register(MigrateCommand())
     }
 
     /// See `Provider`.
