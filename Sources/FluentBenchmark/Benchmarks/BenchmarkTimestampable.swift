@@ -30,8 +30,8 @@ extension Benchmarker where Database: QuerySupporting {
             return
         }
 
-        if !fetched.createdAt!.isWithin(seconds: 0.002, of: bar.createdAt!) ||
-           !fetched.updatedAt!.isWithin(seconds: 0.002, of: bar.updatedAt!) {
+        if !fetched.createdAt!.isWithin(seconds: 2, of: bar.createdAt!) ||
+           !fetched.updatedAt!.isWithin(seconds: 2, of: bar.updatedAt!) {
             fail("fetched timestamps are >= 2ms different from expected according to model")
         }
     }
@@ -66,8 +66,8 @@ extension Benchmarker where Database: QuerySupporting {
             return
         }
 
-        if !fetched.createdAt!.isWithin(seconds: 0.002, of: tanner.createdAt!) ||
-           !fetched.updatedAt!.isWithin(seconds: 0.002, of: tanner.updatedAt!) {
+        if !fetched.createdAt!.isWithin(seconds: 2, of: tanner.createdAt!) ||
+           !fetched.updatedAt!.isWithin(seconds: 2, of: tanner.updatedAt!) {
             fail("fetched timestamps are >= 2ms different from expected according to model")
         }
     }

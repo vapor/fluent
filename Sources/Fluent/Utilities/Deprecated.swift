@@ -22,6 +22,14 @@ extension Model {
     }
 }
 
+extension TransactionSupporting {
+    /// - warning: Deprecated.
+    @available(*, deprecated, message: "Use the new `DatabaseConnectable.transaction(...)` method instead.")
+    public static func transaction(_ transaction:  @escaping (Connection) throws -> Future<Void>, on conn: Connection) -> Future<Void> {
+        return transactionExecute(transaction, on: conn)
+    }
+}
+
 extension QueryBuilder {
     /// - warning: Deprecated.
     @available(*, deprecated, message: "Use Model.query(on:withSoftDeleted:)")
@@ -78,6 +86,12 @@ extension SchemaBuilder {
         where Other: Fluent.Model
     {
         reference(from: base, to: referenced)
+    }
+    
+    /// - warning: Deprecated.
+    @available(*, deprecated, renamed: "reference(for:type:)")
+    public func field<T>(type: Model.Database.SchemaFieldType, for key: KeyPath<Model, T>) {
+        field(for: key, type: type)
     }
 }
 
