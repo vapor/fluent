@@ -21,7 +21,7 @@ extension DatabaseConnectable {
     ///     - db: `DatabaseIdentifier` to perform the transaction on.
     ///     - closure: Closure to perform within the database transaction.
     /// - returns: A future containing the closure result.
-    public func transaction<Database, T>(on db: DatabaseIdentifier<Database>, _ closure: @escaping (Database.Connection) -> Future<T>) -> Future<T>
+    public func transaction<Database, T>(on db: DatabaseIdentifier<Database>, _ closure: @escaping (Database.Connection) throws -> Future<T>) -> Future<T>
         where Database: TransactionSupporting
     {
         return databaseConnection(to: db).flatMap { conn in
