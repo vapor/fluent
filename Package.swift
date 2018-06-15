@@ -9,13 +9,13 @@ let package = Package(
     ],
     dependencies: [
         // 🌎 Utility package containing tools for byte manipulation, Codable, OS APIs, and debugging.
-        .package(url: "https://github.com/vapor/core.git", .branch("fluent-gm")),
+        .package(url: "https://github.com/vapor/core.git", from: "3.0.0"),
 
         // 💻 APIs for creating interactive CLI tools.
         .package(url: "https://github.com/vapor/console.git", from: "3.0.0"),
 
         // 🗄 Core services for creating database integrations.
-        .package(url: "https://github.com/vapor/database-kit.git", .branch("fluent-gm")),
+        .package(url: "https://github.com/vapor/database-kit.git", from: "1.0.0"),
 
         // 📦 Dependency injection / inversion of control framework.
         .package(url: "https://github.com/vapor/service.git", from: "1.0.0"),
