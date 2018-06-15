@@ -15,14 +15,7 @@ public final class MigrateCommand: Command, Service {
     static func migrate(on container: Container) throws -> Future<Void> {
         let logger = try container.make(Logger.self)
         if let migrations = try? container.make(MigrationConfig.self) {
-            return migrations.storage.map { (uid, migration) in
-                return {
-                    logger.info("Migrating '\(uid)' database")
-                    return migration.migrationPrepareBatch(on: container)
-                }
-            }.syncFlatten(on: container).map {
-                logger.info("Migrations complete")
-            }
+            return migrations.prepare(on: container)
         } else {
             logger.info("No migrations configured.")
             return .done(on: container)
