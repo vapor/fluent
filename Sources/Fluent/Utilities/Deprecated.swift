@@ -125,3 +125,11 @@ extension SchemaUpdater {
         self.deleteField(column)
     }
 }
+
+extension DatabasesConfig {
+    /// - warning: Deprecated.
+    @available(*, deprecated, renamed: "enableReferences(on:)")
+    public mutating func enableReferebces<D>(on db: DatabaseIdentifier<D>) where D: SchemaSupporting {
+        return enableReferences(on: db)
+    }
+}

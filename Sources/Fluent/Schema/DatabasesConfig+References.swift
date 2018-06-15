@@ -1,5 +1,5 @@
 extension DatabasesConfig {
-    public mutating func enableReferebces<D>(on db: DatabaseIdentifier<D>) where D: SchemaSupporting {
+    public mutating func enableReferences<D>(on db: DatabaseIdentifier<D>) where D: SchemaSupporting {
         appendConfigurationHandler(on: db) { D.enableReferences(on: $0) }
     }
     
