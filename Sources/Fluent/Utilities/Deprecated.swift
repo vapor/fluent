@@ -65,26 +65,29 @@ extension DatabaseConnectable {
 
 extension SchemaBuilder {
     /// - warning: Deprecated.
-    @available(*, deprecated, renamed: "reference(from:to:)")
-    public func addReference<T, Other>(from base: KeyPath<Model, T>, to referenced: KeyPath<Other, T>)
+    @available(*, deprecated, renamed: "reference(from:to:onUpdate:onDelete:)")
+    public func addReference<T, Other>(from base: KeyPath<Model, T>, to referenced: KeyPath<Other, T>, actions: Model.Database.SchemaReferenceAction? = nil)
         where Other: Fluent.Model
     {
+        assert(actions == nil, "use reference(from:to:onUpdate:onDelete:)")
         reference(from: base, to: referenced)
     }
     
     /// - warning: Deprecated.
-    @available(*, deprecated, renamed: "reference(from:to:)")
-    public func addReference<T, Other>(from base: KeyPath<Model, T?>, to referenced: KeyPath<Other, T>)
+    @available(*, deprecated, renamed: "reference(from:to:onUpdate:onDelete:)")
+    public func addReference<T, Other>(from base: KeyPath<Model, T?>, to referenced: KeyPath<Other, T>, actions: Model.Database.SchemaReferenceAction? = nil)
         where Other: Fluent.Model
     {
+        assert(actions == nil, "use reference(from:to:onUpdate:onDelete:)")
         reference(from: base, to: referenced)
     }
     
     /// - warning: Deprecated.
-    @available(*, deprecated, renamed: "reference(from:to:)")
-    public func addReference<T, Other>(from base: KeyPath<Model, T>, to referenced: KeyPath<Other, T?>)
+    @available(*, deprecated, renamed: "reference(from:to:onUpdate:onDelete:)")
+    public func addReference<T, Other>(from base: KeyPath<Model, T>, to referenced: KeyPath<Other, T?>, actions: Model.Database.SchemaReferenceAction? = nil)
         where Other: Fluent.Model
     {
+        assert(actions == nil, "use reference(from:to:onUpdate:onDelete:)")
         reference(from: base, to: referenced)
     }
     
