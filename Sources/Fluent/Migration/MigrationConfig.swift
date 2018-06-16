@@ -55,4 +55,67 @@ public struct MigrationConfig: Service {
         config.migrations.append(Migration.self)
         storage[database.uid] = config
     }
+    
+    /// Prepares a single batch of migrations.
+    ///
+    /// - parameters:
+    ///     - container: `Container` to use for fetching connections.
+    /// - returns: A future that will complete when the task is finished.
+    public func prepare(on container: Container) -> Future<Void> {
+        do {
+            let logger = try container.make(Logger.self)
+            return storage.map { (uid, migration) in
+                return {
+                    logger.info("Migrating '\(uid)' database")
+                    return migration.migrationPrepareBatch(on: container)
+                }
+            }.syncFlatten(on: container).map { _ in
+                logger.info("Migrations complete")
+            }
+        } catch {
+            return container.future(error: error)
+        }
+    }
+    
+    /// Reverts a single batch of prepared migrations.
+    ///
+    /// - parameters:
+    ///     - container: `Container` to use for fetching connections.
+    /// - returns: A future that will complete when the task is finished.
+    public func revert(on container: Container) -> Future<Void> {
+        do {
+            let logger = try container.make(Logger.self)
+            return storage.map { (uid, migration) in
+                return {
+                    logger.info("Reverting last batch of migrations on '\(uid)' database")
+                    return migration.migrationRevertBatch(on: container)
+                }
+            }.syncFlatten(on: container).map {
+                logger.info("Succesfully reverted last batch of migrations")
+            }
+        } catch {
+            return container.future(error: error)
+        }
+    }
+    
+    /// Reverts all prepared migrations.
+    ///
+    /// - parameters:
+    ///     - container: `Container` to use for fetching connections.
+    /// - returns: A future that will complete when the task is finished.
+    public func revertAll(on container: Container) -> Future<Void> {
+        do {
+            let logger = try container.make(Logger.self)
+            return storage.map { (uid, migration) in
+                return {
+                    logger.info("Reverting all migrations on '\(uid)' database")
+                    return migration.migrationRevertAll(on: container)
+                }
+            }.syncFlatten(on: container).map {
+                logger.info("Successfully reverted all migrations")
+            }
+        } catch {
+            return container.future(error: error)
+        }
+    }
 }

@@ -9,7 +9,9 @@ extension SchemaSupporting {
         let creator = SchemaCreator(Model.self)
         return Future.flatMap(on: conn) {
             try closure(creator)
-            return self.schemaExecute(creator.schema, on: conn)
+            return conn.fluentOperation {
+                return self.schemaExecute(creator.schema, on: conn)
+            }
         }
     }
     
@@ -21,7 +23,9 @@ extension SchemaSupporting {
         let updater = SchemaUpdater(Model.self)
         return Future.flatMap(on: conn) {
             try closure(updater)
-            return self.schemaExecute(updater.schema, on: conn)
+            return conn.fluentOperation {
+                return self.schemaExecute(updater.schema, on: conn)
+            }
         }
     }
     
@@ -29,6 +33,8 @@ extension SchemaSupporting {
     public static func delete<Model>(_ model: Model.Type, on conn: Connection) -> Future<Void>
         where Model: Fluent.Model, Model.Database == Self
     {
-        return schemaExecute(Model.Database.schemaCreate(Model.Database.schemaActionDelete, Model.entity), on: conn)
+        return conn.fluentOperation {
+            return schemaExecute(Model.Database.schemaCreate(Model.Database.schemaActionDelete, Model.entity), on: conn)
+        }
     }
 }

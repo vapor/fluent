@@ -39,30 +39,14 @@ public final class RevertCommand: Command, Service {
             guard context.console.confirm("Are you sure you want to revert all migrations?") else {
                 throw FluentError(identifier: "cancelled", reason: "Migration revert cancelled.")
             }
-
-            return migrations.storage.map { (uid, migration) in
-                return {
-                    logger.info("Reverting all migrations on '\(uid)' database")
-                    return migration.migrationRevertAll(on: context.container)
-                }
-            }.syncFlatten(on: context.container).map(to: Void.self) {
-                logger.info("Successfully reverted all migrations")
-            }
+            return migrations.revertAll(on: context.container)
         } else {
             logger.info("Revert last batch of migrations requested")
             logger.warning("This will revert the last batch of migrations for all configured databases")
             guard context.console.confirm("Are you sure you want to revert the last batch of migrations?") else {
                 throw FluentError(identifier: "cancelled", reason: "Migration revert cancelled.")
             }
-
-            return migrations.storage.map { (uid, migration) in
-                return {
-                    logger.info("Reverting last batch of migrations on '\(uid)' database")
-                    return migration.migrationRevertBatch(on: context.container)
-                }
-            }.syncFlatten(on: context.container).map(to: Void.self) {
-                logger.info("Succesfully reverted last batch of migrations")
-            }
+            return migrations.revert(on: context.container)
         }
     }
 }
