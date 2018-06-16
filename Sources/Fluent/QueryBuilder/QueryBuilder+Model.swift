@@ -10,7 +10,7 @@ extension QueryBuilder where Result: Model, Result.Database == Database {
     /// - parameters:
     ///     - model: `Model` to save.
     /// - returns: A `Future` containing the saved `Model`.
-    internal func save(_ model: Result) -> Future<Result> {
+    public func save(_ model: Result) -> Future<Result> {
         if model.fluentID != nil {
             return update(model)
         } else {
@@ -27,7 +27,7 @@ extension QueryBuilder where Result: Model, Result.Database == Database {
     /// - parameters:
     ///     - model: `Model` to create.
     /// - returns: A `Future` containing the created `Model`.
-    internal func create(_ model: Result) -> Future<Result> {
+    public func create(_ model: Result) -> Future<Result> {
         Database.queryActionApply(Database.queryActionCreate, to: &query)
         var copy: Result
         if Result.createdAtKey != nil || Result.updatedAtKey != nil {
@@ -70,7 +70,7 @@ extension QueryBuilder where Result: Model, Result.Database == Database {
     ///     - model: `Model` to update.
     ///     - originalID: Specify the original ID if the ID has changed.
     /// - returns: A `Future` containing the created `Model`.
-    internal func update(_ model: Result, originalID: Result.ID? = nil) -> Future<Result> {
+    public func update(_ model: Result, originalID: Result.ID? = nil) -> Future<Result> {
         Database.queryActionApply(Database.queryActionUpdate, to: &query)
         var copy: Result
         if Result.updatedAtKey != nil {
