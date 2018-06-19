@@ -5,6 +5,7 @@ let package = Package(
     name: "Fluent",
     products: [
         .library(name: "Fluent", targets: ["Fluent"]),
+        .library(name: "FluentSQL", targets: ["FluentSQL"]),
         .library(name: "FluentBenchmark", targets: ["FluentBenchmark"]),
     ],
     dependencies: [
@@ -15,13 +16,17 @@ let package = Package(
         .package(url: "https://github.com/vapor/console.git", from: "3.0.0"),
 
         // 🗄 Core services for creating database integrations.
-        .package(url: "https://github.com/vapor/database-kit.git", from: "1.0.0"),
+        .package(url: "https://github.com/vapor/database-kit.git", .branch("sql")),
 
         // 📦 Dependency injection / inversion of control framework.
         .package(url: "https://github.com/vapor/service.git", from: "1.0.0"),
+        
+        // *️⃣ Build SQL queries in Swift. Extensible, protocol-based design that supports DQL, DML, and DDL.
+        .package(url: "https://github.com/vapor/sql.git", .branch("sql")),
     ],
     targets: [
         .target(name: "Fluent", dependencies: ["Async", "Console", "Command", "Core", "DatabaseKit", "Logging", "Service"]),
+        .target(name: "FluentSQL", dependencies: ["Fluent", "SQL"]),
         .testTarget(name: "FluentTests", dependencies: ["FluentBenchmark"]),
         .target(name: "FluentBenchmark", dependencies: ["Fluent"]),
     ]
