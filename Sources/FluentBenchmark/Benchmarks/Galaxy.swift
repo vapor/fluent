@@ -1,4 +1,4 @@
-struct Galaxy<Database>: Model where Database: QuerySupporting {
+struct Galaxy<Database>: Model, Equatable where Database: QuerySupporting {
     typealias ID = UUID
     static var idKey: IDKey { return \.id }
     var id: UUID?
