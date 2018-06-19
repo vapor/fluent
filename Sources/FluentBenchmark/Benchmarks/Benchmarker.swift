@@ -91,6 +91,7 @@ extension Benchmarker where
         try benchmarkTimestampable_withSchema()
         try benchmarkTransactions_withSchema()
         try benchmarkRange_withSchema()
+        try benchmarkSubset_withSchema()
     }
 }
 
