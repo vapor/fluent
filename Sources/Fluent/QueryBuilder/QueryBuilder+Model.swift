@@ -35,12 +35,10 @@ extension QueryBuilder where Result: Model, Result.Database == Database {
         if Result.createdAtKey != nil || Result.createdAtKey != nil {
             let now = Date()
             
-            // check if TimestampKey used for createdAt property
             if Result.createdAtKey != nil, copy.fluentCreatedAt == nil {
                 copy.fluentCreatedAt = now
             }
 
-            // check if TimestampKey used for updatedAt property
             if Result.updatedAtKey != nil, copy.fluentUpdatedAt == nil {
                 copy.fluentUpdatedAt = now
             }
