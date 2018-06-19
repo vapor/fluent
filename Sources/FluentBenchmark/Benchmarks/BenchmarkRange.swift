@@ -6,9 +6,9 @@ extension Benchmarker where Database: QuerySupporting {
         _ = try test(Galaxy<Database>(name: "Tiangulum").save(on: conn))
         _ = try test(Galaxy<Database>(name: "Sunflower").save(on: conn))
 
-        func testCount(_ builder: QueryBuilder<Database, Galaxy<Database>>, _ expected: Int) throws {
-            let count = try test(builder.count())
-            if count != expected { fail("invalid count: \(count) != \(expected)") }
+        func testCount(_ builder: QueryBuilder<Database, Galaxy<Database>>, _ expected: Int, line: UInt = #line) throws {
+            let count = try test(builder.all(), line: line).count
+            if count != expected { fail("invalid count: \(count) != \(expected)", line: line) }
         }
 
         try testCount(Galaxy<Database>.query(on: conn).range(..<1), 1)
@@ -16,11 +16,9 @@ extension Benchmarker where Database: QuerySupporting {
         try testCount(Galaxy<Database>.query(on: conn).range(...1), 2)
         try testCount(Galaxy<Database>.query(on: conn).range(0...1), 2)
         try testCount(Galaxy<Database>.query(on: conn).range(1...1), 1)
-        try testCount(Galaxy<Database>.query(on: conn).range(0...), 5)
-        try testCount(Galaxy<Database>.query(on: conn).range(1...), 4)
-        try testCount(Galaxy<Database>.query(on: conn).range(2...), 3)
-        try testCount(Galaxy<Database>.query(on: conn).range(4..<5), 3)
         try testCount(Galaxy<Database>.query(on: conn).range(4..<5), 1)
+        try testCount(Galaxy<Database>.query(on: conn).range(3..<5), 2)
+        try testCount(Galaxy<Database>.query(on: conn).range(2..<4), 2)
     }
 
     public func benchmarkRange() throws {
