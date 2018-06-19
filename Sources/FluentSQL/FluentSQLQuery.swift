@@ -5,7 +5,6 @@ public protocol FluentSQLQuery {
     associatedtype OrderBy: SQLOrderBy
     associatedtype TableIdentifier: SQLTableIdentifier
     associatedtype SelectExpression: SQLSelectExpression
-    associatedtype Upsert: SQLUpsert
     
     var statement: Statement { get set }
     var table: TableIdentifier { get set }
@@ -16,8 +15,6 @@ public protocol FluentSQLQuery {
     var limit: Int? { get set }
     var offset: Int? { get set }
     var values: [String: Expression] { get set }
-    var upsert: Upsert? { get set }
-    
     var defaultBinaryOperator: Expression.BinaryOperator { get set }
     
     static func query(_ statement: Statement, _ table: TableIdentifier) -> Self
