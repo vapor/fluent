@@ -72,6 +72,29 @@ public final class Benchmarker<Database> where Database: LogSupporting {
         }
     }
 }
+extension Benchmarker where
+    Database: SchemaSupporting & MigrationSupporting & JoinSupporting & KeyedCacheSupporting & TransactionSupporting
+{
+    public func runAll() throws {
+        try benchmarkAutoincrement_withSchema()
+        try benchmarkBugs_withSchema()
+        try benchmarkCache_withSchema()
+        try benchmarkChunking_withSchema()
+        try benchmarkIndexSupporting_withSchema()
+        try benchmarkJoins_withSchema()
+        try benchmarkLifecycle_withSchema()
+        try benchmarkModels_withSchema()
+        try benchmarkReferentialActions_withSchema()
+        try benchmarkRelations_withSchema()
+        try benchmarkSchema()
+        try benchmarkSoftDeletable_withSchema()
+        try benchmarkTimestampable_withSchema()
+        try benchmarkTransactions_withSchema()
+        try benchmarkRange_withSchema()
+        try benchmarkSubset_withSchema()
+        try benchmarkSort_withSchema()
+    }
+}
 
 final class BenchmarkLogger: DatabaseLogHandler {
     /// Logs collected
