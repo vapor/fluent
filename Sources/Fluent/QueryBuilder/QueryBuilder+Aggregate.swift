@@ -82,7 +82,7 @@ extension QueryBuilder {
     private func _aggregate<D>(_ aggregate: Database.QueryKey, as type: D.Type = D.self) -> Future<D>
         where D: Decodable
     {
-        
+        let copy = self.query
         // this should be the only key, or else there may be issues
         Database.queryKeyApply(aggregate, to: &query)
 
@@ -100,6 +100,7 @@ extension QueryBuilder {
                     ]
                 )
             }
+            self.query = copy
             return result
         }
     }

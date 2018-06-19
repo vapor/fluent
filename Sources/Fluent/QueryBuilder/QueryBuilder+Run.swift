@@ -21,7 +21,7 @@ extension QueryBuilder {
     ///
     /// - returns: A `Future` containing the first result, if one exists.
     public func first() -> Future<Result?> {
-        return range(...1).all().map { $0.first }
+        return range(..<1).all().map { $0.first }
     }
 
     /// Convenience for chunking model results.
