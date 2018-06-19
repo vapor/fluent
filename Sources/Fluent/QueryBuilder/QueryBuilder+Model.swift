@@ -33,24 +33,14 @@ extension QueryBuilder where Result: Model, Result.Database == Database {
         
         let now = Date()
         
-        // check if TimestampKey is used for createdAt property
-        if let createdAt = Result.createdAtKey {
-            // check if custom createdAt value is specified
-            if let date = model[keyPath: createdAt] {
-                copy.fluentCreatedAt = date
-            } else {
-                copy.fluentCreatedAt = now
-            }
+        // check if TimestampKey used for createdAt property
+        if Result.createdAtKey != nil, copy.fluentCreatedAt == nil {
+            copy.fluentCreatedAt = now
         }
         
-        // check if TimestampKey is used for updatedAt property
-        if let updatedAt = Result.updatedAtKey {
-            // check if custom updatedAt value is specified
-            if let date = model[keyPath: updatedAt] {
-                copy.fluentUpdatedAt = date
-            } else {
-                copy.fluentUpdatedAt = now
-            }
+        // check if TimestampKey used for updatedAt property
+        if Result.updatedAtKey != nil, copy.fluentUpdatedAt == nil {
+            copy.fluentUpdatedAt = now
         }
 
         return connection.flatMap { conn in
