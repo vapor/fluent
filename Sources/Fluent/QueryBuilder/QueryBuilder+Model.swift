@@ -32,7 +32,7 @@ extension QueryBuilder where Result: Model, Result.Database == Database {
         var copy = model
         
         // set timestamps
-        if Result.createdAtKey != nil || Result.createdAtKey != nil {
+        if Result.createdAtKey != nil || Result.updatedAtKey != nil {
             let now = Date()
             
             if Result.createdAtKey != nil, copy.fluentCreatedAt == nil {
