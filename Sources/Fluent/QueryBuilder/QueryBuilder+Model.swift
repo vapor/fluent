@@ -29,15 +29,19 @@ extension QueryBuilder where Result: Model, Result.Database == Database {
     /// - returns: A `Future` containing the created `Model`.
     public func create(_ model: Result) -> Future<Result> {
         Database.queryActionApply(Database.queryActionCreate, to: &query)
-        var copy: Result
+        var copy = model
+        
+        // set timestamps
         if Result.createdAtKey != nil || Result.updatedAtKey != nil {
-            // set timestamps
-            copy = model
             let now = Date()
-            copy.fluentUpdatedAt = now
-            copy.fluentCreatedAt = now
-        } else {
-            copy = model
+            
+            if Result.createdAtKey != nil, copy.fluentCreatedAt == nil {
+                copy.fluentCreatedAt = now
+            }
+
+            if Result.updatedAtKey != nil, copy.fluentUpdatedAt == nil {
+                copy.fluentUpdatedAt = now
+            }
         }
 
         return connection.flatMap { conn in
