@@ -3,6 +3,7 @@ public protocol FluentSQLQuery {
     associatedtype Expression: SQLExpression
     associatedtype Join: SQLJoin
     associatedtype OrderBy: SQLOrderBy
+    associatedtype GroupBy: SQLGroupBy
     associatedtype TableIdentifier: SQLTableIdentifier
     associatedtype SelectExpression: SQLSelectExpression
     
@@ -12,6 +13,7 @@ public protocol FluentSQLQuery {
     var predicate: Expression? { get set }
     var joins: [Join] { get set }
     var orderBy: [OrderBy] { get set }
+    var groupBy: [GroupBy] { get set }
     var limit: Int? { get set }
     var offset: Int? { get set }
     var values: [String: Expression] { get set }
