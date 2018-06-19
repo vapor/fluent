@@ -53,7 +53,7 @@ extension QueryBuilder {
     ///     - upper: `upper` - `lower` = maximum results.
     /// - returns: Query builder for chaining.
     public func range(lower: Int = 0, upper: Int? = nil) -> Self {
-        Database.queryRangeApply(lower: lower, upper: upper, to: &query)
+        Database.queryRangeApply(lower: lower, upper: upper.flatMap { $0 + 1}, to: &query)
         return self
     }
 }
