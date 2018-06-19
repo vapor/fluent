@@ -90,6 +90,7 @@ extension Benchmarker where
         try benchmarkSoftDeletable_withSchema()
         try benchmarkTimestampable_withSchema()
         try benchmarkTransactions_withSchema()
+        try benchmarkRange_withSchema()
     }
 }
 
