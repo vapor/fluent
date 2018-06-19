@@ -7,7 +7,7 @@ extension QueryBuilder {
     ///
     /// - returns: Query builder for chaining.
     public func range(_ range: Range<Int>) -> Self {
-        return self.range(lower: range.lowerBound, upper: range.upperBound)
+        return self.range(lower: range.lowerBound, upper: range.upperBound - 1)
     }
 
     /// Limits the results of this query to the specified range.
