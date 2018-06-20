@@ -97,7 +97,12 @@ extension SchemaSupporting where
 {
     /// See `SchemaSupporting`.
     public static func schemaUnique(on: [QueryField]) -> SchemaConstraint {
-        let uid = on.map { $0.identifier.string }.joined(separator: "+")
+        let uid = on.map {
+            guard let table = $0.table else {
+                fatalError("Cannot create unique constraint on column without table identifier: \($0).")
+            }
+            return "\(table.identifier.string).\($0.identifier.string)"
+        }.joined(separator: "+")
         return .constraint(.unique(on.map { $0.identifier }), .identifier("uq:\(normalizeSQLConstraintIdentifier(uid))"))
     }
 }
