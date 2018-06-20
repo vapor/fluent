@@ -1,6 +1,6 @@
 extension QueryBuilder {
     // MARK: Filter
-
+    
     /// Applies a filter to this query. Usually you will use the filter operators to do this.
     ///
     ///     let users = try User.query(on: conn)
@@ -9,7 +9,7 @@ extension QueryBuilder {
     ///
     /// - parameters:
     ///     - key: Swift `KeyPath` to a field on the model to filter.
-    ///     - type: Query filter type to use.
+    ///     - method: Query filter method type to use.
     ///     - value: Value to filter by.
     /// - returns: Query builder for chaining.
     @discardableResult
@@ -22,7 +22,7 @@ extension QueryBuilder {
             return filter(Database.queryField(.keyPath(key)), method, Database.queryFilterValue([value]))
         }
     }
-
+    
     /// Applies a filter to this query for a joined entity. Usually you will use the filter operators to do this.
     ///
     ///     let users = try User.query(on: conn)
@@ -31,9 +31,8 @@ extension QueryBuilder {
     ///         .all()
     ///
     /// - parameters:
-    ///     - joined: Joined model type to filter.
     ///     - key: Swift `KeyPath` to a field on the model to filter.
-    ///     - type: Query filter type to use.
+    ///     - method: Query filter method type to use.
     ///     - value: Value to filter by.
     /// - returns: Query builder for chaining.
     @discardableResult
@@ -46,7 +45,7 @@ extension QueryBuilder {
             return filter(Database.queryField(.keyPath(key)), method, Database.queryFilterValue([value]))
         }
     }
-
+    
     /// Applies a filter to this query using a custom field. Usually you will use the filter operators to do this.
     ///
     ///     let users = try User.query(on: conn)
@@ -54,8 +53,8 @@ extension QueryBuilder {
     ///         .all()
     ///
     /// - parameters:
-    ///     - key: Swift `KeyPath` to a field on the model to filter.
-    ///     - type: Query filter type to use.
+    ///     - field: Name to a field on the model to filter.
+    ///     - method: Query filter method type to use.
     ///     - value: Value to filter by.
     /// - returns: Query builder for chaining.
     @discardableResult
@@ -68,7 +67,7 @@ extension QueryBuilder {
             return filter(field, method, Database.queryFilterValue([value]))
         }
     }
-
+    
     /// Applies a filter to this query using a custom field. Usually you will use the filter operators to do this.
     ///
     ///     let users = try User.query(on: conn)
@@ -76,15 +75,15 @@ extension QueryBuilder {
     ///         .all()
     ///
     /// - parameters:
-    ///     - key: Swift `KeyPath` to a field on the model to filter.
-    ///     - type: Query filter type to use.
+    ///     - field: Name to a field on the model to filter.
+    ///     - method: Query filter method type to use.
     ///     - value: Value to filter by.
     /// - returns: Query builder for chaining.
     @discardableResult
     private func filter(_ field: Database.QueryField, _ method: Database.QueryFilterMethod, _ value: Database.QueryFilterValue) -> Self {
         return filter(Database.queryFilter(field, method, value))
     }
-
+    
     /// Add a manually created filter to the query builder.
     /// - returns: Query builder for chaining.
     @discardableResult
@@ -92,9 +91,9 @@ extension QueryBuilder {
         Database.queryFilterApply(filter, to: &query)
         return self
     }
-
+    
     // MARK: Filter Group
-
+    
     /// Creates a sub group for this query. This is useful for grouping multiple filters by `.or` instead of `.and`.
     ///
     ///     let users = try User.query(on: conn).group(.or) { or in
@@ -112,14 +111,14 @@ extension QueryBuilder {
         let main = query
         query = Database.query(Database.queryEntity(for: query))
         Database.queryDefaultFilterRelation(relation, on: &query)
-
+        
         // run
         try closure(self)
-
+        
         // switch back to the query, saving the subquery
         let sub = query
         query = main
-
+        
         // apply the sub-filters as a group
         Database.queryFilterApply(Database.queryFilterGroup(relation, Database.queryFilters(for: sub)), to: &query)
         return self
