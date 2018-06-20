@@ -1,6 +1,6 @@
 extension QueryBuilder {
     // MARK: Filter
-    
+
     /// Applies a filter to this query. Usually you will use the filter operators to do this.
     ///
     ///     let users = try User.query(on: conn)
@@ -22,7 +22,7 @@ extension QueryBuilder {
             return filter(Database.queryField(.keyPath(key)), method, Database.queryFilterValue([value]))
         }
     }
-    
+
     /// Applies a filter to this query for a joined entity. Usually you will use the filter operators to do this.
     ///
     ///     let users = try User.query(on: conn)
@@ -45,7 +45,7 @@ extension QueryBuilder {
             return filter(Database.queryField(.keyPath(key)), method, Database.queryFilterValue([value]))
         }
     }
-    
+
     /// Applies a filter to this query using a custom field. Usually you will use the filter operators to do this.
     ///
     ///     let users = try User.query(on: conn)
@@ -67,7 +67,7 @@ extension QueryBuilder {
             return filter(field, method, Database.queryFilterValue([value]))
         }
     }
-    
+
     /// Applies a filter to this query using a custom field. Usually you will use the filter operators to do this.
     ///
     ///     let users = try User.query(on: conn)
@@ -83,7 +83,7 @@ extension QueryBuilder {
     private func filter(_ field: Database.QueryField, _ method: Database.QueryFilterMethod, _ value: Database.QueryFilterValue) -> Self {
         return filter(Database.queryFilter(field, method, value))
     }
-    
+
     /// Add a manually created filter to the query builder.
     /// - returns: Query builder for chaining.
     @discardableResult
@@ -91,7 +91,7 @@ extension QueryBuilder {
         Database.queryFilterApply(filter, to: &query)
         return self
     }
-    
+
     // MARK: Filter Group
     
     /// Creates a sub group for this query. This is useful for grouping multiple filters by `.or` instead of `.and`.
