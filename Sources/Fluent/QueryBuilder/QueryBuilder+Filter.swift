@@ -93,7 +93,7 @@ extension QueryBuilder {
     }
 
     // MARK: Filter Group
-    
+
     /// Creates a sub group for this query. This is useful for grouping multiple filters by `.or` instead of `.and`.
     ///
     ///     let users = try User.query(on: conn).group(.or) { or in
@@ -111,14 +111,14 @@ extension QueryBuilder {
         let main = query
         query = Database.query(Database.queryEntity(for: query))
         Database.queryDefaultFilterRelation(relation, on: &query)
-        
+
         // run
         try closure(self)
-        
+
         // switch back to the query, saving the subquery
         let sub = query
         query = main
-        
+
         // apply the sub-filters as a group
         Database.queryFilterApply(Database.queryFilterGroup(relation, Database.queryFilters(for: sub)), to: &query)
         return self
