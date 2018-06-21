@@ -68,7 +68,7 @@ extension SchemaSupporting where
     SchemaConstraint: SQLTableConstraint,
     QueryField: SQLColumnIdentifier,
     QueryField.Identifier == SchemaConstraint.Algorithm.Identifier,
-    SchemaReferenceAction == SchemaConstraint.Algorithm.ForeignKey.ConflictResolution,
+    SchemaReferenceAction == SchemaConstraint.Algorithm.ForeignKey.Action,
     QueryField.TableIdentifier == SchemaConstraint.Algorithm.ForeignKey.TableIdentifier,
     QueryField.Identifier == SchemaConstraint.Algorithm.ForeignKey.Identifier,
     Self: SQLConstraintIdentifierNormalizer
