@@ -463,7 +463,8 @@ extension Model where Database: QuerySupporting {
         func findModel(in connection: Database.Connection) throws -> Future<Self> {
             return self.find(id, on: connection).map(to: Self.self) { model in
                 guard let model = model else {
-                    throw FluentError(identifier: "modelNotFound", reason: "No model with ID \(id) was found")
+                    let error = FluentError(identifier: "modelNotFound", reason: "No model with ID \(id) was found")
+                    throw NotFound(rootCause: error)
                 }
                 return model
             }
