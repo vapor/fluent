@@ -333,7 +333,7 @@ open class GeneralSQLSerializer<E: Entity>: SQLSerializer {
             case .raw(let raw, _):
                 subclause += "DROP " + raw
             case .some(let some):
-                subclause += "DROP " + escape(some.name)
+                subclause += "DROP FOREIGN KEY " + escape(some.name)
             }
         }
 
