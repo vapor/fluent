@@ -41,34 +41,35 @@ public final class Benchmarker<Database> where Database: LogSupporting {
     }
     
     internal func start(_ name: String) {
-        log("==> Benchmark: \(name)")
+        log("[Fluent Benchmark] Running '\(name)'...")
     }
     
-    internal func log(_ string: String) {
+    /// Calls the private on fail function.
+    internal func fail(_ message: String, file: StaticString = #file, line: UInt = #line) {
+        log()
+        log("❌ Failed")
+        log()
+
+        if logger.logs.isEmpty {
+            log("==> No Database Logs")
+        } else {
+            log("==> Database Log History")
+        }
+        for log in logger.logs {
+            self.log(log.description)
+        }
+        log()
+
+        log("==> Error")
+        self.onFail(message, file, line)
+
+        log()
+    }
+    
+    internal func log(_ string: String = "") {
         print(string)
     }
 
-    /// Calls the private on fail function.
-    internal func fail(_ message: String, file: StaticString = #file, line: UInt = #line) {
-        print()
-        print("❌ FLUENT BENCHMARK FAILED")
-        print()
-
-        if logger.logs.isEmpty {
-            print("==> No Database Logs")
-        } else {
-            print("==> Database Log History")
-        }
-        for log in logger.logs {
-            print(log)
-        }
-        print()
-
-        print("==> Error")
-        self.onFail(message, file, line)
-
-        print()
-    }
 
     /// Awaits the future or fails
     internal func test<T>(_ future: Future<T>, file: StaticString = #file, line: UInt = #line) throws -> T {
