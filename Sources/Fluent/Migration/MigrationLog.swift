@@ -7,7 +7,10 @@ public final class MigrationLog<Database>: Model where Database: QuerySupporting
     public typealias ID = UUID
 
     /// See `Model`.
-    public static var entity: String { return "fluent" }
+    public static var entity: String {
+        get { return _migrationLogEntity }
+        set { _migrationLogEntity = newValue }
+    }
 
     /// See `Model`.
     public static var idKey: IDKey { return \.id }
@@ -40,3 +43,5 @@ public final class MigrationLog<Database>: Model where Database: QuerySupporting
         self.batch = batch
     }
 }
+
+private var _migrationLogEntity = "fluent"

@@ -8,6 +8,15 @@ extension SchemaBuilder where
         _ constraints: Model.Database.Schema.ColumnDefinition.ColumnConstraint...
     ) {
         let property = FluentProperty.keyPath(key)
+        self.field(.columnDefinition(.column(nil, .identifier(property.path[0])), type, [.notNull] + constraints))
+    }
+    
+    public func field<T>(
+        for key: KeyPath<Model, T?>,
+        type: Model.Database.Schema.ColumnDefinition.DataType,
+        _ constraints: Model.Database.Schema.ColumnDefinition.ColumnConstraint...
+    ) {
+        let property = FluentProperty.keyPath(key)
         self.field(.columnDefinition(.column(nil, .identifier(property.path[0])), type, constraints))
     }
 }
