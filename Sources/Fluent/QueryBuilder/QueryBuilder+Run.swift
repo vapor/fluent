@@ -62,7 +62,7 @@ extension QueryBuilder {
     /// - parameters:
     ///     - handler: Optional closure to handle results.
     /// - returns: A `Future` that will be completed when the query has finished.
-    public func run(_ action: Database.QueryAction, into handler: @escaping (Result) throws -> () = { _ in }) -> Future<Void> {
+    public func run(_ action: Database.QueryAction? = nil, into handler: @escaping (Result) throws -> () = { _ in }) -> Future<Void> {
         return connection.flatMap { conn in
             return conn.fluentOperation {
                 return self._run(action, into: handler)
@@ -71,10 +71,12 @@ extension QueryBuilder {
     }
     
     /// Internal non-operation run.
-    private func _run(_ action: Database.QueryAction, into handler: @escaping (Result) throws -> () = { _ in }) -> Future<Void> {
+    private func _run(_ action: Database.QueryAction?, into handler: @escaping (Result) throws -> () = { _ in }) -> Future<Void> {
         // replace action
-        Database.queryActionApply(action, to: &query)
-
+        if let action = action {
+            Database.queryActionApply(action, to: &query)
+        }
+        
         let q = self.query
         let resultTransformer = self.resultTransformer
         return connection.flatMap(to: Void.self) { conn in

@@ -41,6 +41,20 @@ extension QueryBuilder {
 }
 
 extension QueryBuilder where Result: Model, Result.Database == Database {
+    /// Sets a single key-value pair to be updated when the query is run.
+    ///
+    ///     Planet.query(on: conn).update(\.name, to: "Earth").update(\.galaxyID, to: 5).run()
+    ///
+    /// - parameters:
+    ///     - field: KeyPath of field to update.
+    ///     - value: Encodable value to update field to.
+    /// - returns: `Self` for chaining.
+    public func update<T>(_ field: KeyPath<Result, T>, to value: T) -> Self where T: Encodable {
+        Database.queryActionApply(Database.queryActionUpdate, to: &query)
+        Database.queryDataSet(Database.queryField(.keyPath(field)), to: value, on: &query)
+        return self
+    }
+    
     /// Deletes all entities that would be fetched by this query.
     ///
     ///     try User.query(on: conn).filter(\.name == "foo").delete()
