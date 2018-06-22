@@ -9,7 +9,7 @@ extension QueryBuilder {
     ///
     /// - parameters:
     ///     - key: Swift `KeyPath` to a field on the model to filter.
-    ///     - type: Query filter type to use.
+    ///     - method: Query filter method type to use.
     ///     - value: Value to filter by.
     /// - returns: Query builder for chaining.
     @discardableResult
@@ -31,9 +31,8 @@ extension QueryBuilder {
     ///         .all()
     ///
     /// - parameters:
-    ///     - joined: Joined model type to filter.
     ///     - key: Swift `KeyPath` to a field on the model to filter.
-    ///     - type: Query filter type to use.
+    ///     - method: Query filter method type to use.
     ///     - value: Value to filter by.
     /// - returns: Query builder for chaining.
     @discardableResult
@@ -54,8 +53,8 @@ extension QueryBuilder {
     ///         .all()
     ///
     /// - parameters:
-    ///     - key: Swift `KeyPath` to a field on the model to filter.
-    ///     - type: Query filter type to use.
+    ///     - field: Name to a field on the model to filter.
+    ///     - method: Query filter method type to use.
     ///     - value: Value to filter by.
     /// - returns: Query builder for chaining.
     @discardableResult
@@ -76,8 +75,8 @@ extension QueryBuilder {
     ///         .all()
     ///
     /// - parameters:
-    ///     - key: Swift `KeyPath` to a field on the model to filter.
-    ///     - type: Query filter type to use.
+    ///     - field: Name to a field on the model to filter.
+    ///     - method: Query filter method type to use.
     ///     - value: Value to filter by.
     /// - returns: Query builder for chaining.
     @discardableResult
