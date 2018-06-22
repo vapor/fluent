@@ -82,13 +82,16 @@ extension QueryBuilder {
     /// - returns: Query builder for chaining.
     @discardableResult
     private func filter(_ field: Database.QueryField, _ method: Database.QueryFilterMethod, _ value: Database.QueryFilterValue) -> Self {
-        return filter(Database.queryFilter(field, method, value))
+        return filter(custom: Database.queryFilter(field, method, value))
     }
 
     /// Add a manually created filter to the query builder.
+    ///
+    ///     builder.filter(custom: ...)
+    ///
     /// - returns: Query builder for chaining.
     @discardableResult
-    public func filter(_ filter: Database.QueryFilter) -> Self {
+    public func filter(custom filter: Database.QueryFilter) -> Self {
         Database.queryFilterApply(filter, to: &query)
         return self
     }

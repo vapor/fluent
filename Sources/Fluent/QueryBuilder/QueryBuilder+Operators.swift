@@ -7,7 +7,7 @@ extension QueryBuilder {
     ///         when filtering using key paths.
     @discardableResult
     public func filter(_ value: FilterOperator<Database, Result>) -> Self {
-        return filter(value.filter)
+        return filter(custom: value.filter)
     }
 
     /// Applies a filter from one of the filter operators (==, !=, etc) to a joined model.
@@ -21,7 +21,7 @@ extension QueryBuilder {
     ///         when filtering using key paths.
     @discardableResult
     public func filter<A>(_ value: FilterOperator<Database, A>) -> Self {
-        return filter(value.filter)
+        return filter(custom: value.filter)
     }
 }
 

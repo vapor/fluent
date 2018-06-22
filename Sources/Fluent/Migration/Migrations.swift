@@ -38,6 +38,8 @@ internal struct Migrations<Database>: AnyMigrations where Database: MigrationSup
         return container.withNewConnection(to: database) { conn in
             return Database.prepareMigrationMetadata(on: conn).flatMap {
                 return MigrationLog<Database>.revertAll(self.migrations, on: conn, using: container)
+            }.flatMap {
+                return Database.revertMigrationMetadata(on: conn)
             }
         }
     }
