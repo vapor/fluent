@@ -4,6 +4,7 @@ struct Galaxy<Database>: Model, Equatable where Database: QuerySupporting {
     var id: UUID?
     var name: String
     init(id: UUID? = nil, name: String) {
+        self.id = id
         self.name = name
     }
 }

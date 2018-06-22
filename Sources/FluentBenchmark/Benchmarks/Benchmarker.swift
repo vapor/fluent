@@ -93,6 +93,7 @@ extension Benchmarker where
         try benchmarkRange_withSchema()
         try benchmarkSubset_withSchema()
         try benchmarkSort_withSchema()
+        try benchmarkUpdate_withSchema()
     }
 }
 
