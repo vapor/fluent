@@ -2,6 +2,7 @@ import Fluent
 
 extension Benchmarker where Database: QuerySupporting {
     fileprivate func _benchmark(on conn: Database.Connection) throws {
+        start("Update")
         _ = try test(Planet<Database>(name: "Earth", galaxyID: .init()).create(on: conn))
         _ = try test(Planet<Database>(name: "Mars", galaxyID: .init()).create(on: conn))
         

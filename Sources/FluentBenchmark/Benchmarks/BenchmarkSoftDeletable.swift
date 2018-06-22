@@ -3,6 +3,7 @@ import Fluent
 extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
     /// The actual benchmark.
     fileprivate func _benchmark(on conn: Database.Connection) throws {
+        start("Soft delete")
         // create
         var bar = Bar<Database>(baz: 1)
 

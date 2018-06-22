@@ -3,6 +3,7 @@ import Fluent
 extension Benchmarker where Database: QuerySupporting {
     /// Benchmarking pipelining saves.
     fileprivate func _benchmarkPipelining(on conn: Database.Connection) throws {
+        start("Bugs")
         var one = BasicUser<Database>(name: "one")
         var two = BasicUser<Database>(name: "two")
         var three = BasicUser<Database>(name: "three")

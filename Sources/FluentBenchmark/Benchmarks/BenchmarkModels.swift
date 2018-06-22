@@ -1,6 +1,7 @@
 extension Benchmarker where Database: QuerySupporting {
     /// The actual benchmark.
     fileprivate func _benchmark(on conn: Database.Connection) throws {
+        start("Models")
         // create
         let a = Foo<Database>(bar: "asdf", baz: 42)
         let b = Foo<Database>(bar: "asdf", baz: 42)

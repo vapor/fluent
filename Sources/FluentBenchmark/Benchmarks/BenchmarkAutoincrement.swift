@@ -3,6 +3,7 @@ import Fluent
 extension Benchmarker where Database: QuerySupporting {
     /// The actual benchmark.
     fileprivate func _benchmark(on conn: Database.Connection) throws {
+        start("Autoincrement")
         var message = LogMessage<Database>(message: "hello")
 
         if message.id != nil {
