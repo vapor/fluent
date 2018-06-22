@@ -36,7 +36,7 @@ extension QueryBuilder {
         }
     }
 
-    /// Sets the query to decode type `D` when run.
+    /// Sets the query to decode `Model` type `D` when run. The `Model`'s entity will be used.
     ///
     ///     let joined = try User.query(on: req)
     ///         .join(Pet.self, field: \.userID, to: \.id)
@@ -48,21 +48,22 @@ extension QueryBuilder {
     ///     - type: New decodable type `D` to decode.
     /// - returns: `QueryBuilder` decoding type `D`.
     public func decode<Model>(_ type: Model.Type) -> QueryBuilder<Database, Model> where Model: Fluent.Model {
-        return decode(Model.self, Model.entity)
+        return decode(data: Model.self, Model.entity)
     }
     
-    /// Sets the query to decode type `D` when run.
+    /// Sets the query to decode `Decodable` type `D` when run. The data will be decoded from the supplied entity.
     ///
     ///     let joined = try User.query(on: req)
     ///         .join(Pet.self, field: \.userID, to: \.id)
-    ///         .decode(Pet.self, "pets")
+    ///         .decode(data: Pet.self, "pets")
     ///         .all()
     ///     print(joined) // Future<[Pet]>
     ///
     /// - parameters:
     ///     - type: New decodable type `D` to decode.
+    ///     - entity: Table or collection to decode from.
     /// - returns: `QueryBuilder` decoding type `D`.
-    public func decode<D>(_ type: D.Type, _ entity: String) -> QueryBuilder<Database, D> where D: Decodable {
+    public func decode<D>(data type: D.Type, _ entity: String) -> QueryBuilder<Database, D> where D: Decodable {
         return changeResult { row, conn in
             return Database.queryDecode(row, entity: entity, as: D.self, on: conn)
         }
@@ -107,18 +108,19 @@ extension QueryBuilder {
 }
 
 extension QueryBuilder where Result: Model {
-    /// Sets the query to decode type `D` when run.
+    /// Sets the query to decode `Decodable` type `D` when run. This data type will be decoded from
+    /// the current Model's entity.
     ///
     ///     let joined = try User.query(on: req)
     ///         .join(Pet.self, field: \.userID, to: \.id)
-    ///         .decode(Pet.self, "pets")
+    ///         .decode(data: Pet.self)
     ///         .all()
     ///     print(joined) // Future<[Pet]>
     ///
     /// - parameters:
     ///     - type: New decodable type `D` to decode.
     /// - returns: `QueryBuilder` decoding type `D`.
-    public func decode<D>(_ type: D.Type) -> QueryBuilder<Database, D> where D: Decodable {
-        return decode(D.self, Result.entity)
+    public func decode<D>(data type: D.Type) -> QueryBuilder<Database, D> where D: Decodable {
+        return decode(data: D.self, Result.entity)
     }
 }

@@ -88,7 +88,7 @@ extension QueryBuilder {
 
         // decode the result
         var result: D? = nil
-        return decode(AggregateResult<D>.self, Database.queryEntity(for: query)).run(Database.queryActionRead) { row in
+        return decode(data: AggregateResult<D>.self, Database.queryEntity(for: query)).run(Database.queryActionRead) { row in
             result = row.fluentAggregate
         }.map {
             guard let result = result else {
