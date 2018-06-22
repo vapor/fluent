@@ -1,7 +1,6 @@
 version: 2
 
 jobs:
-
   macos:
     macos:
       xcode: "9.2"
@@ -9,7 +8,6 @@ jobs:
       - checkout
       - run: swift build
       - run: swift test
-
   linux:
     docker:
       - image: codevapor/swift:4.1
@@ -21,8 +19,6 @@ jobs:
       - run: 
           name: Run unit tests
           command: swift test
-
-
   linux-release:
     docker:
       - image: codevapor/swift:4.1
@@ -31,13 +27,11 @@ jobs:
       - run: 
           name: Compile code with optimizations
           command: swift build -c release
-
-
   linux-postgresql:
     docker:
       - image: codevapor/swift:4.1
       - image: circleci/postgres:latest
-        name: psql-cleartext
+        name: psql
         environment:
           POSTGRES_USER: vapor_username
           POSTGRES_DB: vapor_database
@@ -55,8 +49,6 @@ jobs:
           name: Run Fluent PostgreSQL unit tests
           command: swift test
           working_directory: ~/fluent-postgresql
-
-
   linux-mysql:
     docker:
       - image: codevapor/swift:4.1
@@ -79,8 +71,6 @@ jobs:
           name: Run Fluent MySQL unit tests
           command: swift test
           working_directory: ~/fluent-mysql
-
-
   linux-sqlite:
     docker:
       - image: codevapor/swift:4.1
@@ -106,8 +96,6 @@ workflows:
       - linux-mysql
       - linux-sqlite
       - linux-release
-      # - macos
-
   nightly:
     triggers:
       - schedule:
@@ -116,7 +104,5 @@ workflows:
             branches:
               only:
                 - master
-                
     jobs:
       - linux
-      # - macos
