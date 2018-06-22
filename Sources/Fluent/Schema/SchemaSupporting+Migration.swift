@@ -3,6 +3,11 @@ extension SchemaSupporting where Self: MigrationSupporting {
     public static func prepareMigrationMetadata(on conn: Connection) -> Future<Void> {
         return MigrationLog<Self>.prepareMetadata(on: conn)
     }
+    
+    /// See `MigrationSupporting`.
+    public static func revertMigrationMetadata(on conn: Connection) -> Future<Void> {
+        return MigrationLog<Self>.revertMetadata(on: conn)
+    }
 }
 
 // MARK: Private
