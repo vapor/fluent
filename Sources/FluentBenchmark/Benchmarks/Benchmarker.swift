@@ -76,6 +76,7 @@ extension Benchmarker where
     Database: SchemaSupporting & MigrationSupporting & JoinSupporting & KeyedCacheSupporting & TransactionSupporting
 {
     public func runAll() throws {
+        try benchmarkAggregate_withSchema()
         try benchmarkAutoincrement_withSchema()
         try benchmarkBugs_withSchema()
         try benchmarkCache_withSchema()
@@ -84,15 +85,15 @@ extension Benchmarker where
         try benchmarkJoins_withSchema()
         try benchmarkLifecycle_withSchema()
         try benchmarkModels_withSchema()
+        try benchmarkRange_withSchema()
         try benchmarkReferentialActions_withSchema()
         try benchmarkRelations_withSchema()
+        try benchmarkSort_withSchema()
+        try benchmarkSubset_withSchema()
         try benchmarkSchema()
         try benchmarkSoftDeletable_withSchema()
         try benchmarkTimestampable_withSchema()
         try benchmarkTransactions_withSchema()
-        try benchmarkRange_withSchema()
-        try benchmarkSubset_withSchema()
-        try benchmarkSort_withSchema()
         try benchmarkUpdate_withSchema()
     }
 }
