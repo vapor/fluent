@@ -3,6 +3,7 @@ import Fluent
 extension Benchmarker where Database: QuerySupporting & TransactionSupporting & KeyedCacheSupporting {
     /// The actual benchmark.
     fileprivate func _benchmark(on conn: Database.Connection) throws {
+        start("Cache")
         let cache = DatabaseKeyedCache<ConfiguredDatabase<Database>>(pool: pool)
 
         // get empty

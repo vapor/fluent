@@ -2,10 +2,11 @@ import Fluent
 
 extension Benchmarker where Database: QuerySupporting {
     fileprivate func _benchmark(on conn: Database.Connection) throws {
+        start("Aggregate")
         _ = try test(Galaxy<Database>(name: "Andromeda").create(on: conn))
-        _ = try test(Planet<Database>(name: "Milky Way", galaxyID: .init()).create(on: conn))
+        _ = try test(Galaxy<Database>(name: "Milky Way").create(on: conn))
         
-        let builder = Planet<Database>.query(on: conn).filter(\.name == "Milky Way")
+        let builder = Galaxy<Database>.query(on: conn).filter(\.name == "Milky Way")
         // test the ability to use all() _after_ count()
         // this can fail if the query builder is not properly removing aggregates
         let count = try test(builder.count())

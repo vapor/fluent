@@ -1,5 +1,6 @@
 extension Benchmarker where Database: QuerySupporting {
     fileprivate func _benchmark(on conn: Database.Connection) throws {
+        start("Sort")
         _ = try test(Galaxy<Database>(name: "Milky Way").save(on: conn))
         _ = try test(Galaxy<Database>(name: "Andromeda").save(on: conn))
         _ = try test(Galaxy<Database>(name: "Messier 82").save(on: conn))

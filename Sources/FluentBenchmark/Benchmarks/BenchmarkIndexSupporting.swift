@@ -3,6 +3,7 @@ import Fluent
 extension Benchmarker where Database: SchemaSupporting & MigrationSupporting {
     /// The actual benchmark.
     fileprivate func _benchmark(on conn: Database.Connection) throws {
+        start("Index")
         var a1 = IndexSupportingModel<Database>(name: "a", age: 1)
         a1 = try test(a1.save(on: conn))
         var a2 = IndexSupportingModel<Database>(name: "a", age: 2)

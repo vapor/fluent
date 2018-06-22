@@ -3,6 +3,7 @@ import Fluent
 extension Benchmarker where Database: JoinSupporting & QuerySupporting {
     /// The actual benchmark.
     fileprivate func _benchmark(on conn: Database.Connection) throws {
+        start("References")
         // create
         var tanner = User<Database>(name: "Tanner", age: 23)
         tanner = try test(tanner.save(on: conn))

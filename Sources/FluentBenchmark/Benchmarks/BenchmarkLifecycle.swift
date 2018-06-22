@@ -4,6 +4,7 @@ import Fluent
 
 extension Benchmarker where Database: QuerySupporting {
     fileprivate func _benchmark(on conn: Database.Connection) throws {
+        start("Lifecycle")
         //create a lifecycle user
         let user = LifecycleUser<Database>(name: "user")
         _ = try test(user.save(on: conn))

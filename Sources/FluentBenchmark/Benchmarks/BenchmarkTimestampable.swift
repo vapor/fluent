@@ -2,6 +2,7 @@ import Fluent
 
 extension Benchmarker where Database: QuerySupporting {
     private func _benchmarkStruct(on conn: Database.Connection) throws {
+        start("Timestamp")
         var bar = Bar<Database>(baz: 1)
         if bar.createdAt != nil || bar.updatedAt != nil {
             fail("timestamps should be nil")

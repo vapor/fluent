@@ -39,6 +39,14 @@ public final class Benchmarker<Database> where Database: LogSupporting {
             .newConnectionPool(config: .init(maxConnections: 20), on: worker)
         self.logger = logger
     }
+    
+    internal func start(_ name: String) {
+        log("==> Benchmark: \(name)")
+    }
+    
+    internal func log(_ string: String) {
+        print(string)
+    }
 
     /// Calls the private on fail function.
     internal func fail(_ message: String, file: StaticString = #file, line: UInt = #line) {
@@ -109,7 +117,6 @@ final class BenchmarkLogger: DatabaseLogHandler {
 
     /// See `DatabaseLogHandler`.
     public func record(log: DatabaseLog) {
-        print(log)
         logs.append(log)
     }
 }

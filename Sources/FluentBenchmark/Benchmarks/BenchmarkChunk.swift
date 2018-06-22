@@ -3,6 +3,7 @@ import Fluent
 extension Benchmarker where Database: QuerySupporting {
     /// The actual benchmark.
     fileprivate func _benchmark(on conn: Database.Connection) throws {
+        start("Chunk")
         var fetched64: [User<Database>] = []
         var fetched2047: [User<Database>] = []
 
