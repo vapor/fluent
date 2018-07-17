@@ -44,17 +44,26 @@ extension SchemaBuilder {
         
     }
 
+    /// Adds a field with specified type.
+    ///
+    ///     builder.field(for: \.name, type: ...)
+    ///
+    /// - parameters:
+    ///     - key: `KeyPath` to the field.
+    ///     - type: Data type to use for this field.
     public func field<T>(for key: KeyPath<Model, T>, type: Model.Database.SchemaFieldType) {
         let field = Model.Database.schemaField(Model.Database.queryField(.keyPath(key)), type)
         self.field(field)
     }
     
+    /// Adds a custom field.
     public func field(_ field: Model.Database.SchemaField) {
         Model.Database.schemaFieldCreate(field, to: &schema)
     }
     
     // MARK: Constraint
     
+    /// Adds a custom constraint.
     public func constraint(_ constraint: Model.Database.SchemaConstraint) {
         Model.Database.schemaConstraintCreate(constraint, to: &schema)
     }

@@ -17,10 +17,17 @@ extension KeyedCacheSupporting where Self: QuerySupporting {
     public static func keyedCacheSet<E>(_ key: String, to encodable: E, on conn: Self.Connection) throws -> Future<Void>
         where E: Encodable
     {
-        let data = try JSONEncoder().encode(Encode<E>(data: encodable))
-        return CacheEntry<Self>(key: key, data: data)
-            .create(on: conn)
-            .transform(to: ())
+        return CacheEntry<Self>.find(key, on: conn).flatMap { existing -> Future<CacheEntry<Self>> in
+            let data = try JSONEncoder().encode(Encode<E>(data: encodable))
+            if let existing = existing {
+                existing.data = data
+                return existing.update(on: conn)
+            } else {
+                // create new entry
+                return CacheEntry<Self>(key: key, data: data)
+                    .create(on: conn)
+            }
+        }.transform(to: ())
     }
 
     /// See `KeyedCacheSupporting`.
