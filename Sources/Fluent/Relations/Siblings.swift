@@ -1,7 +1,4 @@
-import Async
-
-/// A siblings relation is a many-to-many relation between
-/// two models.
+/// A siblings relation is a many-to-many relation between two models.
 ///
 /// Each model should have an opposite Siblings relation.
 ///
@@ -29,40 +26,24 @@ import Async
 ///
 /// It is recommended that you use your own types conforming to `Pivot`
 /// for Siblings pivots as you cannot add additional fields to a `BasicPivot`.
-public struct Siblings<Base: Model, Related: Model, Through: Pivot>
+public struct Siblings<Base, Related, Through>
     where
-        Base.Database == Through.Database,
-        Related.Database == Through.Database,
-        Through.Database: JoinSupporting
+        Base: Model, Related: Model, Through: Pivot,
+        Base.Database == Through.Database, Related.Database == Through.Database, Through.Database: JoinSupporting
 {
-    /// The base model which all fetched models
-    /// should be related to.
+    /// The base model which all fetched models should be related to.
     public let base: Base
 
-    /// Base pivot field type.
-    public typealias BasePivotField = WritableKeyPath<Through, Base.ID>
-
-    /// The base model's foreign id field
-    /// that appears on the pivot.
+    /// The base model's foreign id field that appears on the pivot.
     /// ex: Through.baseID
-    public let basePivotField: BasePivotField
+    internal let basePivotField: WritableKeyPath<Through, Base.ID>
 
-    // Related pivot field type.
-    public typealias RelatedPivotField = WritableKeyPath<Through, Related.ID>
-
-    /// The related model's foreign id field
-    /// that appears on the pivot.
+    /// The related model's foreign id field that appears on the pivot.
     /// ex: Through.relatedID
-    public let relatedPivotField: RelatedPivotField
+    internal let relatedPivotField: WritableKeyPath<Through, Related.ID>
 
     /// Create a new Siblings relation.
-    public init(
-        base: Base,
-        related: Related.Type = Related.self,
-        through: Through.Type = Through.self,
-        basePivotField: BasePivotField,
-        relatedPivotField: RelatedPivotField
-    ) {
+    internal init(base: Base, related: Related.Type = Related.self, through: Through.Type = Through.self, basePivotField: WritableKeyPath<Through, Base.ID>, relatedPivotField: WritableKeyPath<Through, Related.ID>) {
         self.base = base
         self.basePivotField = basePivotField
         self.relatedPivotField = relatedPivotField
@@ -71,10 +52,10 @@ public struct Siblings<Base: Model, Related: Model, Through: Pivot>
 
 extension Siblings where Base.Database: QuerySupporting {
     /// Creates a `QueryBuilder` for the `Related` model.
-    public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Related, Related> {
+    public func query(on conn: DatabaseConnectable) throws -> QueryBuilder<Base.Database, Related> {
         return try Related.query(on: conn)
-            .join(field: relatedPivotField)
-            .filter(Through.self, basePivotField, .equals, .data(base.requireID()))
+            .join(relatedPivotField, to: Related.idKey)
+            .filter(basePivotField == base.requireID())
     }
 
     /// Create a query for the `Through` (pivot) model. This is useful for manually attaching / detaching pivots.
@@ -82,24 +63,23 @@ extension Siblings where Base.Database: QuerySupporting {
     ///     cat.toys.pivots(on: ...).filter(\.isFavorite == false).delete()
     ///
     /// See also the `detachAll(on:)` method.
-    public func pivots(on conn: DatabaseConnectable) throws -> QueryBuilder<Through, Through> {
+    public func pivots(on conn: DatabaseConnectable) throws -> QueryBuilder<Base.Database, Through> {
         return try Through.query(on: conn)
-            .filter(basePivotField, .equals, .data(base.requireID()))
+            .filter(basePivotField == base.requireID())
     }
 }
 
 // MARK: Modifiable Pivot
 
 extension Siblings where Base.Database: QuerySupporting {
-    /// Returns true if the supplied model is attached
-    /// to this relationship.
+    /// Returns true if the supplied model is attached to this relationship.
     public func isAttached(_ model: Related, on conn: DatabaseConnectable) -> Future<Bool> {
         return Future.flatMap(on: conn) {
             return try Through.query(on: conn)
-                .filter(self.basePivotField, .equals, .data(self.base.requireID()))
-                .filter(self.relatedPivotField, .equals, .data(model.requireID()))
+                .filter(self.basePivotField == self.base.requireID())
+                .filter(self.relatedPivotField == model.requireID())
                 .first()
-                .map(to: Bool.self) { $0 != nil }
+                .map { $0 != nil }
         }
     }
 
@@ -111,8 +91,8 @@ extension Siblings where Base.Database: QuerySupporting {
     public func detach(_ model: Related, on conn: DatabaseConnectable) -> Future<Void> {
         return Future.flatMap(on: conn) {
             return try Through.query(on: conn)
-                .filter(self.basePivotField, .equals, .data(self.base.requireID()))
-                .filter(self.relatedPivotField, .equals, .data(model.requireID()))
+                .filter(self.basePivotField == self.base.requireID())
+                .filter(self.relatedPivotField == model.requireID())
                 .delete()
         }
     }
@@ -174,12 +154,12 @@ extension Model {
     /// See Siblings class documentation for more information
     /// about the many parameters. They can be confusing at first!
     ///
-    /// Note: From is assumed to be the model you are calling this method on.
+    /// - note: From is assumed to be the model you are calling this method on.
     public func siblings<Related, Through>(
         related: Related.Type = Related.self,
         through: Through.Type = Through.self,
-        _ basePivotField: Siblings<Self, Related, Through>.BasePivotField,
-        _ relatedPivotField: Siblings<Self, Related, Through>.RelatedPivotField
+        _ basePivotField: WritableKeyPath<Through, Self.ID>,
+        _ relatedPivotField: WritableKeyPath<Through, Related.ID>
     ) -> Siblings<Self, Related, Through> {
         return Siblings(
             base: self,
@@ -189,7 +169,7 @@ extension Model {
     }
 
     /// Free implementation where pivot constraints are met.
-    /// See Model.siblings(_:_:)
+    /// See `Model.siblings(_:_:)`.
     public func siblings<Related, Through>(
         related: Related.Type = Related.self,
         through: Through.Type = Through.self
@@ -200,7 +180,7 @@ extension Model {
     }
 
     /// Free implementation where pivot constraints are met.
-    /// See Model.siblings(_:_:)
+    /// See `Model.siblings(_:_:)`.
     public func siblings<Related, Through>(
         related: Related.Type = Related.self,
         through: Through.Type = Through.self

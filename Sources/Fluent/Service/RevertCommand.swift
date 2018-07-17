@@ -1,8 +1,3 @@
-import Async
-import Command
-import Logging
-import Service
-
 /// Console `Command` for reverting migrations that have been previously prepared.
 ///
 /// Add this `Command` to your `CommandConfig` to enable it.
@@ -16,15 +11,15 @@ import Service
 ///     swift run Run revert
 ///
 public final class RevertCommand: Command, Service {
-    /// See `Command.arguments`
+    /// See `Command`.
     public var arguments: [CommandArgument] { return [] }
 
-    /// See `Command.options`
+    /// See `Command`.
     public var options: [CommandOption] { return [
         CommandOption.flag(name: "all", short: "a", help: ["Reverts all migrations, not just the latest batch."])
     ]}
 
-    /// See `Command.help`
+    /// See `Command`.
     public var help: [String] { return [
         "Reverts migrations that have been previously prepared.",
         "By default, only the latest batch of migrations will be reverted."
@@ -33,7 +28,7 @@ public final class RevertCommand: Command, Service {
     /// Creates a new `RevertCommand`
     public init() {}
 
-    /// See `Command.run(using:)`
+    /// See `Command`.
     public func run(using context: CommandContext) throws -> Future<Void> {
         let migrations = try context.container.make(MigrationConfig.self)
         let logger = try context.container.make(Logger.self)
@@ -42,44 +37,16 @@ public final class RevertCommand: Command, Service {
             logger.info("Revert all migrations requested")
             logger.warning("This will revert all migrations for all configured databases")
             guard context.console.confirm("Are you sure you want to revert all migrations?") else {
-                throw FluentError(identifier: "cancelled", reason: "Migration revert cancelled", source: .capture())
+                throw FluentError(identifier: "cancelled", reason: "Migration revert cancelled.")
             }
-
-            return migrations.storage.map { (uid, migration) in
-                return {
-                    logger.info("Reverting all migrations on '\(uid)' database")
-                    return migration.migrationRevertAll(on: context.container)
-                }
-            }.syncFlatten(on: context.container).map(to: Void.self) {
-                logger.info("Succesfully reverted all migrations")
-            }
+            return migrations.revertAll(on: context.container)
         } else {
             logger.info("Revert last batch of migrations requested")
             logger.warning("This will revert the last batch of migrations for all configured databases")
             guard context.console.confirm("Are you sure you want to revert the last batch of migrations?") else {
-                throw FluentError(identifier: "cancelled", reason: "Migration revert cancelled", source: .capture())
+                throw FluentError(identifier: "cancelled", reason: "Migration revert cancelled.")
             }
-
-            return migrations.storage.map { (uid, migration) in
-                return {
-                    logger.info("Reverting last batch of migrations on '\(uid)' database")
-                    return migration.migrationRevertBatch(on: context.container)
-                }
-            }.syncFlatten(on: context.container).map(to: Void.self) {
-                logger.info("Succesfully reverted last batch of migrations")
-            }
+            return migrations.revert(on: context.container)
         }
-    }
-}
-
-extension CommandConfig {
-    /// Adds Fluent's commands to the `CommandConfig`. Currently only the `RevertCommand` at `"revert"`.
-    ///
-    ///     var commandConfig = CommandConfig.default()
-    ///     commandConfig.useFluentCommands()
-    ///     services.register(commandConfig)
-    ///
-    public mutating func useFluentCommands() {
-        use(RevertCommand.self, as: "revert")
     }
 }
