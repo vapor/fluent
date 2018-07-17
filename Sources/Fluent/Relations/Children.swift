@@ -30,8 +30,8 @@ public struct Children<Parent, Child>
 
     /// Internal parent  ID storage.
     internal enum ParentIDStorage {
-        case optional(WritableKeyPath<Child, Parent.ID?>)
-        case required(WritableKeyPath<Child, Parent.ID>)
+        case optional(KeyPath<Child, Parent.ID?>)
+        case required(KeyPath<Child, Parent.ID>)
     }
 
     /// Reference to the foreign key on the child.
@@ -71,7 +71,7 @@ extension Model {
     ///     }
     ///
     /// The `parentID` should refer to the field on the child entity that contains the parent's ID.
-    public func children<Child>(_ parentID: WritableKeyPath<Child, Self.ID>) -> Children<Self, Child> {
+    public func children<Child>(_ parentID: KeyPath<Child, Self.ID>) -> Children<Self, Child> {
         return Children(parent: self, parentID: .required(parentID))
     }
 
@@ -82,7 +82,7 @@ extension Model {
     ///     }
     ///
     /// The `parentID` should refer to the field on the child entity that contains the parent's ID.
-    public func children<Child>(_ parentID: WritableKeyPath<Child, Self.ID?>) -> Children<Self, Child> {
+    public func children<Child>(_ parentID: KeyPath<Child, Self.ID?>) -> Children<Self, Child> {
         return Children(parent: self, parentID: .optional(parentID))
     }
 }
