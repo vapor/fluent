@@ -22,7 +22,7 @@ let package = Package(
         .package(url: "https://github.com/vapor/service.git", from: "1.0.0"),
         
         // *️⃣ Build SQL queries in Swift. Extensible, protocol-based design that supports DQL, DML, and DDL.
-        .package(url: "https://github.com/vapor/sql.git", from: "2.0.0-beta"),
+        .package(url: "https://github.com/vapor/sql.git", from: "2.0.0"),
     ],
     targets: [
         .target(name: "Fluent", dependencies: ["Async", "Console", "Command", "Core", "DatabaseKit", "Logging", "Service"]),
