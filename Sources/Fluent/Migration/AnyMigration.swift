@@ -15,8 +15,10 @@ public protocol AnyMigration {
 extension AnyMigration where Self: Migration {
     /// See `Migration`.
     public static var migrationName: String {
-        let _type = "\(type(of: self))"
-        return _type.components(separatedBy: ".Type").first ?? _type
+        return String(reflecting: self)
+            .components(separatedBy: ".")
+            .dropFirst()
+            .joined(separator: ".")
     }
 
     /// See `Migration`.
