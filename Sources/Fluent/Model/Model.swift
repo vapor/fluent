@@ -1,7 +1,7 @@
 /// Represents a single table / collection in a Fluent database. Models
 /// are the basis for querying databases (create, read, update, and delete).
 ///
-/// Models can also conform to `Migration` to providing prepare and revert methods for performing actions
+/// Models can also conform to `Migration` to provide prepare and revert methods for performing actions
 /// on the database before the application boots.
 ///
 /// Both `struct`s and `class`es can be models. Since Fluent is closure-based,
@@ -78,7 +78,7 @@
 /// You can add `SoftDeletable` to existing models that have an optional `Date` property for storing the
 /// deleted at date.
 ///
-/// - note: The deleted at date my be set in the future. The model will continue to be included in
+/// - note: The deleted at date may be set in the future. The model will continue to be included in
 ///         queries until the deleted at date passes.
 ///
 /// Use `softDelete(on:)` to soft-delete a `SoftDeletable` model from the database.
