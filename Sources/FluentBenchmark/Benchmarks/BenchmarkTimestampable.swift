@@ -57,7 +57,16 @@ extension Benchmarker where Database: QuerySupporting {
         // Ensure that there is a substantial difference between `originalUpdatedAt` and `updatedAt`.
         Thread.sleep(forTimeInterval: 0.05)
         _ = try test(tanner.save(on: conn))
-        if tanner.updatedAt! <= originalUpdatedAt {
+        let secondUpdatedAt = tanner.updatedAt!
+        if secondUpdatedAt <= originalUpdatedAt {
+            self.fail("new updated at should be greater")
+        }
+        
+        // Ensure that there is a substantial difference between `secondUpdatedAt` and `updatedAt`.
+        Thread.sleep(forTimeInterval: 0.05)
+        _ = try test(User<Database>.query(on: conn).filter(\.name == "Tanner").update(\.age, to: 24).run())
+        let thirdUpdatedAt = tanner.updatedAt!
+        if thirdUpdatedAt <= secondUpdatedAt {
             self.fail("new updated at should be greater")
         }
 
