@@ -67,7 +67,7 @@ extension Benchmarker where Database: QuerySupporting {
         _ = try test(User<Database>.query(on: conn).filter(\.name == "Tanner").update(\.age, to: 24).run())
         let thirdUpdatedAt = tanner.updatedAt!
         if thirdUpdatedAt <= secondUpdatedAt {
-            self.fail("second updated at should be even greater")
+            self.fail("third updated at should be even greater")
         }
 
         let f = try test(User<Database>.query(on: conn).filter(\.name == "Tanner").first())
