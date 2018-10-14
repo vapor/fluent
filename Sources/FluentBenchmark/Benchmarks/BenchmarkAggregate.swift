@@ -55,7 +55,9 @@ extension Benchmarker where Database: QuerySupporting & SchemaSupporting & Migra
     public func benchmarkAggregate_withSchema() throws {
         let conn = try test(pool.requestConnection())
         defer { try? test(Galaxy<Database>.revert(on: conn)) }
+        defer { try? test(UserMigration<Database>.revert(on: conn)) }
         try test(Galaxy<Database>.prepare(on: conn))
+        try test(UserMigration<Database>.prepare(on: conn))
         try self._benchmark(on: conn)
         pool.releaseConnection(conn)
     }
