@@ -14,6 +14,34 @@ extension Benchmarker where Database: QuerySupporting {
         if all.count != count {
             fail("wrong count: \(all.count) != \(count)")
         }
+        
+        let firstSummer = User<Database>(name: "Summer", age: 30)
+        let secondSummer = User<Database>(name: "Summer", age: 31)
+        _ = try test(firstSummer.create(on: conn))
+        _ = try test(secondSummer.create(on: conn))
+        let summersSum = try User<Database>.query(on: conn).filter(\.name == "Summer").sum(\.age).wait()
+        if summersSum != 61 {
+            fail("sum should be 61")
+        }
+        
+        let autumn = User<Database>(name: "Autumn", age: 40)
+        let autumnQuery = User<Database>.query(on: conn).filter(\.name == "Autumn")
+        do {
+            _ = try autumnQuery.sum(\.age).wait()
+            fail("should not have produced a sum")
+        } catch {
+            let defaultSum = try autumnQuery.sum(\.age, default: 0).wait()
+            if defaultSum != 0 {
+                fail("should have defaulted to 0")
+            }
+        }
+        
+        _ = try test(autumn.create(on: conn))
+        let autumnsSum = try autumnQuery.sum(\.age).wait()
+        let alsoAutumnsSum = try autumnQuery.sum(\.age, default: 0).wait()
+        if autumnsSum != 40 || alsoAutumnsSum != 40 {
+            fail("sum should be 40, whether or not a default is provided")
+        }
     }
     
     public func benchmarkAggregate() throws {
