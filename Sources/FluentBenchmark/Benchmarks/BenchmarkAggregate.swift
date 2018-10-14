@@ -25,20 +25,19 @@ extension Benchmarker where Database: QuerySupporting {
         }
         
         let autumn = User<Database>(name: "Autumn", age: 40)
-        let autumnQuery = User<Database>.query(on: conn).filter(\.name == "Autumn")
         do {
-            _ = try autumnQuery.sum(\.age).wait()
+            _ = try User<Database>.query(on: conn).filter(\.name == "Autumn").sum(\.age).wait()
             fail("should not have produced a sum")
         } catch {
-            let defaultSum = try autumnQuery.sum(\.age, default: 0).wait()
+            let defaultSum = try User<Database>.query(on: conn).filter(\.name == "Autumn").sum(\.age, default: 0).wait()
             if defaultSum != 0 {
                 fail("should have defaulted to 0")
             }
         }
         
         _ = try test(autumn.create(on: conn))
-        let autumnsSum = try autumnQuery.sum(\.age).wait()
-        let alsoAutumnsSum = try autumnQuery.sum(\.age, default: 0).wait()
+        let autumnsSum = try User<Database>.query(on: conn).filter(\.name == "Autumn").sum(\.age).wait()
+        let alsoAutumnsSum = try User<Database>.query(on: conn).filter(\.name == "Autumn").sum(\.age, default: 0).wait()
         if autumnsSum != 40 || alsoAutumnsSum != 40 {
             fail("sum should be 40, whether or not a default is provided")
         }
