@@ -1,10 +1,16 @@
 extension QueryBuilder {
     // MARK: Aggregate
 
-    /// Returns the sum of all entries for the supplied field, falling back to the default value if the Future containing the sum resolves to an Error.
+    /// Returns the sum of all entries for the supplied field.
     ///
     ///     let totalLikes = try Post.query(on: conn).sum(\.likes)
-    ///     let totalViralPostLikes = try Post.query(on: conn).filter(\.likes >= 10_000_000).sum(\.likes, default: 0)
+    ///
+    /// If a default value is supplied, it will be used when the sum's result
+    /// set is empty and no sum can be determined.
+    ///
+    ///     let totalViralPostLikes = try Post.query(on: conn)
+    ///         .filter(\.likes >= 10_000_000)
+    ///         .sum(\.likes, default: 0)
     ///
     /// - parameters:
     ///     - field: Field to sum.
