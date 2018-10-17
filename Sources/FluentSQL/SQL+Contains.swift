@@ -1,11 +1,11 @@
 infix operator ~=
-/// Has prefix
+/// Has suffix
 public func ~= <Result, D>(lhs: KeyPath<Result, String>, rhs: String) -> FilterOperator<D, Result>
     where D: QuerySupporting, D.QueryFilterMethod: SQLBinaryOperator
 {
     return .make(lhs, .like, ["%" + rhs])
 }
-/// Has prefix
+/// Has suffix
 public func ~= <Result, D>(lhs: KeyPath<Result, String?>, rhs: String) -> FilterOperator<D, Result>
     where D: QuerySupporting, D.QueryFilterMethod: SQLBinaryOperator
 {
@@ -13,13 +13,13 @@ public func ~= <Result, D>(lhs: KeyPath<Result, String?>, rhs: String) -> Filter
 }
 
 infix operator =~
-/// Has suffix.
+/// Has prefix.
 public func =~ <Result, D>(lhs: KeyPath<Result, String>, rhs: String) -> FilterOperator<D, Result>
     where D: QuerySupporting, D.QueryFilterMethod: SQLBinaryOperator
 {
     return .make(lhs, .like, [rhs + "%"])
 }
-/// Has suffix.
+/// Has prefix.
 public func =~ <Result, D>(lhs: KeyPath<Result, String?>, rhs: String) -> FilterOperator<D, Result>
     where D: QuerySupporting, D.QueryFilterMethod: SQLBinaryOperator
 {
