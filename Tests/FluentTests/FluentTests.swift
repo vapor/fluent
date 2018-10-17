@@ -1,9 +1,14 @@
 import FluentBenchmark
+import NIO
 import XCTest
 
 final class FluentTests: XCTestCase {
-    func testStub() throws { }
+    func testBenchmark() throws {
+        let eventLoop = MultiThreadedEventLoopGroup(numberOfThreads: 1).next()
+        let test = TestDatabase(eventLoop: eventLoop)
+        try FluentBenchmarker(database: test).run()
+    }
     static let allTests = [
-        ("testStub", testStub),
+        ("testBenchmark", testBenchmark),
     ]
 }
