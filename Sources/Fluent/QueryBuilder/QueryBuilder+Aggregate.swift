@@ -1,15 +1,22 @@
 extension QueryBuilder {
     // MARK: Aggregate
 
-    /// Returns the sum of all entries for the supplied field.
+    /// Returns the sum of all entries for the supplied field, falling back to the default value if the Future containing the sum resolves to an Error.
     ///
     ///     let totalLikes = try Post.query(on: conn).sum(\.likes)
+    ///     let totalViralPostLikes = try Post.query(on: conn).filter(\.likes >= 10_000_000).sum(\.likes, default: 0)
     ///
     /// - parameters:
     ///     - field: Field to sum.
+    ///     - default: Optional default to use.
     /// - returns: A `Future` containing the sum.
-    public func sum<T>(_ field: KeyPath<Result, T>) -> Future<T> where T: Decodable {
-        return aggregate(Database.queryAggregateSum, field: field)
+    public func sum<T>(_ field: KeyPath<Result, T>, default: T? = nil) -> Future<T> where T: Decodable {
+        return aggregate(Database.queryAggregateSum, field: field).catchMap { error in
+            guard let d = `default` else {
+                throw error
+            }
+            return d
+        }
     }
 
     /// Returns the average of all entries for the supplied field.
