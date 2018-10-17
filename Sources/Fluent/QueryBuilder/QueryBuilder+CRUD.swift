@@ -52,6 +52,9 @@ extension QueryBuilder where Result: Model, Result.Database == Database {
     public func update<T>(_ field: KeyPath<Result, T>, to value: T) -> Self where T: Encodable {
         Database.queryActionApply(Database.queryActionUpdate, to: &query)
         Database.queryDataSet(Database.queryField(.keyPath(field)), to: value, on: &query)
+        if let updatedAtKey = Result.updatedAtKey {
+            Database.queryDataSet(Database.queryField(.keyPath(updatedAtKey)), to: Date(), on: &query)
+        }
         return self
     }
     
