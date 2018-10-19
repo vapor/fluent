@@ -63,6 +63,21 @@ extension Pivot {
     }
 }
 
+extension Pivot where Self: Migration, Self.Database: SchemaSupporting {
+    
+    /// See `Migration`.
+    ///
+    /// This implementation for `Pivot` types automatically adds foreign key constraints
+    /// to the right and left ID key properties.
+    public static func prepare(on connection: Database.Connection) -> Future<Void> {
+        return Database.create(self, on: connection) { builder in
+            try addProperties(to: builder)
+            builder.reference(from: self.leftIDKey, to: Left.idKey)
+            builder.reference(from: self.rightIDKey, to: Right.idKey)
+        }
+    }
+}
+
 /// A pivot that can be initialized from just the left and right models. This allows
 /// Fluent to automatically create pivots for extended functionality. ex: attaching.
 public protocol ModifiablePivot: Pivot {
