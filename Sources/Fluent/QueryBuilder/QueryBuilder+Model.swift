@@ -28,43 +28,78 @@ extension QueryBuilder where Result: Model, Result.Database == Database {
     ///     - model: `Model` to create.
     /// - returns: A `Future` containing the created `Model`.
     public func create(_ model: Result) -> Future<Result> {
-        Database.queryActionApply(Database.queryActionCreate, to: &query)
-        var copy = model
-        
-        // set timestamps
-        if Result.createdAtKey != nil || Result.updatedAtKey != nil {
-            let now = Date()
-            
-            if Result.createdAtKey != nil, copy.fluentCreatedAt == nil {
-                copy.fluentCreatedAt = now
+        return create([model]).map { created in
+            guard let first = created.first else {
+                throw FluentError(identifier: "noModelCreated", reason: "Expected a model to be returned after it is created, but none where found.")
             }
-
-            if Result.updatedAtKey != nil, copy.fluentUpdatedAt == nil {
-                copy.fluentUpdatedAt = now
-            }
-        }
-
-        return connection.flatMap { conn in
-            return Database.modelEvent(event: .willCreate, model: copy, on: conn).flatMap { model in
-                return try model.willCreate(on: conn)
-            }.flatMap { model -> Future<Result> in
-                var copy = model
-                try Database.queryDataApply(Database.queryEncode(copy, entity: Result.entity), to: &self.query)
-                return self.run(Database.queryActionCreate) {
-                    // to support reference types that may be ignoring return values
-                    // set the id on the existing value before replacing it
-                    copy.fluentID = $0.fluentID
-                    // if a model is returned, use it since it may have default values
-                    copy = $0
-                }.map { copy }
-            }.flatMap { model in
-                return Database.modelEvent(event: .didCreate, model: model, on: conn)
-            }.flatMap { model in
-                return try model.didCreate(on: conn)
-            }
+            return first
         }
     }
 
+    
+    /// Saves an array of models as new items in the database.
+    /// This method can auto-generate the IDs depending on the ID type.
+    ///
+    ///     let users = [User(...), User(...), User(...)]
+    ///     User.query(on: conn).create(users)
+    ///
+    /// - parameters:
+    ///   - models: `Model` objects to create.
+    /// - returns: A `Future` containg the created `Model` objects.
+    func create(_ models: [Result]) -> Future<[Result]> {
+        Database.queryActionApply(Database.queryActionCreate, to: &query)
+        var copy: [Result] = []
+        copy.reserveCapacity(models.count)
+        
+        if Result.createdAtKey != nil || Result.updatedAtKey != nil {
+            let now = Date()
+            
+            for var model in models {
+                if Result.createdAtKey != nil, model.fluentCreatedAt == nil {
+                    model.fluentCreatedAt = now
+                }
+                
+                if Result.updatedAtKey != nil, model.fluentUpdatedAt == nil {
+                    model.fluentUpdatedAt = now
+                }
+                copy.append(model)
+            }
+        } else {
+            copy = models
+        }
+        
+        return connection.flatMap { conn in
+            let willCreate: [Future<Result>] = copy.map { model -> Future<Result> in
+                return Database.modelEvent(event: .willCreate, model: model, on: conn).flatMap { model in
+                    return try model.willCreate(on: conn)
+                }
+            }
+            let create: Future<[Result]> = willCreate.flatten(on: conn).flatMap { models -> Future<[Result]> in
+                var copy = models
+                var modelCreated = 0
+                try Database.queryDataApply(Database.queryEncode(models, entity: Result.entity), to: &self.query)
+                return self.run(Database.queryActionCreate) { created in
+                    guard modelCreated < copy.count else { return }
+                    
+                    copy[modelCreated].fluentID = created.fluentID
+                    copy[modelCreated] = created
+                    
+                    modelCreated += 1
+                }.transform(to: copy)
+            }
+            let didCreate: Future<[Result]> = create.flatMap { models in
+                return models.map { model in
+                    return Database.modelEvent(event: .didCreate, model: model, on: conn)
+                }.flatten(on: conn)
+            }.flatMap { models in
+                return try models.map { model -> Future<Result> in
+                    return try model.didCreate(on: conn)
+                }.flatten(on: conn)
+            }
+            return didCreate
+        }
+    }
+    
     /// Updates the model. This requires that the model has its ID set.
     ///
     ///     let user: User = ...
