@@ -6,8 +6,7 @@ extension Benchmarker where Database: QuerySupporting {
         let a = Foo<Database>(bar: "asdf", baz: 42)
         let b = Foo<Database>(bar: "asdf", baz: 42)
         
-        _ = try test(a.save(on: conn))
-        _ = try test(b.save(on: conn))
+        _ = try test([a, b].save(on: conn))
         var count = try test(Foo<Database>.query(on: conn).count())
         if count != 2 {
             self.fail("count should have been 2")
