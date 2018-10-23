@@ -95,3 +95,11 @@ extension Future where T: Model {
         }
     }
 }
+
+extension Array where Element: Model {
+    
+    /// See `Model`.
+    public func save(on connectable: DatabaseConnectable) -> Future<[Element]> {
+        return Element.query(on: connectable).create(self)
+    }
+}
