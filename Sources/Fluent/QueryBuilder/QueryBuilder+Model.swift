@@ -77,7 +77,9 @@ extension QueryBuilder where Result: Model, Result.Database == Database {
             let create: Future<[Result]> = willCreate.flatten(on: conn).flatMap { models -> Future<[Result]> in
                 var copy = models
                 var modelCreated = 0
-                try Database.queryDataApply(Database.queryEncode(models, entity: Result.entity), to: &self.query)
+                try models.forEach { model in
+                    try Database.queryDataApply(Database.queryEncode(model, entity: Result.entity), to: &self.query)
+                }
                 return self.run(Database.queryActionCreate) { created in
                     guard modelCreated < copy.count else { return }
                     
