@@ -264,14 +264,16 @@ extension QuerySupporting where Query: FluentSQLQuery, QueryField: SQLColumnIden
     public static func queryDataSet<E>(_ field: QueryField, to data: E, on query: inout Query)
         where E: Encodable
     {
-        query.values[field.identifier.string] = .bind(.encodable(data))
+        query.values.indices.forEach { index in
+            query.values[index][field.identifier.string] = .bind(.encodable(data))
+        }
     }
 }
 
 extension QuerySupporting where Query: FluentSQLQuery, QueryData == Dictionary<String, Query.Expression> {
     /// See `QuerySupporting`.
     public static func queryDataApply(_ data: QueryData, to query: inout Query) {
-        query.values = data
+        query.values.append(data)
     }
 }
 
