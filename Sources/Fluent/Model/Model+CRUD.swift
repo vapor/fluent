@@ -70,21 +70,21 @@ extension Future where T: Model {
     /// See `Model`.
     public func save(on connectable: DatabaseConnectable) -> Future<T> {
         return self.flatMap(to: T.self) { (model) in
-            return model.save(on: connectable).transform(to: model)
+            return model.save(on: connectable)
         }
     }
 
     /// See `Model`.
     public func create(on connectable: DatabaseConnectable) -> Future<T> {
         return self.flatMap(to: T.self) { (model) in
-            return model.create(on: connectable).transform(to: model)
+            return model.create(on: connectable)
         }
     }
 
     /// See `Model`.
     public func update(on connectable: DatabaseConnectable) -> Future<T> {
         return self.flatMap(to: T.self) { (model) in
-            return model.update(on: connectable).transform(to: model)
+            return model.update(on: connectable)
         }
     }
 
