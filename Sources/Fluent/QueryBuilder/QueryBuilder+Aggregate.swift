@@ -16,19 +16,8 @@ extension QueryBuilder {
     ///     - field: Field to sum.
     ///     - default: Optional default to use.
     /// - returns: A `Future` containing the sum.
-    public func sum<T>(_ field: KeyPath<Result, T>, default: T? = nil) -> Future<T> where T: Decodable {
-        return self.count().flatMap { count in
-            switch count {
-            case 0:
-                if let d = `default` {
-                    return self.connection.map { _ in d }
-                } else {
-                    throw FluentError(identifier: "noSumResults", reason: "Sum query returned 0 results and no default was supplied.")
-                }
-            default:
-                return self.aggregate(Database.queryAggregateSum, field: field)
-            }
-        }
+    public func sum<T>(_ field: KeyPath<Result, T>, default: T? = nil) -> Future<T> where T: Codable {
+        return aggregate(Database.queryAggregateSum, field: field, default: `default`)
     }
 
     /// Returns the average of all entries for the supplied field.
@@ -37,9 +26,10 @@ extension QueryBuilder {
     ///
     /// - parameters:
     ///     - field: Field to average.
+    ///     - default: Optional default to use.
     /// - returns: A `Future` containing the average.
-    public func average<T>(_ field: KeyPath<Result, T>) -> Future<T> where T: Decodable {
-        return aggregate(Database.queryAggregateAverage, field: field)
+    public func average<T>(_ field: KeyPath<Result, T>, default: T? = nil) -> Future<T> where T: Codable {
+        return aggregate(Database.queryAggregateAverage, field: field, default: `default`)
     }
 
     /// Returns the minimum value of all entries for the supplied field.
@@ -48,9 +38,10 @@ extension QueryBuilder {
     ///
     /// - parameters:
     ///     - field: Field to find min for.
+    ///     - default: Optional default to use.
     /// - returns: A `Future` containing the min.
-    public func min<T>(_ field: KeyPath<Result, T>) -> Future<T> where T: Decodable {
-        return aggregate(Database.queryAggregateMinimum, field: field)
+    public func min<T>(_ field: KeyPath<Result, T>, default: T? = nil) -> Future<T> where T: Codable {
+        return aggregate(Database.queryAggregateMinimum, field: field, default: `default`)
     }
 
     /// Returns the maximum value of all entries for the supplied field.
@@ -59,9 +50,10 @@ extension QueryBuilder {
     ///
     /// - parameters:
     ///     - field: Field to find max for.
+    ///     - default: Optional default to use.
     /// - returns: A `Future` containing the max.
-    public func max<T>(_ field: KeyPath<Result, T>) -> Future<T> where T: Decodable {
-        return aggregate(Database.queryAggregateMaximum, field: field)
+    public func max<T>(_ field: KeyPath<Result, T>, default: T? = nil) -> Future<T> where T: Codable {
+        return aggregate(Database.queryAggregateMaximum, field: field, default: `default`)
     }
 
     /// Perform an aggregate action on the supplied field. Normally you will use one of
@@ -71,13 +63,14 @@ extension QueryBuilder {
     ///
     /// - parameters:
     ///     - method: Aggregate method to use.
-    ///     - field: Field to find max for.
+    ///     - field: Field to find aggregate for.
     ///     - type: `Decodable` type to decode the aggregate value as.
+    ///     - default: Optional default to use.
     /// - returns: A `Future` containing the aggregate.
-    public func aggregate<D, T>(_ method: Database.QueryAggregate, field: KeyPath<Result, T>, as type: D.Type = D.self) -> Future<D>
-        where D: Decodable
+    public func aggregate<D, T>(_ method: Database.QueryAggregate, field: KeyPath<Result, T>, as type: D.Type = D.self, default: D?) -> Future<D>
+        where D: Codable
     {
-        return _aggregate(Database.queryAggregate(method, [Database.queryKey(Database.queryField(.keyPath(field)))]))
+        return _aggregate(Database.queryAggregate(method, [Database.queryKey(Database.queryField(.keyPath(field)))], default: `default`))
     }
 
     /// Returns the number of results for this query.
@@ -86,7 +79,7 @@ extension QueryBuilder {
     ///
     /// - returns: A `Future` containing the count.
     public func count() -> Future<Int> {
-        return _aggregate(Database.queryAggregate(Database.queryAggregateCount, [Database.queryKeyAll]))
+        return _aggregate(Database.queryAggregate(Database.queryAggregateCount, [Database.queryKeyAll], default: 0))
     }
 
     // MARK: Private

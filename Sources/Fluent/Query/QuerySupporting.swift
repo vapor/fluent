@@ -254,7 +254,9 @@ public protocol QuerySupporting: Database {
     /// - parameters:
     ///     - method: Aggregate method to use.
     ///     - field: Keys to aggregate. Can be zero.
-    static func queryAggregate(_ aggregate: QueryAggregate, _ fields: [QueryKey]) -> QueryKey
+    ///     - default: Value to fall back on if the aggregate function returns NULL.
+    static func queryAggregate<C>(_ aggregate: QueryAggregate, _ fields: [QueryKey], default: C?) -> QueryKey
+        where C: Codable
 
     /// Creates a new `QueryKey` from an existing `QueryField`.
     ///
