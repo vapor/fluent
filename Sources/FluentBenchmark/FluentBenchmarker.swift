@@ -17,7 +17,7 @@ public final class FluentBenchmarker {
             var age: Double
         }
         
-        let res = try database.query(User.self).filter("foo", "bar").all().wait()
+        let res = try database.query(User.self).filter(\.name, .equal, "Tanner").all().wait()
         print(res)
     }
 }
