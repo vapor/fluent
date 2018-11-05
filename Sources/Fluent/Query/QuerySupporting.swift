@@ -249,14 +249,21 @@ public protocol QuerySupporting: Database {
     /// Special "all fields" query key.
     static var queryKeyAll: QueryKey { get }
 
-    /// Creates an aggregate-type (computed) query key.
+    /// Creates an aggregate-type (computed) query key, falling back on a default value if the aggregate functions returns NULL.
     ///
     /// - parameters:
     ///     - method: Aggregate method to use.
     ///     - field: Keys to aggregate. Can be zero.
     ///     - default: Value to fall back on if the aggregate function returns NULL.
-    static func queryAggregate<D>(_ aggregate: QueryAggregate, _ fields: [QueryKey], default: D?) -> QueryKey
+    static func queryAggregate<D>(_ aggregate: QueryAggregate, _ fields: [QueryKey], default: D) -> QueryKey
         where D: Decodable
+    
+    /// Creates an aggregate-type (computed) query key.
+    ///
+    /// - parameters:
+    ///     - method: Aggregate method to use.
+    ///     - field: Keys to aggregate. Can be zero.
+    static func queryAggregate(_ aggregate: QueryAggregate, _ fields: [QueryKey]) -> QueryKey
 
     /// Creates a new `QueryKey` from an existing `QueryField`.
     ///

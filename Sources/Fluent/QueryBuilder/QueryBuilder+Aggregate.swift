@@ -70,7 +70,12 @@ extension QueryBuilder {
     public func aggregate<D, T>(_ method: Database.QueryAggregate, field: KeyPath<Result, T>, as type: D.Type = D.self, default: D?) -> Future<D>
         where D: Decodable
     {
-        return _aggregate(Database.queryAggregate(method, [Database.queryKey(Database.queryField(.keyPath(field)))], default: `default`))
+        guard let d = `default` else {
+            return _aggregate(Database.queryAggregate(method, [Database.queryKey(Database.queryField(.keyPath(field)))]))
+        }
+        
+        return _aggregate(Database.queryAggregate(method, [Database.queryKey(Database.queryField(.keyPath(field)))], default: d))
+        
     }
 
     /// Returns the number of results for this query.

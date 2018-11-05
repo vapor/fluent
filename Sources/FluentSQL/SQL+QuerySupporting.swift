@@ -158,7 +158,7 @@ extension QuerySupporting where
     QueryKey.Expression == QueryKey.Expression.Function.Argument.Expression
 {
     /// See `QuerySupporting`.
-    public static func queryAggregate<D>(_ name: QueryAggregate, _ fields: [QueryKey], default: D?) -> QueryKey
+    public static func queryAggregate<D>(_ name: QueryAggregate, _ fields: [QueryKey], default: D) -> QueryKey
         where D: Decodable
     {
         let args: [QueryKey.Expression.Function.Argument] = fields.compactMap { expr in
@@ -171,16 +171,21 @@ extension QuerySupporting where
             }
         }
         
-        var expressions: [QueryKey.Expression] = [.function(.function(name, args))]
-        if let d = `default` {
-            expressions.append(.literal(.numeric(String(describing: d))))
-        } else {
-            expressions.append(.literal(.null))
+        return .expression(.coalesce(.function(.function(name, args)), .literal(.numeric(String(describing: `default`)))), alias: .identifier("fluentAggregate"))
+    }
+    
+    /// See `QuerySupporting`.
+    public static func queryAggregate(_ name: QueryAggregate, _ fields: [QueryKey]) -> QueryKey {
+        let args: [QueryKey.Expression.Function.Argument] = fields.compactMap { expr in
+            if expr.isAll {
+                return .all
+            } else if let (expr, _) = expr.expression {
+                return .expression(expr)
+            } else {
+                return nil
+            }
         }
-        
-        let coalesced: QueryKey.Expression = .coalesce(expressions)
-        
-        return .expression(coalesced, alias: .identifier("fluentAggregate"))
+        return .expression(.function(.function(name, args)), alias: .identifier("fluentAggregate"))
     }
     
 }
