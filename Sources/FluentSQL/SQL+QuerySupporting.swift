@@ -171,7 +171,14 @@ extension QuerySupporting where
             }
         }
         
-        return .expression(.coalesce([.function(.function(name, args)), .literal(.string(String(describing: `default`)))]), alias: .identifier("fluentAggregate"))
+        var expressions: [QueryKey.Expression] = [.function(.function(name, args))]
+        if let d = `default` {
+            expressions.append(.literal(.string(String(describing: d))))
+        }
+        
+        let coalesced: QueryKey.Expression = .coalesce(expressions)
+        
+        return .expression(coalesced, alias: .identifier("fluentAggregate"))
     }
     
 }
