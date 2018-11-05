@@ -84,7 +84,7 @@ extension QueryBuilder {
     ///
     /// - returns: A `Future` containing the count.
     public func count() -> Future<Int> {
-        return _aggregate(Database.queryAggregate(Database.queryAggregateCount, [Database.queryKeyAll], default: 0))
+        return _aggregate(Database.queryAggregate(Database.queryAggregateCount, [Database.queryKeyAll]))
     }
 
     // MARK: Private
