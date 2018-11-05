@@ -173,7 +173,7 @@ extension QuerySupporting where
         
         var expressions: [QueryKey.Expression] = [.function(.function(name, args))]
         if let d = `default` {
-            expressions.append(.literal(.string(String(describing: d))))
+            expressions.append(.literal(.numeric(String(describing: d))))
         } else {
             expressions.append(.literal(.null))
         }
