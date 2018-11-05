@@ -16,7 +16,7 @@ extension QueryBuilder {
     ///     - field: Field to sum.
     ///     - default: Optional default to use.
     /// - returns: A `Future` containing the sum.
-    public func sum<T>(_ field: KeyPath<Result, T>, default: T? = nil) -> Future<T> where T: Codable {
+    public func sum<T>(_ field: KeyPath<Result, T>, default: T? = nil) -> Future<T> where T: Decodable {
         return aggregate(Database.queryAggregateSum, field: field, default: `default`)
     }
 
@@ -28,7 +28,7 @@ extension QueryBuilder {
     ///     - field: Field to average.
     ///     - default: Optional default to use.
     /// - returns: A `Future` containing the average.
-    public func average<T>(_ field: KeyPath<Result, T>, default: T? = nil) -> Future<T> where T: Codable {
+    public func average<T>(_ field: KeyPath<Result, T>, default: T? = nil) -> Future<T> where T: Decodable {
         return aggregate(Database.queryAggregateAverage, field: field, default: `default`)
     }
 
@@ -40,7 +40,7 @@ extension QueryBuilder {
     ///     - field: Field to find min for.
     ///     - default: Optional default to use.
     /// - returns: A `Future` containing the min.
-    public func min<T>(_ field: KeyPath<Result, T>, default: T? = nil) -> Future<T> where T: Codable {
+    public func min<T>(_ field: KeyPath<Result, T>, default: T? = nil) -> Future<T> where T: Decodable {
         return aggregate(Database.queryAggregateMinimum, field: field, default: `default`)
     }
 
@@ -52,7 +52,7 @@ extension QueryBuilder {
     ///     - field: Field to find max for.
     ///     - default: Optional default to use.
     /// - returns: A `Future` containing the max.
-    public func max<T>(_ field: KeyPath<Result, T>, default: T? = nil) -> Future<T> where T: Codable {
+    public func max<T>(_ field: KeyPath<Result, T>, default: T? = nil) -> Future<T> where T: Decodable {
         return aggregate(Database.queryAggregateMaximum, field: field, default: `default`)
     }
 
@@ -68,7 +68,7 @@ extension QueryBuilder {
     ///     - default: Optional default to use.
     /// - returns: A `Future` containing the aggregate.
     public func aggregate<D, T>(_ method: Database.QueryAggregate, field: KeyPath<Result, T>, as type: D.Type = D.self, default: D?) -> Future<D>
-        where D: Codable
+        where D: Decodable
     {
         return _aggregate(Database.queryAggregate(method, [Database.queryKey(Database.queryField(.keyPath(field)))], default: `default`))
     }

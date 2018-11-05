@@ -158,8 +158,8 @@ extension QuerySupporting where
     QueryKey.Expression == QueryKey.Expression.Function.Argument.Expression
 {
     /// See `QuerySupporting`.
-    public static func queryAggregate<C>(_ name: QueryAggregate, _ fields: [QueryKey], default: C?) -> QueryKey
-        where C: Codable
+    public static func queryAggregate<D>(_ name: QueryAggregate, _ fields: [QueryKey], default: D?) -> QueryKey
+        where D: Decodable
     {
         let args: [QueryKey.Expression.Function.Argument] = fields.compactMap { expr in
             if expr.isAll {
@@ -170,7 +170,8 @@ extension QuerySupporting where
                 return nil
             }
         }
-        return .expression(.coalesce([.function(.function(name, args)), .group(.bind(.encodable(`default`)))]), alias: .identifier("fluentAggregate"))
+        
+        return .expression(.coalesce([.function(.function(name, args)), .literal(.string(String(describing: `default`)))]), alias: .identifier("fluentAggregate"))
     }
     
 }
