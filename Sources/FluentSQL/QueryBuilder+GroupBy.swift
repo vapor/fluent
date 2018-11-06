@@ -7,6 +7,9 @@ extension QueryBuilder where Database.Query: FluentSQLQuery, Result: SQLTable {
         query.groupBy.append(.groupBy(.column(.keyPath(field))))
         return self
     }
+}
+
+extension QueryBuilder where Database.Query: FluentSQLQuery {
     
     /// Adds a SQL group by to the query.
     ///
