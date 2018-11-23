@@ -67,31 +67,27 @@
 ///
 ///
 ///     final class User: Model {
+///         static let deletedAtKey: TimestampKey? = \User.deletedAt
 ///         ...
 ///         var deletedAt: Date?
 ///     }
 ///
-///     extension User: SoftDeletable {
-///         static let deletedAtKey: TimestampKey? = \.deletedAt
-///     }
-///
-/// You can add `SoftDeletable` to existing models that have an optional `Date` property for storing the
-/// deleted at date.
-///
-/// - note: The deleted at date may be set in the future. The model will continue to be included in
+/// - Note: The deleted at date may be set in the future. The model will continue to be included in
 ///         queries until the deleted at date passes.
 ///
-/// Use `softDelete(on:)` to soft-delete a `SoftDeletable` model from the database.
+/// Models that have a `deletedAtKey` are soft-deleted from the database by default.
+/// Update the `deletedAtKey` directly and use `save(on:)` or `update(on:)` to soft-delete a model as of a given time.
+/// Use `delete(force: true)` to hard-delete a model with a `deletedAtKey`.
 /// Use `restore(on:)` to restore a soft-deleted model.
 ///
 ///     let user: User
-///     try user.softDelete(on: conn)
+///     try user.delete(on: conn)
 ///     // later ...
 ///     try user.restore(on: conn)
 ///
-/// Use `excludeSoftDeleted()` on `QueryBuilder` to exclude soft-deleted results (included by default).
+/// Use the `withSoftDeleted:` parameter on `Model.query(on:withSoftDeleted:)` to include soft-deleted results (excluded by default).
 ///
-///     User.query(on: conn).excludeSoftDeleted().count()
+///     User.query(on: conn, withSoftDeleted: true).count()
 ///
 /// `SoftDeletable` models have extra lifecycle events:
 ///
