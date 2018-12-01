@@ -2,6 +2,12 @@ import Fluent
 import NIO
 import SQLite3
 
+extension FluentFilter {
+    public static func test(_ string: String) -> FluentFilter {
+        return .custom(string)
+    }
+}
+
 public struct TestDatabase: FluentDatabase {
     public var eventLoop: EventLoop
     
@@ -26,11 +32,25 @@ public struct TestDatabase: FluentDatabase {
             if !query.filters.isEmpty {
                 stmt.append("WHERE")
                 for filter in query.filters {
-                    switch filter.value {
-                    case .encodable(let enc):
-                        stmt += ["\(filter.field.path[0]) = '\(enc)'"]
-                    case .null:
-                        stmt += ["\(filter.field.path[0]) IS NULL"]
+                    switch filter {
+                    case .custom(let custom):
+                        guard let custom = custom as? String else {
+                            fatalError("custom not a string")
+                        }
+                        stmt += [custom]
+                    case .basic(let field, let method, let value):
+                        switch value {
+                        case .bind(let enc):
+                            stmt += ["\(field.path[0]) = '\(enc)'"]
+                        case .array(let arr):
+                            fatalError()
+                        case .null:
+                            stmt += ["\(field.path[0]) IS NULL"]
+                        case .custom(let c):
+                            fatalError()
+                        }
+                    case .group(let filters, let relation):
+                        stmt += ["group!"]
                     }
                 }
             }

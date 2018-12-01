@@ -10,16 +10,27 @@ public final class FluentQueryBuilder<Model, Result>
         self.database = database
         self.query = .init(entity: Model.entity)
     }
-
+    
+    public func filter<T>(_ field: KeyPath<Model, T>, in values: [T]) -> Self
+        where T: Encodable
+    {
+        return self.filter(.init("name"), .in, .array(values.map { .bind($0) }))
+    }
+    
+    public func filter<T>(_ field: KeyPath<Model, T>, notIn values: [T]) -> Self
+        where T: Encodable
+    {
+        return self.filter(.init("name"), .notIn, .array(values.map { .bind($0) }))
+    }
     
     public func filter<T>(_ field: KeyPath<Model, T>, _ method: FluentFilter.Method, _ value: T) -> Self
         where T: Encodable
     {
-        return self.filter(.init("name"), method, .encodable(value))
+        return self.filter(.init("name"), method, .bind(value))
     }
     
     public func filter(_ field: FluentField, _ method: FluentFilter.Method, _ value: FluentValue) -> Self {
-        return self.filter(.init(field: field, method: method, value: value))
+        return self.filter(.basic(field, method, value))
     }
     
     public func filter(_ filter: FluentFilter) -> Self {

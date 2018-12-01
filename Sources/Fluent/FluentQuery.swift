@@ -27,45 +27,40 @@ public struct FluentField {
     }
 }
 
-public struct FluentFilter {
-    public struct Method {
-        public static var equal: Method {
-            return .init(isInverse: false, operation: .equality)
+public enum FluentFilter {
+    public enum Method {
+        public enum Like {
+            case prefix
+            case suffix
+            case any
         }
-        
-        public static var notEqual: Method {
-            return .init(isInverse: true, operation: .equality)
-        }
-        
-        public enum Operation {
-            case equality
-            case comparison(equality: Bool)
-            case subset
-            
-            public enum Like {
-                case any
-                case prefix
-                case suffix
-            }
-            case like(Like)
-        }
-        
-        public var isInverse: Bool
-        public var operation: Operation
+        case equal
+        case notEqual
+        case greaterThan
+        case lessThan
+        case greaterThanOrEqual
+        case lessThanOrEqual
+        case `in`
+        case notIn
+        case like(Like)
+        case notLike(Like)
+        case custom(Any)
     }
     
-    public var field: FluentField
-    public var method: Method
-    public var value: FluentValue
-    
-    public init(field: FluentField, method: Method, value: FluentValue) {
-        self.field = field
-        self.method = method
-        self.value = value
+    public enum Relation {
+        case and
+        case or
+        case custom(Any)
     }
+    
+    case basic(FluentField, Method, FluentValue)
+    case group([FluentFilter], Relation)
+    case custom(Any)
 }
 
 public enum FluentValue {
-    case encodable(Encodable)
+    case bind(Encodable)
+    case array([FluentValue])
     case null
+    case custom(Any)
 }
