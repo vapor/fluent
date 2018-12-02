@@ -250,12 +250,21 @@ public protocol QuerySupporting: Database {
     static var queryKeyAll: QueryKey { get }
 
     /// Creates an aggregate-type (computed) query key.
+    /// (Default alias for the aggregate field is "fluentAggregate")
     ///
     /// - parameters:
     ///     - method: Aggregate method to use.
-    ///     - field: Keys to aggregate. Can be zero.
+    ///     - fields: Keys to aggregate. Can be zero.
     static func queryAggregate(_ aggregate: QueryAggregate, _ fields: [QueryKey]) -> QueryKey
-
+    
+    /// Creates an aggregate-type (computed) query key with specific alias identifier.
+    ///
+    /// - parameters:
+    ///     - method: Aggregate method to use.
+    ///     - fields: Keys to aggregate. Can be zero.
+    ///     - identifier: Alias identifier
+    static func queryAggregate(_ aggregate: QueryAggregate, _ fields: [QueryKey], _ identifier: String) -> QueryKey
+    
     /// Creates a new `QueryKey` from an existing `QueryField`.
     ///
     /// - parameters:

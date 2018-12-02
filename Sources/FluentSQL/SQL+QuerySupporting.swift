@@ -158,7 +158,7 @@ extension QuerySupporting where
     QueryKey.Expression == QueryKey.Expression.Function.Argument.Expression
 {
     /// See `QuerySupporting`.
-    public static func queryAggregate(_ name: QueryAggregate, _ fields: [QueryKey]) -> QueryKey {
+    public static func queryAggregate(_ name: QueryAggregate, _ fields: [QueryKey], _ identifier: String) -> QueryKey {
         let args: [QueryKey.Expression.Function.Argument] = fields.compactMap { expr in
             if expr.isAll {
                 return .all
@@ -168,7 +168,12 @@ extension QuerySupporting where
                 return nil
             }
         }
-        return .expression(.function(.function(name, args)), alias: .identifier("fluentAggregate"))
+        return .expression(.function(.function(name, args)), alias: .identifier(identifier))
+    }
+    
+    /// See `QuerySupporting`.
+    public static func queryAggregate(_ name: QueryAggregate, _ fields: [QueryKey]) -> QueryKey {
+        return queryAggregate(name, fields, "fluentAggregate")
     }
     
 }
