@@ -9,6 +9,7 @@ extension QueryBuilder {
     ///     - key: Swift `KeyPath` to field on model to sort.
     ///     - direction: Direction to sort the fields, ascending or descending.
     /// - returns: Query builder for chaining.
+    @discardableResult
     public func sort<T>(_ key: KeyPath<Result, T>, _ direction: Database.QuerySortDirection = Database.querySortDirectionAscending) -> Self {
         return sort(Database.querySort(Database.queryField(.keyPath(key)), direction))
     }
@@ -21,6 +22,7 @@ extension QueryBuilder {
     ///     - key: Swift `KeyPath` to field on model to sort.
     ///     - direction: Direction to sort the fields, ascending or descending.
     /// - returns: Query builder for chaining.
+    @discardableResult
     public func sort<M, T>(_ key: KeyPath<M, T>, _ direction: Database.QuerySortDirection = Database.querySortDirectionAscending) -> Self {
         return sort(Database.querySort(Database.queryField(.keyPath(key)), direction))
     }
@@ -30,6 +32,7 @@ extension QueryBuilder {
     /// - parameters:
     ///     - sort: Custom sort to add.
     /// - returns: Query builder for chaining.
+    @discardableResult
     public func sort(_ sort: Database.QuerySort) -> Self {
         Database.querySortApply(sort, to: &query)
         return self
