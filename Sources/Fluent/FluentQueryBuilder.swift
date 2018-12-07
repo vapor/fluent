@@ -1,57 +1,43 @@
 import NIO
 
-public final class FluentQueryBuilder<Model, Result>
-    where Model: FluentModel, Result: Codable
+public final class FluentQueryBuilder<M>
+    where M: FluentModel
 {
     var database: FluentDatabase
     var query: FluentQuery
     
-    public init(_ database: FluentDatabase) {
+    public init(database: FluentDatabase) {
         self.database = database
-        self.query = .init(entity: Model.entity)
+        self.query = .init(entity: M.ref.entity)
+        self.query.fields = M.ref.allFields.map { .field($0) }
     }
     
-    public func filter<T>(_ field: KeyPath<Model, T>, in values: [T]) -> Self
+    public func filter<T>(_ field: KeyPath<M, FluentField<M, T>>, _ method: FluentQuery.Filter.Method, _ value: T) -> Self
         where T: Encodable
     {
-        return self.filter(.init("name"), .in, .array(values.map { .bind($0) }))
+        return self.filter(.field(M.ref[keyPath: field]), method, .bind(value))
     }
     
-    public func filter<T>(_ field: KeyPath<Model, T>, notIn values: [T]) -> Self
-        where T: Encodable
-    {
-        return self.filter(.init("name"), .notIn, .array(values.map { .bind($0) }))
-    }
-    
-    public func filter<T>(_ field: KeyPath<Model, T>, _ method: FluentFilter.Method, _ value: T) -> Self
-        where T: Encodable
-    {
-        return self.filter(.init("name"), method, .bind(value))
-    }
-    
-    public func filter(_ field: FluentField, _ method: FluentFilter.Method, _ value: FluentValue) -> Self {
+    public func filter(_ field: FluentQuery.Field, _ method: FluentQuery.Filter.Method, _ value: FluentQuery.Value) -> Self {
         return self.filter(.basic(field, method, value))
     }
     
-    public func filter(_ filter: FluentFilter) -> Self {
+    public func filter(_ filter: FluentQuery.Filter) -> Self {
         self.query.filters.append(filter)
         return self
     }
     
-    public func all() -> EventLoopFuture<[Result]> {
-        var futureResults: [EventLoopFuture<Result>] = []
+    public func all() -> EventLoopFuture<[M]> {
+        var models: [M] = []
+        return self.run { model in
+            models.append(model)
+        }.map { models }
+    }
+    
+    public func run(_ onOutput: @escaping (M) throws -> ()) -> EventLoopFuture<Void> {
         return self.database.fluentQuery(self.query) { output in
-            let decoded = output.fluentDecode(Result.self, entity: nil)
-            futureResults.append(decoded)
-        }.then {
-            let results: [Result] = []
-            return EventLoopFuture.reduce(
-                into: results,
-                futureResults,
-                eventLoop: self.database.eventLoop
-            ) { a, b in
-                a.append(b)
-            }
+            let model = M(storage: .init(output: output))
+            try onOutput(model)
         }
     }
 }

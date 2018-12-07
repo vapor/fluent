@@ -1,4 +1,6 @@
 import Fluent
+import Foundation
+
 public final class FluentBenchmarker {
     public let database: FluentDatabase
     
@@ -11,15 +13,8 @@ public final class FluentBenchmarker {
     }
     
     func basics() throws {
-        struct User: FluentModel {
-            var id: Int?
-            var name: String
-            var age: Double
-        }
-        
-        let res = try database.query(User.self)
+        let res = try database.query(Galaxy.self)
             .filter(\.name, .equal, "Tanner")
-            .filter(.test("AND 1 = 1"))
             .all().wait()
         print(res)
     }
