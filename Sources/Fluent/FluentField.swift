@@ -1,4 +1,4 @@
-public struct FluentField<M, T>: AnyFluentField
+public struct FluentField<M, T>: FluentProperty
     where M: FluentModel, T: Codable
 {
     public let name: String
@@ -19,11 +19,6 @@ public struct FluentField<M, T>: AnyFluentField
         }
         return try output.fluentDecode(field: self.name, entity: self.model.entity, as: T.self)
     }
-}
-
-public protocol AnyFluentField {
-    var name: String { get }
-    var entity: String? { get }
 }
 
 extension FluentModel {

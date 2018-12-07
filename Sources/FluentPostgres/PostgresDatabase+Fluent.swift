@@ -77,7 +77,7 @@ extension PostgresQuery.Expression {
         case .array(let values):
             return .group(values.map { .fluent(value: $0) })
         case .bind(let encodable):
-            return .bind(.encodable(encodable as! String))
+            return .bind(.encodable(encodable))
         case .custom(let custom):
             return custom as! PostgresQuery.Expression
         case .null: return .literal(.null)
@@ -92,6 +92,8 @@ extension PostgresQuery.Expression.BinaryOperator {
             return custom as! PostgresQuery.Expression.BinaryOperator
         case .equal:
             return .equal
+        case .in:
+            return .in
         default: fatalError()
         }
     }

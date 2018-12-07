@@ -8,7 +8,7 @@ public struct FluentQuery {
     }
     
     public enum Field {
-        case field(AnyFluentField)
+        case field(name: String, entity: String?)
         case custom(Any)
     }
     

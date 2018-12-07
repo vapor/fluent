@@ -16,14 +16,21 @@ final class FluentPostgresTests: XCTestCase {
             database: "vapor_database",
             tlsConfig: nil
         )
-        let db = PostgresDatabase(config: config, on: eventLoop)
-            .newConnectionPool(config: .init(maxConnections: 20))
-        _ = try db.withConnection { conn in
-            conn.simpleQuery("""
-            DROP TABLE IF EXISTS "galaxies"; CREATE TABLE "galaxies" ("id" INT, "name" TEXT)
-            """)
-        }.wait()
-        try FluentBenchmarker(database: db).run()
+        let conn = try PostgresDatabase(config: config, on: eventLoop).newConnection().wait()
+        _ = try conn.simpleQuery("""
+        DROP TABLE IF EXISTS "planets";
+        DROP TABLE IF EXISTS "galaxies";
+        CREATE TABLE "galaxies" ("id" BIGINT, "name" TEXT);
+        CREATE TABLE "planets" ("id" BIGINT, "name" TEXT, "galaxyID" BIGINT);
+        """).wait()
+        try conn.loadTableNames().wait()
+        _ = try conn.simpleQuery("""
+        INSERT INTO "galaxies" VALUES (1, 'Milky Way');
+        INSERT INTO "galaxies" VALUES (2, 'Andromeda');
+        INSERT INTO "planets" VALUES (1, 'Earth', 1);
+        INSERT INTO "planets" VALUES (2, 'Jupiter', 1);
+        """).wait()
+        try FluentBenchmarker(database: conn).run()
     }
     static let allTests = [
         ("testBenchmark", testBenchmark),

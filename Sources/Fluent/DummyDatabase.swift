@@ -28,6 +28,10 @@ private struct DummyOutput: FluentOutput {
     func fluentDecode<T>(field: String, entity: String?, as type: T.Type) throws -> T where T : Decodable {
         return try T(from: DummyDecoder())
     }
+    
+    var description: String {
+        return "<dummy>"
+    }
 }
 
 private struct DummyDecoder: Decoder {
