@@ -16,7 +16,7 @@ public final class FluentBenchmarker {
     func testBasics() throws {
         print("[BASIC]")
         let res = try database.query(Galaxy.self)
-            .filter(\.name, .equal, "Milky Way")
+            .filter(\.name == "Milky Way")
             .all().wait()
         print(res)
     }

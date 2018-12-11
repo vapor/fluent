@@ -74,7 +74,7 @@ extension PostgresQuery.Expression {
 extension PostgresQuery.Expression {
     static func fluent(value: FluentQuery.Value) -> PostgresQuery.Expression {
         switch value {
-        case .array(let values):
+        case .group(let values):
             return .group(values.map { .fluent(value: $0) })
         case .bind(let encodable):
             return .bind(.encodable(encodable))
@@ -90,10 +90,18 @@ extension PostgresQuery.Expression.BinaryOperator {
         switch method {
         case .custom(let custom):
             return custom as! PostgresQuery.Expression.BinaryOperator
-        case .equal:
-            return .equal
-        case .in:
-            return .in
+        case .equality(let inverse):
+            if inverse {
+                return .notEqual
+            } else {
+                return .equal
+            }
+        case .subset(let inverse):
+            if inverse {
+                return .notIn
+            } else {
+                return .in
+            }
         default: fatalError()
         }
     }

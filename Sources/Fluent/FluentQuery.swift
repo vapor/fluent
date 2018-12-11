@@ -14,22 +14,24 @@ public struct FluentQuery {
     
     public enum Filter {
         public enum Method {
-            public enum Like {
+            /// LHS is equal to RHS
+            case equality(inverse: Bool)
+            
+            /// LHS is greater than RHS
+            case order(inverse: Bool, equality: Bool)
+            
+            /// LHS exists in RHS
+            case subset(inverse: Bool)
+            
+            public enum Contains {
                 case prefix
                 case suffix
-                case any
+                case anywhere
             }
+            /// RHS exists in LHS
+            case contains(inverse: Bool, Contains)
             
-            case equal
-            case notEqual
-            case greaterThan
-            case lessThan
-            case greaterThanOrEqual
-            case lessThanOrEqual
-            case `in`
-            case notIn
-            case like(Like)
-            case notLike(Like)
+            /// Custom method
             case custom(Any)
         }
         
@@ -46,7 +48,7 @@ public struct FluentQuery {
     
     public enum Value {
         case bind(Encodable)
-        case array([Value])
+        case group([Value])
         case null
         case custom(Any)
     }
