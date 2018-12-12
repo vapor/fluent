@@ -14,10 +14,20 @@ public struct FluentField<M, T>: FluentProperty
     }
     
     public func get() throws -> T {
-        guard let output = self.model.storage.output else {
-            fatalError("No storage row")
+        if let output = self.model.storage.output {
+            return try output.fluentDecode(field: self.name, entity: self.model.entity, as: T.self)
+        } else if let input = self.model.storage.input[self.name] {
+            switch input {
+            case .bind(let encodable): return encodable as! T
+            default: fatalError("Non-matching input.")
+            }
+        } else {
+            fatalError("No input or output for this field.")
         }
-        return try output.fluentDecode(field: self.name, entity: self.model.entity, as: T.self)
+    }
+    
+    public func set(to value: T) {
+        self.model.storage.input[self.name] = .bind(value)
     }
 }
 

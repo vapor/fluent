@@ -53,11 +53,19 @@ public final class FluentQueryBuilder<Model>
         return self
     }
     
+    public func first() -> EventLoopFuture<Model?> {
+        return all().map { $0.first }
+    }
+    
     public func all() -> EventLoopFuture<[Model]> {
         var models: [Model] = []
         return self.run { model in
             models.append(model)
         }.map { models }
+    }
+    
+    public func run() -> EventLoopFuture<Void> {
+        return self.run { _ in }
     }
     
     public func run(_ onOutput: @escaping (Model) throws -> ()) -> EventLoopFuture<Void> {

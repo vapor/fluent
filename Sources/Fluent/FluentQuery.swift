@@ -52,16 +52,18 @@ public struct FluentQuery {
         case null
         case custom(Any)
     }
-
+    
     public var fields: [Field]
     public var action: Action
     public var entity: String
     public var filters: [Filter]
+    public var input: [[Value]]
     
     public init(entity: String) {
         self.fields = []
         self.action = .read
         self.entity = entity
         self.filters = []
+        self.input = []
     }
 }
