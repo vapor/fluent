@@ -17,24 +17,39 @@ extension PostgresQuery {
 }
 
 private extension PostgresQuery.ColumnDefinition {
-    static func fluent(_ field: DatabaseSchema.Field) -> PostgresQuery.ColumnDefinition {
+    static func fluent(_ field: DatabaseSchema.FieldDefinition) -> PostgresQuery.ColumnDefinition {
         switch field {
         case .custom(let custom): return custom as! PostgresQuery.ColumnDefinition
-        case .definition(let definition): return .fluent(definition)
-        case .name: fatalError()
+        case .definition(let name, let dataType, let constraints):
+            return .columnDefinition(
+                .fluent(name),
+                .fluent(dataType),
+                constraints.map { .fluent($0)}
+            )
         }
     }
-    
-    static func fluent(_ field: DatabaseSchema.Field.Definition) -> PostgresQuery.ColumnDefinition {
-        var constraints: [PostgresQuery.ColumnConstraint] = []
-        if field.isIdentifier {
-            constraints.append(.constraint(algorithm: .primaryKey, name: nil))
+}
+
+private extension PostgresQuery.ColumnIdentifier {
+    static func fluent(_ name: DatabaseSchema.FieldName) -> PostgresQuery.ColumnIdentifier {
+        switch name {
+        case .custom(let custom):
+            return custom as! PostgresQuery.ColumnIdentifier
+        case .string(let string):
+            return .column(name: .identifier(string), table: nil)
         }
-        return .columnDefinition(
-            .column(name: .identifier(field.name), table: nil),
-            .fluent(field.dataType),
-            constraints
-        )
+    }
+}
+
+private extension PostgresQuery.ColumnConstraint {
+    static func fluent(_ constraint: DatabaseSchema.FieldConstraint) -> PostgresQuery.ColumnConstraint {
+        switch constraint {
+        case .custom(let custom):
+            return custom as! PostgresQuery.ColumnConstraint
+        case .primaryKey:
+            #warning("constraints need reliable name")
+            return .constraint(algorithm: .primaryKey, name: nil)
+        }
     }
 }
 

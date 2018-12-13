@@ -9,12 +9,20 @@ public struct ChildrenRelation<Parent, Child>
         self.relation = relation
     }
     
-    #warning("add query fetch method")
+    public func query(on database: FluentDatabase) throws -> QueryBuilder<Child> {
+        let field = Child.new()[keyPath: self.relation].id
+        return try database.query(Child.self).filter(
+            .field(name: field.name, entity: Child.new().entity),
+            .equality(inverse: false),
+            .bind(self.parent.id.get())
+        )
+    }
     
     public func get() throws -> [Child] {
-        #warning("better storage cache result")
-        let children = self.parent.storage.cache!.storage[Child.ref.entity]! as! [Child]
-        return try children.filter { child in
+        guard let cache = self.parent.storage.cache else {
+            fatalError("No cache set on storage.")
+        }
+        return try cache.get(Child.self).filter { child in
             return try child[keyPath: self.relation].id.get() == self.parent.id.get()
         }
     }

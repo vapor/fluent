@@ -5,7 +5,7 @@ public struct ModelField<Model, Value>: ModelProperty
         return Value.self
     }
     
-    public var isIdentifier: Bool
+    public var constraints: [DatabaseSchema.FieldConstraint]
     
     public let name: String
     public var entity: String? {
@@ -19,11 +19,11 @@ public struct ModelField<Model, Value>: ModelProperty
         let name: String
     }
     
-    init(model: Model, name: String, dataType: DatabaseSchema.DataType?, isIdentifier: Bool) {
+    init(model: Model, name: String, dataType: DatabaseSchema.DataType?, constraints: [DatabaseSchema.FieldConstraint]) {
         self.model = model
         self.name = name
         self.dataType = dataType
-        self.isIdentifier = isIdentifier
+        self.constraints = constraints
     }
     
     public func get() throws -> Value {
@@ -51,11 +51,10 @@ extension Model {
     public func field<Value>(
         _ name: String,
         _ dataType: DatabaseSchema.DataType? = nil,
-        isIdentifier: Bool = false,
-        as type: Value.Type = Value.self
+        _ constraints: DatabaseSchema.FieldConstraint...
     ) -> Field<Value>
         where Value: Codable
     {
-        return .init(model: self, name: name, dataType: dataType, isIdentifier: isIdentifier)
+        return .init(model: self, name: name, dataType: dataType, constraints: constraints)
     }
 }

@@ -3,7 +3,7 @@ public protocol ModelProperty {
     var entity: String? { get }
     var type: Any.Type { get }
     var dataType: DatabaseSchema.DataType? { get }
-    var isIdentifier: Bool { get }
+    var constraints: [DatabaseSchema.FieldConstraint] { get }
 }
 
 extension Model {

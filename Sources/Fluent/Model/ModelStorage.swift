@@ -1,14 +1,16 @@
 public struct ModelStorage {
-    public static let empty: ModelStorage = .init(output: nil, cache: nil)
+    public static let empty: ModelStorage = .init(output: nil, cache: nil, exists: false)
     
     var output: DatabaseOutput?
     var input: [String: DatabaseQuery.Value]
-    var cache: FluentEagerLoad.Cache?
+    var cache: EagerLoad.Cache?
+    var exists: Bool
 
-    init(output: DatabaseOutput?, cache: FluentEagerLoad.Cache?) {
+    init(output: DatabaseOutput?, cache: EagerLoad.Cache?, exists: Bool) {
         self.output = output
         self.cache = cache
         self.input = [:]
+        self.exists = exists
     }
 }
 

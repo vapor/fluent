@@ -12,16 +12,28 @@ final class FluentPostgresTests: XCTestCase {
         try self.benchmarker.testAll()
     }
     
-    func testBasics() throws {
-        try self.benchmarker.testBasics()
-    }
-    
-    func testEagerLoad() throws {
-        try self.benchmarker.testEagerLoad()
-    }
-    
     func testCreate() throws {
         try self.benchmarker.testCreate()
+    }
+    
+    func testRead() throws {
+        try self.benchmarker.testRead()
+    }
+    
+    func testUpdate() throws {
+        try self.benchmarker.testUpdate()
+    }
+    
+    func testDelete() throws {
+        try self.benchmarker.testDelete()
+    }
+    
+    func testEagerLoadChildren() throws {
+        try self.benchmarker.testEagerLoadChildren()
+    }
+    
+    func testEagerLoadParent() throws {
+        try self.benchmarker.testEagerLoadParent()
     }
     
     override func setUp() {

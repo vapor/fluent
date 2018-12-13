@@ -19,7 +19,7 @@ public struct DatabaseSchema {
             }
         }
         
-        static var int: DataType {
+        public static var int: DataType {
             return .int64
         }
         case int8
@@ -27,7 +27,7 @@ public struct DatabaseSchema {
         case int32
         case int64
         
-        static var uint: DataType {
+        public static var uint: DataType {
             return .uint64
         }
         case uint8
@@ -54,22 +54,25 @@ public struct DatabaseSchema {
         case custom(Any)
     }
     
-    public enum Field {
-        public struct Definition {
-            public var name: String
-            public var dataType: DataType
-            public var isIdentifier: Bool
-        }
-        
-        case definition(Definition)
-        case name(String)
+    public enum FieldConstraint {
+        case primaryKey
+        case custom(Any)
+    }
+    
+    public enum FieldDefinition {
+        case definition(name: FieldName, dataType: DataType, constraints: [FieldConstraint])
+        case custom(Any)
+    }
+    
+    public enum FieldName {
+        case string(String)
         case custom(Any)
     }
     
     public var action: Action
     public var entity: String
-    public var createFields: [Field]
-    public var deleteFields: [Field]
+    public var createFields: [FieldDefinition]
+    public var deleteFields: [FieldName]
     
     public init(entity: String) {
         self.action = .create

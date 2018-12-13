@@ -13,7 +13,7 @@ final class Galaxy: Model {
     }
     
     var id: Field<Int> {
-        return self.field("id", isIdentifier: true)
+        return self.field("id", .int, .primaryKey)
     }
     
     var name: Field<String> {

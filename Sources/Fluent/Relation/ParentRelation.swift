@@ -10,6 +10,15 @@ public struct ParentRelation<Child, Parent>
     public func set(to parent: Parent) throws {
         try self.id.set(to: parent.id.get())
     }
+    
+    public func get() throws -> Parent {
+        guard let cache = self.id.model.storage.cache else {
+            fatalError("No cache set on storage.")
+        }
+        return try cache.get(Parent.self).filter { parent in
+            return try parent.id.get() == self.id.get()
+        }.first!
+    }
 }
 
 extension ParentRelation: ModelProperty {
@@ -29,8 +38,8 @@ extension ParentRelation: ModelProperty {
         return Parent.ID.self
     }
     
-    public var isIdentifier: Bool {
-        return false
+    public var constraints: [DatabaseSchema.FieldConstraint] {
+        return self.id.constraints
     }
 }
 

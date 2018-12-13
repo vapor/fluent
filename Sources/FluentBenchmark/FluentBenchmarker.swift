@@ -9,9 +9,12 @@ public final class FluentBenchmarker {
     }
     
     public func testAll() throws {
-        try self.testBasics()
-        try self.testEagerLoad()
         try self.testCreate()
+        try self.testRead()
+        try self.testUpdate()
+        try self.testDelete()
+        try self.testEagerLoadChildren()
+        try self.testEagerLoadParent()
     }
     
     struct Failure: Error, CustomStringConvertible, LocalizedError {
@@ -27,50 +30,6 @@ public final class FluentBenchmarker {
         
         init(_ reason: String) {
             self.reason = reason
-        }
-    }
-    
-    public func testBasics() throws {
-        try runTest(#function, [
-            Galaxy.migration(on: self.database),
-            GalaxySeed(on: self.database)
-        ]) {
-            guard let milkyWay = try self.database.query(Galaxy.self)
-                .filter(\.name == "Milky Way")
-                .first().wait()
-            else {
-                throw Failure("unpexected missing galaxy")
-            }
-            guard try milkyWay.name.get() == "Milky Way" else {
-                throw Failure("unexpected name")
-            }
-        }
-    }
-    
-    public func testEagerLoad() throws {
-        try runTest(#function, [
-            Galaxy.migration(on: self.database),
-            Planet.migration(on: self.database),
-            GalaxySeed(on: self.database),
-            PlanetSeed(on: self.database)
-        ]) {
-            let galaxies = try self.database.query(Galaxy.self)
-                .with(\.planets)
-                .all().wait()
-
-            for galaxy in galaxies {
-                let planets = try galaxy.planets.get()
-                switch try galaxy.name.get() {
-                case "Milky Way":
-                    guard try planets.contains(where: { try $0.name.get() == "Earth" }) else {
-                        throw Failure("unexpected missing planet")
-                    }
-                    guard try !planets.contains(where: { try $0.name.get() == "PA-99-N2"}) else {
-                        throw Failure("unexpected planet")
-                    }
-                default: break
-                }
-            }
         }
     }
     
@@ -98,10 +57,125 @@ public final class FluentBenchmarker {
         }
     }
     
+    public func testRead() throws {
+        try runTest(#function, [
+            Galaxy.migration(on: self.database),
+            GalaxySeed(on: self.database)
+        ]) {
+            guard let milkyWay = try self.database.query(Galaxy.self)
+                .filter(\.name == "Milky Way")
+                .first().wait()
+                else {
+                    throw Failure("unpexected missing galaxy")
+            }
+            guard try milkyWay.name.get() == "Milky Way" else {
+                throw Failure("unexpected name")
+            }
+        }
+    }
+    
+    public func testUpdate() throws {
+        try runTest(#function, [
+            Galaxy.migration(on: self.database)
+        ]) {
+            let galaxy = Galaxy.new()
+            galaxy.name.set(to: "Milkey Way")
+            try galaxy.save(on: self.database).wait()
+            galaxy.name.set(to: "Milky Way")
+            try galaxy.save(on: self.database).wait()
+            
+            // verify
+            let galaxies = try self.database.query(Galaxy.self).filter(\.name == "Milky Way").all().wait()
+            guard galaxies.count == 1 else {
+                throw Failure("unexpected galaxy count: \(galaxies)")
+            }
+            guard try galaxies[0].name.get() == "Milky Way" else {
+                throw Failure("unexpected galaxy name")
+            }
+        }
+    }
+    
+    public func testDelete() throws {
+        try runTest(#function, [
+            Galaxy.migration(on: self.database)
+        ]) {
+            let galaxy = Galaxy.new()
+            galaxy.name.set(to: "Milky Way")
+            try galaxy.save(on: self.database).wait()
+            try galaxy.delete(on: self.database).wait()
+            
+            // verify
+            let galaxies = try self.database.query(Galaxy.self).all().wait()
+            guard galaxies.count == 0 else {
+                throw Failure("unexpected galaxy count: \(galaxies)")
+            }
+        }
+    }
+    
+    public func testEagerLoadChildren() throws {
+        try runTest(#function, [
+            Galaxy.migration(on: self.database),
+            Planet.migration(on: self.database),
+            GalaxySeed(on: self.database),
+            PlanetSeed(on: self.database)
+        ]) {
+            let galaxies = try self.database.query(Galaxy.self)
+                .with(\.planets)
+                .all().wait()
+
+            for galaxy in galaxies {
+                let planets = try galaxy.planets.get()
+                switch try galaxy.name.get() {
+                case "Milky Way":
+                    guard try planets.contains(where: { try $0.name.get() == "Earth" }) else {
+                        throw Failure("unexpected missing planet")
+                    }
+                    guard try !planets.contains(where: { try $0.name.get() == "PA-99-N2"}) else {
+                        throw Failure("unexpected planet")
+                    }
+                default: break
+                }
+            }
+        }
+    }
+    
+    public func testEagerLoadParent() throws {
+        try runTest(#function, [
+            Galaxy.migration(on: self.database),
+            Planet.migration(on: self.database),
+            GalaxySeed(on: self.database),
+            PlanetSeed(on: self.database)
+        ]) {
+            let planets = try self.database.query(Planet.self)
+                .with(\.galaxy)
+                .all().wait()
+            
+            for planet in planets {
+                let galaxy = try planet.galaxy.get()
+                switch try planet.name.get() {
+                case "Earth":
+                    guard try galaxy.name.get() == "Milky Way" else {
+                        throw Failure("unexpected galaxy name: \(galaxy)")
+                    }
+                case "PA-99-N2":
+                    guard try galaxy.name.get() == "Andromeda" else {
+                        throw Failure("unexpected galaxy name: \(galaxy)")
+                    }
+                default: break
+                }
+            }
+        }
+    }
+    
     private func runTest(_ name: String, _ migrations: [Migration], _ test: () throws -> ()) throws {
         print("[FluentBenchmark] Running \(name)...")
         for migration in migrations {
-            try migration.prepare().wait()
+            do {
+                try migration.prepare().wait()
+            } catch {
+                try migration.revert().wait()
+                try migration.prepare().wait()
+            }
         }
         var e: Error?
         do {
