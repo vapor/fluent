@@ -14,6 +14,10 @@ public final class FluentBenchmarker {
         try self.testEagerLoad()
     }
     
+    public func runTest(_ test: () -> (), migrations: [Migration]) {
+        fatalError()
+    }
+    
     public func testBasics() throws {
         print("[BASIC]")
         let res = try self.database.query(Galaxy.self)
@@ -50,6 +54,8 @@ public final class FluentBenchmarker {
     }
     
     public func testCreate() throws {
+        try self.database.schema(Galaxy.self).auto().create().wait()
+        
         let galaxy = Galaxy.new()
         galaxy.name.set(to: "Messier 82")
         try galaxy.save(on: self.database).wait()
@@ -64,5 +70,7 @@ public final class FluentBenchmarker {
         if try fetched.id.get() != galaxy.id.get() {
             throw Failure("unexpected id: \(galaxy) \(fetched)")
         }
+        
+        try self.database.schema(Galaxy.self).delete().wait()
     }
 }

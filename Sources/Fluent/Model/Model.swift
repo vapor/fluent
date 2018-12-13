@@ -1,10 +1,10 @@
-public protocol FluentModel: class, CustomStringConvertible {
+public protocol Model: class, CustomStringConvertible {
     associatedtype ID: FluentID
     var entity: String { get }
-    var properties: [FluentProperty] { get }
-    var storage: FluentStorage { get set }
+    var properties: [Property] { get }
+    var storage: Storage { get set }
     var id: Field<ID> { get }
-    init(storage: FluentStorage)
+    init(storage: Storage)
 }
 
 import Foundation
@@ -12,11 +12,20 @@ import Foundation
 extension UUID: FluentID { }
 extension Int: FluentID { }
 
+
+
+extension Model {
+    public var exists: Bool {
+        #warning("support changing id")
+        return self.storage.output != nil
+    }
+}
+
 public protocol FluentID: Codable { }
 
 import NIO
 
-extension FluentModel {
+extension Model {
     public func save(on database: FluentDatabase) -> EventLoopFuture<Void> {
         if self.exists {
             return self.update(on: database)
@@ -40,7 +49,7 @@ extension FluentModel {
     }
 }
 
-extension FluentModel {
+extension Model {
     public var entity: String {
         return "\(Self.self)"
     }
@@ -63,7 +72,7 @@ extension FluentModel {
 }
 
 
-extension FluentModel {
+extension Model {
     internal static var ref: Self {
         return .init(storage: .empty)
     }

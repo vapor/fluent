@@ -1,10 +1,10 @@
 import Fluent
 import Foundation
 
-final class Planet: FluentModel {
-    var storage: FluentStorage
+final class Planet: Model {
+    var storage: Storage
     
-    var properties: [FluentProperty] {
+    var properties: [Property] {
         return [id, name, galaxy]
     }
     
@@ -13,7 +13,7 @@ final class Planet: FluentModel {
     }
     
     var id: Field<Int> {
-        return self.field("id")
+        return self.field("id", isIdentifier: true)
     }
     
     var name: Field<String> {
@@ -24,7 +24,7 @@ final class Planet: FluentModel {
         return self.parent("galaxyID")
     }
     
-    init(storage: FluentStorage) {
+    init(storage: Storage) {
         self.storage = storage
     }
 }
