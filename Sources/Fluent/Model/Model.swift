@@ -21,7 +21,7 @@ extension Model {
     }
 }
 
-public protocol FluentID: Codable { }
+public protocol FluentID: Codable, Equatable { }
 
 import NIO
 

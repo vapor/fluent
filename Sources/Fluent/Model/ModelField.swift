@@ -45,11 +45,16 @@ public struct ModelField<Model, Value>: ModelProperty
 }
 
 extension Model {
-    public typealias Field<T> = ModelField<Self, T>
-        where T: Codable
+    public typealias Field<Value> = ModelField<Self, Value>
+        where Value: Codable
     
-    public func field<T>(_ name: String, _ dataType: DatabaseSchema.DataType? = nil, isIdentifier: Bool = false) -> Field<T>
-        where T: Codable
+    public func field<Value>(
+        _ name: String,
+        _ dataType: DatabaseSchema.DataType? = nil,
+        isIdentifier: Bool = false,
+        as type: Value.Type = Value.self
+    ) -> Field<Value>
+        where Value: Codable
     {
         return .init(model: self, name: name, dataType: dataType, isIdentifier: isIdentifier)
     }

@@ -25,7 +25,8 @@ public final class QueryBuilder<Model>
     public func with<Child>(_ key: KeyPath<Model, ChildrenRelation<Model, Child>>) -> Self
         where Child: Fluent.Model
     {
-        let child = Model.ref[keyPath: key]
+        let children = Model.new()[keyPath: key]
+        let parent = Child.new()[keyPath: children.relation]
         
         if self.eagerLoad.cache == nil {
             self.eagerLoad.cache = .init()
@@ -34,7 +35,7 @@ public final class QueryBuilder<Model>
         self.eagerLoad.requests.append(.init { cache, database, ids in
             let values = ids.map { DatabaseQuery.Value.bind($0) }
             return database.query(Child.self)
-                .filter(.field(name: child.name, entity: Child.ref.entity), .subset(inverse: false), .group(values))
+                .filter(.field(name: parent.id.name, entity: Child.new().entity), .subset(inverse: false), .group(values))
                 .all()
                 .map { (Child.ref.entity, $0) }
         })

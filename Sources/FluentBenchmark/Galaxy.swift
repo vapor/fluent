@@ -21,7 +21,7 @@ final class Galaxy: Model {
     }
     
     var planets: Children<Planet> {
-        return self.children("galaxyID")
+        return self.children(\.galaxy)
     }
     
     init(storage: Storage) {

@@ -6,12 +6,12 @@ public protocol Migration {
 }
 
 extension Model {
-    static func migration(database: FluentDatabase) -> Migration {
-        return ModelMigration<Self>(database: database)
+    public static func migration(on database: FluentDatabase) -> Migration {
+        return AutoMigration<Self>(database: database)
     }
 }
 
-final class ModelMigration<Model>: Migration where Model: Fluent.Model {
+final class AutoMigration<Model>: Migration where Model: Fluent.Model {
     let database: FluentDatabase
     
     init(database: FluentDatabase) {

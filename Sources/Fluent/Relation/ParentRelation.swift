@@ -1,24 +1,28 @@
 public struct ParentRelation<Child, Parent>
     where Child: Model, Parent: Model
 {
-    public var field: ModelField<Child, Parent.ID>
+    public var id: ModelField<Child, Parent.ID>
     
-    init(field: ModelField<Child, Parent.ID>) {
-        self.field = field
+    init(id: ModelField<Child, Parent.ID>) {
+        self.id = id
+    }
+    
+    public func set(to parent: Parent) throws {
+        try self.id.set(to: parent.id.get())
     }
 }
 
 extension ParentRelation: ModelProperty {
     public var name: String {
-        return self.field.name
+        return self.id.name
     }
     
     public var entity: String? {
-        return self.field.entity
+        return self.id.entity
     }
     
     public var dataType: DatabaseSchema.DataType? {
-        return self.field.dataType
+        return self.id.dataType
     }
     
     public var type: Any.Type {
@@ -37,6 +41,6 @@ extension Model {
     public func parent<Model>(_ name: String, _ dataType: DatabaseSchema.DataType? = nil) -> Parent<Model>
         where Model: Fluent.Model
     {
-        return .init(field: self.field(name, dataType))
+        return .init(id: self.field(name, dataType))
     }
 }

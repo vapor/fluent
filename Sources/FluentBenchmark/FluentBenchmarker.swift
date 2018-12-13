@@ -11,38 +11,15 @@ public final class FluentBenchmarker {
     public func testAll() throws {
         try self.testBasics()
         try self.testEagerLoad()
-        try self.testEagerLoad()
-    }
-    
-    public func runTest(_ test: () -> (), migrations: [Migration]) {
-        fatalError()
-    }
-    
-    public func testBasics() throws {
-        print("[BASIC]")
-        let res = try self.database.query(Galaxy.self)
-            .filter(\.name == "Milky Way")
-            .all().wait()
-        print(res)
-    }
-    
-    public func testEagerLoad() throws {
-        print("[EAGER LOAD]")
-        
-        // SELECT "galaxies"."id", "galaxies"."name" FROM "galaxies"
-        let galaxies = try self.database.query(Galaxy.self)
-            .with(\.planets)
-            .all().wait()
-        print(galaxies) // [Galaxy]
-
-        // SELECT "planets"."id", "planets"."name", "planets"."galaxyID" FROM "planets" WHERE "planets"."galaxyID" IN ($1, $2)
-        for galaxy in galaxies {
-            print(galaxy.planets.get()) // [Planet]
-        }
+        try self.testCreate()
     }
     
     struct Failure: Error, CustomStringConvertible, LocalizedError {
         let reason: String
+        
+        var errorDescription: String? {
+            return self.reason
+        }
         
         var description: String {
             return self.reason
@@ -53,24 +30,90 @@ public final class FluentBenchmarker {
         }
     }
     
+    public func testBasics() throws {
+        try runTest(#function, [
+            Galaxy.migration(on: self.database),
+            GalaxySeed(on: self.database)
+        ]) {
+            guard let milkyWay = try self.database.query(Galaxy.self)
+                .filter(\.name == "Milky Way")
+                .first().wait()
+            else {
+                throw Failure("unpexected missing galaxy")
+            }
+            guard try milkyWay.name.get() == "Milky Way" else {
+                throw Failure("unexpected name")
+            }
+        }
+    }
+    
+    public func testEagerLoad() throws {
+        try runTest(#function, [
+            Galaxy.migration(on: self.database),
+            Planet.migration(on: self.database),
+            GalaxySeed(on: self.database),
+            PlanetSeed(on: self.database)
+        ]) {
+            let galaxies = try self.database.query(Galaxy.self)
+                .with(\.planets)
+                .all().wait()
+
+            for galaxy in galaxies {
+                let planets = try galaxy.planets.get()
+                switch try galaxy.name.get() {
+                case "Milky Way":
+                    guard try planets.contains(where: { try $0.name.get() == "Earth" }) else {
+                        throw Failure("unexpected missing planet")
+                    }
+                    guard try !planets.contains(where: { try $0.name.get() == "PA-99-N2"}) else {
+                        throw Failure("unexpected planet")
+                    }
+                default: break
+                }
+            }
+        }
+    }
+    
     public func testCreate() throws {
-        try self.database.schema(Galaxy.self).auto().create().wait()
-        
-        let galaxy = Galaxy.new()
-        galaxy.name.set(to: "Messier 82")
-        try galaxy.save(on: self.database).wait()
-        
-        guard let fetched = try self.database.query(Galaxy.self).filter(\.name == "Messier 82").first().wait() else {
-            throw Failure("unexpected empty result set")
+        try runTest(#function, [
+            Galaxy.migration(on: self.database)
+        ]) {
+            let galaxy = Galaxy.new()
+            galaxy.name.set(to: "Messier 82")
+            try galaxy.save(on: self.database).wait()
+            guard try galaxy.id.get() == 1 else {
+                throw Failure("unexpected galaxy id: \(galaxy)")
+            }
+            
+            guard let fetched = try self.database.query(Galaxy.self).filter(\.name == "Messier 82").first().wait() else {
+                throw Failure("unexpected empty result set")
+            }
+            
+            if try fetched.name.get() != galaxy.name.get() {
+                throw Failure("unexpected name: \(galaxy) \(fetched)")
+            }
+            if try fetched.id.get() != galaxy.id.get() {
+                throw Failure("unexpected id: \(galaxy) \(fetched)")
+            }
         }
-        
-        if try fetched.name.get() != galaxy.name.get() {
-            throw Failure("unexpected name: \(galaxy) \(fetched)")
+    }
+    
+    private func runTest(_ name: String, _ migrations: [Migration], _ test: () throws -> ()) throws {
+        print("[FluentBenchmark] Running \(name)...")
+        for migration in migrations {
+            try migration.prepare().wait()
         }
-        if try fetched.id.get() != galaxy.id.get() {
-            throw Failure("unexpected id: \(galaxy) \(fetched)")
+        var e: Error?
+        do {
+            try test()
+        } catch {
+            e = error
         }
-        
-        try self.database.schema(Galaxy.self).delete().wait()
+        for migration in migrations {
+            try migration.revert().wait()
+        }
+        if let error = e {
+            throw error
+        }
     }
 }
