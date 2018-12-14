@@ -6,6 +6,7 @@ let package = Package(
     products: [
         .library(name: "Fluent", targets: ["Fluent"]),
         .library(name: "FluentBenchmark", targets: ["FluentBenchmark"]),
+        .library(name: "FluentPostgres", targets: ["FluentPostgres"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-nio.git", .branch("master")),
