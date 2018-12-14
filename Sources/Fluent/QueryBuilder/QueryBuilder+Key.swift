@@ -26,7 +26,7 @@ extension QueryBuilder {
     ///         let name: String
     ///     }
     ///
-    ///     let users = try User.query(on: conn)
+    ///     let people = try User.query(on: conn)
     ///         .keys(for: Person.self)
     ///         .all()
     ///
