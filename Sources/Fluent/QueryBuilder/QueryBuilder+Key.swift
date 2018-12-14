@@ -40,7 +40,7 @@ extension QueryBuilder {
         let properties = try type.decodeProperties(depth: depth)
         for property in properties {
             Database.queryKeyApply(
-                Database.queryKey(Database.queryField(property)),
+                Database.queryKey(Database.queryField(.reflected(property, rootType: Result.self))),
                 to: &self.query
             )
         }
