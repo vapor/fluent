@@ -12,15 +12,15 @@ final class Planet: Model {
         return "planets"
     }
     
-    var id: Field<Int> {
+    var id: ModelField<Planet, Int> {
         return self.field("id", .int, .primaryKey)
     }
     
-    var name: Field<String> {
+    var name: ModelField<Planet, String> {
         return self.field("name")
     }
     
-    var galaxy: Parent<Galaxy> {
+    var galaxy: ParentRelation<Planet, Galaxy> {
         return self.parent("galaxyID")
     }
     

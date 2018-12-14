@@ -1,4 +1,4 @@
-// swift-tools-version:4.2
+// swift-tools-version:5.0
 import PackageDescription
 
 let package = Package(
@@ -8,7 +8,7 @@ let package = Package(
         .library(name: "FluentBenchmark", targets: ["FluentBenchmark"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-nio.git", from: "1.0.0"),
+        .package(url: "https://github.com/apple/swift-nio.git", .branch("master")),
         .package(url: "https://github.com/vapor/postgresql.git", .branch("2")),
     ],
     targets: [

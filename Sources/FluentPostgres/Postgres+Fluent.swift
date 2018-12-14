@@ -35,7 +35,7 @@ extension PostgresConnection: FluentDatabase {
     }
 }
 
-extension DatabaseConnectionPool: FluentDatabase where Database.Connection: FluentDatabase {
+extension ConnectionPool: FluentDatabase where Database.Connection: FluentDatabase {
     public func execute(_ query: DatabaseQuery, _ onOutput: @escaping (DatabaseOutput) throws -> ()) -> EventLoopFuture<Void> {
         return self.withConnection { conn in
             return conn.execute(query, onOutput)

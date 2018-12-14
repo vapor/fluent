@@ -17,7 +17,7 @@ final class PlanetSeed: Migration {
     private func add(_ planets: [String], to galaxy: String) -> EventLoopFuture<Void> {
         return self.database.query(Galaxy.self).filter(\.name == galaxy).first().then { galaxy -> EventLoopFuture<Void> in
             guard let galaxy = galaxy else {
-                return self.database.eventLoop.newSucceededFuture(result: ())
+                return self.database.eventLoop.makeSucceededFuture(result: ())
             }
             let saves = planets.map { name -> EventLoopFuture<Void> in
                 let planet = Planet.new()
@@ -30,6 +30,6 @@ final class PlanetSeed: Migration {
     }
     
     func revert() -> EventLoopFuture<Void> {
-        return self.database.eventLoop.newSucceededFuture(result: ())
+        return self.database.eventLoop.makeSucceededFuture(result: ())
     }
 }

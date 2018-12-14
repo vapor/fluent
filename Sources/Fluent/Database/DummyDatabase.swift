@@ -15,15 +15,15 @@ public struct DummyDatabase: FluentDatabase {
             for _ in 0..<Int.random(in: 1..<42) {
                 try onOutput(DummyOutput())
             }
-            return self.eventLoop.newSucceededFuture(result: ())
+            return self.eventLoop.makeSucceededFuture(result: ())
         } catch {
-            return self.eventLoop.newFailedFuture(error: error)
+            return self.eventLoop.makeFailedFuture(error: error)
         }
     }
     
     /// See `FluentDatabase`.
     public func execute(_ schema: DatabaseSchema) -> EventLoopFuture<Void> {
-        return self.eventLoop.newSucceededFuture(result: ())
+        return self.eventLoop.makeSucceededFuture(result: ())
     }
 }
 

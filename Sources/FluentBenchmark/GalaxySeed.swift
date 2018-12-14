@@ -18,6 +18,6 @@ final class GalaxySeed: Migration {
     }
     
     func revert() -> EventLoopFuture<Void> {
-        return self.database.eventLoop.newSucceededFuture(result: ())
+        return self.database.eventLoop.makeSucceededFuture(result: ())
     }
 }

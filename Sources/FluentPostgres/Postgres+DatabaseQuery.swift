@@ -64,11 +64,20 @@ private extension PostgresQuery.Expression {
 
 private extension PostgresQuery.Expression {
     static func fluent(_ value: DatabaseQuery.Value) -> PostgresQuery.Expression {
+        struct AnyEncodable: Encodable {
+            let encodable: Encodable
+            init(_ encodable: Encodable) {
+                self.encodable = encodable
+            }
+            func encode(to encoder: Encoder) throws {
+                try self.encodable.encode(to: encoder)
+            }
+        }
         switch value {
         case .group(let values):
             return .group(values.map { .fluent($0) })
         case .bind(let encodable):
-            return .bind(.encodable(encodable))
+            return .bind(.encodable(AnyEncodable(encodable)))
         case .custom(let custom):
             return custom as! PostgresQuery.Expression
         case .null: return .literal(.null)
