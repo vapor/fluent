@@ -11,7 +11,7 @@ extension QueryBuilder {
     ///     - key: Swift `KeyPath` to a field on the model to retrieve.
     /// - returns: Query builder for chaining.
     @discardableResult
-    public func key<T>(field: KeyPath<Result, T>) -> Self where T: Decodable {
+    public func key<T>(_ field: KeyPath<Result, T>) -> Self where T: Decodable {
         Database.queryKeyApply(
             Database.queryKey(Database.queryField(.keyPath(field))),
             to: &self.query
