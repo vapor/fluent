@@ -19,7 +19,7 @@ let package = Package(
         .target(name: "Fluent", dependencies: ["FluentKit"]),
         .target(name: "FluentSQL", dependencies: ["FluentKit", "SQLKit"]),
         .target(name: "FluentBenchmark", dependencies: ["FluentKit"]),
-        .target(name: "FluentPostgresDriver", dependencies: ["FluentKit", "PostgresKit"]),
+        .target(name: "FluentPostgresDriver", dependencies: ["FluentSQL", "PostgresKit"]),
         .target(name: "FluentKit", dependencies: ["NIO"]),
         .testTarget(name: "FluentKitTests", dependencies: ["FluentBenchmark"]),
         .testTarget(name: "FluentPostgresDriverTests", dependencies: ["FluentPostgresDriver", "FluentBenchmark"]),
