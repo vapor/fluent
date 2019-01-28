@@ -13,6 +13,16 @@ extension DatabaseQuery.Field {
     }
 }
 
+public struct SQLRaw: SQLExpression {
+    public var string: String
+    public init(_ string: String) {
+        self.string = string
+    }
+    
+    public func serialize(to serializer: inout SQLSerializer) {
+        serializer.write(self.string)
+    }
+}
 
 public struct SQLList: SQLExpression {
     public var items: [SQLExpression]
