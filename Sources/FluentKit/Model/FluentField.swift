@@ -43,6 +43,10 @@ public struct FluentField<Model, Value>: AnyFluentField
         try container.encode(self.get(), forKey: FluentFieldKey(field: self))
     }
     
+    public func decode(from container: KeyedDecodingContainer<FluentFieldKey>) throws {
+        try self.set(to: container.decode(Value.self, forKey: FluentFieldKey(field: self)))
+    }
+    
     public func set(to value: Value) {
         self.model.storage.input[self.name] = .bind(value)
     }

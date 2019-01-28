@@ -7,6 +7,15 @@ extension FluentModel where Self: Encodable {
     }
 }
 
+extension FluentModel where Self: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: FluentFieldKey.self)
+        self.init(storage: .empty)
+        for field in self.fields {
+            try field.decode(from: container)
+        }
+    }
+}
 
 public struct FluentFieldKey: CodingKey {
     let field: AnyFluentField

@@ -5,6 +5,7 @@ public protocol AnyFluentField {
     var dataType: FluentSchema.DataType? { get }
     var constraints: [FluentSchema.FieldConstraint] { get }
     func encode(to container: inout KeyedEncodingContainer<FluentFieldKey>) throws
+    func decode(from container: KeyedDecodingContainer<FluentFieldKey>) throws
 }
 
 extension FluentModel {
