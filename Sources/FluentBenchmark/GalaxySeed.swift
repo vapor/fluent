@@ -1,7 +1,7 @@
 import Fluent
 import NIO
 
-final class GalaxySeed: Migration {
+final class GalaxySeed: FluentMigration {
     let database: FluentDatabase
     
     init(on database: FluentDatabase) {

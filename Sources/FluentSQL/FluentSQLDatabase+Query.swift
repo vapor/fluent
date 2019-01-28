@@ -1,5 +1,5 @@
 extension FluentSQLDatabase {
-    internal func convert(_ fluent: DatabaseQuery) -> SQLExpression {
+    internal func convert(_ fluent: FluentQuery) -> SQLExpression {
         let sql: SQLExpression
         switch fluent.action {
         case .read: sql = self.select(fluent)
@@ -15,13 +15,13 @@ extension FluentSQLDatabase {
     
     // MARK: Private
     
-    private func delete(_ query: DatabaseQuery) -> SQLExpression {
+    private func delete(_ query: FluentQuery) -> SQLExpression {
         var delete = SQLDelete(table: SQLIdentifier(query.entity))
         delete.predicate = self.filters(query.filters)
         return delete
     }
     
-    private func update(_ query: DatabaseQuery) -> SQLExpression {
+    private func update(_ query: FluentQuery) -> SQLExpression {
         var update = SQLUpdate(table: SQLIdentifier(query.entity))
         #warning("TODO: better indexing")
         for (i, field) in query.fields.enumerated() {
@@ -35,7 +35,7 @@ extension FluentSQLDatabase {
         return update
     }
     
-    private func select(_ query: DatabaseQuery) -> SQLExpression {
+    private func select(_ query: FluentQuery) -> SQLExpression {
         var select = SQLSelect()
         select.tables.append(SQLIdentifier(query.entity))
         select.columns = query.fields.map(self.field)
@@ -43,7 +43,7 @@ extension FluentSQLDatabase {
         return select
     }
     
-    private func insert(_ query: DatabaseQuery) -> SQLExpression {
+    private func insert(_ query: FluentQuery) -> SQLExpression {
         var insert = SQLInsert(table: SQLIdentifier(query.entity))
         insert.columns = query.fields.map(self.field)
         insert.values = query.input.map { row in
@@ -52,7 +52,7 @@ extension FluentSQLDatabase {
         return insert
     }
     
-    private func filters(_ filters: [DatabaseQuery.Filter]) -> SQLExpression? {
+    private func filters(_ filters: [FluentQuery.Filter]) -> SQLExpression? {
         guard !filters.isEmpty else {
             return nil
         }
@@ -62,7 +62,7 @@ extension FluentSQLDatabase {
         )
     }
     
-    private func field(_ field: DatabaseQuery.Field) -> SQLExpression {
+    private func field(_ field: FluentQuery.Field) -> SQLExpression {
         switch field {
         case .custom(let any):
             #warning("TODO:")
@@ -76,7 +76,7 @@ extension FluentSQLDatabase {
         }
     }
     
-    private func filter(_ filter: DatabaseQuery.Filter) -> SQLExpression {
+    private func filter(_ filter: FluentQuery.Filter) -> SQLExpression {
         switch filter {
         case .basic(let field, let method, let value):
             return SQLBinaryExpression(
@@ -92,7 +92,7 @@ extension FluentSQLDatabase {
         }
     }
     
-    private func relation(_ relation: DatabaseQuery.Filter.Relation) -> SQLExpression {
+    private func relation(_ relation: FluentQuery.Filter.Relation) -> SQLExpression {
         switch relation {
         case .and: return SQLBinaryOperator.and
         case .or: return SQLBinaryOperator.or
@@ -100,7 +100,7 @@ extension FluentSQLDatabase {
         }
     }
     
-    private func value(_ value: DatabaseQuery.Value) -> SQLExpression {
+    private func value(_ value: FluentQuery.Value) -> SQLExpression {
         switch value {
         case .bind(let encodable):
             return SQLBind(encodable)
@@ -114,7 +114,7 @@ extension FluentSQLDatabase {
         }
     }
     
-    private func method(_ method: DatabaseQuery.Filter.Method) -> SQLExpression {
+    private func method(_ method: FluentQuery.Filter.Method) -> SQLExpression {
         switch method {
         case .equality(let inverse):
             if inverse {

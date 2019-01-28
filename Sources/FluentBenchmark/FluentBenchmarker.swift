@@ -164,7 +164,7 @@ public final class FluentBenchmarker {
         }
     }
     
-    private func runTest(_ name: String, _ migrations: [Migration], _ test: () throws -> ()) throws {
+    private func runTest(_ name: String, _ migrations: [FluentMigration], _ test: () throws -> ()) throws {
         print("[FluentBenchmark] Running \(name)...")
         for migration in migrations {
             do {

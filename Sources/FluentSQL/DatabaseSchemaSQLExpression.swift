@@ -1,7 +1,7 @@
 internal struct DatabaseSchemaConverter {
-    public let schema: DatabaseSchema
+    public let schema: FluentSchema
     
-    public init(_ schema: DatabaseSchema) {
+    public init(_ schema: FluentSchema) {
         self.schema = schema
     }
     
@@ -34,7 +34,7 @@ internal struct DatabaseSchemaConverter {
         return SQLIdentifier(string)
     }
     
-    private func fieldDefinition(_ fieldDefinition: DatabaseSchema.FieldDefinition) -> SQLExpression {
+    private func fieldDefinition(_ fieldDefinition: FluentSchema.FieldDefinition) -> SQLExpression {
         switch fieldDefinition {
         case .custom(let any):
             return any as! SQLExpression
@@ -47,7 +47,7 @@ internal struct DatabaseSchemaConverter {
         }
     }
     
-    private func fieldName(_ fieldName: DatabaseSchema.FieldName) -> SQLExpression {
+    private func fieldName(_ fieldName: FluentSchema.FieldName) -> SQLExpression {
         switch fieldName {
         case .custom(let any):
             return any as! SQLExpression
@@ -56,7 +56,7 @@ internal struct DatabaseSchemaConverter {
         }
     }
     
-    private func dataType(_ dataType: DatabaseSchema.DataType) -> SQLExpression {
+    private func dataType(_ dataType: FluentSchema.DataType) -> SQLExpression {
         switch dataType {
         case .bool: return SQLDataType.int
         case .data: return SQLDataType.blob
@@ -71,7 +71,7 @@ internal struct DatabaseSchemaConverter {
         }
     }
     
-    private func fieldConstraint(_ fieldConstraint: DatabaseSchema.FieldConstraint) -> SQLExpression {
+    private func fieldConstraint(_ fieldConstraint: FluentSchema.FieldConstraint) -> SQLExpression {
         switch fieldConstraint {
         case .custom(let any):
             return any as! SQLExpression

@@ -1,10 +1,10 @@
-public struct ChildrenRelation<Parent, Child>
-    where Parent: FluentKit.Model, Child: FluentKit.Model
+public struct FluentChildren<Parent, Child>
+    where Parent: FluentKit.FluentModel, Child: FluentKit.FluentModel
 {
     let parent: Parent
-    let relation: KeyPath<Child, ParentRelation<Child, Parent>>
+    let relation: KeyPath<Child, FluentParent<Child, Parent>>
     
-    init(parent: Parent, relation: KeyPath<Child, ParentRelation<Child, Parent>>) {
+    init(parent: Parent, relation: KeyPath<Child, FluentParent<Child, Parent>>) {
         self.parent = parent
         self.relation = relation
     }
@@ -28,12 +28,12 @@ public struct ChildrenRelation<Parent, Child>
     }
 }
 
-extension Model {
-    public typealias Children<Model> = ChildrenRelation<Self, Model>
-        where Model: FluentKit.Model
+extension FluentModel {
+    public typealias Children<Model> = FluentChildren<Self, Model>
+        where Model: FluentModel
     
-    public func children<Model>(_ relation: KeyPath<Model, ParentRelation<Model, Self>>) -> Children<Model>
-        where Model: FluentKit.Model
+    public func children<Model>(_ relation: KeyPath<Model, FluentParent<Model, Self>>) -> Children<Model>
+        where Model: FluentKit.FluentModel
     {
         return .init(parent: self, relation: relation)
     }

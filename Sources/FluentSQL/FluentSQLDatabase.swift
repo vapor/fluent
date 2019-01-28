@@ -1,11 +1,11 @@
 public protocol FluentSQLDatabaseDelegate {
     var eventLoop: EventLoop { get }
     var database: SQLDatabase { get }
-    func convert(_ fluent: DatabaseQuery, _ sql: SQLExpression) -> SQLExpression
+    func convert(_ fluent: FluentQuery, _ sql: SQLExpression) -> SQLExpression
 }
 
 extension FluentSQLDatabaseDelegate {
-    public func convert(_ fluent: DatabaseQuery, _ sql: SQLExpression) -> SQLExpression {
+    public func convert(_ fluent: FluentQuery, _ sql: SQLExpression) -> SQLExpression {
         return sql
     }
 }
@@ -22,15 +22,15 @@ public struct FluentSQLDatabase: FluentDatabase {
     }
     
     public func execute(
-        _ query: DatabaseQuery,
-        _ onOutput: @escaping (DatabaseOutput) throws -> ()
+        _ query: FluentQuery,
+        _ onOutput: @escaping (FluentOutput) throws -> ()
     ) -> EventLoopFuture<Void> {
         return self.delegate.database.sqlQuery(self.convert(query)) { row in
-            try onOutput(SQLDatabaseOutput(row))
+            try onOutput(row.fluentOutput)
         }
     }
     
-    public func execute(_ schema: DatabaseSchema) -> EventLoopFuture<Void> {
+    public func execute(_ schema: FluentSchema) -> EventLoopFuture<Void> {
         let sql = DatabaseSchemaConverter(schema).convert()
         return self.delegate.database.sqlQuery(sql) { row in
             assertionFailure()

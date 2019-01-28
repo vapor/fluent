@@ -1,26 +1,26 @@
 import Fluent
 import Foundation
 
-final class Planet: Model {
+final class Planet: FluentModel {
     var storage: Storage
     
-    var properties: [Property] {
-        return [id, name, galaxy]
+    var fields: [AnyField] {
+        return [id, name, galaxy.id]
     }
     
     var entity: String {
         return "planets"
     }
     
-    var id: ModelField<Planet, Int> {
+    var id: Field<Int> {
         return self.field("id", .int, .primaryKey)
     }
     
-    var name: ModelField<Planet, String> {
+    var name: Field<String> {
         return self.field("name")
     }
     
-    var galaxy: ParentRelation<Planet, Galaxy> {
+    var galaxy: Parent<Galaxy> {
         return self.parent("galaxyID")
     }
     

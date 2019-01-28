@@ -8,27 +8,27 @@ public struct DummyDatabase: FluentDatabase {
     public init() { }
     
     /// See `FluentDatabase`.
-    public func execute(_ query: DatabaseQuery, _ onOutput: @escaping (DatabaseOutput) throws -> ()) -> EventLoopFuture<Void> {
+    public func execute(_ query: FluentQuery, _ onOutput: @escaping (FluentOutput) throws -> ()) -> EventLoopFuture<Void> {
         do {
             for _ in 0..<Int.random(in: 1..<42) {
                 try onOutput(DummyOutput())
             }
-            return self.eventLoop.makeSucceededFuture(result: ())
+            return self.eventLoop.makeSucceededFuture(())
         } catch {
-            return self.eventLoop.makeFailedFuture(error: error)
+            return self.eventLoop.makeFailedFuture(error)
         }
     }
     
     /// See `FluentDatabase`.
-    public func execute(_ schema: DatabaseSchema) -> EventLoopFuture<Void> {
-        return self.eventLoop.makeSucceededFuture(result: ())
+    public func execute(_ schema: FluentSchema) -> EventLoopFuture<Void> {
+        return self.eventLoop.makeSucceededFuture(())
     }
 }
 
 // MARK: Private
 
-private struct DummyOutput: DatabaseOutput {
-    func decode<T>(field: String, entity: String?, as type: T.Type) throws -> T where T : Decodable {
+private struct DummyOutput: FluentOutput {
+    func decode<T>(field: String, as type: T.Type) throws -> T where T : Decodable {
         return try T(from: DummyDecoder())
     }
     

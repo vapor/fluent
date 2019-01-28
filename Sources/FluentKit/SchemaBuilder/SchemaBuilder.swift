@@ -2,15 +2,15 @@ import NIO
 
 extension FluentDatabase {
     public func schema<Model>(_ model: Model.Type) -> SchemaBuilder<Model>
-        where Model: FluentKit.Model
+        where Model: FluentKit.FluentModel
     {
         return .init(database: self)
     }
 }
 
-public final class SchemaBuilder<Model> where Model: FluentKit.Model {
+public final class SchemaBuilder<Model> where Model: FluentKit.FluentModel {
     let database: FluentDatabase
-    public var schema: DatabaseSchema
+    public var schema: FluentSchema
     
     public init(database: FluentDatabase) {
         self.database = database
@@ -18,7 +18,7 @@ public final class SchemaBuilder<Model> where Model: FluentKit.Model {
     }
     
     public func auto() -> Self {
-        self.schema.createFields = Model.new().properties.map { field in
+        self.schema.createFields = Model.new().fields.map { field in
             return .definition(
                 name: .string(field.name),
                 dataType: field.dataType ?? .bestFor(type: field.type),
@@ -28,7 +28,7 @@ public final class SchemaBuilder<Model> where Model: FluentKit.Model {
         return self
     }
     
-    public func field<Model, Value>(_ keyPath: KeyPath<Model, ModelField<Model, Value>>) -> Self {
+    public func field<Model, Value>(_ keyPath: KeyPath<Model, FluentField<Model, Value>>) -> Self {
         let field = Model.new()[keyPath: keyPath]
         return self.field(.definition(
             name: .string(field.name),
@@ -37,7 +37,7 @@ public final class SchemaBuilder<Model> where Model: FluentKit.Model {
         ))
     }
     
-    public func field(_ field: DatabaseSchema.FieldDefinition) -> Self {
+    public func field(_ field: FluentSchema.FieldDefinition) -> Self {
         self.schema.createFields.append(field)
         return self
     }
@@ -46,7 +46,7 @@ public final class SchemaBuilder<Model> where Model: FluentKit.Model {
         return self.deleteField(.string(name))
     }
     
-    public func deleteField(_ name: DatabaseSchema.FieldName) -> Self {
+    public func deleteField(_ name: FluentSchema.FieldName) -> Self {
         self.schema.deleteFields.append(name)
         return self
     }

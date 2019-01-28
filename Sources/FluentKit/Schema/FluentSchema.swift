@@ -1,4 +1,4 @@
-public struct DatabaseSchema {
+public struct FluentSchema {
     public enum Action {
         case create
         case update

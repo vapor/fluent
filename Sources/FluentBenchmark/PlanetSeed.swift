@@ -1,7 +1,7 @@
 import Fluent
 import NIO
 
-final class PlanetSeed: Migration {
+final class PlanetSeed: FluentMigration {
     let database: FluentDatabase
     
     init(on database: FluentDatabase) {

@@ -1,4 +1,4 @@
-extension Model where Self: Encodable {
+extension FluentModel where Self: Encodable {
     public func encode(to encoder: Encoder) throws {
         guard let output = self.storage.output as? Encodable else {
             fatalError("No encodable storage output.")

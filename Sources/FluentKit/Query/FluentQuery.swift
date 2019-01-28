@@ -1,4 +1,4 @@
-public struct DatabaseQuery {
+public struct FluentQuery {
     public enum Action {
         case create
         case read

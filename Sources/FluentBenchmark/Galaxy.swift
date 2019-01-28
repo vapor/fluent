@@ -1,10 +1,10 @@
 import Fluent
 import Foundation
 
-final class Galaxy: Model {
+final class Galaxy: FluentModel {
     var storage: Storage
     
-    var properties: [Property] {
+    var fields: [AnyField] {
         return [id, name]
     }
     
@@ -12,15 +12,15 @@ final class Galaxy: Model {
         return "galaxies"
     }
     
-    var id: ModelField<Galaxy, Int> {
+    var id: Field<Int> {
         return self.field("id", .int, .primaryKey)
     }
     
-    var name: ModelField<Galaxy, String> {
+    var name: Field<String> {
         return self.field("name")
     }
     
-    var planets: ChildrenRelation<Galaxy, Planet> {
+    var planets: Children<Planet> {
         return self.children(\.galaxy)
     }
     
