@@ -12,7 +12,11 @@ extension FluentModel where Self: Decodable {
         let container = try decoder.container(keyedBy: FluentFieldKey.self)
         self.init(storage: .empty)
         for field in self.fields {
-            try field.decode(from: container)
+            if field.name == self.id.name {
+                try? field.decode(from: container)
+            } else {
+                try field.decode(from: container)
+            }
         }
     }
 }
