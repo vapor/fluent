@@ -1,5 +1,5 @@
 public struct ChildrenRelation<Parent, Child>
-    where Parent: Fluent.Model, Child: Fluent.Model
+    where Parent: FluentKit.Model, Child: FluentKit.Model
 {
     let parent: Parent
     let relation: KeyPath<Child, ParentRelation<Child, Parent>>
@@ -30,10 +30,10 @@ public struct ChildrenRelation<Parent, Child>
 
 extension Model {
     public typealias Children<Model> = ChildrenRelation<Self, Model>
-        where Model: Fluent.Model
+        where Model: FluentKit.Model
     
     public func children<Model>(_ relation: KeyPath<Model, ParentRelation<Model, Self>>) -> Children<Model>
-        where Model: Fluent.Model
+        where Model: FluentKit.Model
     {
         return .init(parent: self, relation: relation)
     }

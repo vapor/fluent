@@ -1,5 +1,6 @@
-import Fluent
+import FluentKit
 import Foundation
+import XCTest
 
 public final class FluentBenchmarker {
     public let database: FluentDatabase
@@ -17,24 +18,8 @@ public final class FluentBenchmarker {
         try self.testEagerLoadParent()
     }
     
-    struct Failure: Error, CustomStringConvertible, LocalizedError {
-        let reason: String
-        
-        var errorDescription: String? {
-            return self.reason
-        }
-        
-        var description: String {
-            return self.reason
-        }
-        
-        init(_ reason: String) {
-            self.reason = reason
-        }
-    }
-    
     public func testCreate() throws {
-        try runTest(#function, [
+        try self.runTest(#function, [
             Galaxy.migration(on: self.database)
         ]) {
             let galaxy = Galaxy.new()
@@ -167,12 +152,25 @@ public final class FluentBenchmarker {
         }
     }
     
+    struct Failure: Error {
+        let reason: String
+        let line: UInt
+        let file: StaticString
+        
+        init(_ reason: String, line: UInt = #line, file: StaticString = #file) {
+            self.reason = reason
+            self.line = line
+            self.file = file
+        }
+    }
+    
     private func runTest(_ name: String, _ migrations: [Migration], _ test: () throws -> ()) throws {
         print("[FluentBenchmark] Running \(name)...")
         for migration in migrations {
             do {
                 try migration.prepare().wait()
             } catch {
+                print("[FluentBenchmark] Migration failed, attempting to revert existing...")
                 try migration.revert().wait()
                 try migration.prepare().wait()
             }
@@ -180,6 +178,8 @@ public final class FluentBenchmarker {
         var e: Error?
         do {
             try test()
+        } catch let failure as Failure {
+            XCTFail(failure.reason, file: failure.file, line: failure.line)
         } catch {
             e = error
         }

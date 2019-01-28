@@ -45,10 +45,10 @@ extension ParentRelation: ModelProperty {
 
 extension Model {
     public typealias Parent<Model> = ParentRelation<Self, Model>
-        where Model: Fluent.Model
+        where Model: FluentKit.Model
     
     public func parent<Model>(_ name: String, _ dataType: DatabaseSchema.DataType? = nil) -> Parent<Model>
-        where Model: Fluent.Model
+        where Model: FluentKit.Model
     {
         return .init(id: self.field(name, dataType))
     }

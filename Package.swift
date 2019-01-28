@@ -5,18 +5,23 @@ let package = Package(
     name: "fluent",
     products: [
         .library(name: "Fluent", targets: ["Fluent"]),
+        .library(name: "FluentSQL", targets: ["FluentSQL"]),
         .library(name: "FluentBenchmark", targets: ["FluentBenchmark"]),
-        .library(name: "FluentPostgres", targets: ["FluentPostgres"]),
+        .library(name: "FluentPostgresDriver", targets: ["FluentPostgresDriver"]),
+        .library(name: "FluentKit", targets: ["FluentKit"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-nio.git", .branch("master")),
         .package(url: "https://github.com/vapor/postgresql.git", .branch("2")),
+        .package(url: "https://github.com/vapor/sql.git", .branch("3")),
     ],
     targets: [
-        .target(name: "Fluent", dependencies: ["NIO"]),
-        .testTarget(name: "FluentTests", dependencies: ["FluentBenchmark"]),
-        .target(name: "FluentBenchmark", dependencies: ["Fluent", "NIO"]),
-        .target(name: "FluentPostgres", dependencies: ["Fluent", "PostgresKit"]),
-        .testTarget(name: "FluentPostgresTests", dependencies: ["FluentPostgres", "FluentBenchmark"]),
+        .target(name: "Fluent", dependencies: ["FluentKit"]),
+        .target(name: "FluentSQL", dependencies: ["FluentKit", "SQLKit"]),
+        .target(name: "FluentBenchmark", dependencies: ["FluentKit"]),
+        .target(name: "FluentPostgresDriver", dependencies: ["FluentKit", "PostgresKit"]),
+        .target(name: "FluentKit", dependencies: ["NIO"]),
+        .testTarget(name: "FluentKitTests", dependencies: ["FluentBenchmark"]),
+        .testTarget(name: "FluentPostgresDriverTests", dependencies: ["FluentPostgresDriver", "FluentBenchmark"]),
     ]
 )

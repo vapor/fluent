@@ -2,14 +2,14 @@ import NIO
 
 extension FluentDatabase {
     public func query<Model>(_ model: Model.Type) -> QueryBuilder<Model>
-        where Model: Fluent.Model
+        where Model: FluentKit.Model
     {
         return .init(database: self)
     }
 }
 
 public final class QueryBuilder<Model>
-    where Model: Fluent.Model
+    where Model: FluentKit.Model
 {
     let database: FluentDatabase
     public var query: DatabaseQuery
@@ -23,7 +23,7 @@ public final class QueryBuilder<Model>
     }
     
     public func with<Child>(_ key: KeyPath<Model, ChildrenRelation<Model, Child>>) -> Self
-        where Child: Fluent.Model
+        where Child: FluentKit.Model
     {
         let children = Model.new()[keyPath: key]
         let parent = Child.new()[keyPath: children.relation]
@@ -42,7 +42,7 @@ public final class QueryBuilder<Model>
     }
     
     public func with<Parent>(_ key: KeyPath<Model, ParentRelation<Model, Parent>>) -> Self
-        where Parent: Fluent.Model
+        where Parent: FluentKit.Model
     {
         let id = Parent.new().id
         self.eagerLoad.requests.append(.init { cache, database, models in
@@ -133,7 +133,7 @@ public final class QueryBuilder<Model>
             let model = Model.init(storage: .init(output: output, cache: self.eagerLoad.cache, exists: true))
             all.append(model)
             try onOutput(model)
-        }.then {
+        }.flatMap {
             return .andAll(self.eagerLoad.requests.map { request in
                 #warning("fix force try")
                 return try! request.run(self.eagerLoad.cache, self.database, all).map { result in
@@ -144,7 +144,7 @@ public final class QueryBuilder<Model>
     }
 }
 
-public struct ModelFilter<Model> where Model: Fluent.Model {
+public struct ModelFilter<Model> where Model: FluentKit.Model {
     static func make<Value>(
         _ lhs: KeyPath<Model, ModelField<Model, Value>>,
         _ method: DatabaseQuery.Filter.Method,

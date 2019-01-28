@@ -21,7 +21,7 @@ struct EagerLoad {
             self.storage = [:]
         }
         
-        func get<Related>(_ type: Related.Type) throws -> [Related] where Related: Fluent.Model {
+        func get<Related>(_ type: Related.Type) throws -> [Related] where Related: Model {
             guard let result = self.storage[Related.new().entity] as? Result else {
                 fatalError("no eager loaded results for \(Related.self)")
             }

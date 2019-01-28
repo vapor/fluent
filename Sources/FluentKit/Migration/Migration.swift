@@ -11,7 +11,7 @@ extension Model {
     }
 }
 
-final class AutoMigration<Model>: Migration where Model: Fluent.Model {
+final class AutoMigration<Model>: Migration where Model: FluentKit.Model {
     let database: FluentDatabase
     
     init(database: FluentDatabase) {

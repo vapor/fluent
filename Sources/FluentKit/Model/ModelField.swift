@@ -1,5 +1,5 @@
 public struct ModelField<Model, Value>: ModelProperty
-    where Model: Fluent.Model, Value: Codable
+    where Model: FluentKit.Model, Value: Codable
 {
     public var type: Any.Type {
         return Value.self
@@ -35,7 +35,7 @@ public struct ModelField<Model, Value>: ModelProperty
             default: fatalError("Non-matching input.")
             }
         } else {
-            fatalError("No input or output for this field.")
+            fatalError("No input or output for field: \(Model.self).\(self.name).")
         }
     }
     

@@ -1,0 +1,65 @@
+import FluentSQL
+
+extension PostgresConnection: FluentDatabase {
+    public func execute(_ query: DatabaseQuery, _ onOutput: @escaping (DatabaseOutput) throws -> ()) -> EventLoopFuture<Void> {
+        return FluentSQLDatabase(delegate: PostgresConnectionSQLDelegate(self))
+            .execute(query, onOutput)
+    }
+    
+    public func execute(_ schema: DatabaseSchema) -> EventLoopFuture<Void> {
+        return FluentSQLDatabase(delegate: PostgresConnectionSQLDelegate(self))
+            .execute(schema)
+    }
+}
+
+extension ConnectionPool: FluentDatabase where Database.Connection: FluentDatabase {
+    public func execute(_ query: DatabaseQuery, _ onOutput: @escaping (DatabaseOutput) throws -> ()) -> EventLoopFuture<Void> {
+        return self.withConnection { conn in
+            return conn.execute(query, onOutput)
+        }
+    }
+    
+    public func execute(_ schema: DatabaseSchema) -> EventLoopFuture<Void> {
+        return self.withConnection { conn in
+            return conn.execute(schema)
+        }
+    }
+}
+
+
+private struct PostgresConnectionSQLDelegate: FluentSQLDatabaseDelegate {
+    var eventLoop: EventLoop {
+        return self.connection.eventLoop
+    }
+    
+    let connection: PostgresConnection
+    
+    var database: SQLDatabase {
+        return self.connection
+    }
+    
+    init(_ connection: PostgresConnection) {
+        self.connection = connection
+    }
+    
+    func convert(_ fluent: DatabaseQuery, _ sql: SQLExpression) -> SQLExpression {
+        switch fluent.action {
+        case .create:
+            return PostgresReturning(sql)
+        default:
+            return sql
+        }
+    }
+}
+
+private struct PostgresReturning: SQLExpression {
+    let base: SQLExpression
+    init(_ base: SQLExpression) {
+        self.base = base
+    }
+    
+    func serialize(to serializer: inout SQLSerializer) {
+        self.base.serialize(to: &serializer)
+        serializer.write(" RETURNING *")
+    }
+}

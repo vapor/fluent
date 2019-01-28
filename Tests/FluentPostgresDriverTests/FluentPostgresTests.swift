@@ -1,7 +1,5 @@
 import FluentBenchmark
-import FluentPostgres
-import NIO
-import PostgresKit
+import FluentPostgresDriver
 import XCTest
 
 final class FluentPostgresTests: XCTestCase {

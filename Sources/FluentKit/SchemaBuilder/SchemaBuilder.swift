@@ -2,13 +2,13 @@ import NIO
 
 extension FluentDatabase {
     public func schema<Model>(_ model: Model.Type) -> SchemaBuilder<Model>
-        where Model: Fluent.Model
+        where Model: FluentKit.Model
     {
         return .init(database: self)
     }
 }
 
-public final class SchemaBuilder<Model> where Model: Fluent.Model {
+public final class SchemaBuilder<Model> where Model: FluentKit.Model {
     let database: FluentDatabase
     public var schema: DatabaseSchema
     
