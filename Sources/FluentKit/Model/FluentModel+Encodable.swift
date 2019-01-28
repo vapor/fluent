@@ -1,8 +1,32 @@
 extension FluentModel where Self: Encodable {
     public func encode(to encoder: Encoder) throws {
-        guard let output = self.storage.output as? Encodable else {
-            fatalError("No encodable storage output.")
+        var container = encoder.container(keyedBy: FluentFieldKey.self)
+        for field in self.fields {
+            try field.encode(to: &container)
         }
-        try output.encode(to: encoder)
+    }
+}
+
+
+public struct FluentFieldKey: CodingKey {
+    let field: AnyFluentField
+    init(field: AnyFluentField) {
+        self.field = field
+    }
+    
+    public var stringValue: String {
+        return self.field.name
+    }
+    
+    public init?(stringValue: String) {
+        fatalError()
+    }
+    
+    public var intValue: Int? {
+        return nil
+    }
+    
+    public init?(intValue: Int) {
+        fatalError()
     }
 }
