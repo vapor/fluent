@@ -21,6 +21,42 @@ public struct FluentParent<Child, Parent>
     }
 }
 
+extension FluentParent: FluentProperty {
+    public var name: String {
+        return self.id.name
+    }
+    
+    public var entity: String? {
+        return self.id.entity
+    }
+    
+    public var type: Any.Type {
+        return self.id.type
+    }
+    
+    public var dataType: FluentSchema.DataType? {
+        return self.id.dataType
+    }
+    
+    public var constraints: [FluentSchema.FieldConstraint] {
+        return self.id.constraints
+    }
+    
+    public func encode(to container: inout KeyedEncodingContainer<FluentCodingKey>) throws {
+        if self.id.model.storage.eagerLoads[Parent.new().entity] != nil {
+            let parent = try self.get()
+            try container.encode(parent, forKey: FluentCodingKey("\(Parent.self)".lowercased()))
+        } else {
+            try self.id.encode(to: &container)
+        }
+    }
+    
+    public func decode(from container: KeyedDecodingContainer<FluentCodingKey>) throws {
+        try self.id.decode(from: container)
+    }
+}
+
+
 extension FluentModel {
     public typealias Parent<Model> = FluentParent<Self, Model>
         where Model: FluentModel

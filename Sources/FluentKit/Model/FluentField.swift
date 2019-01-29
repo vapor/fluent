@@ -1,4 +1,4 @@
-public struct FluentField<Model, Value>: AnyFluentField
+public struct FluentField<Model, Value>: FluentProperty
     where Model: FluentKit.FluentModel, Value: Codable
 {
     public var type: Any.Type {
@@ -39,12 +39,12 @@ public struct FluentField<Model, Value>: AnyFluentField
         }
     }
     
-    public func encode(to container: inout KeyedEncodingContainer<FluentFieldKey>) throws {
-        try container.encode(self.get(), forKey: FluentFieldKey(field: self))
+    public func encode(to container: inout KeyedEncodingContainer<FluentCodingKey>) throws {
+        try container.encode(self.get(), forKey: FluentCodingKey(self.name))
     }
     
-    public func decode(from container: KeyedDecodingContainer<FluentFieldKey>) throws {
-        try self.set(to: container.decode(Value.self, forKey: FluentFieldKey(field: self)))
+    public func decode(from container: KeyedDecodingContainer<FluentCodingKey>) throws {
+        try self.set(to: container.decode(Value.self, forKey: FluentCodingKey(self.name)))
     }
     
     public func set(to value: Value) {

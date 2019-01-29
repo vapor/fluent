@@ -19,7 +19,7 @@ public final class FluentQueryBuilder<Model>
         self.database = database
         self.query = .init(entity: Model.new().entity)
         self.eagerLoads = [:]
-        self.query.fields = Model.new().fields.map { .field(
+        self.query.fields = Model.new().properties.map { .field(
             name: $0.name,
             entity: $0.entity,
             alias: nil
@@ -66,7 +66,7 @@ public final class FluentQueryBuilder<Model>
     public func join<Parent>(_ key: KeyPath<Model, FluentParent<Model, Parent>>) -> Self {
         let l = Model.new()[keyPath: key].id
         let f = Parent.new().id
-        self.query.fields += Parent.new().fields.map { .field(name: $0.name, entity: $0.entity, alias: $0.entity! + "_" + $0.name) }
+        self.query.fields += Parent.new().properties.map { .field(name: $0.name, entity: $0.entity, alias: $0.entity! + "_" + $0.name) }
         self.query.joins.append(.model(
             foreign: .field(name: f.name, entity: f.entity, alias: nil),
             local: .field(name: l.name, entity: l.entity, alias: nil)
@@ -82,7 +82,7 @@ public final class FluentQueryBuilder<Model>
     {
         let f = Foreign.new()[keyPath: foreign]
         let l = Model.new()[keyPath: local]
-        self.query.fields += Foreign.new().fields.map { .field(name: $0.name, entity: $0.entity, alias: $0.entity! + "_" + $0.name) }
+        self.query.fields += Foreign.new().properties.map { .field(name: $0.name, entity: $0.entity, alias: $0.entity! + "_" + $0.name) }
         print(self.query.fields)
         self.query.joins.append(.model(
             foreign: .field(name: f.name, entity: f.entity, alias: nil),

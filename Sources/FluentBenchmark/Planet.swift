@@ -1,11 +1,11 @@
 import Fluent
 import Foundation
 
-final class Planet: FluentModel {
+final class Planet: FluentModel, Codable {
     var storage: Storage
     
-    var fields: [AnyField] {
-        return [id, name, galaxy.id]
+    var properties: [Property] {
+        return [id, name, galaxy]
     }
     
     var entity: String {

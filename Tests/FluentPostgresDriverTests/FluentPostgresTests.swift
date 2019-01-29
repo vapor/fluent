@@ -37,6 +37,14 @@ final class FluentPostgresTests: XCTestCase {
         try self.benchmarker.testEagerLoadParentJoin()
     }
     
+    func testEagerLoadSubqueryJSONEncode() throws {
+        try self.benchmarker.testEagerLoadSubqueryJSONEncode()
+    }
+    
+    func testEagerLoadJoinJSONEncode() throws {
+        try self.benchmarker.testEagerLoadJoinJSONEncode()
+    }
+    
     func testMigrator() throws {
         try self.benchmarker.testMigrator()
     }
@@ -47,6 +55,10 @@ final class FluentPostgresTests: XCTestCase {
     
     func testJoin() throws {
         try self.benchmarker.testJoin()
+    }
+    
+    func testWorkUnit() throws {
+        try self.benchmarker.testWorkUnit()
     }
     
     override func setUp() {

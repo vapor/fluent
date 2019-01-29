@@ -1,7 +1,7 @@
-public protocol FluentModel: class, CustomStringConvertible {
+public protocol FluentModel: class, CustomStringConvertible, Codable {
     associatedtype ID: FluentID
     var entity: String { get }
-    var fields: [AnyField] { get }
+    var properties: [Property] { get }
     var storage: Storage { get set }
     var id: Field<ID> { get }
     init(storage: Storage)
@@ -18,6 +18,8 @@ extension FluentModel {
         return self.storage.output != nil
     }
 }
+
+
 
 public protocol FluentID: Codable, Hashable { }
 

@@ -67,7 +67,7 @@ public final class MigrationLog: FluentModel {
         return self.field("updatedAt")
     }
     
-    public var fields: [AnyField] {
+    public var properties: [Property] {
         return [self.id, self.name, self.batch, self.createdAt, self.updatedAt]
     }
 

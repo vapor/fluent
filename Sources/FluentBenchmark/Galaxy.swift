@@ -4,7 +4,7 @@ import Foundation
 final class Galaxy: FluentModel {
     var storage: Storage
     
-    var fields: [AnyField] {
+    var properties: [Property] {
         return [id, name]
     }
     

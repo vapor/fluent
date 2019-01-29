@@ -18,7 +18,7 @@ public final class SchemaBuilder<Model> where Model: FluentKit.FluentModel {
     }
     
     public func auto() -> Self {
-        self.schema.createFields = Model.new().fields.map { field in
+        self.schema.createFields = Model.new().properties.map { field in
             return .definition(
                 name: .string(field.name),
                 dataType: field.dataType ?? .bestFor(type: field.type),

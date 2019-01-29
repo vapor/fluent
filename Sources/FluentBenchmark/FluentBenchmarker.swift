@@ -180,6 +180,54 @@ public final class FluentBenchmarker {
         }
     }
     
+    public func testEagerLoadSubqueryJSONEncode() throws {
+        try runTest(#function, [
+            Galaxy.autoMigration(),
+            Planet.autoMigration(),
+            GalaxySeed(),
+            PlanetSeed()
+        ]) {
+            let planets = try self.database.query(Planet.self)
+                .with(\.galaxy, method: .subquery)
+                .all().wait()
+            
+            let encoder = JSONEncoder()
+            let json = try encoder.encode(planets)
+            let string = String(data: json, encoding: .utf8)!
+            
+            let expected = """
+            [{"id":1,"name":"Mercury","galaxy":{"id":2,"name":"Milky Way"}},{"id":2,"name":"Venus","galaxy":{"id":2,"name":"Milky Way"}},{"id":3,"name":"Earth","galaxy":{"id":2,"name":"Milky Way"}},{"id":4,"name":"Mars","galaxy":{"id":2,"name":"Milky Way"}},{"id":5,"name":"Jupiter","galaxy":{"id":2,"name":"Milky Way"}},{"id":6,"name":"Saturn","galaxy":{"id":2,"name":"Milky Way"}},{"id":7,"name":"Uranus","galaxy":{"id":2,"name":"Milky Way"}},{"id":8,"name":"Neptune","galaxy":{"id":2,"name":"Milky Way"}},{"id":9,"name":"PA-99-N2","galaxy":{"id":1,"name":"Andromeda"}}]
+            """
+            guard string == expected else {
+                throw Failure("unexpected json format")
+            }
+        }
+    }
+    
+    public func testEagerLoadJoinJSONEncode() throws {
+        try runTest(#function, [
+            Galaxy.autoMigration(),
+            Planet.autoMigration(),
+            GalaxySeed(),
+            PlanetSeed()
+        ]) {
+            let planets = try self.database.query(Planet.self)
+                .with(\.galaxy, method: .join)
+                .all().wait()
+            
+            let encoder = JSONEncoder()
+            let json = try encoder.encode(planets)
+            let string = String(data: json, encoding: .utf8)!
+            
+            let expected = """
+            [{"id":1,"name":"Mercury","galaxy":{"id":2,"name":"Milky Way"}},{"id":2,"name":"Venus","galaxy":{"id":2,"name":"Milky Way"}},{"id":3,"name":"Earth","galaxy":{"id":2,"name":"Milky Way"}},{"id":4,"name":"Mars","galaxy":{"id":2,"name":"Milky Way"}},{"id":5,"name":"Jupiter","galaxy":{"id":2,"name":"Milky Way"}},{"id":6,"name":"Saturn","galaxy":{"id":2,"name":"Milky Way"}},{"id":7,"name":"Uranus","galaxy":{"id":2,"name":"Milky Way"}},{"id":8,"name":"Neptune","galaxy":{"id":2,"name":"Milky Way"}},{"id":9,"name":"PA-99-N2","galaxy":{"id":1,"name":"Andromeda"}}]
+            """
+            guard string == expected else {
+                throw Failure("unexpected json format")
+            }
+        }
+    }
+    
     public func testMigrator() throws {
         try self.runTest(#function, []) {
             var migrations = FluentMigrations()
@@ -236,6 +284,34 @@ public final class FluentBenchmarker {
                 .join(\.galaxy)
                 .all().wait()
             print(planets)
+        }
+    }
+    
+    public func testWorkUnit() throws {
+        try runTest(#function, [
+            Galaxy.autoMigration()
+        ]) {
+            let unit = self.database.workUnit()
+            
+            let galaxy = Galaxy.new()
+            galaxy.name.set(to: "Milky Way")
+            try galaxy.save(on: unit).wait()
+            
+            do {
+                let galaxies = try self.database.query(Galaxy.self).all().wait()
+                guard galaxies.count == 0 else {
+                    throw Failure("expected galaxy count to be 0 before commit")
+                }
+            }
+            
+            try unit.commit().wait()
+            
+            do {
+                let galaxies = try self.database.query(Galaxy.self).all().wait()
+                guard galaxies.count == 1 else {
+                    throw Failure("expected galaxy count to be 1 after commit")
+                }
+            }
         }
     }
     
