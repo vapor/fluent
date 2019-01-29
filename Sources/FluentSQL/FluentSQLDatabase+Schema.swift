@@ -1,16 +1,10 @@
-internal struct DatabaseSchemaConverter {
-    public let schema: FluentSchema
-    
-    public init(_ schema: FluentSchema) {
-        self.schema = schema
-    }
-    
-    internal func convert() -> SQLExpression {
-        switch self.schema.action {
+extension FluentSQLDatabase {
+    internal func convert(_ schema: FluentSchema) -> SQLExpression {
+        switch schema.action {
         case .create:
-            return self.create()
+            return self.create(schema)
         case .delete:
-            return self.delete()
+            return self.delete(schema)
         default:
             #warning("TODO:")
             fatalError("\(self) not yet supported")
@@ -19,14 +13,14 @@ internal struct DatabaseSchemaConverter {
     
     // MARK: Private
     
-    private func delete() -> SQLExpression {
-        var delete = SQLDropTable(table: self.name(self.schema.entity))
+    private func delete(_ schema: FluentSchema) -> SQLExpression {
+        var delete = SQLDropTable(table: self.name(schema.entity))
         return delete
     }
     
-    private func create() -> SQLExpression {
-        var create = SQLCreateTable(name: self.name(self.schema.entity))
-        create.columns = self.schema.createFields.map(self.fieldDefinition)
+    private func create(_ schema: FluentSchema) -> SQLExpression {
+        var create = SQLCreateTable(name: self.name(schema.entity))
+        create.columns = schema.createFields.map(self.fieldDefinition)
         return create
     }
     

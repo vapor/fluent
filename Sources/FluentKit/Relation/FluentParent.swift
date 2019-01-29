@@ -12,12 +12,12 @@ public struct FluentParent<Child, Parent>
     }
     
     public func get() throws -> Parent {
-        guard let cache = self.id.model.storage.cache else {
+        guard let cache = self.id.model.storage.eagerLoads[Parent.new().entity] else {
             fatalError("No cache set on storage.")
         }
-        return try cache.get(Parent.self).filter { parent in
-            return try parent.id.get() == self.id.get()
-        }.first!
+        return try cache.get(id: self.id.get())
+            .map { $0 as! Parent }
+            .first!
     }
 }
 

@@ -40,6 +40,7 @@ extension FluentSQLDatabase {
         select.tables.append(SQLIdentifier(query.entity))
         select.columns = query.fields.map(self.field)
         select.predicate = self.filters(query.filters)
+        select.joins = query.joins.map(self.join)
         return select
     }
     
@@ -62,16 +63,43 @@ extension FluentSQLDatabase {
         )
     }
     
+    private func join(_ join: FluentQuery.Join) -> SQLExpression {
+        switch join {
+        case .custom(let any): return any as! SQLExpression
+        case .model(let foreign, let local):
+            let table: SQLExpression
+            switch foreign {
+            case .custom(let any): table = any as! SQLExpression
+            case .field(let name, let entity, let alias):
+                table = SQLIdentifier(entity!)
+            }
+            return SQLJoin(
+                method: SQLJoinMethod.inner,
+                table: table,
+                expression: SQLBinaryExpression(
+                    left: self.field(local),
+                    op: SQLBinaryOperator.equal,
+                    right: self.field(foreign)
+                )
+            )
+        }
+    }
+    
     private func field(_ field: FluentQuery.Field) -> SQLExpression {
         switch field {
         case .custom(let any):
             #warning("TODO:")
             return any as! SQLExpression
-        case .field(let name, let entity):
+        case .field(let name, let entity, let alias):
             if let entity = entity {
-                return SQLIdentifier(name)
-                #warning("TODO: if joins exist, use full column name")
-                // return SQLColumn(SQLIdentifier(name), table: SQLIdentifier(entity))
+                #warning("TODO: if joins don't exist, use short column name")
+                // return SQLIdentifier(name)
+                let id = SQLColumn(SQLIdentifier(name), table: SQLIdentifier(entity))
+                if let alias = alias {
+                    return SQLAlias(id, as: SQLIdentifier(alias))
+                } else {
+                    return id
+                }
             } else {
                 return SQLIdentifier(name)
             }

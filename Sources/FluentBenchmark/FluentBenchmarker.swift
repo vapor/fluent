@@ -152,6 +152,34 @@ public final class FluentBenchmarker {
         }
     }
     
+    public func testEagerLoadParentJoin() throws {
+        try runTest(#function, [
+            Galaxy.autoMigration(),
+            Planet.autoMigration(),
+            GalaxySeed(),
+            PlanetSeed()
+        ]) {
+            let planets = try self.database.query(Planet.self)
+                .with(\.galaxy, method: .join)
+                .all().wait()
+            
+            for planet in planets {
+                let galaxy = try planet.galaxy.get()
+                switch try planet.name.get() {
+                case "Earth":
+                    guard try galaxy.name.get() == "Milky Way" else {
+                        throw Failure("unexpected galaxy name: \(galaxy)")
+                    }
+                case "PA-99-N2":
+                    guard try galaxy.name.get() == "Andromeda" else {
+                        throw Failure("unexpected galaxy name: \(galaxy)")
+                    }
+                default: break
+                }
+            }
+        }
+    }
+    
     public func testMigrator() throws {
         try self.runTest(#function, []) {
             var migrations = FluentMigrations()
@@ -194,6 +222,20 @@ public final class FluentBenchmarker {
                 self.log("Migration failed: \(error)")
             }
             try migrator.revertAll().wait()
+        }
+    }
+    
+    public func testJoin() throws {
+        try runTest(#function, [
+            Galaxy.autoMigration(),
+            Planet.autoMigration(),
+            GalaxySeed(),
+            PlanetSeed()
+        ]) {
+            let planets = try self.database.query(Planet.self)
+                .join(\.galaxy)
+                .all().wait()
+            print(planets)
         }
     }
     

@@ -8,7 +8,7 @@ public struct FluentQuery {
     }
     
     public enum Field {
-        case field(name: String, entity: String?)
+        case field(name: String, entity: String?, alias: String?)
         case custom(Any)
     }
     
@@ -53,11 +53,17 @@ public struct FluentQuery {
         case custom(Any)
     }
     
+    public enum Join {
+        case model(foreign: Field, local: Field)
+        case custom(Any)
+    }
+    
     public var fields: [Field]
     public var action: Action
     public var entity: String
     public var filters: [Filter]
     public var input: [[Value]]
+    public var joins: [Join]
     
     public init(entity: String) {
         self.fields = []
@@ -65,5 +71,6 @@ public struct FluentQuery {
         self.entity = entity
         self.filters = []
         self.input = []
+        self.joins = []
     }
 }

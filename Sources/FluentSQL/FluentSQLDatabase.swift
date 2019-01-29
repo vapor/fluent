@@ -31,9 +31,8 @@ public struct FluentSQLDatabase: FluentDatabase {
     }
     
     public func execute(_ schema: FluentSchema) -> EventLoopFuture<Void> {
-        let sql = DatabaseSchemaConverter(schema).convert()
-        return self.delegate.database.sqlQuery(sql) { row in
-            assertionFailure()
+        return self.delegate.database.sqlQuery(self.convert(schema)) { row in
+            assertionFailure("Unexpected output during Schema execute.")
         }
     }
 }

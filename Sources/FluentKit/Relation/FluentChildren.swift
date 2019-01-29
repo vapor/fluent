@@ -12,19 +12,18 @@ public struct FluentChildren<Parent, Child>
     public func query(on database: FluentDatabase) throws -> FluentQueryBuilder<Child> {
         let field = Child.new()[keyPath: self.relation].id
         return try database.query(Child.self).filter(
-            .field(name: field.name, entity: Child.new().entity),
+            .field(name: field.name, entity: Child.new().entity, alias: nil),
             .equality(inverse: false),
             .bind(self.parent.id.get())
         )
     }
     
     public func get() throws -> [Child] {
-        guard let cache = self.parent.storage.cache else {
+        guard let cache = self.parent.storage.eagerLoads[Child.new().entity] else {
             fatalError("No cache set on storage.")
         }
-        return try cache.get(Child.self).filter { child in
-            return try child[keyPath: self.relation].id.get() == self.parent.id.get()
-        }
+        return try cache.get(id: self.parent.id.get())
+            .map { $0 as! Child }
     }
 }
 

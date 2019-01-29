@@ -1,14 +1,18 @@
 public struct FluentStorage {
-    public static let empty: FluentStorage = .init(output: nil, cache: nil, exists: false)
+    public static let empty: FluentStorage = .init(
+        output: nil,
+        eagerLoads: [:],
+        exists: false
+    )
     
     var output: FluentOutput?
     var input: [String: FluentQuery.Value]
-    var cache: EagerLoad.Cache?
+    var eagerLoads: [String: EagerLoad]
     var exists: Bool
 
-    init(output: FluentOutput?, cache: EagerLoad.Cache?, exists: Bool) {
+    init(output: FluentOutput?, eagerLoads: [String: EagerLoad], exists: Bool) {
         self.output = output
-        self.cache = cache
+        self.eagerLoads = eagerLoads
         self.input = [:]
         self.exists = exists
     }

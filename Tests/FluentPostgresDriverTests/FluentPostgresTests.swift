@@ -33,12 +33,20 @@ final class FluentPostgresTests: XCTestCase {
         try self.benchmarker.testEagerLoadParent()
     }
     
+    func testEagerLoadParentJoin() throws {
+        try self.benchmarker.testEagerLoadParentJoin()
+    }
+    
     func testMigrator() throws {
         try self.benchmarker.testMigrator()
     }
     
     func testMigratorError() throws {
         try self.benchmarker.testMigratorError()
+    }
+    
+    func testJoin() throws {
+        try self.benchmarker.testJoin()
     }
     
     override func setUp() {
