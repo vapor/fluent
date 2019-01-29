@@ -66,5 +66,6 @@ extension Pivot {
 /// A pivot that can be initialized from just the left and right models. This allows
 /// Fluent to automatically create pivots for extended functionality. ex: attaching.
 public protocol ModifiablePivot: Pivot {
+    /// Creates an instance of `Self` using the left and right related models.
     init(_ left: Left, _ right: Right) throws
 }

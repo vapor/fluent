@@ -5,11 +5,30 @@ extension QueryBuilder {
     ///
     ///     let totalLikes = try Post.query(on: conn).sum(\.likes)
     ///
+    /// If a default value is supplied, it will be used when the sum's result
+    /// set is empty and no sum can be determined.
+    ///
+    ///     let totalViralPostLikes = try Post.query(on: conn)
+    ///         .filter(\.likes >= 10_000_000)
+    ///         .sum(\.likes, default: 0)
+    ///
     /// - parameters:
     ///     - field: Field to sum.
+    ///     - default: Optional default to use.
     /// - returns: A `Future` containing the sum.
-    public func sum<T>(_ field: KeyPath<Result, T>) -> Future<T> where T: Decodable {
-        return aggregate(Database.queryAggregateSum, field: field)
+    public func sum<T>(_ field: KeyPath<Result, T>, default: T? = nil) -> Future<T> where T: Decodable {
+        return self.count().flatMap { count in
+            switch count {
+            case 0:
+                if let d = `default` {
+                    return self.connection.map { _ in d }
+                } else {
+                    throw FluentError(identifier: "noSumResults", reason: "Sum query returned 0 results and no default was supplied.")
+                }
+            default:
+                return self.aggregate(Database.queryAggregateSum, field: field)
+            }
+        }
     }
 
     /// Returns the average of all entries for the supplied field.

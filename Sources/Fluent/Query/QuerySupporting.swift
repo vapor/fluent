@@ -230,6 +230,7 @@ public protocol QuerySupporting: Database {
     /// ||
     static var queryFilterRelationOr: QueryFilterRelation { get }
     
+    /// Applies a new default filter relation to the query.
     static func queryDefaultFilterRelation(_ relation: QueryFilterRelation, on: inout Query)
 
     /// Creates an instance of `QueryFilter` from a relation and an array of other filters.

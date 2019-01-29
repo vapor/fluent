@@ -20,6 +20,7 @@ public final class SchemaUpdater<Model>: SchemaBuilder where Model: Fluent.Model
     
     // MARK: Constraint
     
+    /// Deletes a custom constraint.
     public func deleteConstraint(_ constraint: Model.Database.SchemaConstraint) {
         Model.Database.schemaConstraintDelete(constraint, to: &schema)
     }
