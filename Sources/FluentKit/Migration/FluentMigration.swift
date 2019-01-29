@@ -1,28 +1,37 @@
 import NIO
 
 public protocol FluentMigration {
-    func prepare() -> EventLoopFuture<Void>
-    func revert() -> EventLoopFuture<Void>
+    var name: String { get }
+    func prepare(on database: FluentDatabase) -> EventLoopFuture<Void>
+    func revert(on database: FluentDatabase) -> EventLoopFuture<Void>
+}
+
+extension FluentMigration {
+    public var name: String {
+        return "\(Self.self)"
+    }
+    
 }
 
 extension FluentModel {
-    public static func migration(on database: FluentDatabase) -> FluentMigration {
-        return AutoMigration<Self>(database: database)
+    public static func autoMigration() -> FluentMigration {
+        return AutoMigration<Self>()
     }
 }
 
-private final class AutoMigration<Model>: FluentMigration where Model: FluentKit.FluentModel {
-    let database: FluentDatabase
-    
-    init(database: FluentDatabase) {
-        self.database = database
+private final class AutoMigration<Model>: FluentMigration
+    where Model: FluentKit.FluentModel
+{
+    init() { }
+    var name: String {
+        return "\(Model.self)"
     }
     
-    func prepare() -> EventLoopFuture<Void> {
-        return self.database.schema(Model.self).auto().create()
+    func prepare(on database: FluentDatabase) -> EventLoopFuture<Void> {
+        return database.schema(Model.self).auto().create()
     }
     
-    func revert() -> EventLoopFuture<Void> {
-        return self.database.schema(Model.self).delete()
+    func revert(on database: FluentDatabase) -> EventLoopFuture<Void> {
+        return database.schema(Model.self).delete()
     }
 }

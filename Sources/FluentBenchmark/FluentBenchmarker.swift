@@ -20,7 +20,7 @@ public final class FluentBenchmarker {
     
     public func testCreate() throws {
         try self.runTest(#function, [
-            Galaxy.migration(on: self.database)
+            Galaxy.autoMigration()
         ]) {
             let galaxy = Galaxy.new()
             galaxy.name.set(to: "Messier 82")
@@ -44,8 +44,8 @@ public final class FluentBenchmarker {
     
     public func testRead() throws {
         try runTest(#function, [
-            Galaxy.migration(on: self.database),
-            GalaxySeed(on: self.database)
+            Galaxy.autoMigration(),
+            GalaxySeed()
         ]) {
             guard let milkyWay = try self.database.query(Galaxy.self)
                 .filter(\.name == "Milky Way")
@@ -61,7 +61,7 @@ public final class FluentBenchmarker {
     
     public func testUpdate() throws {
         try runTest(#function, [
-            Galaxy.migration(on: self.database)
+            Galaxy.autoMigration()
         ]) {
             let galaxy = Galaxy.new()
             galaxy.name.set(to: "Milkey Way")
@@ -82,7 +82,7 @@ public final class FluentBenchmarker {
     
     public func testDelete() throws {
         try runTest(#function, [
-            Galaxy.migration(on: self.database)
+            Galaxy.autoMigration(),
         ]) {
             let galaxy = Galaxy.new()
             galaxy.name.set(to: "Milky Way")
@@ -99,10 +99,10 @@ public final class FluentBenchmarker {
     
     public func testEagerLoadChildren() throws {
         try runTest(#function, [
-            Galaxy.migration(on: self.database),
-            Planet.migration(on: self.database),
-            GalaxySeed(on: self.database),
-            PlanetSeed(on: self.database)
+            Galaxy.autoMigration(),
+            Planet.autoMigration(),
+            GalaxySeed(),
+            PlanetSeed()
         ]) {
             let galaxies = try self.database.query(Galaxy.self)
                 .with(\.planets)
@@ -126,10 +126,10 @@ public final class FluentBenchmarker {
     
     public func testEagerLoadParent() throws {
         try runTest(#function, [
-            Galaxy.migration(on: self.database),
-            Planet.migration(on: self.database),
-            GalaxySeed(on: self.database),
-            PlanetSeed(on: self.database)
+            Galaxy.autoMigration(),
+            Planet.autoMigration(),
+            GalaxySeed(),
+            PlanetSeed()
         ]) {
             let planets = try self.database.query(Planet.self)
                 .with(\.galaxy)
@@ -152,6 +152,51 @@ public final class FluentBenchmarker {
         }
     }
     
+    public func testMigrator() throws {
+        try self.runTest(#function, []) {
+            var migrations = FluentMigrations()
+            migrations.add(Galaxy.autoMigration())
+            migrations.add(Planet.autoMigration())
+            
+            var databases = FluentDatabases()
+            databases.add(self.database, as: .init(string: "main"))
+            
+            let migrator = FluentMigrator(
+                databases: databases,
+                migrations: migrations,
+                on: self.database.eventLoop
+            )
+            try migrator.prepare().wait()
+            try migrator.revertAll().wait()
+        }
+    }
+    
+    public func testMigratorError() throws {
+        try self.runTest(#function, []) {
+            var migrations = FluentMigrations()
+            migrations.add(Galaxy.autoMigration())
+            migrations.add(ErrorMigration())
+            migrations.add(Planet.autoMigration())
+            
+            var databases = FluentDatabases()
+            databases.add(self.database, as: .init(string: "main"))
+            
+            let migrator = FluentMigrator(
+                databases: databases,
+                migrations: migrations,
+                on: self.database.eventLoop
+            )
+            do {
+                try migrator.prepare().wait()
+                throw Failure("prepare did not fail")
+            } catch {
+                // success
+                self.log("Migration failed: \(error)")
+            }
+            try migrator.revertAll().wait()
+        }
+    }
+    
     struct Failure: Error {
         let reason: String
         let line: UInt
@@ -165,14 +210,14 @@ public final class FluentBenchmarker {
     }
     
     private func runTest(_ name: String, _ migrations: [FluentMigration], _ test: () throws -> ()) throws {
-        print("[FluentBenchmark] Running \(name)...")
+        self.log("Running \(name)...")
         for migration in migrations {
             do {
-                try migration.prepare().wait()
+                try migration.prepare(on: self.database).wait()
             } catch {
-                print("[FluentBenchmark] Migration failed, attempting to revert existing...")
-                try migration.revert().wait()
-                try migration.prepare().wait()
+                self.log("Migration failed, attempting to revert existing...")
+                try migration.revert(on: self.database).wait()
+                try migration.prepare(on: self.database).wait()
             }
         }
         var e: Error?
@@ -184,10 +229,14 @@ public final class FluentBenchmarker {
             e = error
         }
         for migration in migrations {
-            try migration.revert().wait()
+            try migration.revert(on: self.database).wait()
         }
         if let error = e {
             throw error
         }
+    }
+    
+    private func log(_ message: String) {
+        print("[FluentBenchmark] \(message)")
     }
 }

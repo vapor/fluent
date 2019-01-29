@@ -1,14 +1,14 @@
 import NIO
 
 extension FluentDatabase {
-    public func query<Model>(_ model: Model.Type) -> QueryBuilder<Model>
+    public func query<Model>(_ model: Model.Type) -> FluentQueryBuilder<Model>
         where Model: FluentKit.FluentModel
     {
         return .init(database: self)
     }
 }
 
-public final class QueryBuilder<Model>
+public final class FluentQueryBuilder<Model>
     where Model: FluentKit.FluentModel
 {
     let database: FluentDatabase
@@ -18,8 +18,8 @@ public final class QueryBuilder<Model>
     public init(database: FluentDatabase) {
         self.database = database
         self.query = .init(entity: Model.new().entity)
-        self.query.fields = Model.new().fields.map { .field(name: $0.name, entity: $0.entity) }
         self.eagerLoad = .init()
+        self.query.fields = Model.new().fields.map { .field(name: $0.name, entity: $0.entity) }
     }
     
     public func with<Child>(_ key: KeyPath<Model, FluentChildren<Model, Child>>) -> Self

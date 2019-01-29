@@ -1,3 +1,5 @@
+import Foundation
+
 public struct FluentSchema {
     public enum Action {
         case create
@@ -15,6 +17,8 @@ public struct FluentSchema {
             case id(String.self): return .string
             case id(Int.self), id(Int64.self): return .int64
             case id(UInt.self), id(UInt64.self): return .uint64
+            case id(UUID.self): return .uuid
+            case id(Date.self): return .datetime
             default: fatalError("Unknown type: \(type)")
             }
         }
@@ -35,6 +39,7 @@ public struct FluentSchema {
         case uint32
         case uint64
         
+        
         case bool
         
         public struct Enum {
@@ -51,6 +56,7 @@ public struct FluentSchema {
         case float
         case double
         case data
+        case uuid
         case custom(Any)
     }
     

@@ -33,6 +33,14 @@ final class FluentPostgresTests: XCTestCase {
         try self.benchmarker.testEagerLoadParent()
     }
     
+    func testMigrator() throws {
+        try self.benchmarker.testMigrator()
+    }
+    
+    func testMigratorError() throws {
+        try self.benchmarker.testMigratorError()
+    }
+    
     override func setUp() {
         let eventLoop = MultiThreadedEventLoopGroup(numberOfThreads: 1).next()
         let config = PostgresDatabase.Config(

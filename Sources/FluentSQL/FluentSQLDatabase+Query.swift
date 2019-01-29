@@ -69,7 +69,9 @@ extension FluentSQLDatabase {
             return any as! SQLExpression
         case .field(let name, let entity):
             if let entity = entity {
-                return SQLColumn(SQLIdentifier(name), table: SQLIdentifier(entity))
+                return SQLIdentifier(name)
+                #warning("TODO: if joins exist, use full column name")
+                // return SQLColumn(SQLIdentifier(name), table: SQLIdentifier(entity))
             } else {
                 return SQLIdentifier(name)
             }

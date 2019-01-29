@@ -60,11 +60,14 @@ internal struct DatabaseSchemaConverter {
         switch dataType {
         case .bool: return SQLDataType.int
         case .data: return SQLDataType.blob
-        case .date: return SQLDataType.real
-        case .datetime: return SQLDataType.real
+        case .date: return SQLRaw("DATE")
+        case .datetime: return SQLRaw("TIMESTAMP")
         case .custom(let any): return any as! SQLExpression
         case .int64: return SQLDataType.bigint
         case .string: return SQLDataType.text
+        case .uuid:
+            #warning("TODO: get better support for this")
+            return SQLRaw("UUID")
         default:
             #warning("TODO:")
             fatalError("\(dataType) not yet supported")

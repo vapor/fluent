@@ -9,7 +9,7 @@ public struct FluentChildren<Parent, Child>
         self.relation = relation
     }
     
-    public func query(on database: FluentDatabase) throws -> QueryBuilder<Child> {
+    public func query(on database: FluentDatabase) throws -> FluentQueryBuilder<Child> {
         let field = Child.new()[keyPath: self.relation].id
         return try database.query(Child.self).filter(
             .field(name: field.name, entity: Child.new().entity),
