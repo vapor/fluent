@@ -31,6 +31,7 @@ public final class FluentQueryBuilder<Model>
         case join
     }
     
+    @discardableResult
     public func with<Child>(
         _ key: KeyPath<Model, FluentChildren<Model, Child>>,
         method: EagerLoadMethod = .subquery
@@ -47,6 +48,7 @@ public final class FluentQueryBuilder<Model>
         return self
     }
 
+    @discardableResult
     public func with<Parent>(
         _ key: KeyPath<Model, FluentParent<Model, Parent>>,
         method: EagerLoadMethod = .subquery
@@ -63,6 +65,7 @@ public final class FluentQueryBuilder<Model>
         }
     }
     
+    @discardableResult
     public func join<Parent>(_ key: KeyPath<Model, FluentParent<Model, Parent>>) -> Self {
         let l = Model.new()[keyPath: key].id
         let f = Parent.new().id
@@ -74,6 +77,7 @@ public final class FluentQueryBuilder<Model>
         return self
     }
     
+    @discardableResult
     public func join<Foreign, T>(
         _ local: KeyPath<Model, FluentField<Model, T>>,
         _ foreign: KeyPath<Foreign, FluentField<Foreign, T>>
@@ -92,10 +96,12 @@ public final class FluentQueryBuilder<Model>
     }
     
     
+    @discardableResult
     public func filter(_ filter: ModelFilter<Model>) -> Self {
         return self.filter(filter.filter)
     }
     
+    @discardableResult
     public func filter<T>(
         _ key: KeyPath<Model, FluentField<Model, T>>,
         in value: [T]
@@ -109,6 +115,7 @@ public final class FluentQueryBuilder<Model>
         )
     }
     
+    @discardableResult
     public func filter<T>(_ key: KeyPath<Model, FluentField<Model, T>>, _ method: FluentQuery.Filter.Method, _ value: T) -> Self
         where T: Encodable
     {
@@ -116,24 +123,29 @@ public final class FluentQueryBuilder<Model>
         return self.filter(.field(name: property.name, entity: property.entity, alias: nil), method, .bind(value))
     }
     
+    @discardableResult
     public func filter(_ field: FluentQuery.Field, _ method: FluentQuery.Filter.Method, _ value: FluentQuery.Value) -> Self {
         return self.filter(.basic(field, method, value))
     }
     
+    @discardableResult
     public func filter(_ filter: FluentQuery.Filter) -> Self {
         self.query.filters.append(filter)
         return self
     }
     
+    @discardableResult
     public func set(_ data: [String: FluentQuery.Value]) -> Self {
         query.fields = data.keys.map { .field(name: $0, entity: nil, alias: nil) }
         query.input.append(.init(data.values))
         return self
     }
     
+    @discardableResult
     public func set<Value>(_ field: KeyPath<Model, FluentField<Model, Value>>, to value: Value) -> Self {
         let ref = Model.new()
-        query.fields.append(.field(name: ref[keyPath: field].name, entity: ref.entity, alias: nil))
+        self.query.fields = []
+        query.fields.append(.field(name: ref[keyPath: field].name, entity: nil, alias: nil))
         switch query.input.count {
         case 0: query.input = [[.bind(value)]]
         default: query.input[0].append(.bind(value))

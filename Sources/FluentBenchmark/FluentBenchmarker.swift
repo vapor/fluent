@@ -287,6 +287,41 @@ public final class FluentBenchmarker {
         }
     }
     
+    public func testBatchCreate() throws {
+        try runTest(#function, [
+            Galaxy.autoMigration()
+        ]) {
+            let galaxies = Array("abcdefghijklmnopqrstuvwxyz").map { letter -> Galaxy in
+                let galaxy = Galaxy.new()
+                galaxy.name.set(to: String(letter))
+                return galaxy
+            }
+                
+            try galaxies.create(on: self.database).wait()
+            guard try galaxies[5].id.get() == 6 else {
+                throw Failure("batch insert did not set id")
+            }
+        }
+    }
+    
+    public func testBatchUpdate() throws {
+        try runTest(#function, [
+            Galaxy.autoMigration(),
+            GalaxySeed()
+        ]) {
+            try self.database.query(Galaxy.self).set(\.name, to: "Foo")
+                .update().wait()
+            
+            let galaxies = try self.database.query(Galaxy.self).all().wait()
+            for galaxy in galaxies {
+                
+                guard try galaxy.name.get() == "Foo" else {
+                    throw Failure("batch update did not set id")
+                }
+            }
+        }
+    }
+    
 //    public func testWorkUnit() throws {
 //        try runTest(#function, [
 //            Galaxy.autoMigration()

@@ -56,6 +56,14 @@ final class FluentPostgresTests: XCTestCase {
     func testJoin() throws {
         try self.benchmarker.testJoin()
     }
+    
+    func testBatchCreate() throws {
+        try self.benchmarker.testBatchCreate()
+    }
+    
+    func testBatchUpdate() throws {
+        try self.benchmarker.testBatchUpdate()
+    }
 //    
 //    func testWorkUnit() throws {
 //        try self.benchmarker.testWorkUnit()
