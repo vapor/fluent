@@ -287,33 +287,35 @@ public final class FluentBenchmarker {
         }
     }
     
-    public func testWorkUnit() throws {
-        try runTest(#function, [
-            Galaxy.autoMigration()
-        ]) {
-            let unit = self.database.workUnit()
-            
-            let galaxy = Galaxy.new()
-            galaxy.name.set(to: "Milky Way")
-            try galaxy.save(on: unit).wait()
-            
-            do {
-                let galaxies = try self.database.query(Galaxy.self).all().wait()
-                guard galaxies.count == 0 else {
-                    throw Failure("expected galaxy count to be 0 before commit")
-                }
-            }
-            
-            try unit.commit().wait()
-            
-            do {
-                let galaxies = try self.database.query(Galaxy.self).all().wait()
-                guard galaxies.count == 1 else {
-                    throw Failure("expected galaxy count to be 1 after commit")
-                }
-            }
-        }
-    }
+//    public func testWorkUnit() throws {
+//        try runTest(#function, [
+//            Galaxy.autoMigration()
+//        ]) {
+//            let unit = self.database.workUnit()
+//            
+//            let galaxy = Galaxy.new()
+//            galaxy.name.set(to: "Milky Way")
+//            try galaxy.save(on: unit).wait()
+//            try galaxy.save(on: unit).wait()
+//            try galaxy.save(on: unit).wait()
+//            
+//            do {
+//                let galaxies = try self.database.query(Galaxy.self).all().wait()
+//                guard galaxies.count == 0 else {
+//                    throw Failure("expected galaxy count to be 0 before commit")
+//                }
+//            }
+//            
+//            try unit.commit().wait()
+//            
+//            do {
+//                let galaxies = try self.database.query(Galaxy.self).all().wait()
+//                guard galaxies.count == 1 else {
+//                    throw Failure("expected galaxy count to be 1 after commit")
+//                }
+//            }
+//        }
+//    }
     
     struct Failure: Error {
         let reason: String

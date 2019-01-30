@@ -56,10 +56,10 @@ final class FluentPostgresTests: XCTestCase {
     func testJoin() throws {
         try self.benchmarker.testJoin()
     }
-    
-    func testWorkUnit() throws {
-        try self.benchmarker.testWorkUnit()
-    }
+//    
+//    func testWorkUnit() throws {
+//        try self.benchmarker.testWorkUnit()
+//    }
     
     override func setUp() {
         let eventLoop = MultiThreadedEventLoopGroup(numberOfThreads: 1).next()
