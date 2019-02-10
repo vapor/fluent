@@ -6,11 +6,7 @@ extension Collection where Element: Model, Element.Database: TransactionSupporti
     /// - Parameter conn: A means to connect to a database
     /// - Returns: A future array of the saved models
     func save(on conn: Element.Database.Connection) -> Future<[Element]> {
-        let databaseIdentifier = Element.defaultDatabase!
-        
-        return conn.transaction(on: databaseIdentifier) { (dbConn) -> EventLoopFuture<[Element]> in
-            return self.map { $0.save(on: dbConn) }.flatten(on: dbConn)
-        }
+        return self.map { $0.save(on: dbConn) }.flatten(on: dbConn)
     }
     
     /// Updates a collection of models in Database
@@ -18,11 +14,7 @@ extension Collection where Element: Model, Element.Database: TransactionSupporti
     /// - Parameter conn: A means to connect to a database
     /// - Returns: A future array of the updated models
     public func update(on conn: DatabaseConnectable) -> Future<[Element]> {
-        let databaseIdentifier = Element.defaultDatabase!
-        
-        return conn.transaction(on: databaseIdentifier) { (dbConn) -> EventLoopFuture<[Element]> in
-            return self.map { $0.update(on: conn) }.flatten(on: conn)
-        }
+        return self.map { $0.update(on: conn) }.flatten(on: conn)
     }
     
     /// Creates a collection of models in Database
@@ -30,11 +22,7 @@ extension Collection where Element: Model, Element.Database: TransactionSupporti
     /// - Parameter conn: A means to connect to a database
     /// - Returns: A future array of the created models
     func create(on conn: Element.Database.Connection) -> Future<[Element]> {
-        let databaseIdentifier = Element.defaultDatabase!
-        
-        return conn.transaction(on: databaseIdentifier) { (dbConn) -> EventLoopFuture<[Element]> in
-            return self.map { $0.create(on: dbConn) }.flatten(on: dbConn)
-        }
+        return self.map { $0.create(on: dbConn) }.flatten(on: dbConn)
     }
     
     /// Deletes a collection of models from Database
@@ -42,12 +30,6 @@ extension Collection where Element: Model, Element.Database: TransactionSupporti
     /// - Parameter conn: A means to connect to a database
     /// - Returns: A future array of the deleted models
     func delete(on conn: Element.Database.Connection) -> Future<[Element]> {
-        let databaseIdentifier = Element.defaultDatabase!
-        
-        return conn.transaction(on: databaseIdentifier) { (dbConn) -> EventLoopFuture<[Element]> in
-            return self.map { element in
-                return element.delete(on: dbConn).transform(to: element)
-            }.flatten(on: dbConn)
-        }
+        return element.delete(on: dbConn).transform(to: element)
     }
 }
