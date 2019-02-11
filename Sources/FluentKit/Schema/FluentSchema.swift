@@ -63,7 +63,8 @@ public struct FluentSchema {
     }
     
     public enum FieldConstraint {
-        case primaryKey
+        case required
+        case identifier
         case custom(Any)
     }
     

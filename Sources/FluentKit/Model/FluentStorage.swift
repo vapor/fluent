@@ -52,8 +52,10 @@ struct NestedOutput: FluentOutput {
 }
 
 struct NestedStorage: FluentStorage {
-    var name: String
-    var base: FluentEntity
+    let name: String
+    let base: FluentEntity
+    let dataType: FluentSchema.DataType?
+    let constraints: [FluentSchema.FieldConstraint]
     
     var path: [String] {
         return self.base.storage.path + [self.name]
@@ -91,33 +93,71 @@ struct NestedStorage: FluentStorage {
 }
 
 extension FluentEntity {
-    public func nested<Nested>(_ name: String, _ nested: Nested.Type = Nested.self) -> Nested
+    public func nested<Nested>(
+        _ name: String,
+        _ dataType: FluentSchema.DataType? = nil,
+        _ constraints: FluentSchema.FieldConstraint...
+    ) -> Nested
         where Nested: FluentEntity
     {
-        return .init(storage: NestedStorage(name: name, base: self))
+        let storage = NestedStorage(
+            name: name,
+            base: self,
+            dataType: dataType,
+            constraints: constraints
+        )
+        return .init(storage: storage)
     }
 }
 
-public protocol FluentNestedModel: FluentEntity, FluentProperty { }
+public protocol FluentNestedModel: FluentEntity { }
 
 extension FluentNestedModel {
+    public var property: FluentProperty {
+        return NestedProperty(entity: self)
+    }
+}
+
+struct NestedProperty<Nested>: FluentProperty
+    where Nested: FluentNestedModel
+{
+    let entity: Nested
+    
+    init(entity: Nested) {
+        self.entity = entity
+    }
+    
     public var name: String {
-        guard let storage = self.storage as? NestedStorage else {
+        guard let storage = self.entity.storage as? NestedStorage else {
             fatalError()
         }
         return storage.name
     }
     
+    var dataType: FluentSchema.DataType? {
+        guard let storage = self.entity.storage as? NestedStorage else {
+            fatalError()
+        }
+        return storage.dataType
+    }
+    
+    var constraints: [FluentSchema.FieldConstraint] {
+        guard let storage = self.entity.storage as? NestedStorage else {
+            fatalError()
+        }
+        return storage.constraints
+    }
+    
     public var type: Any.Type {
-        return Self.self
+        return Nested.self
     }
     
     public func encode(to container: inout KeyedEncodingContainer<StringCodingKey>) throws {
-        try container.encode(self, forKey: StringCodingKey(self.name))
+        try container.encode(self.entity, forKey: StringCodingKey(self.name))
     }
     
     public func decode(from container: KeyedDecodingContainer<StringCodingKey>) throws {
-        let model = try container.decode(Self.self, forKey: StringCodingKey(self.name))
-        self.storage = model.storage
+        let model = try container.decode(Nested.self, forKey: StringCodingKey(self.name))
+        self.entity.storage = model.storage
     }
 }

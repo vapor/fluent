@@ -6,7 +6,7 @@ final class User: FluentModel {
     var storage: Storage
     
     var properties: [Property] {
-        return [id, name, pet]
+        return [id, name, pet.property]
     }
     
     var entity: String {
@@ -14,15 +14,15 @@ final class User: FluentModel {
     }
     
     var id: Field<Int> {
-        return self.field("id", .int, .primaryKey)
+        return self.field("id", .int, .identifier)
     }
     
     var name: Field<String> {
-        return self.field("name")
+        return self.field("name", .string, .required)
     }
     
     var pet: Pet {
-        return self.nested("pet")
+        return self.nested("pet", .json, .required)
     }
     
     init(storage: Storage) {

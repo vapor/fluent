@@ -13,7 +13,7 @@ final class Planet: FluentModel, Codable {
     }
     
     var id: Field<Int> {
-        return self.field("id", .int, .primaryKey)
+        return self.field("id", .int, .identifier)
     }
     
     var name: Field<String> {

@@ -73,9 +73,11 @@ extension FluentSQLDatabase {
     
     private func fieldConstraint(_ fieldConstraint: FluentSchema.FieldConstraint) -> SQLExpression {
         switch fieldConstraint {
+        case .required:
+            return SQLColumnConstraint.notNull
         case .custom(let any):
             return any as! SQLExpression
-        case .primaryKey:
+        case .identifier:
             return SQLColumnConstraint.primaryKey
         }
     }
