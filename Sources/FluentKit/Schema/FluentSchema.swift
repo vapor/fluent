@@ -23,6 +23,8 @@ public struct FluentSchema {
             }
         }
         
+        case json
+        
         public static var int: DataType {
             return .int64
         }

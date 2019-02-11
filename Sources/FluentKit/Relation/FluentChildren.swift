@@ -12,7 +12,7 @@ public struct FluentChildren<Parent, Child>
     public func query(on database: FluentDatabase) throws -> FluentQueryBuilder<Child> {
         let field = Child.new()[keyPath: self.relation].id
         return try database.query(Child.self).filter(
-            .field(name: field.name, entity: Child.new().entity, alias: nil),
+            .field(path: [field.name], entity: Child.new().entity, alias: nil),
             .equality(inverse: false),
             .bind(self.parent.id.get())
         )

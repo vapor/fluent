@@ -59,6 +59,9 @@ extension FluentSQLDatabase {
         case .custom(let any): return any as! SQLExpression
         case .int64: return SQLDataType.bigint
         case .string: return SQLDataType.text
+        case .json:
+            #warning("TODO: get better support for this")
+            return SQLRaw("JSON")
         case .uuid:
             #warning("TODO: get better support for this")
             return SQLRaw("UUID")

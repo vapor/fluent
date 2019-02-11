@@ -26,10 +26,6 @@ extension FluentParent: FluentProperty {
         return self.id.name
     }
     
-    public var entity: String? {
-        return self.id.entity
-    }
-    
     public var type: Any.Type {
         return self.id.type
     }
@@ -42,16 +38,16 @@ extension FluentParent: FluentProperty {
         return self.id.constraints
     }
     
-    public func encode(to container: inout KeyedEncodingContainer<FluentCodingKey>) throws {
+    public func encode(to container: inout KeyedEncodingContainer<StringCodingKey>) throws {
         if self.id.model.storage.eagerLoads[Parent.new().entity] != nil {
             let parent = try self.get()
-            try container.encode(parent, forKey: FluentCodingKey("\(Parent.self)".lowercased()))
+            try container.encode(parent, forKey: StringCodingKey("\(Parent.self)".lowercased()))
         } else {
             try self.id.encode(to: &container)
         }
     }
     
-    public func decode(from container: KeyedDecodingContainer<FluentCodingKey>) throws {
+    public func decode(from container: KeyedDecodingContainer<StringCodingKey>) throws {
         try self.id.decode(from: container)
     }
 }

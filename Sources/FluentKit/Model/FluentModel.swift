@@ -1,10 +1,31 @@
-public protocol FluentModel: class, CustomStringConvertible, Codable {
-    associatedtype ID: FluentID
-    var entity: String { get }
+public protocol FluentEntity: class, Codable {
     var properties: [Property] { get }
     var storage: Storage { get set }
-    var id: Field<ID> { get }
     init(storage: Storage)
+}
+
+extension FluentEntity {
+    public typealias Property = FluentProperty
+}
+
+extension FluentEntity {
+    public typealias Storage = FluentStorage
+}
+
+extension FluentEntity {
+    public static func new() -> Self {
+        return .init()
+    }
+    
+    public init() {
+        self.init(storage: ModelStorage(output: nil, eagerLoads: [:], exists: false))
+    }
+}
+
+public protocol FluentModel: FluentEntity, CustomStringConvertible {
+    associatedtype ID: FluentID
+    var entity: String { get }
+    var id: Field<ID> { get }
 }
 
 import Foundation
@@ -18,8 +39,6 @@ extension FluentModel {
         return self.storage.output != nil
     }
 }
-
-
 
 public protocol FluentID: Codable, Hashable { }
 
@@ -36,9 +55,11 @@ extension Array where Element: FluentModel {
         var it = self.makeIterator()
         return builder.run { model in
             let next = it.next()!
-            next.storage.exists = true
-            next.storage.input = [:]
-            next.storage.output = model.storage.output
+            next.storage = ModelStorage(
+                output: model.storage.output,
+                eagerLoads: model.storage.eagerLoads,
+                exists: true
+            )
         }
     }
 }
@@ -57,10 +78,12 @@ extension FluentModel {
         let builder = database.query(Self.self).set(self.storage.input)
         builder.query.action = .create
         return builder.run { model in
-            self.storage.exists = true
             #warning("for mysql, we might need to hold onto storage input")
-            self.storage.input = [:]
-            self.storage.output = model.storage.output
+            self.storage = ModelStorage(
+                output: model.storage.output,
+                eagerLoads: model.storage.eagerLoads,
+                exists: true
+            )
         }
     }
     
@@ -69,9 +92,12 @@ extension FluentModel {
         let builder = try! database.query(Self.self).filter(\.id == self.id.get()).set(self.storage.input)
         builder.query.action = .update
         return builder.run { model in
+            self.storage = ModelStorage(
+                output: model.storage.output,
+                eagerLoads: model.storage.eagerLoads,
+                exists: true
+            )
             #warning("for mysql, we might need to hold onto storage input")
-            self.storage.input = [:]
-            self.storage.output = model.storage.output
         }
     }
     
@@ -104,12 +130,5 @@ extension FluentModel {
             output = "nil"
         }
         return "\(Self.self)(input: \(input), output: \(output))"
-    }
-}
-
-
-extension FluentModel {
-    public static func new() -> Self {
-        return .init(storage: .empty)
     }
 }

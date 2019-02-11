@@ -20,8 +20,8 @@ public final class FluentQueryBuilder<Model>
         self.query = .init(entity: Model.new().entity)
         self.eagerLoads = [:]
         self.query.fields = Model.new().properties.map { .field(
-            name: $0.name,
-            entity: $0.entity,
+            path: [$0.name],
+            entity: Model.new().entity,
             alias: nil
         ) }
     }
@@ -69,10 +69,16 @@ public final class FluentQueryBuilder<Model>
     public func join<Parent>(_ key: KeyPath<Model, FluentParent<Model, Parent>>) -> Self {
         let l = Model.new()[keyPath: key].id
         let f = Parent.new().id
-        self.query.fields += Parent.new().properties.map { .field(name: $0.name, entity: $0.entity, alias: $0.entity! + "_" + $0.name) }
+        self.query.fields += Parent.new().properties.map {
+            .field(
+                path: [$0.name],
+                entity: Parent.new().entity,
+                alias: Parent.new().entity + "_" + $0.name
+            )
+        }
         self.query.joins.append(.model(
-            foreign: .field(name: f.name, entity: f.entity, alias: nil),
-            local: .field(name: l.name, entity: l.entity, alias: nil)
+            foreign: .field(path: [f.name], entity: Parent.new().entity, alias: nil),
+            local: .field(path: [l.name], entity: Model.new().entity, alias: nil)
         ))
         return self
     }
@@ -86,11 +92,16 @@ public final class FluentQueryBuilder<Model>
     {
         let f = Foreign.new()[keyPath: foreign]
         let l = Model.new()[keyPath: local]
-        self.query.fields += Foreign.new().properties.map { .field(name: $0.name, entity: $0.entity, alias: $0.entity! + "_" + $0.name) }
-        print(self.query.fields)
+        self.query.fields += Foreign.new().properties.map {
+            return .field(
+                path: [$0.name],
+                entity: Foreign.new().entity,
+                alias: Foreign.new().entity + "_" + $0.name
+            )
+        }
         self.query.joins.append(.model(
-            foreign: .field(name: f.name, entity: f.entity, alias: nil),
-            local: .field(name: l.name, entity: l.entity, alias: nil)
+            foreign: .field(path: [f.name], entity: Foreign.new().entity, alias: nil),
+            local: .field(path: [l.name], entity: Model.new().entity, alias: nil)
         ))
         return self
     }
@@ -109,9 +120,9 @@ public final class FluentQueryBuilder<Model>
         where T: Encodable
     {
         return self.filter(
-            .field(name: Model.new()[keyPath: key].name, entity: Model.new().entity, alias: nil),
+            .field(path: [Model.new()[keyPath: key].name], entity: Model.new().entity, alias: nil),
             .subset(inverse: false),
-            .group(value.map { .bind($0) })
+            .array(value.map { .bind($0) })
         )
     }
     
@@ -120,7 +131,15 @@ public final class FluentQueryBuilder<Model>
         where T: Encodable
     {
         let property = Model.new()[keyPath: key]
-        return self.filter(.field(name: property.name, entity: property.entity, alias: nil), method, .bind(value))
+        return self.filter(
+            .field(
+                path: [property.name],
+                entity: Model.new().entity,
+                alias: nil
+            ),
+            method,
+            .bind(value)
+        )
     }
     
     @discardableResult
@@ -136,7 +155,7 @@ public final class FluentQueryBuilder<Model>
     
     @discardableResult
     public func set(_ data: [String: FluentQuery.Value]) -> Self {
-        query.fields = data.keys.map { .field(name: $0, entity: nil, alias: nil) }
+        query.fields = data.keys.map { .field(path: [$0], entity: nil, alias: nil) }
         query.input.append(.init(data.values))
         return self
     }
@@ -145,7 +164,7 @@ public final class FluentQueryBuilder<Model>
     public func set<Value>(_ field: KeyPath<Model, FluentField<Model, Value>>, to value: Value) -> Self {
         let ref = Model.new()
         self.query.fields = []
-        query.fields.append(.field(name: ref[keyPath: field].name, entity: nil, alias: nil))
+        query.fields.append(.field(path: [ref[keyPath: field].name], entity: nil, alias: nil))
         switch query.input.count {
         case 0: query.input = [[.bind(value)]]
         default: query.input[0].append(.bind(value))
@@ -188,7 +207,7 @@ public final class FluentQueryBuilder<Model>
     public func run(_ onOutput: @escaping (Model) throws -> ()) -> EventLoopFuture<Void> {
         var all: [Model] = []
         return self.database.execute(self.query) { output in
-            let model = Model.init(storage: .init(
+            let model = Model.init(storage: ModelStorage(
                 output: output,
                 eagerLoads: self.eagerLoads,
                 exists: true
@@ -204,14 +223,14 @@ public final class FluentQueryBuilder<Model>
 }
 
 public struct ModelFilter<Model> where Model: FluentKit.FluentModel {
-    static func make<Value>(
-        _ lhs: KeyPath<Model, FluentField<Model, Value>>,
+    static func make<Value, Foo>(
+        _ lhs: KeyPath<Model, FluentField<Foo, Value>>,
         _ method: FluentQuery.Filter.Method,
         _ rhs: Value
     ) -> ModelFilter {
-        let property = Model.new()[keyPath: lhs]
+        let field = Model.new()[keyPath: lhs]
         return .init(filter: .basic(
-            .field(name: property.name, entity: property.entity, alias: nil),
+            .field(path: field.path, entity: Model.new().entity, alias: nil),
             method,
             .bind(rhs)
         ))
@@ -223,6 +242,6 @@ public struct ModelFilter<Model> where Model: FluentKit.FluentModel {
     }
 }
 
-public func ==<Model, Value>(lhs: KeyPath<Model, FluentField<Model, Value>>, rhs: Value) -> ModelFilter<Model> {
+public func ==<Model, Foo, Value>(lhs: KeyPath<Model, FluentField<Foo, Value>>, rhs: Value) -> ModelFilter<Model> {
     return .make(lhs, .equality(inverse: false), rhs)
 }

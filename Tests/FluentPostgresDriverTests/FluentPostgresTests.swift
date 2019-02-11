@@ -64,6 +64,10 @@ final class FluentPostgresTests: XCTestCase {
     func testBatchUpdate() throws {
         try self.benchmarker.testBatchUpdate()
     }
+    
+    func testNestedModel() throws {
+        try self.benchmarker.testNestedModel()
+    }
 //    
 //    func testWorkUnit() throws {
 //        try self.benchmarker.testWorkUnit()

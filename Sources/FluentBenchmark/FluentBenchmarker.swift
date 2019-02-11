@@ -352,6 +352,40 @@ public final class FluentBenchmarker {
 //        }
 //    }
     
+    public func testNestedModel() throws {
+        try runTest(#function, [
+            User.autoMigration(),
+            UserSeed()
+        ]) {
+            let users = try self.database.query(User.self)
+                .filter(\.pet.animal == .cat)
+                .all().wait()
+        
+            guard let user = users.first, users.count == 1 else {
+                throw Failure("unexpected user count")
+            }
+            guard try user.name.get() == "Tanner" else {
+                throw Failure("unexpected user name")
+            }
+            guard try user.pet.nickname.get() == "Ziz" else {
+                throw Failure("unexpected pet nickname")
+            }
+            guard try user.pet.animal.get() == .cat else {
+                throw Failure("unexpected pet animal")
+            }
+            
+            let encoder = JSONEncoder()
+            let json = try encoder.encode(user)
+            let string = String(data: json, encoding: .utf8)!
+            let expected = """
+            {"id":2,"name":"Tanner","pet":{"nickname":"Ziz","animal":"cat"}}
+            """
+            guard string == expected else {
+                throw Failure("unexpected output")
+            }
+        }
+    }
+    
     struct Failure: Error {
         let reason: String
         let line: UInt

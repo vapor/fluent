@@ -1,6 +1,6 @@
 import NIO
 
-protocol EagerLoad: class {
+public protocol EagerLoad: class {
     func run(_ models: [Any], on database: FluentDatabase) -> EventLoopFuture<Void>
     func get(id: Any) throws -> [Any]
 }
@@ -9,7 +9,7 @@ extension FluentModel {
     func joined<Joined>(_ model: Joined.Type) -> Joined
         where Joined: FluentModel
     {
-        return Joined(storage: .init(
+        return Joined(storage: ModelStorage(
             output: self.storage.output!.prefixed(by: Joined.new().entity + "_"),
             eagerLoads: [:],
             exists: true

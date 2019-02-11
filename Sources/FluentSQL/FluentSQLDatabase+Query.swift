@@ -70,7 +70,7 @@ extension FluentSQLDatabase {
             let table: SQLExpression
             switch foreign {
             case .custom(let any): table = any as! SQLExpression
-            case .field(let name, let entity, let alias):
+            case .field(let path, let entity, let alias):
                 table = SQLIdentifier(entity!)
             }
             return SQLJoin(
@@ -90,18 +90,24 @@ extension FluentSQLDatabase {
         case .custom(let any):
             #warning("TODO:")
             return any as! SQLExpression
-        case .field(let name, let entity, let alias):
-            if let entity = entity {
-                #warning("TODO: if joins don't exist, use short column name")
-                // return SQLIdentifier(name)
-                let id = SQLColumn(SQLIdentifier(name), table: SQLIdentifier(entity))
-                if let alias = alias {
-                    return SQLAlias(id, as: SQLIdentifier(alias))
+        case .field(let path, let entity, let alias):
+            #warning("TODO: if joins don't exist, use short column name")
+            switch path.count {
+            case 1:
+                let name = path[0]
+                if let entity = entity {
+                    let id = SQLColumn(SQLIdentifier(name), table: SQLIdentifier(entity))
+                    if let alias = alias {
+                        return SQLAlias(id, as: SQLIdentifier(alias))
+                    } else {
+                        return id
+                    }
                 } else {
-                    return id
+                    return SQLIdentifier(name)
                 }
-            } else {
-                return SQLIdentifier(name)
+            case 2:
+                return SQLRaw("\(path[0])->>'\(path[1])'")
+            default: fatalError()
             }
         }
     }
@@ -130,14 +136,36 @@ extension FluentSQLDatabase {
         }
     }
     
+
+    
+    struct DictValues: Encodable {
+        let dict: [String: FluentQuery.Value]
+
+        func encode(to encoder: Encoder) throws {
+            var keyed = encoder.container(keyedBy: StringCodingKey.self)
+            for (key, val) in self.dict {
+                let key = StringCodingKey(key)
+                switch val {
+                case .bind(let encodable):
+                    try keyed.encode(EncoderWrapper(encodable), forKey: key)
+                case .null:
+                    try keyed.encodeNil(forKey: key)
+                default: fatalError()
+                }
+            }
+        }
+    }
+    
     private func value(_ value: FluentQuery.Value) -> SQLExpression {
         switch value {
         case .bind(let encodable):
             return SQLBind(encodable)
         case .null:
             return SQLLiteral.null
-        case .group(let values):
+        case .array(let values):
             return SQLGroupExpression(SQLList(items: values.map(self.value), separator: SQLRaw(", ")))
+        case .dictionary(let dict):
+            return SQLBind(DictValues(dict: dict))
         default:
             #warning("TODO:")
             fatalError("\(value) not yet supported")

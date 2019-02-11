@@ -8,12 +8,16 @@ public struct FluentQuery {
     }
     
     public enum Field {
-        case field(name: String, entity: String?, alias: String?)
+        case field(path: [String], entity: String?, alias: String?)
         case custom(Any)
     }
     
     public enum Filter {
         public enum Method {
+            public static var equals: Method {
+                return .equality(inverse: false)
+            }
+            
             /// LHS is equal to RHS
             case equality(inverse: Bool)
             
@@ -48,7 +52,8 @@ public struct FluentQuery {
     
     public enum Value {
         case bind(Encodable)
-        case group([Value])
+        case dictionary([String: Value])
+        case array([Value])
         case null
         case custom(Any)
     }

@@ -1,5 +1,5 @@
-public struct FluentField<Model, Value>: FluentProperty
-    where Model: FluentKit.FluentModel, Value: Codable
+public struct FluentField<Entity, Value>: FluentProperty
+    where Entity: FluentEntity, Value: Codable
 {
     public var type: Any.Type {
         return Value.self
@@ -8,18 +8,20 @@ public struct FluentField<Model, Value>: FluentProperty
     public var constraints: [FluentSchema.FieldConstraint]
     
     public let name: String
-    public var entity: String? {
-        return self.model.entity
+    
+    public var path: [String] {
+        return self.model.storage.path + [self.name]
     }
+
     public let dataType: FluentSchema.DataType?
     
-    internal let model: Model
+    internal let model: Entity
     
     struct Interface: Codable {
         let name: String
     }
     
-    init(model: Model, name: String, dataType: FluentSchema.DataType?, constraints: [FluentSchema.FieldConstraint]) {
+    init(model: Entity, name: String, dataType: FluentSchema.DataType?, constraints: [FluentSchema.FieldConstraint]) {
         self.model = model
         self.name = name
         self.dataType = dataType
@@ -35,16 +37,16 @@ public struct FluentField<Model, Value>: FluentProperty
             default: fatalError("Non-matching input.")
             }
         } else {
-            fatalError("No input or output for field: \(Model.self).\(self.name).")
+            fatalError("No input or output for field: \(Entity.self).\(self.name).")
         }
     }
     
-    public func encode(to container: inout KeyedEncodingContainer<FluentCodingKey>) throws {
-        try container.encode(self.get(), forKey: FluentCodingKey(self.name))
+    public func encode(to container: inout KeyedEncodingContainer<StringCodingKey>) throws {
+        try container.encode(self.get(), forKey: StringCodingKey(self.name))
     }
     
-    public func decode(from container: KeyedDecodingContainer<FluentCodingKey>) throws {
-        try self.set(to: container.decode(Value.self, forKey: FluentCodingKey(self.name)))
+    public func decode(from container: KeyedDecodingContainer<StringCodingKey>) throws {
+        try self.set(to: container.decode(Value.self, forKey: StringCodingKey(self.name)))
     }
     
     public func set(to value: Value) {
@@ -52,7 +54,7 @@ public struct FluentField<Model, Value>: FluentProperty
     }
 }
 
-extension FluentModel {
+extension FluentEntity {
     public typealias Field<Value> = FluentField<Self, Value>
         where Value: Codable
     
