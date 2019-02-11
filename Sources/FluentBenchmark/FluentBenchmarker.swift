@@ -358,7 +358,7 @@ public final class FluentBenchmarker {
             UserSeed()
         ]) {
             let users = try self.database.query(User.self)
-                .filter(\.pet.animal == .cat)
+                .filter(\.pet.type == .cat)
                 .all().wait()
         
             guard let user = users.first, users.count == 1 else {
@@ -367,18 +367,18 @@ public final class FluentBenchmarker {
             guard try user.name.get() == "Tanner" else {
                 throw Failure("unexpected user name")
             }
-            guard try user.pet.nickname.get() == "Ziz" else {
-                throw Failure("unexpected pet nickname")
+            guard try user.pet.name.get() == "Ziz" else {
+                throw Failure("unexpected pet name")
             }
-            guard try user.pet.animal.get() == .cat else {
-                throw Failure("unexpected pet animal")
+            guard try user.pet.type.get() == .cat else {
+                throw Failure("unexpected pet type")
             }
             
             let encoder = JSONEncoder()
             let json = try encoder.encode(user)
             let string = String(data: json, encoding: .utf8)!
             let expected = """
-            {"id":2,"name":"Tanner","pet":{"nickname":"Ziz","animal":"cat"}}
+            {"id":2,"name":"Tanner","pet":{"name":"Ziz","type":"cat"}}
             """
             guard string == expected else {
                 throw Failure("unexpected output")

@@ -12,7 +12,11 @@ extension PostgresConnection: FluentDatabase {
     }
 }
 
-extension ConnectionPool: FluentDatabase where Database.Connection: FluentDatabase {
+extension ConnectionPool: FluentDatabase where Source.Connection: FluentDatabase {
+    public var eventLoop: EventLoop {
+        return self.source.eventLoop
+    }
+    
     public func execute(_ query: FluentQuery, _ onOutput: @escaping (FluentOutput) throws -> ()) -> EventLoopFuture<Void> {
         return self.withConnection { conn in
             return conn.execute(query, onOutput)

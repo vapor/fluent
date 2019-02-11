@@ -13,7 +13,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-nio.git", .branch("master")),
         .package(url: "https://github.com/vapor/postgresql.git", .branch("2")),
-        .package(url: "https://github.com/vapor/sql.git", .branch("3")),
+        .package(url: "https://github.com/vapor/sql.git", .branch("master")),
     ],
     targets: [
         .target(name: "Fluent", dependencies: ["FluentKit"]),

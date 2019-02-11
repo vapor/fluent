@@ -215,9 +215,9 @@ public final class FluentQueryBuilder<Model>
             all.append(model)
             try onOutput(model)
         }.flatMap {
-            return .andAll(self.eagerLoads.values.map { eagerLoad in
+            return .andAllSucceed(self.eagerLoads.values.map { eagerLoad in
                 return eagerLoad.run(all, on: self.database)
-            }, eventLoop: self.database.eventLoop)
+            }, on: self.database.eventLoop)
         }
     }
 }

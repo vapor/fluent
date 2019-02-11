@@ -10,7 +10,7 @@ final class GalaxySeed: FluentMigration {
             galaxy.name.set(to: name)
             return galaxy.save(on: database)
         }
-        return .andAll(saves, eventLoop: database.eventLoop)
+        return .andAllSucceed(saves, on: database.eventLoop)
     }
     
     func revert(on database: FluentDatabase) -> EventLoopFuture<Void> {

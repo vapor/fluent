@@ -9,7 +9,7 @@ final class PlanetSeed: FluentMigration {
             "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"
         ], to: "Milky Way", on: database)
         let andromeda = self.add(["PA-99-N2"], to: "Andromeda", on: database)
-        return .andAll([milkyWay, andromeda], eventLoop: database.eventLoop)
+        return .andAllSucceed([milkyWay, andromeda], on: database.eventLoop)
     }
     
     private func add(_ planets: [String], to galaxy: String, on database: FluentDatabase) -> EventLoopFuture<Void> {
@@ -23,7 +23,7 @@ final class PlanetSeed: FluentMigration {
                 try! planet.galaxy.set(to: galaxy)
                 return planet.save(on: database)
             }
-            return .andAll(saves, eventLoop: database.eventLoop)
+            return .andAllSucceed(saves, on: database.eventLoop)
         }
     }
     

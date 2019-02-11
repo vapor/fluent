@@ -38,15 +38,15 @@ final class Pet: FluentNestedModel {
     var storage: Storage
     
     var properties: [Property] {
-        return [nickname, animal]
+        return [name, type]
     }
     
-    var nickname: Field<String> {
-        return self.field("nickname")
+    var name: Field<String> {
+        return self.field("name")
     }
     
-    var animal: Field<Animal> {
-        return self.field("animal")
+    var type: Field<Animal> {
+        return self.field("type")
     }
     
     init(storage: Storage) {
@@ -58,17 +58,18 @@ final class UserSeed: FluentMigration {
     init() { }
     
     func prepare(on database: FluentDatabase) -> EventLoopFuture<Void> {
-        let tanner = User.new()
+        let tanner = User()
         tanner.name.set(to: "Tanner")
-        tanner.pet.nickname.set(to: "Ziz")
-        tanner.pet.animal.set(to: .cat)
-        
-        let logan =  User.new()
+        tanner.pet.name.set(to: "Ziz")
+        tanner.pet.type.set(to: .cat)
+
+        let logan =  User()
         logan.name.set(to: "Logan")
-        logan.pet.nickname.set(to: "Runa")
-        logan.pet.animal.set(to: .dog)
+        logan.pet.name.set(to: "Runa")
+        logan.pet.type.set(to: .dog)
         
-        return logan.save(on: database).and(tanner.save(on: database))
+        return logan.save(on: database)
+            .and(tanner.save(on: database))
             .map { _ in }
     }
     

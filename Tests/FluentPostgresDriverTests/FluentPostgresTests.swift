@@ -83,7 +83,7 @@ final class FluentPostgresTests: XCTestCase {
             database: "vapor_database",
             tlsConfig: nil
         )
-        let conn = try! PostgresDatabase(config: config, on: eventLoop).newConnection().wait()
+        let conn = try! PostgresDatabase(config: config, on: eventLoop).makeConnection().wait()
         self.benchmarker = FluentBenchmarker(database: conn)
     }
     
