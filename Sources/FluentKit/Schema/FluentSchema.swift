@@ -19,7 +19,7 @@ public struct FluentSchema {
             case id(UInt.self), id(UInt64.self): return .uint64
             case id(UUID.self): return .uuid
             case id(Date.self): return .datetime
-            default: fatalError("Unknown type: \(type)")
+            default: return .json
             }
         }
         

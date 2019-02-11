@@ -97,3 +97,27 @@ extension FluentEntity {
         return .init(storage: NestedStorage(name: name, base: self))
     }
 }
+
+public protocol FluentNestedModel: FluentEntity, FluentProperty { }
+
+extension FluentNestedModel {
+    public var name: String {
+        guard let storage = self.storage as? NestedStorage else {
+            fatalError()
+        }
+        return storage.name
+    }
+    
+    public var type: Any.Type {
+        return Self.self
+    }
+    
+    public func encode(to container: inout KeyedEncodingContainer<StringCodingKey>) throws {
+        try container.encode(self, forKey: StringCodingKey(self.name))
+    }
+    
+    public func decode(from container: KeyedDecodingContainer<StringCodingKey>) throws {
+        let model = try container.decode(Self.self, forKey: StringCodingKey(self.name))
+        self.storage = model.storage
+    }
+}

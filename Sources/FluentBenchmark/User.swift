@@ -34,37 +34,12 @@ enum Animal: String, Codable {
     case cat, dog
 }
 
-final class Pet: FluentEntity, FluentProperty {
-    var name: String {
-        return "pet"
-    }
-    
-    var type: Any.Type {
-        return Pet.self
-    }
-    
-    var dataType: FluentSchema.DataType? {
-        return .json
-    }
-    
-    var constraints: [FluentSchema.FieldConstraint] {
-        return []
-    }
+final class Pet: FluentNestedModel {
+    var storage: Storage
     
     var properties: [Property] {
         return [nickname, animal]
     }
-    
-    func encode(to container: inout KeyedEncodingContainer<StringCodingKey>) throws {
-        try container.encode(self, forKey: StringCodingKey(self.name))
-    }
-    
-    func decode(from container: KeyedDecodingContainer<StringCodingKey>) throws {
-        let model = try container.decode(Pet.self, forKey: StringCodingKey(self.name))
-        self.storage = model.storage
-    }
-    
-    var storage: Storage
     
     var nickname: Field<String> {
         return self.field("nickname")

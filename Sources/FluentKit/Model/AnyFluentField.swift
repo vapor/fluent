@@ -6,3 +6,13 @@ public protocol FluentProperty {
     func encode(to container: inout KeyedEncodingContainer<StringCodingKey>) throws
     func decode(from container: KeyedDecodingContainer<StringCodingKey>) throws
 }
+
+extension FluentProperty {
+    public var dataType: FluentSchema.DataType? {
+        return nil
+    }
+    
+    public var constraints: [FluentSchema.FieldConstraint] {
+        return []
+    }
+}
