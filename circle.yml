@@ -1,48 +1,16 @@
 version: 2
 
 jobs:
-  11-linux:
+  linux-release:
     docker:
-      - image: codevapor/swift:5.0
-      - image: circleci/postgres:11
-        name: psql
-        environment:
-          POSTGRES_USER: vapor_username
-          POSTGRES_DB: vapor_database
-          POSTGRES_PASSWORD: vapor_password
-    steps:
-      - checkout
-      - run: swift build
-      - run: swift test
-  10-linux:
-    docker:
-      - image: codevapor/swift:5.0
-      - image: circleci/postgres:10
-        name: psql
-        environment:
-          POSTGRES_USER: vapor_username
-          POSTGRES_DB: vapor_database
-          POSTGRES_PASSWORD: vapor_password
-    steps:
-      - checkout
-      - run: swift build
-      - run: swift test
-  9-linux:
-    docker:
-      - image: codevapor/swift:5.0
-      - image: circleci/postgres:9
-        name: psql
-        environment:
-          POSTGRES_USER: vapor_username
-          POSTGRES_DB: vapor_database
-          POSTGRES_PASSWORD: vapor_password
+      - image: vapor/swift:5.0
     steps:
       - checkout
       - run: swift build
       - run: swift test
   linux-release:
     docker:
-      - image: codevapor/swift:5.0
+      - image: vapor/swift:5.0
     steps:
       - checkout
       - run: swift build -c release
@@ -50,8 +18,6 @@ workflows:
   version: 2
   tests:
     jobs:
-      - 11-linux
-      - 10-linux
-      - 9-linux
+      - linux
       - linux-release
 
