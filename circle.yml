@@ -1,7 +1,7 @@
 version: 2
 
 jobs:
-  linux-release:
+  linux:
     docker:
       - image: vapor/swift:5.0
     steps:
