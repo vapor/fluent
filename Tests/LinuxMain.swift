@@ -4,7 +4,8 @@ import XCTest
 @testable import FluentTests
 
 XCTMain([
-	testCase(FluentTests.allTests),
+    // Vapor
+    testCase(FluentTests.allTests),
 ])
 
 #endif
