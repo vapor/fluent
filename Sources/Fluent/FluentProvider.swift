@@ -16,6 +16,10 @@ public final class FluentProvider: ServiceProvider {
             )
         }
         
+        s.singleton(FluentDatabases.self) { c in
+            return .init(on: c.eventLoop)
+        }
+        
         s.extend(CommandConfig.self) { commands, c in
             try commands.use(c.make(MigrateCommand.self), as: "migrate")
         }
