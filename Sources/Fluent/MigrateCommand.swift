@@ -13,7 +13,15 @@ public final class MigrateCommand: Command {
         return []
     }
     
+    let migrator: FluentMigrator
+    
+    public init(migrator: FluentMigrator) {
+        self.migrator = migrator
+    }
+    
     public func run(using context: CommandContext) throws -> EventLoopFuture<Void> {
-        return context.eventLoop.makeSucceededFuture(())
+        return self.migrator.previewPrepareBatch().map { migrations in
+            print(migrations)
+        }
     }
 }
