@@ -20,8 +20,21 @@ public final class MigrateCommand: Command {
     }
     
     public func run(using context: CommandContext) throws -> EventLoopFuture<Void> {
-        return self.migrator.previewPrepareBatch().map { migrations in
-            print(migrations)
+        return self.migrator.previewPrepareBatch().flatMap { migrations in
+            guard migrations.count > 0 else {
+                context.console.print("No new migrations.")
+                return context.eventLoop.makeSucceededFuture(())
+            }
+            context.console.print("The following migration(s) will prepare:")
+            for (migration, dbid) in migrations {
+                let id = dbid?.string ?? "default"
+                context.console.print("- \(migration.name) on \(id)")
+            }
+            if context.console.confirm("Would you like to continue?") {
+                return self.migrator.prepareBatch()
+            } else {
+                return context.eventLoop.makeSucceededFuture(())
+            }
         }
     }
 }
