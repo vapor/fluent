@@ -1,6 +1,6 @@
 import Vapor
 
-public final class FluentProvider: ServiceProvider {
+public final class FluentProvider: Provider {
     public init() { }
     
     public func register(_ s: inout Services) throws {
@@ -8,7 +8,7 @@ public final class FluentProvider: ServiceProvider {
             return try .init(migrator: c.make())
         }
         
-        s.register(FluentMigrator.self) { c in
+        s.register(Migrator.self) { c in
             return try .init(
                 databases: c.make(),
                 migrations: c.make(),
@@ -16,7 +16,7 @@ public final class FluentProvider: ServiceProvider {
             )
         }
         
-        s.singleton(FluentDatabases.self) { c in
+        s.singleton(Databases.self) { c in
             return .init(on: c.eventLoop)
         }
         

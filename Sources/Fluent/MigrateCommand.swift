@@ -13,9 +13,9 @@ public final class MigrateCommand: Command {
         return []
     }
     
-    let migrator: FluentMigrator
+    let migrator: Migrator
     
-    public init(migrator: FluentMigrator) {
+    public init(migrator: Migrator) {
         self.migrator = migrator
     }
     
