@@ -122,8 +122,11 @@ extension QueryBuilder {
         let sub = query
         query = main
 
-        // apply the sub-filters as a group
-        Database.queryFilterApply(Database.queryFilterGroup(relation, Database.queryFilters(for: sub)), to: &query)
+        // apply the sub-filters as a group, if there are any
+        let queryFilters = Database.queryFilters(for: sub)
+        if !queryFilters.isEmpty {
+            Database.queryFilterApply(Database.queryFilterGroup(relation, queryFilters), to: &query)
+        }
         return self
     }
 }
