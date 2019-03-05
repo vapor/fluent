@@ -6,7 +6,7 @@ extension Collection where Element: Model, Element.Database: TransactionSupporti
     /// - Parameter conn: A means to connect to a database
     /// - Returns: A future array of the saved models
     func save(on conn: Element.Database.Connection) -> Future<[Element]> {
-        return self.map { $0.save(on: dbConn) }.flatten(on: dbConn)
+        return self.map { $0.save(on: conn) }.flatten(on: conn)
     }
     
     /// Updates a collection of models in Database
