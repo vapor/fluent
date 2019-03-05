@@ -39,7 +39,7 @@ jobs:
     steps:
       - run:
           name: Clone Fluent PostgreSQL
-          command: git clone -b master https://github.com/vapor/fluent-postgresql.git
+          command: git clone -b 1 https://github.com/vapor/fluent-postgresql.git
           working_directory: ~/
       - run:
           name: Switch Fluent PostgreSQL to this Fluent revision
