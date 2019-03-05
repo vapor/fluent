@@ -22,7 +22,7 @@ extension Collection where Element: Model, Element.Database: TransactionSupporti
     /// - Parameter conn: A means to connect to a database
     /// - Returns: A future array of the created models
     func create(on conn: Element.Database.Connection) -> Future<[Element]> {
-        return self.map { $0.create(on: dbConn) }.flatten(on: dbConn)
+        return self.map { $0.create(on: conn) }.flatten(on: conn)
     }
     
     /// Deletes a collection of models from Database
