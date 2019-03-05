@@ -30,6 +30,8 @@ extension Collection where Element: Model, Element.Database: TransactionSupporti
     /// - Parameter conn: A means to connect to a database
     /// - Returns: A future array of the deleted models
     func delete(on conn: Element.Database.Connection) -> Future<[Element]> {
-        return element.delete(on: dbConn).transform(to: element)
+        return self.map { element in
+            return element.delete(on: conn).transform(to: element)
+        }.flatten(on: conn)
     }
 }
