@@ -79,6 +79,15 @@ extension QueryBuilder {
             return conn.eventLoop.newSucceededFuture(result: output)
         }
     }
+
+    /// Transforms the previous query result to a new result using the supplied closure.
+    public func transformResult<NewResult>(with transformer: @escaping (Database.Output, Database.Connection, Result) -> Future<NewResult>) -> QueryBuilder<Database, NewResult> {
+        return .init(query: query, on: connection) { row, conn in
+            return self.resultTransformer(row, conn).flatMap { result in
+                return transformer(row, conn, result)
+            }
+        }
+    }
     
     // MARK: Internal
     
@@ -94,15 +103,6 @@ extension QueryBuilder {
     func changeResult<NewResult>(with transformer: @escaping (Database.Output, Database.Connection) -> Future<NewResult>) -> QueryBuilder<Database, NewResult> {
         return .init(query: query, on: connection) { row, conn in
             return transformer(row, conn)
-        }
-    }
-
-    /// Transforms the previous query result to a new result using the supplied closure.
-    func transformResult<NewResult>(with transformer: @escaping (Database.Output, Database.Connection, Result) -> Future<NewResult>) -> QueryBuilder<Database, NewResult> {
-        return .init(query: query, on: connection) { row, conn in
-            return self.resultTransformer(row, conn).flatMap { result in
-                return transformer(row, conn, result)
-            }
         }
     }
 }
