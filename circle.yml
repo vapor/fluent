@@ -61,7 +61,7 @@ jobs:
     steps:
       - run:
           name: Clone Fluent MySQL
-          command: git clone -b master https://github.com/vapor/fluent-mysql.git
+          command: git clone -b 3 https://github.com/vapor/fluent-mysql.git
           working_directory: ~/
       - run:
           name: Switch Fluent MySQL to this Fluent revision
