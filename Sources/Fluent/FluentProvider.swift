@@ -25,3 +25,5 @@ public final class FluentProvider: Provider {
         }
     }
 }
+
+extension ModelRow: Content { }
