@@ -49,7 +49,7 @@ extension Model where Database: QuerySupporting {
     ///     - conn: Database connection to use.
     /// - returns: Future that will be completed when the delete is done.
     public func delete(force: Bool = false, on conn: DatabaseConnectable) -> Future<Void> {
-        return Self.query(on: conn).delete(self, force: force)
+        return Self.query(on: conn, withSoftDeleted: true).delete(self, force: force)
     }
     
     /// Restores a soft deleted model.
