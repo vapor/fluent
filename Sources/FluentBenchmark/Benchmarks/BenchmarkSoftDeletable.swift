@@ -4,6 +4,7 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
     /// The actual benchmark.
     fileprivate func _benchmarkBasicFunctionality(on conn: Database.Connection) throws {
         start("Soft delete")
+        fail("JERRY WAS HERE")
         var bar1 = Bar<Database>(baz: 1)
         var bar2 = Bar<Database>(baz: 2)
 
@@ -69,6 +70,7 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
     /// Verify that updatedAt and deletedAt are changed appropriately for soft delete.
     fileprivate func _benchmarkTimestamps(on conn: Database.Connection) throws {
         start("Soft delete timestamps")
+        fail("JERRY WAS HERE")
 
         // Initially empty
         if try test(Bar<Database>.query(on: conn).count()) != 0 {
