@@ -91,7 +91,7 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
 
         // After soft delete, updatedAt should have changed and deletedAt should now be set
         try test(bar.delete(on: conn))
-        guard let deletedBar = try test(Bar<Database>.query(on: conn).first()) else {
+        guard let deletedBar = try test(Bar<Database>.query(on: conn, withSoftDeleted: true).first()) else {
             fail("hard delete when soft was expected")
             return
         }
