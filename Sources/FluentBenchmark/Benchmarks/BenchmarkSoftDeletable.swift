@@ -154,6 +154,7 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting & 
             try? test(Bar<Database>.revert(on: conn))
         }
         try self._benchmark(on: conn)
+        try self._benchmarkTimestamps(on: conn)
         pool.releaseConnection(conn)
     }
 }
