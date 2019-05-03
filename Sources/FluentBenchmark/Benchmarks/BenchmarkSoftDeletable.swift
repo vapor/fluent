@@ -2,7 +2,7 @@ import Fluent
 
 extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
     /// The actual benchmark.
-    fileprivate func _benchmark(on conn: Database.Connection) throws {
+    fileprivate func _benchmarkBasicFunctionality(on conn: Database.Connection) throws {
         start("Soft delete")
         var bar1 = Bar<Database>(baz: 1)
         var bar2 = Bar<Database>(baz: 2)
@@ -134,12 +134,17 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting {
             fail("count should be 0 at the end of the test")
         }
     }
+
+    /// The actual benchmark.
+    fileprivate func _benchmark(on conn: Database.Connection) throws {
+        try _benchmarkBasicFunctionality(on: conn)
+        try _benchmarkTimestamps(on: conn)
+    }
     
     /// Benchmark fluent transactions.
     public func benchmarkSoftDeletable() throws {
         let conn = try test(pool.requestConnection())
         try self._benchmark(on: conn)
-        try self._benchmarkTimestamps(on: conn)
         pool.releaseConnection(conn)
     }
 }
@@ -154,7 +159,6 @@ extension Benchmarker where Database: QuerySupporting & TransactionSupporting & 
             try? test(Bar<Database>.revert(on: conn))
         }
         try self._benchmark(on: conn)
-        try self._benchmarkTimestamps(on: conn)
         pool.releaseConnection(conn)
     }
 }
