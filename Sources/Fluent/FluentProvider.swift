@@ -20,7 +20,7 @@ public final class FluentProvider: Provider {
             return .init(on: c.eventLoop)
         }
         
-        s.extend(CommandConfig.self) { commands, c in
+        s.extend(CommandConfiguration.self) { commands, c in
             try commands.use(c.make(MigrateCommand.self), as: "migrate")
         }
     }
