@@ -1,16 +1,14 @@
 import Vapor
 
 public final class MigrateCommand: Command {
-    public var arguments: [CommandArgument] {
-        return []
+    public struct Signature: CommandSignature {
+        let revert = Option<Bool>(name: "revert", type: .flag)
     }
-    
-    public var options: [CommandOption] {
-        return [.flag(name: "revert")]
-    }
-    
-    public var help: [String] {
-        return []
+
+    public let signature = Signature()
+
+    public var help: String {
+        return "Prepare or revert your database migrations"
     }
     
     let migrator: Migrator
@@ -19,8 +17,8 @@ public final class MigrateCommand: Command {
         self.migrator = migrator
     }
     
-    public func run(using context: CommandContext) throws {
-        let isRevert = context.options["revert"].flatMap(Bool.init) ?? false
+    public func run(using context: CommandContext<MigrateCommand>) throws {
+        let isRevert = context.option(\.revert) ?? false
         context.console.info("Migrate Command: \(isRevert ? "Revert" : "Prepare")")
         try self.migrator.setupIfNeeded().wait()
         if isRevert {
@@ -30,7 +28,7 @@ public final class MigrateCommand: Command {
         }
     }
     
-    private func revert(using context: CommandContext) throws {
+    private func revert(using context: CommandContext<MigrateCommand>) throws {
         let migrations = try self.migrator.previewRevertLastBatch().wait()
         guard migrations.count > 0 else {
             context.console.print("No migrations to revert.")
@@ -51,7 +49,7 @@ public final class MigrateCommand: Command {
         }
     }
     
-    private func prepare(using context: CommandContext) throws {
+    private func prepare(using context: CommandContext<MigrateCommand>) throws {
         let migrations = try self.migrator.previewPrepareBatch().wait()
         guard migrations.count > 0 else {
             context.console.print("No new migrations.")

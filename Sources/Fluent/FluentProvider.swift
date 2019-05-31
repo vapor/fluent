@@ -3,7 +3,7 @@ import Vapor
 public final class FluentProvider: Provider {
     public init() { }
     
-    public func register(_ s: inout Services) throws {
+    public func register(_ s: inout Services) {
         s.register(MigrateCommand.self) { c in
             return try .init(migrator: c.make())
         }
@@ -20,7 +20,7 @@ public final class FluentProvider: Provider {
             return .init(on: c.eventLoop)
         }
         
-        s.extend(CommandConfig.self) { commands, c in
+        s.extend(CommandConfiguration.self) { commands, c in
             try commands.use(c.make(MigrateCommand.self), as: "migrate")
         }
     }
