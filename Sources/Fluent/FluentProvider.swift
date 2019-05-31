@@ -24,6 +24,15 @@ public final class FluentProvider: Provider {
             try commands.use(c.make(MigrateCommand.self), as: "migrate")
         }
     }
+
+    public func willShutdown(_ c: Container) {
+        do {
+            let databases = try c.make(Databases.self)
+            try databases.close().wait()
+        } catch {
+            print("Could not cleanup databases: \(error)")
+        }
+    }
 }
 
 extension ModelRow: Content { }
