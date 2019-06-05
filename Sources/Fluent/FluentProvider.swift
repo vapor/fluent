@@ -35,4 +35,4 @@ public final class FluentProvider: Provider {
     }
 }
 
-extension ModelRow: Content { }
+extension Row: Content { }
