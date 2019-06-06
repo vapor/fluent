@@ -6,6 +6,7 @@ jobs:
       xcode: "11.0.0"
     steps:
       - checkout
+      - run: HOMEBREW_NO_AUTO_UPDATE=1 brew install openssl@1.1
       - run: swift build
       - run: swift test
   macos-release:
@@ -13,12 +14,14 @@ jobs:
       xcode: "11.0.0"
     steps:
       - checkout
+      - run: HOMEBREW_NO_AUTO_UPDATE=1 brew install openssl@1.1
       - run: swift build -c release
   bionic:
     docker:
       - image: vapor/swift:5.1-bionic
     steps:
       - checkout
+      - run: apt-get update; apt-get install -y libssl-dev zlib1g-dev
       - run: swift build
       - run: swift test
   bionic-release:
@@ -26,12 +29,14 @@ jobs:
       - image: vapor/swift:5.1-bionic
     steps:
       - checkout
+      - run: apt-get update; apt-get install -y libssl-dev zlib1g-dev
       - run: swift build -c release
   xenial:
     docker:
       - image: vapor/swift:5.1-xenial
     steps:
       - checkout
+      - run: apt-get update; apt-get install -y libssl-dev zlib1g-dev
       - run: swift build
       - run: swift test
   xenial-release:
@@ -39,6 +44,7 @@ jobs:
       - image: vapor/swift:5.1-xenial
     steps:
       - checkout
+      - run: apt-get update; apt-get install -y libssl-dev zlib1g-dev
       - run: swift build -c release
 
 workflows:

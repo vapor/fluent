@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://user-images.githubusercontent.com/1342803/58727365-19b1a280-83b2-11e9-8240-601f3e5fa68f.png" alt="Fluent">
+    <img src="https://user-images.githubusercontent.com/1342803/59051613-4dca0f00-885b-11e9-8ed7-509eacdf8f1c.png" alt="Fluent">
     <br>
     <br>
     <a href="https://api.vapor.codes/fluent/master/Fluent/index.html">
