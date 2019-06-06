@@ -31,21 +31,6 @@ jobs:
       - checkout
       - run: apt-get update; apt-get install -y libssl-dev zlib1g-dev
       - run: swift build -c release
-  xenial:
-    docker:
-      - image: vapor/swift:5.1-xenial
-    steps:
-      - checkout
-      - run: apt-get update; apt-get install -y libssl-dev zlib1g-dev
-      - run: swift build
-      - run: swift test
-  xenial-release:
-    docker:
-      - image: vapor/swift:5.1-xenial
-    steps:
-      - checkout
-      - run: apt-get update; apt-get install -y libssl-dev zlib1g-dev
-      - run: swift build -c release
 
 workflows:
   version: 2
@@ -55,5 +40,3 @@ workflows:
 #      - macos-release
       - bionic
       - bionic-release
-      - xenial
-      - xenial-release
