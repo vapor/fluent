@@ -8,7 +8,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/vapor/fluent-kit.git", from: "1.0.0-alpha"),
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0-alpha"),
+        .package(url: "https://github.com/vapor/vapor.git", .branch("auto-migrate")),
     ],
     targets: [
         .target(name: "Fluent", dependencies: ["FluentKit", "Vapor"]),

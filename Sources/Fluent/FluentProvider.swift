@@ -25,6 +25,38 @@ public final class FluentProvider: Provider {
         }
     }
 
+    public func willBoot(_ application: Application) throws {
+        let autoMigrate = Option<Bool>(
+            name: "auto-migrate",
+            short: nil,
+            type: .flag,
+            help: "If true, Fluent will automatically migrate your database on boot"
+        )
+
+        let autoRevert = Option<Bool>(
+            name: "auto-revert",
+            short: nil,
+            type: .flag,
+            help: "If true, Fluent will automatically revert your database on boot"
+        )
+
+        if let isAutoRevert = try application.environment.commandInput.parse(option: autoRevert), isAutoRevert == "true" {
+            let c = try application.makeContainer().wait()
+            defer { c.shutdown() }
+            let migrator = try c.make(Migrator.self)
+            try migrator.setupIfNeeded().wait()
+            try migrator.revertAllBatches().wait()
+        }
+
+        if let isAutoMigrate = try application.environment.commandInput.parse(option: autoMigrate), isAutoMigrate == "true" {
+            let c = try application.makeContainer().wait()
+            defer { c.shutdown() }
+            let migrator = try c.make(Migrator.self)
+            try migrator.setupIfNeeded().wait()
+            try migrator.prepareBatch().wait()
+        }
+    }
+
     public func willShutdown(_ c: Container) {
         do {
             let databases = try c.make(Databases.self)
