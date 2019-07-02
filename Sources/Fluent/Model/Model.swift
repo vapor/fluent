@@ -101,22 +101,11 @@
 ///     - `didSoftDelete`.
 ///
 /// See `Model` to learn more about Fluent lifecycle hooks.
-public protocol Model: AnyModel, Reflectable {
+public protocol Model: AnyModel, Identifiable, Reflectable {
     // MARK: DB
 
     /// The type of database this model can be queried on.
     associatedtype Database: QuerySupporting
-
-    // MARK: ID
-
-    /// The associated Identifier type. Usually `Int` or `UUID`. Must conform to `ID`.
-    associatedtype ID: Fluent.ID
-
-    /// Typealias for Swift `KeyPath` to an optional ID for this model.
-    typealias IDKey = WritableKeyPath<Self, ID?>
-
-    /// Swift `KeyPath` to this `Model`'s identifier.
-    static var idKey: IDKey { get }
     
     // MARK: Timestamps
     
@@ -266,28 +255,7 @@ extension Model {
 
 /// MARK: Key Access
 
-extension Model {
-    /// Returns the model's ID, throwing an error if the model does not yet have an ID.
-    public func requireID() throws -> ID {
-        guard let id = self.fluentID else {
-            throw FluentError(identifier: "idRequired", reason: "\(Self.self) does not have an identifier.")
-        }
-
-        return id
-    }
-
-    /// Access the Fluent identifier keyed by `idKey`.
-    public var fluentID: ID? {
-        get {
-            let path = Self.idKey
-            return self[keyPath: path]
-        }
-        set {
-            let path = Self.idKey
-            self[keyPath: path] = newValue
-        }
-    }
-    
+extension Model {    
     /// Access the Fluent timestamp keyed by `createdAtKey`.
     public var fluentCreatedAt: Date? {
         get {
