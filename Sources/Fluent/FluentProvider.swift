@@ -66,5 +66,3 @@ public final class FluentProvider: Provider {
         }
     }
 }
-
-extension Row: Content { }
