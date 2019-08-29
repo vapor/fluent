@@ -26,21 +26,23 @@ public final class FluentProvider: Provider {
     }
 
     public func willBoot(_ application: Application) throws {
-        let autoMigrate = Option<Bool>(
-            name: "auto-migrate",
-            short: nil,
-            type: .flag,
-            help: "If true, Fluent will automatically migrate your database on boot"
-        )
+        struct Signature: CommandSignature {
+            @Flag(
+                name: "auto-migrate",
+                help: "If true, Fluent will automatically migrate your database on boot")
+            var autoMigrate
 
-        let autoRevert = Option<Bool>(
-            name: "auto-revert",
-            short: nil,
-            type: .flag,
-            help: "If true, Fluent will automatically revert your database on boot"
-        )
+            @Flag(
+                name: "auto-revert",
+                help: "If true, Fluent will automatically revert your database on boot")
+            var autoRevert
 
-        if let isAutoRevert = try application.environment.commandInput.parse(option: autoRevert), isAutoRevert == "true" {
+            init() { }
+        }
+
+        let signature = try Signature(from: &application.environment.commandInput)
+
+        if signature.autoRevert {
             let c = try application.makeContainer().wait()
             defer { c.shutdown() }
             let migrator = try c.make(Migrator.self)
@@ -48,7 +50,7 @@ public final class FluentProvider: Provider {
             try migrator.revertAllBatches().wait()
         }
 
-        if let isAutoMigrate = try application.environment.commandInput.parse(option: autoMigrate), isAutoMigrate == "true" {
+        if signature.autoMigrate {
             let c = try application.makeContainer().wait()
             defer { c.shutdown() }
             let migrator = try c.make(Migrator.self)

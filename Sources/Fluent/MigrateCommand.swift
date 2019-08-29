@@ -2,7 +2,10 @@ import Vapor
 
 public final class MigrateCommand: Command {
     public struct Signature: CommandSignature {
-        let revert = Option<Bool>(name: "revert", type: .flag)
+        @Flag(name: "revert")
+        var revert: Bool
+
+        public init() { }
     }
 
     public let signature = Signature()
@@ -10,25 +13,24 @@ public final class MigrateCommand: Command {
     public var help: String {
         return "Prepare or revert your database migrations"
     }
-    
+
     let migrator: Migrator
-    
+
     public init(migrator: Migrator) {
         self.migrator = migrator
     }
-    
-    public func run(using context: CommandContext<MigrateCommand>) throws {
-        let isRevert = context.option(\.revert) ?? false
-        context.console.info("Migrate Command: \(isRevert ? "Revert" : "Prepare")")
+
+    public func run(using context: CommandContext, signature: Signature) throws {
+        context.console.info("Migrate Command: \(signature.revert ? "Revert" : "Prepare")")
         try self.migrator.setupIfNeeded().wait()
-        if isRevert {
+        if signature.revert {
             try self.revert(using: context)
         } else {
             try self.prepare(using: context)
         }
     }
-    
-    private func revert(using context: CommandContext<MigrateCommand>) throws {
+
+    private func revert(using context: CommandContext) throws {
         let migrations = try self.migrator.previewRevertLastBatch().wait()
         guard migrations.count > 0 else {
             context.console.print("No migrations to revert.")
@@ -48,8 +50,8 @@ public final class MigrateCommand: Command {
             context.console.warning("Migration cancelled")
         }
     }
-    
-    private func prepare(using context: CommandContext<MigrateCommand>) throws {
+
+    private func prepare(using context: CommandContext) throws {
         let migrations = try self.migrator.previewPrepareBatch().wait()
         guard migrations.count > 0 else {
             context.console.print("No new migrations.")
