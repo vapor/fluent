@@ -15,6 +15,10 @@ public final class FluentProvider: Provider {
                 on: c.eventLoop
             )
         }
+
+        s.register(Database.self) { c in
+            return try c.make(Databases.self).default()
+        }
         
         s.singleton(Databases.self) { c in
             return .init(on: c.eventLoop)
