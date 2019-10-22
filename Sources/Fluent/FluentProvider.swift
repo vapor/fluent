@@ -3,33 +3,44 @@ import Vapor
 public final class FluentProvider: Provider {
     public init() { }
     
-    public func register(_ s: inout Services) {
-        s.register(MigrateCommand.self) { c in
-            return try .init(migrator: c.make())
+    public func register(_ app: Application) {
+        app.register(MigrateCommand.self) { c in
+            return .init(migrator: c.make())
         }
         
-        s.register(Migrator.self) { c in
-            return try .init(
-                databases: c.make(),
-                migrations: c.make(),
-                on: c.eventLoop
+        app.register(Migrator.self) { app in
+            return .init(
+                databases: app.make(),
+                migrations: app.make(),
+                logger: app.make(),
+                on: app.make()
             )
         }
+        
+        app.register(DatabaseSessions.self) { app in
+            return .init(database: app.make())
+        }
 
-        s.register(Database.self) { c in
-            return try c.make(Databases.self).default()
+        app.register(Database.self) { c in
+            return c.make(Databases.self).default()
         }
         
-        s.singleton(Databases.self) { c in
-            return .init(on: c.eventLoop)
+        app.register(singleton: Databases.self, boot: { app in
+            return .init()
+        }, shutdown: { databases in
+            databases.shutdown()
+        })
+        
+        app.register(ConnectionPoolConfiguration.self) { app in
+            return .init()
         }
         
-        s.extend(CommandConfiguration.self) { commands, c in
-            try commands.use(c.make(MigrateCommand.self), as: "migrate")
+        app.register(extension: CommandConfiguration.self) { commands, c in
+            commands.use(c.make(MigrateCommand.self), as: "migrate")
         }
     }
 
-    public func willBoot(_ application: Application) throws {
+    public func willBoot(_ app: Application) throws {
         struct Signature: CommandSignature {
             @Flag(name: "auto-migrate", help: "If true, Fluent will automatically migrate your database on boot")
             var autoMigrate: Bool
@@ -40,31 +51,58 @@ public final class FluentProvider: Provider {
             init() { }
         }
 
-        let signature = try Signature(from: &application.environment.commandInput)
-
+        let signature = try Signature(from: &app.environment.commandInput)
         if signature.autoRevert {
-            let c = try application.makeContainer().wait()
-            defer { c.shutdown() }
-            let migrator = try c.make(Migrator.self)
+            let migrator = app.make(Migrator.self)
             try migrator.setupIfNeeded().wait()
             try migrator.revertAllBatches().wait()
         }
 
         if signature.autoMigrate {
-            let c = try application.makeContainer().wait()
-            defer { c.shutdown() }
-            let migrator = try c.make(Migrator.self)
+            let migrator = app.make(Migrator.self)
             try migrator.setupIfNeeded().wait()
             try migrator.prepareBatch().wait()
         }
     }
+}
 
-    public func willShutdown(_ c: Container) {
-        do {
-            let databases = try c.make(Databases.self)
-            try databases.close().wait()
-        } catch {
-            print("Could not cleanup databases: \(error)")
-        }
+extension Application {
+    public var databases: Databases {
+        return self.make()
+    }
+}
+
+extension Request {
+    public var db: Database {
+        return self.application.make(Database.self).with(self)
+    }
+    
+    public func db(_ id: DatabaseID) -> Database {
+        return self.application.make(Databases.self)
+            .database(id)!
+            .with(self)
+    }
+}
+
+extension Database {
+    public func with(_ request: Request) -> Database {
+        return RequestSpecificDatabase(request: request, database: self)
+    }
+}
+
+private struct RequestSpecificDatabase: Database {
+    let request: Request
+    let database: Database
+    
+    var driver: DatabaseDriver {
+        return self.database.driver
+    }
+    
+    var logger: Logger {
+        return self.request.logger
+    }
+    
+    var eventLoopPreference: EventLoopPreference {
+        return .delegate(on: self.request.eventLoop)
     }
 }
