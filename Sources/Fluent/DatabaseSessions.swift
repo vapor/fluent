@@ -1,24 +1,28 @@
 import Vapor
 
 public struct DatabaseSessions: Sessions {
-    let database: Database
+    public let databaseID: DatabaseID
+    
+    public init(databaseID: DatabaseID = .default) {
+        self.databaseID = databaseID
+    }
     
     public func createSession(_ data: SessionData, for request: Request) -> EventLoopFuture<SessionID> {
         let id = self.generateID()
         return Session(key: id, data: data)
-            .create(on: self.database.with(request))
+            .create(on: request.db(self.databaseID))
             .map { id }
     }
     
     public func readSession(_ sessionID: SessionID, for request: Request) -> EventLoopFuture<SessionData?> {
-        return Session.query(on: self.database.with(request))
+        return Session.query(on: request.db(self.databaseID))
             .filter(\.$key == sessionID)
             .first()
             .map { $0?.data }
     }
     
     public func updateSession(_ sessionID: SessionID, to data: SessionData, for request: Request) -> EventLoopFuture<SessionID> {
-        return Session.query(on: self.database.with(request))
+        return Session.query(on: request.db(self.databaseID))
             .filter(\.$key == sessionID)
             .set(\.$data, to: data)
             .update()
@@ -26,7 +30,7 @@ public struct DatabaseSessions: Sessions {
     }
     
     public func deleteSession(_ sessionID: SessionID, for request: Request) -> EventLoopFuture<Void> {
-        return Session.query(on: self.database.with(request))
+        return Session.query(on: request.db(self.databaseID))
             .filter(\.$key == sessionID)
             .delete()
     }

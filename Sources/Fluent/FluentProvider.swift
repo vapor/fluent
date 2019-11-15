@@ -18,20 +18,21 @@ public final class FluentProvider: Provider {
         }
         
         app.register(DatabaseSessions.self) { app in
-            return .init(database: app.make())
+            return .init()
         }
 
         app.register(Database.self) { c in
-            return c.make(Databases.self).default()
+            return c.make(Databases.self)
+                .database(.default, logger: c.make(), on: c.make())!
         }
         
         app.register(singleton: Databases.self, boot: { app in
-            return .init()
+            return .init(threadPool: app.make(), on: app.make())
         }, shutdown: { databases in
             databases.shutdown()
         })
         
-        app.register(ConnectionPoolConfiguration.self) { app in
+        app.register(singleton: Migrations.self) { app in
             return .init()
         }
         
@@ -68,41 +69,28 @@ public final class FluentProvider: Provider {
 
 extension Application {
     public var databases: Databases {
-        return self.make()
+        self.make()
+    }
+    
+    public var migrations: Migrations {
+        self.make()
+    }
+    
+    public var db: Database {
+        self.db(.default)
+    }
+    
+    public func db(_ id: DatabaseID) -> Database {
+        self.databases.database(id, logger: self.make(), on: self.make())!
     }
 }
 
 extension Request {
     public var db: Database {
-        return self.application.make(Database.self).with(self)
+        self.db(.default)
     }
     
     public func db(_ id: DatabaseID) -> Database {
-        return self.application.make(Databases.self)
-            .database(id)!
-            .with(self)
-    }
-}
-
-extension Database {
-    public func with(_ request: Request) -> Database {
-        return RequestSpecificDatabase(request: request, database: self)
-    }
-}
-
-private struct RequestSpecificDatabase: Database {
-    let request: Request
-    let database: Database
-    
-    var driver: DatabaseDriver {
-        return self.database.driver
-    }
-    
-    var logger: Logger {
-        return self.request.logger
-    }
-    
-    var eventLoopPreference: EventLoopPreference {
-        return .delegate(on: self.request.eventLoop)
+        self.application.databases.database(id, logger: self.logger, on: self.eventLoop)!
     }
 }
