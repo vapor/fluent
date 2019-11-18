@@ -68,20 +68,13 @@ public final class FluentProvider: Provider {
 }
 
 extension Application {
-    public var databases: Databases {
-        self.make()
-    }
-    
-    public var migrations: Migrations {
-        self.make()
-    }
-    
     public var db: Database {
         self.db(.default)
     }
     
     public func db(_ id: DatabaseID) -> Database {
-        self.databases.database(id, logger: self.make(), on: self.make())!
+        self.make(Databases.self)
+            .database(id, logger: self.make(), on: self.make())!
     }
 }
 
@@ -91,6 +84,7 @@ extension Request {
     }
     
     public func db(_ id: DatabaseID) -> Database {
-        self.application.databases.database(id, logger: self.logger, on: self.eventLoop)!
+        self.application.make(Databases.self)
+            .database(id, logger: self.logger, on: self.eventLoop)!
     }
 }
