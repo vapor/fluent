@@ -68,6 +68,14 @@ public final class FluentProvider: Provider {
 }
 
 extension Application {
+    public var databases: Databases {
+        self.make()
+    }
+    
+    public var migrations: Migrations {
+        self.make()
+    }
+    
     public var db: Database {
         self.db(.default)
     }
