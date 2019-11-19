@@ -3,18 +3,17 @@ import Vapor
 public final class Fluent: Provider {
     public let application: Application
     
-    var _databases: Databases?
-    var _migrations: Migrations?
+    let databases: Databases
+    let migrations: Migrations
     
     public init(_ application: Application) {
         self.application = application
-    }
-    
-    public func register(_ app: Application) {
-        app.commands.use(MigrateCommand(application: app), as: "migrate")
+        self.databases = Databases(threadPool: application.threadPool, on: application.eventLoopGroup)
+        application.commands.use(MigrateCommand(application: application), as: "migrate")
+        self.migrations = .init()
     }
 
-    public func willBoot(_ app: Application) throws {
+    public func willBoot() throws {
         struct Signature: CommandSignature {
             @Flag(name: "auto-migrate", help: "If true, Fluent will automatically migrate your database on boot")
             var autoMigrate: Bool
@@ -25,21 +24,19 @@ public final class Fluent: Provider {
             init() { }
         }
 
-        let signature = try Signature(from: &app.environment.commandInput)
+        let signature = try Signature(from: &self.application.environment.commandInput)
         if signature.autoRevert {
-            try app.migrator.setupIfNeeded().wait()
-            try app.migrator.revertAllBatches().wait()
+            try self.application.migrator.setupIfNeeded().wait()
+            try self.application.migrator.revertAllBatches().wait()
         }
         if signature.autoMigrate {
-            try app.migrator.setupIfNeeded().wait()
-            try app.migrator.prepareBatch().wait()
+            try self.application.migrator.setupIfNeeded().wait()
+            try self.application.migrator.prepareBatch().wait()
         }
     }
     
     public func shutdown() {
-        if let dbs = self._databases {
-            dbs.shutdown()
-        }
+        self.databases.shutdown()
     }
 }
 
@@ -74,13 +71,11 @@ extension Application {
     }
     
     public var databases: Databases {
-        self.fluent.lazy(get: \._databases) {
-            Databases(threadPool: self.threadPool, on: self.eventLoopGroup)
-        }
+        self.fluent.databases
     }
     
     public var migrations: Migrations {
-        self.fluent.lazy(get: \._migrations, as: .init())
+        self.fluent.migrations
     }
     
     public var migrator: Migrator {
