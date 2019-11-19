@@ -1,6 +1,6 @@
 import Vapor
 
-public struct DatabaseSessions: Sessions {
+public struct DatabaseSessions: SessionDriver {
     public let databaseID: DatabaseID
     
     public init(databaseID: DatabaseID = .default) {

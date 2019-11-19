@@ -1,44 +1,17 @@
 import Vapor
 
-public final class FluentProvider: Provider {
-    public init() { }
+public final class Fluent: Provider {
+    public let application: Application
+    
+    var _databases: Databases?
+    var _migrations: Migrations?
+    
+    public init(_ application: Application) {
+        self.application = application
+    }
     
     public func register(_ app: Application) {
-        app.register(MigrateCommand.self) { c in
-            return .init(migrator: c.make())
-        }
-        
-        app.register(Migrator.self) { app in
-            return .init(
-                databases: app.make(),
-                migrations: app.make(),
-                logger: app.make(),
-                on: app.make()
-            )
-        }
-        
-        app.register(DatabaseSessions.self) { app in
-            return .init()
-        }
-
-        app.register(Database.self) { c in
-            return c.make(Databases.self)
-                .database(.default, logger: c.make(), on: c.make())!
-        }
-        
-        app.register(singleton: Databases.self, boot: { app in
-            return .init(threadPool: app.make(), on: app.make())
-        }, shutdown: { databases in
-            databases.shutdown()
-        })
-        
-        app.register(singleton: Migrations.self) { app in
-            return .init()
-        }
-        
-        app.register(extension: CommandConfiguration.self) { commands, c in
-            commands.use(c.make(MigrateCommand.self), as: "migrate")
-        }
+        app.commands.use(MigrateCommand(application: app), as: "migrate")
     }
 
     public func willBoot(_ app: Application) throws {
@@ -54,35 +27,27 @@ public final class FluentProvider: Provider {
 
         let signature = try Signature(from: &app.environment.commandInput)
         if signature.autoRevert {
-            let migrator = app.make(Migrator.self)
-            try migrator.setupIfNeeded().wait()
-            try migrator.revertAllBatches().wait()
+            try app.migrator.setupIfNeeded().wait()
+            try app.migrator.revertAllBatches().wait()
         }
-
         if signature.autoMigrate {
-            let migrator = app.make(Migrator.self)
-            try migrator.setupIfNeeded().wait()
-            try migrator.prepareBatch().wait()
+            try app.migrator.setupIfNeeded().wait()
+            try app.migrator.prepareBatch().wait()
+        }
+    }
+    
+    public func shutdown() {
+        if let dbs = self._databases {
+            dbs.shutdown()
         }
     }
 }
 
-extension Application {
-    public var databases: Databases {
-        self.make()
-    }
-    
-    public var migrations: Migrations {
-        self.make()
-    }
-    
-    public var db: Database {
-        self.db(.default)
-    }
-    
-    public func db(_ id: DatabaseID) -> Database {
-        self.make(Databases.self)
-            .database(id, logger: self.make(), on: self.make())!
+extension Sessions {
+    public func use(database id: DatabaseID) {
+        self.use {
+            DatabaseSessions(databaseID: id)
+        }
     }
 }
 
@@ -92,7 +57,57 @@ extension Request {
     }
     
     public func db(_ id: DatabaseID) -> Database {
-        self.application.make(Databases.self)
+        self.application.databases
             .database(id, logger: self.logger, on: self.eventLoop)!
     }
 }
+
+
+extension Application {
+    public var db: Database {
+        self.db(.default)
+    }
+    
+    public func db(_ id: DatabaseID) -> Database {
+        self.databases
+            .database(id, logger: self.logger, on: self.eventLoopGroup.next())!
+    }
+    
+    public var databases: Databases {
+        self.fluent.lazy(get: \._databases) {
+            Databases(threadPool: self.threadPool, on: self.eventLoopGroup)
+        }
+    }
+    
+    public var migrations: Migrations {
+        self.fluent.lazy(get: \._migrations, as: .init())
+    }
+    
+    public var migrator: Migrator {
+        Migrator(
+            databases: self.databases,
+            migrations: self.migrations,
+            logger: self.logger,
+            on: self.eventLoopGroup.next()
+        )
+    }
+    
+    var fluent: Fluent {
+        self.providers.require(Fluent.self)
+    }
+}
+
+struct FluentStorage {
+    let databases: Databases
+    let migrations: Migrations
+    
+    init(_ app: Application) {
+        self.databases = Databases(threadPool: app.threadPool, on: app.eventLoopGroup)
+        self.migrations = Migrations()
+    }
+    
+    func shutdown() {
+        self.databases.shutdown()
+    }
+}
+
