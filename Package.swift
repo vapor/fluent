@@ -15,6 +15,6 @@ let package = Package(
     ],
     targets: [
         .target(name: "Fluent", dependencies: ["FluentKit", "Vapor"]),
-        .testTarget(name: "FluentTests", dependencies: ["Fluent"]),
+        .testTarget(name: "FluentTests", dependencies: ["Fluent", "XCTVapor"]),
     ]
 )

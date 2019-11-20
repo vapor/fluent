@@ -1,9 +1,9 @@
 import Vapor
 
 public struct DatabaseSessions: SessionDriver {
-    public let databaseID: DatabaseID
+    public let databaseID: DatabaseID?
     
-    public init(databaseID: DatabaseID = .default) {
+    public init(databaseID: DatabaseID? = nil) {
         self.databaseID = databaseID
     }
     

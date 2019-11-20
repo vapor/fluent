@@ -50,10 +50,10 @@ extension Sessions {
 
 extension Request {
     public var db: Database {
-        self.db(.default)
+        self.db(nil)
     }
     
-    public func db(_ id: DatabaseID) -> Database {
+    public func db(_ id: DatabaseID?) -> Database {
         self.application.databases
             .database(id, logger: self.logger, on: self.eventLoop)!
     }
@@ -62,10 +62,10 @@ extension Request {
 
 extension Application {
     public var db: Database {
-        self.db(.default)
+        self.db(nil)
     }
     
-    public func db(_ id: DatabaseID) -> Database {
+    public func db(_ id: DatabaseID?) -> Database {
         self.databases
             .database(id, logger: self.logger, on: self.eventLoopGroup.next())!
     }
