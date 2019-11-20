@@ -6,27 +6,27 @@ final class FluentTests: XCTestCase {
     func testRepositoryPatternStatic() throws {
         let app = Application(.testing)
         defer { app.shutdown() }
-        
+
         var posts: [Post] = [
             .init(content: "a"),
             .init(content: "b")
         ]
-        
-        app.middleware.use(PostRepositoryMiddleware {
+
+        app.posts.use {
             TestPostRepository(posts: posts, eventLoop: $0.eventLoop)
-        })
-        
+        }
+
         app.get("foo") { req -> EventLoopFuture<[Post]> in
             req.posts.all()
         }
-        
+
         try app.testable().test(.GET, "foo") { res in
             XCTAssertEqual(res.status, .ok)
             XCTAssertEqualJSON(res.body.string, posts)
         }
-        
+
         posts.append(.init(content: "c"))
-        
+
         try app.testable().test(.GET, "foo") { res in
             XCTAssertEqual(res.status, .ok)
             XCTAssertEqualJSON(res.body.string, posts)
@@ -46,9 +46,9 @@ final class FluentTests: XCTestCase {
             ]
         }, as: .test)
         
-        app.middleware.use(PostRepositoryMiddleware {
+        app.posts.use {
             DatabasePostRepository(database: $0.db(.test))
-        })
+        }
         
         app.get("foo") { req -> EventLoopFuture<[Post]> in
             req.posts.all()
@@ -86,7 +86,6 @@ struct TestRow: DatabaseRow {
     }
 }
 
-
 final class TestDatabaseDriver: DatabaseDriver {
     let handler: (DatabaseQuery) -> [DatabaseRow]
     
@@ -100,6 +99,37 @@ final class TestDatabaseDriver: DatabaseDriver {
     
     func shutdown() {
         // nothing
+    }
+}
+
+
+extension Request {
+    var posts: PostRepository {
+        self.application.posts.makePosts!(self)
+    }
+}
+
+extension Application {
+    var posts: PostRepositoryFactory {
+        get {
+            if let existing = self.userInfo["posts"] as? PostRepositoryFactory {
+                return existing
+            } else {
+                let new = PostRepositoryFactory()
+                self.userInfo["posts"] = new
+                return new
+            }
+        }
+        set {
+            self.userInfo["posts"] = newValue
+        }
+    }
+}
+
+struct PostRepositoryFactory {
+    var makePosts: ((Request) -> PostRepository)?
+    mutating func use(_ makePosts: @escaping (Request) -> PostRepository) {
+        self.makePosts = makePosts
     }
 }
 
@@ -160,27 +190,4 @@ struct DatabasePostRepository: PostRepository {
 
 protocol PostRepository {
     func all() -> EventLoopFuture<[Post]>
-}
-
-struct PostRepositoryMiddleware: Middleware {
-    let makePosts: (Request) -> PostRepository
-    
-    func respond(to request: Request, chainingTo next: Responder) -> EventLoopFuture<Response> {
-        request.posts = self.makePosts(request)
-        return next.respond(to: request)
-    }
-}
-
-extension Request {
-    var posts: PostRepository {
-        get {
-            guard let post = self.userInfo["post"] as? PostRepository else {
-                fatalError("PostRepository not configured on request")
-            }
-            return post
-        }
-        set {
-            self.userInfo["post"] = newValue
-        }
-    }
 }
