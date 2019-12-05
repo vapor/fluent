@@ -14,15 +14,14 @@ public final class MigrateCommand: Command {
         return "Prepare or revert your database migrations"
     }
 
-    let migrator: Migrator
-
-    public init(migrator: Migrator) {
-        self.migrator = migrator
+    let application: Application
+    init(application: Application) {
+        self.application = application
     }
 
     public func run(using context: CommandContext, signature: Signature) throws {
         context.console.info("Migrate Command: \(signature.revert ? "Revert" : "Prepare")")
-        try self.migrator.setupIfNeeded().wait()
+        try self.application.migrator.setupIfNeeded().wait()
         if signature.revert {
             try self.revert(using: context)
         } else {
@@ -31,7 +30,7 @@ public final class MigrateCommand: Command {
     }
 
     private func revert(using context: CommandContext) throws {
-        let migrations = try self.migrator.previewRevertLastBatch().wait()
+        let migrations = try self.application.migrator.previewRevertLastBatch().wait()
         guard migrations.count > 0 else {
             context.console.print("No migrations to revert.")
             return
@@ -44,7 +43,7 @@ public final class MigrateCommand: Command {
             context.console.print(dbid?.string ?? "default")
         }
         if context.console.confirm("Would you like to continue?".consoleText(.warning)) {
-            try self.migrator.revertLastBatch().wait()
+            try self.application.migrator.revertLastBatch().wait()
             context.console.print("Migration successful")
         } else {
             context.console.warning("Migration cancelled")
@@ -52,7 +51,7 @@ public final class MigrateCommand: Command {
     }
 
     private func prepare(using context: CommandContext) throws {
-        let migrations = try self.migrator.previewPrepareBatch().wait()
+        let migrations = try self.application.migrator.previewPrepareBatch().wait()
         guard migrations.count > 0 else {
             context.console.print("No new migrations.")
             return
@@ -65,7 +64,7 @@ public final class MigrateCommand: Command {
             context.console.print(dbid?.string ?? "default")
         }
         if context.console.confirm("Would you like to continue?".consoleText(.warning)) {
-            try self.migrator.prepareBatch().wait()
+            try self.application.migrator.prepareBatch().wait()
             context.console.print("Migration successful")
         } else {
             context.console.warning("Migration cancelled")
