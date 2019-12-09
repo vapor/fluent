@@ -36,8 +36,7 @@ final class FluentTests: XCTestCase {
     func testRepositoryPatternDatabase() throws {
         let app = Application(.testing)
         defer { app.shutdown() }
-        
-        app.use(Fluent.self)
+
         app.databases.use(TestDatabaseDriver { query in
             XCTAssertEqual(query.schema, "posts")
             return [
@@ -46,8 +45,8 @@ final class FluentTests: XCTestCase {
             ]
         }, as: .test)
         
-        app.posts.use {
-            DatabasePostRepository(database: $0.db(.test))
+        app.posts.use { req in
+            DatabasePostRepository(database: req.db(.test))
         }
         
         app.get("foo") { req -> EventLoopFuture<[Post]> in
