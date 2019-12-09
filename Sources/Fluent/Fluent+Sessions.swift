@@ -1,27 +1,64 @@
 import Vapor
 
-public struct DatabaseSessions: SessionDriver {
-    public let databaseID: DatabaseID?
+extension Application.Fluent {
+    public var sessions: Sessions {
+        .init(fluent: self)
+    }
+
+    public struct Sessions {
+        let fluent: Application.Fluent
+    }
+}
+
+extension Application.Fluent.Sessions {
+    public func middleware<User>(
+        for user: User.Type,
+        databaseID: DatabaseID? = nil
+    ) -> Middleware
+        where User: SessionAuthenticatable, User: Model, User.SessionID == User.IDValue
+    {
+        DatabaseSessionAuthenticator<User>(databaseID: databaseID).middleware()
+    }
+
+    public func driver(_ databaseID: DatabaseID? = nil) -> SessionDriver {
+        DatabaseSessions(databaseID: databaseID)
+    }
+}
+
+extension Application.Sessions.Provider {
+    public static var fluent: Self {
+        return .fluent(nil)
+    }
+
+    public static func fluent(_ databaseID: DatabaseID?) -> Self {
+        .init {
+            $0.sessions.use { $0.fluent.sessions.driver(databaseID) }
+        }
+    }
+}
+
+private struct DatabaseSessions: SessionDriver {
+    let databaseID: DatabaseID?
     
-    public init(databaseID: DatabaseID? = nil) {
+    init(databaseID: DatabaseID? = nil) {
         self.databaseID = databaseID
     }
     
-    public func createSession(_ data: SessionData, for request: Request) -> EventLoopFuture<SessionID> {
+    func createSession(_ data: SessionData, for request: Request) -> EventLoopFuture<SessionID> {
         let id = self.generateID()
         return Session(key: id, data: data)
             .create(on: request.db(self.databaseID))
             .map { id }
     }
     
-    public func readSession(_ sessionID: SessionID, for request: Request) -> EventLoopFuture<SessionData?> {
+    func readSession(_ sessionID: SessionID, for request: Request) -> EventLoopFuture<SessionData?> {
         return Session.query(on: request.db(self.databaseID))
             .filter(\.$key == sessionID)
             .first()
             .map { $0?.data }
     }
     
-    public func updateSession(_ sessionID: SessionID, to data: SessionData, for request: Request) -> EventLoopFuture<SessionID> {
+    func updateSession(_ sessionID: SessionID, to data: SessionData, for request: Request) -> EventLoopFuture<SessionID> {
         return Session.query(on: request.db(self.databaseID))
             .filter(\.$key == sessionID)
             .set(\.$data, to: data)
@@ -29,7 +66,7 @@ public struct DatabaseSessions: SessionDriver {
             .map { sessionID }
     }
     
-    public func deleteSession(_ sessionID: SessionID, for request: Request) -> EventLoopFuture<Void> {
+    func deleteSession(_ sessionID: SessionID, for request: Request) -> EventLoopFuture<Void> {
         return Session.query(on: request.db(self.databaseID))
             .filter(\.$key == sessionID)
             .delete()
@@ -44,15 +81,13 @@ public struct DatabaseSessions: SessionDriver {
     }
 }
 
-extension SessionID: Codable {
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        try self.init(string: container.decode(String.self))
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        try container.encode(self.string)
+private struct DatabaseSessionAuthenticator<User>: SessionAuthenticator
+    where User: SessionAuthenticatable, User: Model, User.SessionID == User.IDValue
+{
+    let databaseID: DatabaseID?
+
+    func resolve(sessionID: User.SessionID, for request: Request) -> EventLoopFuture<User?> {
+        User.find(sessionID, on: request.db)
     }
 }
 

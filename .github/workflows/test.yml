@@ -8,15 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - run: swift test --enable-test-discovery
+    - run: swift test --enable-test-discovery --sanitize=thread
   bionic:
-    container: 
-      image: vapor/swift:5.1-bionic
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-    - run: swift test --enable-test-discovery
-  thread:
     container: 
       image: vapor/swift:5.1-bionic
     runs-on: ubuntu-latest
