@@ -2,7 +2,7 @@ import Fluent
 import Vapor
 import XCTVapor
 
-final class FluentTests: XCTestCase {
+final class FluentRepositoryTests: XCTestCase {
     func testRepositoryPatternStatic() throws {
         let app = Application(.testing)
         defer { app.shutdown() }
@@ -65,50 +65,13 @@ final class FluentTests: XCTestCase {
     }
 }
 
-extension DatabaseID {
-    static var test: DatabaseID { .init(string: "test") }
-}
-
-struct TestRow: DatabaseRow {
-    var data: [String: Any]
-    
-    var description: String {
-        self.data.description
-    }
-    
-    func contains(field: String) -> Bool {
-        self.data.keys.contains(field)
-    }
-    
-    func decode<T>(field: String, as type: T.Type, for database: Database) throws -> T where T : Decodable {
-        return self.data[field] as! T
-    }
-}
-
-final class TestDatabaseDriver: DatabaseDriver {
-    let handler: (DatabaseQuery) -> [DatabaseRow]
-    
-    init(_ handler: @escaping (DatabaseQuery) -> [DatabaseRow]) {
-        self.handler = handler
-    }
-    
-    func makeDatabase(with context: DatabaseContext) -> Database {
-        TestDatabase(driver: self, context: context)
-    }
-    
-    func shutdown() {
-        // nothing
-    }
-}
-
-
-extension Request {
+private extension Request {
     var posts: PostRepository {
         self.application.posts.makePosts!(self)
     }
 }
 
-extension Application {
+private extension Application {
     var posts: PostRepositoryFactory {
         get {
             if let existing = self.userInfo["posts"] as? PostRepositoryFactory {
@@ -125,32 +88,14 @@ extension Application {
     }
 }
 
-struct PostRepositoryFactory {
+private struct PostRepositoryFactory {
     var makePosts: ((Request) -> PostRepository)?
     mutating func use(_ makePosts: @escaping (Request) -> PostRepository) {
         self.makePosts = makePosts
     }
 }
 
-struct TestDatabase: Database {
-    let driver: TestDatabaseDriver
-    let context: DatabaseContext
-    
-    func execute(query: DatabaseQuery, onRow: @escaping (DatabaseRow) -> ()) -> EventLoopFuture<Void> {
-        self.driver.handler(query).forEach(onRow)
-        return self.eventLoop.makeSucceededFuture(())
-    }
-    
-    func execute(schema: DatabaseSchema) -> EventLoopFuture<Void> {
-        fatalError()
-    }
-    
-    func withConnection<T>(_ closure: @escaping (Database) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
-        closure(self)
-    }
-}
-
-final class Post: Model, Content, Equatable {
+private final class Post: Model, Content, Equatable {
     static func == (lhs: Post, rhs: Post) -> Bool {
         lhs.id == rhs.id && lhs.content == rhs.content
     }
@@ -171,7 +116,7 @@ final class Post: Model, Content, Equatable {
     }
 }
 
-struct TestPostRepository: PostRepository {
+private struct TestPostRepository: PostRepository {
     let posts: [Post]
     let eventLoop: EventLoop
 
@@ -180,13 +125,13 @@ struct TestPostRepository: PostRepository {
     }
 }
 
-struct DatabasePostRepository: PostRepository {
+private struct DatabasePostRepository: PostRepository {
     let database: Database
     func all() -> EventLoopFuture<[Post]> {
         database.query(Post.self).all()
     }
 }
 
-protocol PostRepository {
+private protocol PostRepository {
     func all() -> EventLoopFuture<[Post]>
 }
