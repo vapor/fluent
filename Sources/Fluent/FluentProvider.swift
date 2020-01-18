@@ -38,6 +38,22 @@ extension Application {
         )
     }
 
+    /// Automatically runs forward migrations without confirmation.
+    /// This can be triggered by passing `--auto-migrate` flag.
+    public func autoMigrate() -> EventLoopFuture<Void> {
+        self.migrator.setupIfNeeded().flatMap {
+            self.migrator.prepareBatch()
+        }
+    }
+
+    /// Automatically runs reverse migrations without confirmation.
+    /// This can be triggered by passing `--auto-revert` during boot.
+    public func autoRevert() -> EventLoopFuture<Void> {
+        self.migrator.setupIfNeeded().flatMap {
+            self.migrator.revertAllBatches()
+        }
+    }
+
     public struct Fluent {
         final class Storage {
             let databases: Databases
@@ -70,12 +86,10 @@ extension Application {
 
                 let signature = try Signature(from: &application.environment.commandInput)
                 if signature.autoRevert {
-                    try application.migrator.setupIfNeeded().wait()
-                    try application.migrator.revertAllBatches().wait()
+                    try application.autoRevert().wait()
                 }
                 if signature.autoMigrate {
-                    try application.migrator.setupIfNeeded().wait()
-                    try application.migrator.prepareBatch().wait()
+                    try application.autoMigrate().wait()
                 }
             }
 
