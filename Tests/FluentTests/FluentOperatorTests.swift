@@ -15,7 +15,7 @@ final class FluentOperatorTests: XCTestCase {
             .filter(\.$name ~= "art")
         // name doesn't contain string anywhere, prefix, suffix
         _ = Planet.query(on: db)
-            .filter(\.$name !~~ "art")
+            .filter(\.$name !~ "art")
         _ = Planet.query(on: db)
             .filter(\.$name !=~ "art")
         _ = Planet.query(on: db)
