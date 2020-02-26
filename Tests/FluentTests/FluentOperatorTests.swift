@@ -32,7 +32,7 @@ final class FluentOperatorTests: XCTestCase {
 private final class Planet: Model {
     static let schema = "planets"
 
-    @ID(key: "id")
+    @ID(custom: .id)
     var id: Int?
 
     @Field(key: "name")
@@ -44,7 +44,7 @@ private struct DummyDatabase: Database {
         fatalError()
     }
 
-    func execute(query: DatabaseQuery, onRow: @escaping (DatabaseRow) -> ()) -> EventLoopFuture<Void> {
+    func execute(query: DatabaseQuery, onOutput: @escaping (DatabaseOutput) -> ()) -> EventLoopFuture<Void> {
         fatalError()
     }
 
@@ -52,7 +52,15 @@ private struct DummyDatabase: Database {
         fatalError()
     }
 
+    func execute(enum: DatabaseEnum) -> EventLoopFuture<Void> {
+        fatalError()
+    }
+    
     func withConnection<T>(_ closure: @escaping (Database) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
+        fatalError()
+    }
+    
+    func transaction<T>(_ closure: @escaping (Database) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
         fatalError()
     }
 }

@@ -11,8 +11,8 @@ final class FluentPaginationTests: XCTestCase {
         for i in 1...1_000 {
             rows.append(TestRow(data: ["id": i, "title": "Todo #\(i)"]))
         }
-
-        app.databases.use(TestDatabaseDriver { query in
+    
+        app.databases.use(TestDatabaseConfiguration { query in
             XCTAssertEqual(query.schema, "todos")
             let result: [TestRow]
             if let limit = query.limits.first?.value, let offset = query.offsets.first?.value {
@@ -20,16 +20,13 @@ final class FluentPaginationTests: XCTestCase {
             } else {
                 result = rows
             }
-
-            if query.fields.count == 1 {
-                // aggregate
-                return [
-                    TestRow(data: ["fluentAggregate": rows.count])
-                ]
-            } else {
-                return result
+            
+            switch query.action {
+                case .aggregate(_):
+                    return [TestRow(data: [.aggregate: rows.count])]
+                default:
+                    return result
             }
-
         }, as: .test)
 
         app.get("todos") { req -> EventLoopFuture<Page<Todo>> in
@@ -90,7 +87,7 @@ private extension DatabaseQuery.Offset {
 private final class Todo: Model, Content {
     static let schema = "todos"
 
-    @ID(key: "id")
+    @ID(custom: .id)
     var id: Int?
 
     @Field(key: "title")
