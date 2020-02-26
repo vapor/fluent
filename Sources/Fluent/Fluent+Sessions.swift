@@ -17,7 +17,7 @@ extension Application.Fluent.Sessions {
     ) -> Middleware
         where User: SessionAuthenticatable, User: Model, User.SessionID == User.IDValue
     {
-        DatabaseSessionAuthenticator<User>(databaseID: databaseID).middleware()
+        DatabaseSessionAuthenticator<User>(databaseID: databaseID)
     }
 
     public func driver(_ databaseID: DatabaseID? = nil) -> SessionDriver {
