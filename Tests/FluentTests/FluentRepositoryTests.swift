@@ -37,7 +37,7 @@ final class FluentRepositoryTests: XCTestCase {
         let app = Application(.testing)
         defer { app.shutdown() }
 
-        app.databases.use(TestDatabaseDriver { query in
+        app.databases.use(TestDatabaseConfiguration { query in
             XCTAssertEqual(query.schema, "posts")
             return [
                 TestRow(data: ["id": 1, "content": "a"]),
@@ -102,7 +102,7 @@ private final class Post: Model, Content, Equatable {
     
     static var schema: String { "posts" }
     
-    @ID(key: "id")
+    @ID(custom: .id)
     var id: Int?
     
     @Field(key: "content")

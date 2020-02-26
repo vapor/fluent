@@ -8,40 +8,52 @@ struct TestDatabase: Database {
     let driver: TestDatabaseDriver
     let context: DatabaseContext
 
-    func execute(query: DatabaseQuery, onRow: @escaping (DatabaseRow) -> ()) -> EventLoopFuture<Void> {
-        self.driver.handler(query).forEach(onRow)
+    func execute(query: DatabaseQuery, onOutput: @escaping (DatabaseOutput) -> ()) -> EventLoopFuture<Void> {
+        self.driver.handler(query).forEach(onOutput)
         return self.eventLoop.makeSucceededFuture(())
     }
 
     func execute(schema: DatabaseSchema) -> EventLoopFuture<Void> {
         fatalError()
     }
-
+    
+    func execute(enum: DatabaseEnum) -> EventLoopFuture<Void> {
+        fatalError()
+    }
+    
     func withConnection<T>(_ closure: @escaping (Database) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
+        closure(self)
+    }
+
+    func transaction<T>(_ closure: @escaping (Database) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
         closure(self)
     }
 }
 
-struct TestRow: DatabaseRow {
-    var data: [String: Any]
+struct TestRow: DatabaseOutput {
+    var data: [FieldKey: Any]
 
     var description: String {
         self.data.description
     }
+    
+    func schema(_ schema: String) -> DatabaseOutput {
+        self
+    }
 
-    func contains(field: String) -> Bool {
+    func contains(_ field: FieldKey) -> Bool {
         self.data.keys.contains(field)
     }
 
-    func decode<T>(field: String, as type: T.Type, for database: Database) throws -> T where T : Decodable {
-        return self.data[field] as! T
+    func decode<T>(_ field: FieldKey, as type: T.Type) throws -> T where T : Decodable {
+        self.data[field]! as! T
     }
 }
 
 final class TestDatabaseDriver: DatabaseDriver {
-    let handler: (DatabaseQuery) -> [DatabaseRow]
+    let handler: (DatabaseQuery) -> [DatabaseOutput]
 
-    init(_ handler: @escaping (DatabaseQuery) -> [DatabaseRow]) {
+    init(_ handler: @escaping (DatabaseQuery) -> [DatabaseOutput]) {
         self.handler = handler
     }
 
@@ -51,5 +63,15 @@ final class TestDatabaseDriver: DatabaseDriver {
 
     func shutdown() {
         // nothing
+    }
+}
+
+struct TestDatabaseConfiguration: DatabaseConfiguration {
+    let handler: (DatabaseQuery) -> [DatabaseOutput]
+
+    var middleware: [AnyModelMiddleware] = []
+
+    func makeDriver(for databases: Databases) -> DatabaseDriver {
+        TestDatabaseDriver(handler)
     }
 }
