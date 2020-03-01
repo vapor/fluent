@@ -65,6 +65,12 @@ final class FluentRepositoryTests: XCTestCase {
     }
 }
 
+extension ByteBuffer {
+    var string: String {
+        .init(decoding: self.readableBytesView, as: UTF8.self)
+    }
+}
+
 private extension Request {
     var posts: PostRepository {
         self.application.posts.makePosts!(self)

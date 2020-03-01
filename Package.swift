@@ -1,4 +1,4 @@
-// swift-tools-version:5.1
+// swift-tools-version:5.2
 import PackageDescription
 
 let package = Package(
@@ -10,11 +10,17 @@ let package = Package(
         .library(name: "Fluent", targets: ["Fluent"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/vapor/fluent-kit.git", from: "1.0.0-beta.5"),
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0-beta.4"),
+        .package(url: "https://github.com/vapor/fluent-kit.git", from: "1.0.0-rc.1"),
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0-rc.1"),
     ],
     targets: [
-        .target(name: "Fluent", dependencies: ["FluentKit", "Vapor"]),
-        .testTarget(name: "FluentTests", dependencies: ["Fluent", "XCTVapor"]),
+        .target(name: "Fluent", dependencies: [
+            .product(name: "FluentKit", package: "fluent-kit"),
+            .product(name: "Vapor", package: "vapor"),
+        ]),
+        .testTarget(name: "FluentTests", dependencies: [
+            .target(name: "Fluent"),
+            .product(name: "XCTVapor", package: "vapor"),
+        ]),
     ]
 )
