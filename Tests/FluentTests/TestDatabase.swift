@@ -9,7 +9,11 @@ struct TestDatabase: Database {
     let context: DatabaseContext
 
     func execute(query: DatabaseQuery, onOutput: @escaping (DatabaseOutput) -> ()) -> EventLoopFuture<Void> {
-        self.driver.handler(query).forEach(onOutput)
+        self.driver.handler(query).forEach { row in
+            self.context.eventLoop.execute {
+                onOutput(row)
+            }
+        }
         return self.eventLoop.makeSucceededFuture(())
     }
 
@@ -41,12 +45,12 @@ struct TestRow: DatabaseOutput {
         self
     }
 
-    func contains(_ field: FieldKey) -> Bool {
-        self.data.keys.contains(field)
+    func contains(_ path: [FieldKey]) -> Bool {
+        self.data.keys.contains(path[0])
     }
 
-    func decode<T>(_ field: FieldKey, as type: T.Type) throws -> T where T : Decodable {
-        self.data[field]! as! T
+    func decode<T>(_ path: [FieldKey], as type: T.Type) throws -> T where T : Decodable {
+        self.data[path[0]]! as! T
     }
 }
 
