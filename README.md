@@ -1,5 +1,9 @@
 <p align="center">
-    <img src="https://user-images.githubusercontent.com/1342803/59051613-4dca0f00-885b-11e9-8ed7-509eacdf8f1c.png" alt="Fluent">
+    <img 
+        src="https://user-images.githubusercontent.com/1342803/59051613-4dca0f00-885b-11e9-8ed7-509eacdf8f1c.png" 
+        height="64" 
+        alt="Fluent"
+    >
     <br>
     <br>
     <a href="https://api.vapor.codes/fluent/master/Fluent/index.html">
@@ -11,10 +15,10 @@
     <a href="LICENSE">
         <img src="http://img.shields.io/badge/license-MIT-brightgreen.svg" alt="MIT License">
     </a>
-    <a href="https://circleci.com/gh/vapor/fluent">
-        <img src="https://circleci.com/gh/vapor/fluent.svg?style=shield" alt="Continuous Integration">
+    <a href="https://github.com/vapor/fluent/actions">
+        <img src="https://github.com/vapor/fluent/workflows/test/badge.svg" alt="Continuous Integration">
     </a>
     <a href="https://swift.org">
-        <img src="http://img.shields.io/badge/swift-5.1-brightgreen.svg" alt="Swift 5.1">
+        <img src="http://img.shields.io/badge/swift-5.2-brightgreen.svg" alt="Swift 5.2">
     </a>
 </p>
