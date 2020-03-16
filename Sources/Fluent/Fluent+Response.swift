@@ -101,12 +101,8 @@ extension Response {
         as mediaType: HTTPMediaType = .json
     ) throws -> Response
         where T: Content {
-            let hash = try Insecure.MD5.hash(data: JSONEncoder().encode(obj))
-            let etag = hash.map { String(format: "%02hhx", $0) }.joined(separator: "")
-            let headers = HTTPHeaders([("Location", location), ("ETag", "\"\(etag)\"")])
-            let response = Response(status: .created, headers: headers)
-
-            try response.content.encode(obj, as: mediaType)
+            let response = try Self.withETag(obj, includeBody: true, justCreated: true)
+            response.headers.add(name: .location, value: location)
 
             return response
     }
