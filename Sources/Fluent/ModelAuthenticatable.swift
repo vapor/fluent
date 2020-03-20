@@ -1,16 +1,16 @@
 import Vapor
 
-public protocol ModelUser: Model, Authenticatable {
+public protocol ModelAuthenticatable: Model, Authenticatable {
     static var usernameKey: KeyPath<Self, Field<String>> { get }
     static var passwordHashKey: KeyPath<Self, Field<String>> { get }
     func verify(password: String) throws -> Bool
 }
 
-extension ModelUser {
+extension ModelAuthenticatable {
     public static func authenticator(
         database: DatabaseID? = nil
-    ) -> ModelUserAuthenticator<Self> {
-        ModelUserAuthenticator<Self>(database: database)
+    ) -> Authenticator {
+        ModelAuthenticator<Self>(database: database)
     }
 
     var _$username: Field<String> {
@@ -22,27 +22,27 @@ extension ModelUser {
     }
 }
 
-public struct ModelUserAuthenticator<User>: BasicAuthenticator
-    where User: ModelUser
+private struct ModelAuthenticator<User>: BasicAuthenticator
+    where User: ModelAuthenticatable
 {
     public let database: DatabaseID?
 
     public func authenticate(
         basic: BasicAuthorization,
         for request: Request
-    ) -> EventLoopFuture<User?> {
+    ) -> EventLoopFuture<Void> {
         User.query(on: request.db(self.database))
             .filter(\._$username == basic.username)
             .first()
             .flatMapThrowing
         {
             guard let user = $0 else {
-                return nil
+                return
             }
             guard try user.verify(password: basic.password) else {
-                return nil
+                return
             }
-            return user
+            request.auth.login(user)
         }
     }
 }
