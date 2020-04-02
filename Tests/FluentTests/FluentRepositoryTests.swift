@@ -78,22 +78,15 @@ private extension Request {
 }
 
 private extension Application {
-    private struct PostsKey: StorageKey {
+    private struct PostRepositoryKey: StorageKey {
         typealias Value = PostRepositoryFactory
     }
-
     var posts: PostRepositoryFactory {
         get {
-            if let existing = self.storage[PostsKey.self] {
-                return existing
-            } else {
-                let new = PostRepositoryFactory()
-                self.storage[PostsKey.self] = new
-                return new
-            }
+            self.storage[PostRepositoryKey.self] ?? .init()
         }
         set {
-            self.storage[PostsKey.self] = newValue
+            self.storage[PostRepositoryKey.self] = newValue
         }
     }
 }
