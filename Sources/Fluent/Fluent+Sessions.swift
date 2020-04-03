@@ -10,16 +10,15 @@ extension Application.Fluent {
     }
 }
 
-extension Application.Fluent.Sessions {
-    public func middleware<User>(
-        for user: User.Type,
+extension Model where Self: SessionAuthenticatable, Self.SessionID == Self.IDValue {
+    public static func sessionAuthenticator(
         databaseID: DatabaseID? = nil
-    ) -> Middleware
-        where User: SessionAuthenticatable, User: Model, User.SessionID == User.IDValue
-    {
-        DatabaseSessionAuthenticator<User>(databaseID: databaseID).middleware()
+    ) -> Authenticator {
+        DatabaseSessionAuthenticator<Self>(databaseID: databaseID)
     }
+}
 
+extension Application.Fluent.Sessions {
     public func driver(_ databaseID: DatabaseID? = nil) -> SessionDriver {
         DatabaseSessions(databaseID: databaseID)
     }
@@ -86,8 +85,12 @@ private struct DatabaseSessionAuthenticator<User>: SessionAuthenticator
 {
     let databaseID: DatabaseID?
 
-    func resolve(sessionID: User.SessionID, for request: Request) -> EventLoopFuture<User?> {
-        User.find(sessionID, on: request.db)
+    func authenticate(sessionID: User.SessionID, for request: Request) -> EventLoopFuture<Void> {
+        User.find(sessionID, on: request.db).map {
+            if let user = $0 {
+                request.auth.login(user)
+            }
+        }
     }
 }
 
