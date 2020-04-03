@@ -92,7 +92,11 @@ private struct DatabaseSessionAuthenticator<User>: SessionAuthenticator
 }
 
 public final class Session: Model {
-    public static let schema = "sessions"
+    public static let schema = "_fluent_sessions"
+
+    public static var migration: Migration {
+        CreateSession()
+    }
     
     @ID(key: "id")
     public var id: UUID?
