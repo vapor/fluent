@@ -2,7 +2,7 @@ import Fluent
 import Vapor
 import XCTVapor
 
-final class FluentOperatorTests: XCTestCase {
+final class OperatorTests: XCTestCase {
     func testCustomOperators() throws {
         let db = DummyDatabase()
 
