@@ -115,6 +115,11 @@ public final class Session: Model {
 }
 
 public struct CreateSession: Migration {
+    
+    public init() {
+        
+    }
+    
     public func prepare(on database: Database) -> EventLoopFuture<Void> {
         return database.schema("sessions")
             .field("id", .uuid, .identifier(auto: false))
