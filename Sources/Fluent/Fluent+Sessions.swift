@@ -92,7 +92,7 @@ private struct DatabaseSessionAuthenticator<User>: SessionAuthenticator
 }
 
 public final class Session: Model {
-    public static let schema = "sessions"
+    public static let schema = "_fluent_sessions"
     
     @ID(key: "id")
     public var id: UUID?
@@ -121,7 +121,7 @@ public struct CreateSession: Migration {
     }
     
     public func prepare(on database: Database) -> EventLoopFuture<Void> {
-        return database.schema("sessions")
+        return database.schema("_fluent_sessions")
             .field("id", .uuid, .identifier(auto: false))
             .field("key", .string, .required)
             .field("data", .json, .required)
@@ -129,6 +129,6 @@ public struct CreateSession: Migration {
     }
     
     public func revert(on database: Database) -> EventLoopFuture<Void> {
-        return database.schema("sessions").delete()
+        return database.schema("_fluent_sessions").delete()
     }
 }
