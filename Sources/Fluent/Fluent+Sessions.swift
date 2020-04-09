@@ -10,16 +10,28 @@ extension Application.Fluent {
     }
 }
 
-extension Application.Fluent.Sessions {
-    public func middleware<User>(
-        for user: User.Type,
-        databaseID: DatabaseID? = nil
-    ) -> Middleware
-        where User: SessionAuthenticatable, User: Model, User.SessionID == User.IDValue
-    {
-        DatabaseSessionAuthenticator<User>(databaseID: databaseID).middleware()
-    }
+public protocol ModelSessionAuthenticatable: Model, SessionAuthenticatable
+    where Self.SessionID == Self.IDValue
+{ }
 
+extension ModelSessionAuthenticatable {
+    public var sessionID: SessionID {
+        guard let id = self.id else {
+            fatalError("Cannot persist unsaved model to session.")
+        }
+        return id
+    }
+}
+
+extension Model where Self: SessionAuthenticatable, Self.SessionID == Self.IDValue {
+    public static func sessionAuthenticator(
+        _ databaseID: DatabaseID? = nil
+    ) -> Authenticator {
+        DatabaseSessionAuthenticator<Self>(databaseID: databaseID)
+    }
+}
+
+extension Application.Fluent.Sessions {
     public func driver(_ databaseID: DatabaseID? = nil) -> SessionDriver {
         DatabaseSessions(databaseID: databaseID)
     }
@@ -46,20 +58,20 @@ private struct DatabaseSessions: SessionDriver {
     
     func createSession(_ data: SessionData, for request: Request) -> EventLoopFuture<SessionID> {
         let id = self.generateID()
-        return Session(key: id, data: data)
+        return SessionRecord(key: id, data: data)
             .create(on: request.db(self.databaseID))
             .map { id }
     }
     
     func readSession(_ sessionID: SessionID, for request: Request) -> EventLoopFuture<SessionData?> {
-        return Session.query(on: request.db(self.databaseID))
+        SessionRecord.query(on: request.db(self.databaseID))
             .filter(\.$key == sessionID)
             .first()
             .map { $0?.data }
     }
     
     func updateSession(_ sessionID: SessionID, to data: SessionData, for request: Request) -> EventLoopFuture<SessionID> {
-        return Session.query(on: request.db(self.databaseID))
+        SessionRecord.query(on: request.db(self.databaseID))
             .filter(\.$key == sessionID)
             .set(\.$data, to: data)
             .update()
@@ -67,7 +79,7 @@ private struct DatabaseSessions: SessionDriver {
     }
     
     func deleteSession(_ sessionID: SessionID, for request: Request) -> EventLoopFuture<Void> {
-        return Session.query(on: request.db(self.databaseID))
+        SessionRecord.query(on: request.db(self.databaseID))
             .filter(\.$key == sessionID)
             .delete()
     }
@@ -86,15 +98,37 @@ private struct DatabaseSessionAuthenticator<User>: SessionAuthenticator
 {
     let databaseID: DatabaseID?
 
-    func resolve(sessionID: User.SessionID, for request: Request) -> EventLoopFuture<User?> {
-        User.find(sessionID, on: request.db)
+    func authenticate(sessionID: User.SessionID, for request: Request) -> EventLoopFuture<Void> {
+        User.find(sessionID, on: request.db).map {
+            if let user = $0 {
+                request.auth.login(user)
+            }
+        }
     }
 }
 
-public final class Session: Model {
-    public static let schema = "sessions"
+public final class SessionRecord: Model {
+    public static let schema = "_fluent_sessions"
+
+    private struct _Migration: Migration {
+        func prepare(on database: Database) -> EventLoopFuture<Void> {
+            database.schema("_fluent_sessions")
+                .id()
+                .field("key", .string, .required)
+                .field("data", .json, .required)
+                .create()
+        }
+
+        func revert(on database: Database) -> EventLoopFuture<Void> {
+            database.schema("_fluent_sessions").delete()
+        }
+    }
+
+    public static var migration: Migration {
+        _Migration()
+    }
     
-    @ID(key: "id")
+    @ID(key: .id)
     public var id: UUID?
     
     @Field(key: "key")
@@ -103,27 +137,11 @@ public final class Session: Model {
     @Field(key: "data")
     public var data: SessionData
     
-    public init() {
-        
-    }
+    public init() { }
     
     public init(id: UUID? = nil, key: SessionID, data: SessionData) {
         self.id = id
         self.key = key
         self.data = data
-    }
-}
-
-public struct CreateSession: Migration {
-    public func prepare(on database: Database) -> EventLoopFuture<Void> {
-        return database.schema("sessions")
-            .field("id", .uuid, .identifier(auto: false))
-            .field("key", .string, .required)
-            .field("data", .json, .required)
-            .create()
-    }
-    
-    public func revert(on database: Database) -> EventLoopFuture<Void> {
-        return database.schema("sessions").delete()
     }
 }

@@ -1,33 +1,37 @@
 import Fluent
 import Vapor
 import XCTVapor
+import XCTFluent
 
-final class FluentPaginationTests: XCTestCase {
+final class PaginationTests: XCTestCase {
     func testPagination() throws {
         let app = Application(.testing)
         defer { app.shutdown() }
 
-        var rows: [TestRow] = []
+        var rows: [TestOutput] = []
         for i in 1...1_000 {
-            rows.append(TestRow(data: ["id": i, "title": "Todo #\(i)"]))
+            rows.append(TestOutput([
+                "id": i,
+                "title": "Todo #\(i)"
+            ]))
         }
-    
-        app.databases.use(TestDatabaseConfiguration { query in
+        let test = CallbackTestDatabase { query in
             XCTAssertEqual(query.schema, "todos")
-            let result: [TestRow]
+            let result: [TestOutput]
             if let limit = query.limits.first?.value, let offset = query.offsets.first?.value {
-                result = [TestRow](rows[min(offset, rows.count - 1)..<min(offset + limit, rows.count)])
+                result = [TestOutput](rows[min(offset, rows.count - 1)..<min(offset + limit, rows.count)])
             } else {
                 result = rows
             }
-            
+
             switch query.action {
-                case .aggregate(_):
-                    return [TestRow(data: [.aggregate: rows.count])]
-                default:
-                    return result
+            case .aggregate(_):
+                return [TestOutput([.aggregate: rows.count])]
+            default:
+                return result
             }
-        }, as: .test)
+        }
+        app.databases.use(test.configuration, as: .test)
 
         app.get("todos") { req -> EventLoopFuture<Page<Todo>> in
             Todo.query(on: req.db).paginate(for: req)

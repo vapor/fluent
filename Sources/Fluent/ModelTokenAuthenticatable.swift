@@ -1,17 +1,17 @@
 import Vapor
 
-public protocol ModelUserToken: Model {
+public protocol ModelTokenAuthenticatable: Model, Authenticatable {
     associatedtype User: Model & Authenticatable
     static var valueKey: KeyPath<Self, Field<String>> { get }
     static var userKey: KeyPath<Self, Parent<User>> { get }
     var isValid: Bool { get }
 }
 
-extension ModelUserToken {
+extension ModelTokenAuthenticatable {
     public static func authenticator(
         database: DatabaseID? = nil
-    ) -> ModelUserTokenAuthenticator<Self> {
-        ModelUserTokenAuthenticator<Self>(database: database)
+    ) -> Authenticator {
+        ModelTokenAuthenticator<Self>(database: database)
     }
 
     var _$value: Field<String> {
@@ -23,8 +23,8 @@ extension ModelUserToken {
     }
 }
 
-public struct ModelUserTokenAuthenticator<Token>: BearerAuthenticator
-    where Token: ModelUserToken
+private struct ModelTokenAuthenticator<Token>: BearerAuthenticator
+    where Token: ModelTokenAuthenticatable
 {
     public typealias User = Token.User
     public let database: DatabaseID?
@@ -32,21 +32,23 @@ public struct ModelUserTokenAuthenticator<Token>: BearerAuthenticator
     public func authenticate(
         bearer: BearerAuthorization,
         for request: Request
-    ) -> EventLoopFuture<User?> {
+    ) -> EventLoopFuture<Void> {
         let db = request.db(self.database)
         return Token.query(on: db)
             .filter(\._$value == bearer.token)
             .first()
             .flatMap
-        { token -> EventLoopFuture<User?> in
+        { token -> EventLoopFuture<Void> in
             guard let token = token else {
-                return request.eventLoop.makeSucceededFuture(nil)
+                return request.eventLoop.makeSucceededFuture(())
             }
             guard token.isValid else {
-                return token.delete(on: db).map { nil }
+                return token.delete(on: db)
             }
-            return token._$user.get(on: db)
-                .map { $0 }
+            request.auth.login(token)
+            return token._$user.get(on: db).map {
+                request.auth.login($0)
+            }
         }
     }
 }

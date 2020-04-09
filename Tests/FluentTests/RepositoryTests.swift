@@ -1,8 +1,9 @@
 import Fluent
 import Vapor
+import XCTFluent
 import XCTVapor
 
-final class FluentRepositoryTests: XCTestCase {
+final class RepositoryTests: XCTestCase {
     func testRepositoryPatternStatic() throws {
         let app = Application(.testing)
         defer { app.shutdown() }
@@ -37,13 +38,8 @@ final class FluentRepositoryTests: XCTestCase {
         let app = Application(.testing)
         defer { app.shutdown() }
 
-        app.databases.use(TestDatabaseConfiguration { query in
-            XCTAssertEqual(query.schema, "posts")
-            return [
-                TestRow(data: ["id": 1, "content": "a"]),
-                TestRow(data: ["id": 2, "content": "b"]),
-            ]
-        }, as: .test)
+        let test = ArrayTestDatabase()
+        app.databases.use(test.configuration, as: .test)
         
         app.posts.use { req in
             DatabasePostRepository(database: req.db(.test))
@@ -57,6 +53,11 @@ final class FluentRepositoryTests: XCTestCase {
             .init(id: 1, content: "a"),
             .init(id: 2, content: "b")
         ]
+
+        test.append([
+            TestOutput(["id": 1, "content": "a"]),
+            TestOutput(["id": 2, "content": "b"]),
+        ])
         
         try app.testable().test(.GET, "foo") { res in
             XCTAssertEqual(res.status, .ok)
