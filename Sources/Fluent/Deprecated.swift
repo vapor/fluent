@@ -14,6 +14,6 @@ extension Application.Fluent.Sessions {
     ) -> Middleware
         where User: SessionAuthenticatable, User: Model, User.SessionID == User.IDValue
     {
-        User.sessionAuthenticator(databaseID: databaseID)
+        User.sessionAuthenticator(databaseID)
     }
 }

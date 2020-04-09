@@ -8,13 +8,6 @@ final class PaginationTests: XCTestCase {
         let app = Application(.testing)
         defer { app.shutdown() }
 
-        let test = TestDatabase()
-        app.databases.use(test.configuration, as: .test)
-
-        app.get("todos") { req -> EventLoopFuture<Page<Todo>> in
-            Todo.query(on: req.db).paginate(for: req)
-        }
-
         var rows: [TestOutput] = []
         for i in 1...1_000 {
             rows.append(TestOutput([
@@ -22,8 +15,7 @@ final class PaginationTests: XCTestCase {
                 "title": "Todo #\(i)"
             ]))
         }
-        
-        test.use { query in
+        let test = CallbackTestDatabase { query in
             XCTAssertEqual(query.schema, "todos")
             let result: [TestOutput]
             if let limit = query.limits.first?.value, let offset = query.offsets.first?.value {
@@ -38,6 +30,11 @@ final class PaginationTests: XCTestCase {
             default:
                 return result
             }
+        }
+        app.databases.use(test.configuration, as: .test)
+
+        app.get("todos") { req -> EventLoopFuture<Page<Todo>> in
+            Todo.query(on: req.db).paginate(for: req)
         }
 
         try app.test(.GET, "todos") { res in

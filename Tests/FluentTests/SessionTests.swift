@@ -1,6 +1,7 @@
 import XCTFluent
 import XCTVapor
 import Fluent
+import Vapor
 
 final class SessionTests: XCTestCase {
     func testSessions() throws {
@@ -8,8 +9,9 @@ final class SessionTests: XCTestCase {
         defer { app.shutdown() }
 
         // Setup test db.
-        let test = TestDatabase()
+        let test = ArrayTestDatabase()
         app.databases.use(test.configuration, as: .test)
+        app.migrations.add(SessionRecord.migration)
 
         // Configure sessions.
         app.sessions.use(.fluent)
@@ -57,6 +59,25 @@ final class SessionTests: XCTestCase {
         }
     }
 }
+
+final class User: Model {
+    static let schema = "users"
+
+    @ID(key: .id)
+    var id: UUID?
+
+    @Field(key: "name")
+    var name: String
+
+    init() { }
+
+    init(id: UUID? = nil, name: String) {
+        self.id = id
+        self.name = name
+    }
+}
+
+extension User: ModelSessionAuthenticatable { }
 
 extension DatabaseID {
     static var test: Self {

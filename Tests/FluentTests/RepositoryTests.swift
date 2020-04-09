@@ -38,7 +38,7 @@ final class RepositoryTests: XCTestCase {
         let app = Application(.testing)
         defer { app.shutdown() }
 
-        let test = TestDatabase()
+        let test = ArrayTestDatabase()
         app.databases.use(test.configuration, as: .test)
         
         app.posts.use { req in
