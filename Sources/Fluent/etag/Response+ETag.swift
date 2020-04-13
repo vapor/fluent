@@ -1,6 +1,6 @@
 import Vapor
 
-extension Response {
+public extension Response {
     // MARK: - DTO related -
 
     /// Returns a `Response` with appropriate ETag headers.
