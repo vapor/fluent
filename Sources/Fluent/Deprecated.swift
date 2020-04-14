@@ -3,7 +3,7 @@ import Vapor
 @available(*, deprecated, renamed: "ModelAuthenticatable")
 public typealias ModelUser = ModelAuthenticatable
 
-@available(*, deprecated, renamed: "ModelAuthenticatable")
+@available(*, deprecated, renamed: "ModelTokenAuthenticatable")
 public typealias ModelUserToken = ModelTokenAuthenticatable
 
 extension Application.Fluent.Sessions {
