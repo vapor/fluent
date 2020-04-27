@@ -128,19 +128,15 @@ public final class SessionRecord: Model {
         _Migration()
     }
     
-    @ID(key: .id)
-    public var id: UUID?
-    
-    @Field(key: "key")
-    public var key: SessionID
+    @ID(key: "key")
+    public var key: SessionID?
     
     @Field(key: "data")
     public var data: SessionData
     
     public init() { }
     
-    public init(id: UUID? = nil, key: SessionID, data: SessionData) {
-        self.id = id
+    public init(key: SessionID, data: SessionData) {
         self.key = key
         self.data = data
     }
