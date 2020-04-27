@@ -127,7 +127,7 @@ public final class SessionRecord: Model {
         _Migration()
     }
     
-    @ID()
+    @ID(custom: .id, generatedBy: .user)
     public var id: SessionID?
     
     @Field(key: "data")
