@@ -42,8 +42,7 @@ final class SessionTests: XCTestCase {
         // Add single query output with session data for session read.
         test.append([
             TestOutput([
-                "id": UUID(),
-                "key": SessionID(string: sessionID!),
+                "id": SessionID(string: sessionID!),
                 "data": SessionData(["name": "vapor"])
             ])
         ])

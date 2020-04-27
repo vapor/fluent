@@ -58,21 +58,21 @@ private struct DatabaseSessions: SessionDriver {
     
     func createSession(_ data: SessionData, for request: Request) -> EventLoopFuture<SessionID> {
         let id = self.generateID()
-        return SessionRecord(key: id, data: data)
+        return SessionRecord(id: id, data: data)
             .create(on: request.db(self.databaseID))
             .map { id }
     }
     
     func readSession(_ sessionID: SessionID, for request: Request) -> EventLoopFuture<SessionData?> {
         SessionRecord.query(on: request.db(self.databaseID))
-            .filter(\.$key == sessionID)
+            .filter(\.$id == sessionID)
             .first()
             .map { $0?.data }
     }
     
     func updateSession(_ sessionID: SessionID, to data: SessionData, for request: Request) -> EventLoopFuture<SessionID> {
         SessionRecord.query(on: request.db(self.databaseID))
-            .filter(\.$key == sessionID)
+            .filter(\.$id == sessionID)
             .set(\.$data, to: data)
             .update()
             .map { sessionID }
@@ -80,7 +80,7 @@ private struct DatabaseSessions: SessionDriver {
     
     func deleteSession(_ sessionID: SessionID, for request: Request) -> EventLoopFuture<Void> {
         SessionRecord.query(on: request.db(self.databaseID))
-            .filter(\.$key == sessionID)
+            .filter(\.$id == sessionID)
             .delete()
     }
     
@@ -114,7 +114,6 @@ public final class SessionRecord: Model {
         func prepare(on database: Database) -> EventLoopFuture<Void> {
             database.schema("_fluent_sessions")
                 .id()
-                .field("key", .string, .required)
                 .field("data", .json, .required)
                 .create()
         }
@@ -128,16 +127,16 @@ public final class SessionRecord: Model {
         _Migration()
     }
     
-    @ID(key: "key")
-    public var key: SessionID?
+    @ID()
+    public var id: SessionID?
     
     @Field(key: "data")
     public var data: SessionData
     
     public init() { }
     
-    public init(key: SessionID, data: SessionData) {
-        self.key = key
+    public init(id: SessionID, data: SessionData) {
+        self.id = id
         self.data = data
     }
 }
