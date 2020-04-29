@@ -116,6 +116,7 @@ public final class SessionRecord: Model {
                 .id()
                 .field("key", .string, .required)
                 .field("data", .json, .required)
+                .unique(on: "key")
                 .create()
         }
 
