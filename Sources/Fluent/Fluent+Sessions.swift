@@ -140,7 +140,8 @@ public final class SessionRecord: Model {
     
     public init() { }
     
-    public init(key: SessionID, data: SessionData) {
+    public init(id: UUID? = nil, key: SessionID, data: SessionData) {
+        self.id = id
         self.key = key
         self.data = data
     }
