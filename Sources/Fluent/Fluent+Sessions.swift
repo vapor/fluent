@@ -133,7 +133,7 @@ public final class SessionRecord: Model {
     public var id: UUID?
     
     @ID(key: "key")
-    public var key: SessionID?
+    public var key: SessionID
     
     @Field(key: "data")
     public var data: SessionData
