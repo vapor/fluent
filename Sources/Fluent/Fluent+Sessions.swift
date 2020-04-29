@@ -129,6 +129,9 @@ public final class SessionRecord: Model {
         _Migration()
     }
     
+    @ID(key: .id)
+    public var id: UUID?
+    
     @ID(key: "key")
     public var key: SessionID?
     
