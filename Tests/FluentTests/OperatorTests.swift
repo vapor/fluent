@@ -40,6 +40,10 @@ private final class Planet: Model {
 }
 
 private struct DummyDatabase: Database {
+    var inTransaction: Bool {
+        false
+    }
+
     var context: DatabaseContext {
         fatalError()
     }
