@@ -1,24 +1,33 @@
 import Vapor
+import FluentKit
 
 extension Request {
+    public var queryHistory: QueryHistory {
+        return .init()
+    }
+
     public var db: Database {
         self.db(nil)
     }
 
     public func db(_ id: DatabaseID?) -> Database {
         self.application.databases
-            .database(id, logger: self.logger, on: self.eventLoop)!
+            .database(id, logger: self.logger, on: self.eventLoop, history: self.application.fluent.historyEnabled ? queryHistory : nil)!
     }
 }
 
 extension Application {
+    public var queryHistory: QueryHistory {
+        return .init()
+    }
+
     public var db: Database {
         self.db(nil)
     }
 
     public func db(_ id: DatabaseID?) -> Database {
         self.databases
-            .database(id, logger: self.logger, on: self.eventLoopGroup.next())!
+            .database(id, logger: self.logger, on: self.eventLoopGroup.next(), history: self.fluent.historyEnabled ? queryHistory : nil)!
     }
 
     public var databases: Databases {
