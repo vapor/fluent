@@ -18,7 +18,7 @@ final class QueryHistoryTests: XCTestCase {
 
         app.get("foo") { req -> EventLoopFuture<[Post]> in
             return Post.query(on: req.db).all().map { posts in
-                XCTAssertEqual(req.fluent.history?.queries.count, nil)
+                XCTAssertEqual(req.fluent.history.queries.count, 0)
                 return posts
             }
         }
@@ -41,9 +41,9 @@ final class QueryHistoryTests: XCTestCase {
         ])
 
         app.get("foo") { req -> EventLoopFuture<[Post]> in
-            req.fluent.startRecording()
+            req.fluent.history.start()
             return Post.query(on: req.db).all().map { posts in
-                XCTAssertEqual(req.fluent.history?.queries.count, 1)
+                XCTAssertEqual(req.fluent.history.queries.count, 1)
                 return posts
             }
         }
@@ -66,10 +66,10 @@ final class QueryHistoryTests: XCTestCase {
         ])
 
         app.get("foo") { req -> EventLoopFuture<[Post]> in
-            req.fluent.startRecording()
+            req.fluent.history.start()
             return Post.query(on: req.db).all().flatMap { posts -> EventLoopFuture<[Post]> in
-                XCTAssertEqual(req.fluent.history?.queries.count, 1)
-                req.fluent.stopRecording()
+                XCTAssertEqual(req.fluent.history.queries.count, 1)
+                req.fluent.history.stop()
 
                 test.append([
                     TestOutput(["id": 1, "content": "a"]),
@@ -78,7 +78,7 @@ final class QueryHistoryTests: XCTestCase {
 
                 return Post.query(on: req.db).all()
             }.map { posts in
-                XCTAssertEqual(req.fluent.history?.queries.count, nil)
+                XCTAssertEqual(req.fluent.history.queries.count, 0)
                 return posts
             }
         }
@@ -92,7 +92,7 @@ final class QueryHistoryTests: XCTestCase {
         let app = Application(.testing)
         defer { app.shutdown() }
 
-        app.fluent.startRecording()
+        app.fluent.history.start()
         let test = ArrayTestDatabase()
         app.databases.use(test.configuration, as: .test)
 
@@ -127,7 +127,7 @@ final class QueryHistoryTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
         }
 
-        XCTAssertEqual(app.fluent.history?.queries.count, 3)
+        XCTAssertEqual(app.fluent.history.queries.count, 3)
     }
 }
 
