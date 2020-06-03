@@ -2,32 +2,32 @@ import Vapor
 import FluentKit
 
 extension Request {
-    public var queryHistory: QueryHistory {
-        return .init()
-    }
-
     public var db: Database {
         self.db(nil)
     }
 
     public func db(_ id: DatabaseID?) -> Database {
         self.application.databases
-            .database(id, logger: self.logger, on: self.eventLoop, history: self.application.fluent.historyEnabled ? queryHistory : nil)!
+            .database(id, logger: self.logger, on: self.eventLoop, history: self.fluent.history)!
+    }
+
+    public var fluent: Fluent {
+        .init(request: self)
+    }
+
+    public struct Fluent {
+        let request: Request
     }
 }
 
 extension Application {
-    public var queryHistory: QueryHistory {
-        return .init()
-    }
-
     public var db: Database {
         self.db(nil)
     }
 
     public func db(_ id: DatabaseID?) -> Database {
         self.databases
-            .database(id, logger: self.logger, on: self.eventLoopGroup.next(), history: self.fluent.historyEnabled ? queryHistory : nil)!
+            .database(id, logger: self.logger, on: self.eventLoopGroup.next(), history: self.fluent.history)!
     }
 
     public var databases: Databases {

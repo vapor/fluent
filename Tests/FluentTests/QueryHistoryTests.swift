@@ -18,7 +18,7 @@ final class QueryHistoryTests: XCTestCase {
 
         app.get("foo") { req -> EventLoopFuture<[Post]> in
             return Post.query(on: req.db).all().map { posts in
-                XCTAssertEqual(req.queryHistory.queries.count, 0)
+                XCTAssertEqual(req.fluent.history?.queries.count, nil)
                 return posts
             }
         }
@@ -32,7 +32,6 @@ final class QueryHistoryTests: XCTestCase {
         let app = Application(.testing)
         defer { app.shutdown() }
 
-        app.fluent.enableQueryHistory()
         let test = ArrayTestDatabase()
         app.databases.use(test.configuration, as: .test)
 
@@ -42,8 +41,9 @@ final class QueryHistoryTests: XCTestCase {
         ])
 
         app.get("foo") { req -> EventLoopFuture<[Post]> in
+            req.fluent.startRecording()
             return Post.query(on: req.db).all().map { posts in
-                XCTAssertEqual(req.queryHistory.queries.count, 1)
+                XCTAssertEqual(req.fluent.history?.queries.count, 1)
                 return posts
             }
         }
@@ -51,6 +51,83 @@ final class QueryHistoryTests: XCTestCase {
         try app.testable().test(.GET, "foo") { res in
             XCTAssertEqual(res.status, .ok)
         }
+    }
+
+    func testQueryHistoryEnableAndDisable() throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+
+        let test = ArrayTestDatabase()
+        app.databases.use(test.configuration, as: .test)
+
+        test.append([
+            TestOutput(["id": 1, "content": "a"]),
+            TestOutput(["id": 2, "content": "b"]),
+        ])
+
+        app.get("foo") { req -> EventLoopFuture<[Post]> in
+            req.fluent.startRecording()
+            return Post.query(on: req.db).all().flatMap { posts -> EventLoopFuture<[Post]> in
+                XCTAssertEqual(req.fluent.history?.queries.count, 1)
+                req.fluent.stopRecording()
+
+                test.append([
+                    TestOutput(["id": 1, "content": "a"]),
+                    TestOutput(["id": 2, "content": "b"]),
+                ])
+
+                return Post.query(on: req.db).all()
+            }.map { posts in
+                XCTAssertEqual(req.fluent.history?.queries.count, nil)
+                return posts
+            }
+        }
+
+        try app.testable().test(.GET, "foo") { res in
+            XCTAssertEqual(res.status, .ok)
+        }
+    }
+
+    func testQueryHistoryForApp() throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+
+        app.fluent.startRecording()
+        let test = ArrayTestDatabase()
+        app.databases.use(test.configuration, as: .test)
+
+        app.get("foo") { req -> EventLoopFuture<[Post]> in
+            return Post.query(on: app.db).all()
+        }
+
+        test.append([
+            TestOutput(["id": 1, "content": "a"]),
+            TestOutput(["id": 2, "content": "b"]),
+        ])
+
+        try app.testable().test(.GET, "foo") { res in
+            XCTAssertEqual(res.status, .ok)
+        }
+
+        test.append([
+            TestOutput(["id": 1, "content": "a"]),
+            TestOutput(["id": 2, "content": "b"]),
+        ])
+
+        try app.testable().test(.GET, "foo") { res in
+            XCTAssertEqual(res.status, .ok)
+        }
+
+        test.append([
+            TestOutput(["id": 1, "content": "a"]),
+            TestOutput(["id": 2, "content": "b"]),
+        ])
+
+        try app.testable().test(.GET, "foo") { res in
+            XCTAssertEqual(res.status, .ok)
+        }
+
+        XCTAssertEqual(app.fluent.history?.queries.count, 3)
     }
 }
 
