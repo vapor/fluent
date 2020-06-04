@@ -41,14 +41,13 @@ extension Application.Fluent.History {
         }
     }
 
-    var history: QueryHistory {
-        guard self.historyEnabled else { return .init() }
-        return storage[RequestQueryHistory.self] ?? .init()
+    var history: QueryHistory? {
+        return storage[RequestQueryHistory.self]
     }
 
     /// The queries stored in this lifecycle history
     public var queries: [DatabaseQuery] {
-        return history.queries
+        return history?.queries ?? []
     }
 
     /// Start recording the query history
@@ -82,14 +81,13 @@ extension Request.Fluent.History {
         }
     }
 
-    var history: QueryHistory {
-        guard historyEnabled else { return .init() }
-        return storage[RequestQueryHistory.self] ?? .init()
+    var history: QueryHistory? {
+        return storage[RequestQueryHistory.self]
     }
 
     /// The queries stored in this lifecycle history
     public var queries: [DatabaseQuery] {
-        return history.queries
+        return history?.queries ?? []
     }
 
     /// Start recording the query history
