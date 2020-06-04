@@ -13,14 +13,37 @@ struct FluentHistory {
     let enabled: Bool
 }
 
+extension Request {
+    public struct Fluent {
+        let request: Request
+
+        public var history: History {
+            .init(fluent: self)
+        }
+
+        public struct History {
+            let fluent: Fluent
+        }
+    }
+}
+
 extension Application.Fluent.History {
     var historyEnabled: Bool {
-        return (self.fluent.application.storage[FluentHistoryKey.self]?.enabled) ?? false
+        storage[FluentHistoryKey.self]?.enabled ?? false
+    }
+
+    var storage: Storage {
+        get {
+            self.fluent.application.storage
+        }
+        nonmutating set {
+            self.fluent.application.storage = newValue
+        }
     }
 
     var history: QueryHistory {
-        guard historyEnabled else { return .init() }
-        return self.fluent.application.storage[RequestQueryHistory.self] ?? .init()
+        guard self.historyEnabled else { return .init() }
+        return storage[RequestQueryHistory.self] ?? .init()
     }
 
     /// The queries stored in this lifecycle history
@@ -30,30 +53,38 @@ extension Application.Fluent.History {
 
     /// Start recording the query history
     public func start() {
-        self.fluent.application.storage[FluentHistoryKey.self] = .init(enabled: true)
-        self.fluent.application.storage[RequestQueryHistory.self] = .init()
+        storage[FluentHistoryKey.self] = .init(enabled: true)
+        storage[RequestQueryHistory.self] = .init()
     }
 
     /// Stop recording the query history
     public func stop() {
-        self.fluent.application.storage[FluentHistoryKey.self] = .init(enabled: false)
-        self.fluent.application.storage[RequestQueryHistory.self] = nil
+        storage[FluentHistoryKey.self] = .init(enabled: false)
     }
 
     /// Clear the stored query history
     public func clear() {
-        self.fluent.application.storage[RequestQueryHistory.self] = .init()
+        storage[RequestQueryHistory.self] = .init()
     }
 }
 
 extension Request.Fluent.History {
     var historyEnabled: Bool {
-        return (self.fluent.request.storage[FluentHistoryKey.self]?.enabled) ?? false
+        return (storage[FluentHistoryKey.self]?.enabled) ?? false
+    }
+
+    var storage: Storage {
+        get {
+            self.fluent.request.storage
+        }
+        nonmutating set {
+            self.fluent.request.storage = newValue
+        }
     }
 
     var history: QueryHistory {
         guard historyEnabled else { return .init() }
-        return self.fluent.request.storage[RequestQueryHistory.self] ?? .init()
+        return storage[RequestQueryHistory.self] ?? .init()
     }
 
     /// The queries stored in this lifecycle history
@@ -69,12 +100,11 @@ extension Request.Fluent.History {
 
     /// Stop recording the query history
     public func stop() {
-        self.fluent.request.storage[FluentHistoryKey.self] = .init(enabled: false)
-        self.fluent.request.storage[RequestQueryHistory.self] = nil
+        storage[FluentHistoryKey.self] = .init(enabled: false)
     }
 
     /// Clear the stored query history
     public func clear() {
-        self.fluent.request.storage[RequestQueryHistory.self] = .init()
+        storage[RequestQueryHistory.self] = .init()
     }
 }

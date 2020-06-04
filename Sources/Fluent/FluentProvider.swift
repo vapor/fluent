@@ -7,24 +7,18 @@ extension Request {
     }
 
     public func db(_ id: DatabaseID?) -> Database {
-        self.application.databases
-            .database(id, logger: self.logger, on: self.eventLoop, history: self.fluent.history.historyEnabled ? self.fluent.history.history : nil)!
+        self.application
+            .databases
+            .database(
+                id,
+                logger: self.logger,
+                on: self.eventLoop,
+                history: self.fluent.history.historyEnabled ? self.fluent.history.history : nil
+            )!
     }
 
     public var fluent: Fluent {
         .init(request: self)
-    }
-
-    public struct Fluent {
-        let request: Request
-
-        public var history: History {
-            .init(fluent: self)
-        }
-
-        public struct History {
-            let fluent: Fluent
-        }
     }
 }
 
@@ -35,7 +29,12 @@ extension Application {
 
     public func db(_ id: DatabaseID?) -> Database {
         self.databases
-            .database(id, logger: self.logger, on: self.eventLoopGroup.next(), history: self.fluent.history.historyEnabled ? self.fluent.history.history : nil)!
+            .database(
+                id,
+                logger: self.logger,
+                on: self.eventLoopGroup.next(),
+                history: self.fluent.history.historyEnabled ? self.fluent.history.history : nil
+            )!
     }
 
     public var databases: Databases {
