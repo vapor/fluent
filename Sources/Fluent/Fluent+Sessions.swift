@@ -67,20 +67,29 @@ private struct DatabaseSessions: SessionDriver {
         SessionRecord.query(on: request.db(self.databaseID))
             .filter(\.$key == sessionID)
             .first()
-            .map { $0?.data }
+            .map { $0?.session }
     }
     
     func updateSession(_ sessionID: SessionID, to data: SessionData, for request: Request) -> EventLoopFuture<SessionID> {
-        SessionRecord.query(on: request.db(self.databaseID))
-            .filter(\.$key == sessionID)
-            .set(\.$data, to: data)
-            .update()
-            .map { sessionID }
+        let query = SessionRecord.query(on: request.db(self.databaseID))
+                                 .filter(\.$key == sessionID)
+        
+        if data.userStorageChanged { query.set(\.$storage, to: data.storage) }
+        if data.appStorageChanged { query.set(\.$appStorage, to: data.appStorage) }
+        if data.expiryChanged { query.set(\.$expiration, to: data.expiration) }
+        
+        return query.update().map { sessionID }
     }
     
     func deleteSession(_ sessionID: SessionID, for request: Request) -> EventLoopFuture<Void> {
         SessionRecord.query(on: request.db(self.databaseID))
             .filter(\.$key == sessionID)
+            .delete()
+    }
+    
+    func deleteExpiredSessions(before: SessionData.Expiration, on request: Request) -> EventLoopFuture<Void> {
+        SessionRecord.query(on: request.db(self.databaseID))
+            .filter(\.$expiration <= before)
             .delete()
     }
     
@@ -112,16 +121,18 @@ public final class SessionRecord: Model {
 
     private struct _Migration: Migration {
         func prepare(on database: Database) -> EventLoopFuture<Void> {
-            database.schema("_fluent_sessions")
+            database.schema(SessionRecord.schema)
                 .id()
                 .field("key", .string, .required)
-                .field("data", .json, .required)
+                .field("storage", .json, .required)
+                .field("appStorage", .json, .required)
+                .field("expiration", .datetime, .required)
                 .unique(on: "key")
                 .create()
         }
 
         func revert(on database: Database) -> EventLoopFuture<Void> {
-            database.schema("_fluent_sessions").delete()
+            database.schema(SessionRecord.schema).delete()
         }
     }
 
@@ -135,14 +146,26 @@ public final class SessionRecord: Model {
     @Field(key: "key")
     public var key: SessionID
     
-    @Field(key: "data")
-    public var data: SessionData
+    @Field(key: "storage")
+    public var storage: SessionData.Data
+    
+    @Field(key: "appStorage")
+    public var appStorage: SessionData.Data
+    
+    @Field(key: "expiration")
+    public var expiration: SessionData.Expiration
     
     public init() { }
     
     public init(id: UUID? = nil, key: SessionID, data: SessionData) {
         self.id = id
         self.key = key
-        self.data = data
+        self.storage = data.storage
+        self.appStorage = data.appStorage
+        self.expiration = data.expiration
+    }
+    
+    public var session: SessionData {
+        .init(storage, app: appStorage, expiration: expiration)
     }
 }

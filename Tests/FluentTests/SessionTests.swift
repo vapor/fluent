@@ -44,7 +44,9 @@ final class SessionTests: XCTestCase {
             TestOutput([
                 "id": UUID(),
                 "key": SessionID(string: sessionID!),
-                "data": SessionData(["name": "vapor"])
+                "storage": ["name": "vapor"],
+                "appStorage": [:],
+                "expiration": Date()
             ])
         ])
         // Add empty query output for session update.
@@ -54,6 +56,7 @@ final class SessionTests: XCTestCase {
             cookies["vapor-session"] = .init(string: sessionID!)
             req.headers.cookie = cookies
         }) { res in
+            print(res.status)
             XCTAssertEqual(res.status, .ok)
             XCTAssertEqual(res.body.string, "vapor")
         }
