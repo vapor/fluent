@@ -110,7 +110,7 @@ private struct DatabaseSessionAuthenticator<User>: SessionAuthenticator
 public final class SessionRecord: Model {
     public static let schema = "_fluent_sessions"
 
-    private struct _Migration: Migration {
+    struct Create: Migration {
         func prepare(on database: Database) -> EventLoopFuture<Void> {
             database.schema("_fluent_sessions")
                 .id()
@@ -126,7 +126,7 @@ public final class SessionRecord: Model {
     }
 
     public static var migration: Migration {
-        _Migration()
+        Create()
     }
     
     @ID(key: .id)

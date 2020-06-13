@@ -4,6 +4,10 @@ import Fluent
 import Vapor
 
 final class SessionTests: XCTestCase {
+    func testSessionMigrationName() {
+        XCTAssertEqual(SessionRecord.migration.name, "Fluent.SessionRecord.Create")
+    }
+    
     func testSessions() throws {
         let app = Application(.testing)
         defer { app.shutdown() }
