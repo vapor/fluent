@@ -1,4 +1,5 @@
 import Vapor
+import FluentKit
 
 extension Request {
     public var db: Database {
@@ -6,8 +7,18 @@ extension Request {
     }
 
     public func db(_ id: DatabaseID?) -> Database {
-        self.application.databases
-            .database(id, logger: self.logger, on: self.eventLoop)!
+        self.application
+            .databases
+            .database(
+                id,
+                logger: self.logger,
+                on: self.eventLoop,
+                history: self.fluent.history.historyEnabled ? self.fluent.history.history : nil
+            )!
+    }
+
+    public var fluent: Fluent {
+        .init(request: self)
     }
 }
 
@@ -18,7 +29,12 @@ extension Application {
 
     public func db(_ id: DatabaseID?) -> Database {
         self.databases
-            .database(id, logger: self.logger, on: self.eventLoopGroup.next())!
+            .database(
+                id,
+                logger: self.logger,
+                on: self.eventLoopGroup.next(),
+                history: self.fluent.history.historyEnabled ? self.fluent.history.history : nil
+            )!
     }
 
     public var databases: Databases {
@@ -114,6 +130,14 @@ extension Application {
             )
             self.application.lifecycle.use(Lifecycle())
             self.application.commands.use(MigrateCommand(), as: "migrate")
+        }
+
+        public var history: History {
+            .init(fluent: self)
+        }
+
+        public struct History {
+            let fluent: Fluent
         }
     }
 
