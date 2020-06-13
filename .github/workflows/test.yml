@@ -1,18 +1,45 @@
 name: test
 on:
-- pull_request
+  pull_request:
+  push:
+    branches:
+      - master
 jobs:
-  fluent_xenial:
-    container: 
-      image: vapor/swift:5.2-xenial
+  linux:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - swift:5.2-xenial
+          - swift:5.2-bionic
+          - swiftlang/swift:nightly-5.2-xenial
+          - swiftlang/swift:nightly-5.2-bionic
+          - swiftlang/swift:nightly-5.3-xenial
+          - swiftlang/swift:nightly-5.3-bionic
+          - swiftlang/swift:nightly-master-xenial
+          - swiftlang/swift:nightly-master-bionic
+          - swiftlang/swift:nightly-master-focal
+          - swiftlang/swift:nightly-master-centos8
+          - swiftlang/swift:nightly-master-amazonlinux2
+    container: ${{ matrix.image }}
+    env:
+      LOG_LEVEL: info
+    steps:  
+      - name: Checkout Fluent
+        uses: actions/checkout@v2
+      - name: Run base tests with Thread Sanitizer
+        run: swift test --enable-test-discovery --sanitize=thread
+  macOS:
+    env:
+      LOG_LEVEL: info
+    runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v1
-    - run: swift test --enable-test-discovery --sanitize=thread
-  fluent_bionic:
-    container: 
-      image: vapor/swift:5.2-bionic
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-    - run: swift test --enable-test-discovery --sanitize=thread
+      - name: Select latest available Xcode
+        uses: maxim-lobanov/setup-xcode@1.0
+        with:
+          xcode-version: latest
+      - name: Checkout Fluent
+        uses: actions/checkout@v2
+      - name: Run base Fluent tests with Thread Sanitizer
+        run: swift test --package-path fluent-kit --enable-test-discovery --sanitize=thread
