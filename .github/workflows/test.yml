@@ -42,4 +42,4 @@ jobs:
       - name: Checkout Fluent
         uses: actions/checkout@v2
       - name: Run base Fluent tests with Thread Sanitizer
-        run: swift test --package-path fluent-kit --enable-test-discovery --sanitize=thread
+        run: swift test --enable-test-discovery --sanitize=thread
