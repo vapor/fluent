@@ -6,8 +6,8 @@
     >
     <br>
     <br>
-    <a href="https://api.vapor.codes/fluent/master/Fluent/index.html">
-        <img src="http://img.shields.io/badge/api-docs-2196f3.svg" alt="Documentation">
+    <a href="https://docs.vapor.codes/4.0/">
+        <img src="http://img.shields.io/badge/read_the-docs-2196f3.svg" alt="Documentation">
     </a>
     <a href="https://discord.gg/vapor">
         <img src="https://img.shields.io/discord/431917998102675485.svg" alt="Team Chat">
