@@ -4,7 +4,7 @@ on:
      branches:
        - master
 
-  jobs:
+jobs:
   deploy:
     name: api.vapor.codes
     runs-on: ubuntu-latest
