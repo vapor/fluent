@@ -6,7 +6,7 @@
     >
     <br>
     <br>
-    <a href="https://docs.vapor.codes/4.0/">
+    <a href="https://docs.vapor.codes/4.0/fluent/overview/">
         <img src="http://img.shields.io/badge/read_the-docs-2196f3.svg" alt="Documentation">
     </a>
     <a href="https://discord.gg/vapor">
