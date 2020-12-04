@@ -14,7 +14,6 @@ final class CredentialTests: XCTestCase {
         app.databases.use(test.configuration, as: .test)
 
         // Configure sessions.
-        app.sessions.use(.fluent)
         app.middleware.use(app.sessions.middleware)
 
         // Setup routes.
@@ -28,7 +27,7 @@ final class CredentialTests: XCTestCase {
             return req.redirect(to: "/protected")
         }
 
-        let protectedRoutes = sessionRoutes.grouped(User.redirectMiddleware(path: "/login"))
+        let protectedRoutes = sessionRoutes.grouped(CredentialsUser.redirectMiddleware(path: "/login"))
         protectedRoutes.get("protected") { req -> HTTPStatus in
             _ = try req.auth.require(CredentialsUser.self)
             return .ok
@@ -38,9 +37,10 @@ final class CredentialTests: XCTestCase {
         let password = "password-\(Int.random())"
         let passwordHash = try Bcrypt.hash(password)
         let testUser = CredentialsUser(id: UUID(), username: "user-\(Int.random())", password: passwordHash)
-        test.append([
-            testUser
-        ])
+        test.append([TestOutput(testUser)])
+        test.append([TestOutput(testUser)])
+        test.append([TestOutput(testUser)])
+        test.append([TestOutput(testUser)])
 
         // Test login
         let loginData = ModelCredentials(username: testUser.username, password: password)
