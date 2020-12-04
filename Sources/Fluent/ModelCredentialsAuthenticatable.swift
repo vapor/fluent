@@ -25,6 +25,11 @@ extension ModelCredentialsAuthenticatable {
 public struct ModelCredentials: Content {
     public let username: String
     public let password: String
+
+    public init(username: String, password: String) {
+        self.username = username
+        self.password = password
+    }
 }
 
 private struct ModelCredentialsAuthenticator<User>: CredentialsAuthenticator
