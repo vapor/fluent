@@ -22,7 +22,7 @@ final class CredentialTests: XCTestCase {
 
         let credentialRoutes = sessionRoutes.grouped(CredentialsUser.credentialsAuthenticator())
         credentialRoutes.post("login") { req -> Response in
-            guard req.auth.has(User.self) else {
+            guard req.auth.has(CredentialsUser.self) else {
                 throw Abort(.unauthorized)
             }
             return req.redirect(to: "/protected")
@@ -30,12 +30,20 @@ final class CredentialTests: XCTestCase {
 
         let protectedRoutes = sessionRoutes.grouped(User.redirectMiddleware(path: "/login"))
         protectedRoutes.get("protected") { req -> HTTPStatus in
-            _ = try req.auth.require(User.self)
+            _ = try req.auth.require(CredentialsUser.self)
             return .ok
         }
 
+        // Create user
+        let password = "password-\(Int.random())"
+        let passwordHash = try Bcrypt.hash(password)
+        let testUser = CredentialsUser(id: UUID(), username: "user-\(Int.random())", password: passwordHash)
+        test.append([
+            testUser
+        ])
+
         // Test login
-        let loginData = ModelCredentials(username: "something", password: "else")
+        let loginData = ModelCredentials(username: testUser.username, password: password)
         try app.test(.POST, "/login", beforeRequest: { req in
             try req.content.encode(loginData, as: .urlEncodedForm)
         }) { res in
