@@ -10,8 +10,8 @@ final class CredentialTests: XCTestCase {
         defer { app.shutdown() }
 
         // Setup test db.
-        let test = ArrayTestDatabase()
-        app.databases.use(test.configuration, as: .test)
+        let testDB = ArrayTestDatabase()
+        app.databases.use(testDB.configuration, as: .test)
 
         // Configure sessions.
         app.middleware.use(app.sessions.middleware)
@@ -37,10 +37,10 @@ final class CredentialTests: XCTestCase {
         let password = "password-\(Int.random())"
         let passwordHash = try Bcrypt.hash(password)
         let testUser = CredentialsUser(id: UUID(), username: "user-\(Int.random())", password: passwordHash)
-        test.append([TestOutput(testUser)])
-        test.append([TestOutput(testUser)])
-        test.append([TestOutput(testUser)])
-        test.append([TestOutput(testUser)])
+        testDB.append([TestOutput(testUser)])
+        testDB.append([TestOutput(testUser)])
+        testDB.append([TestOutput(testUser)])
+        testDB.append([TestOutput(testUser)])
 
         // Test login
         let loginData = ModelCredentials(username: testUser.username, password: password)
