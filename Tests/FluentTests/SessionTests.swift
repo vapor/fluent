@@ -48,7 +48,7 @@ final class SessionTests: XCTestCase {
             TestOutput([
                 "id": UUID(),
                 "key": SessionID(string: sessionID!),
-                "data": SessionData(["name": "vapor"])
+                "data": SessionData(initialData: ["name": "vapor"])
             ])
         ])
         // Add empty query output for session update.
