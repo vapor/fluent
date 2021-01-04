@@ -64,6 +64,44 @@ final class PaginationTests: XCTestCase {
             XCTAssertEqual(todos.items.count, 1)
         }
     }
+
+    func testPaginationLimits() throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+
+        let test = ArrayTestDatabase()
+        app.databases.use(test.configuration, as: .test)
+
+        test.append([
+            TestOutput(["id": 1, "title": "a"]),
+            TestOutput(["id": 2, "title": "b"]),
+            TestOutput(["id": 3, "title": "c"]),
+            TestOutput(["id": 4, "title": "d"]),
+            TestOutput(["id": 5, "title": "e"]),
+        ])
+
+        // request limitation
+        app.get("foo-request") { req -> EventLoopFuture<Page<Todo>> in
+            req.fluent.paginationLimits.setMaxPerPage(3)
+            return Todo.query(on: req.db).paginate(for: req)
+        }
+
+        // application-wide limitation
+        app.fluent.paginationLimits.setMaxPerPage(2)
+        app.get("foo-app") { req -> EventLoopFuture<Page<Todo>> in
+            Todo.query(on: app.db).paginate(for: req)
+        }
+
+        try app.test(.GET, "foo-request?page=1&per=3") { res in
+            XCTAssertEqual(res.status, .ok)
+        }.test(.GET, "foo-request?page=1&per=4") { res in
+            XCTAssertEqual(res.status, .internalServerError)
+        }.test(.GET, "foo-app?page=1&per=2") { res in
+            XCTAssertEqual(res.status, .ok)
+        }.test(.GET, "foo-app?page=1&per=3") { res in
+            XCTAssertEqual(res.status, .internalServerError)
+        }
+    }
 }
 
 private extension DatabaseQuery.Limit {
