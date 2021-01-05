@@ -86,20 +86,31 @@ final class PaginationTests: XCTestCase {
             return Todo.query(on: req.db).paginate(for: req)
         }
 
+        app.get("foo-request-no-limit") { req -> EventLoopFuture<Page<Todo>> in
+            req.fluent.pagination.setMaxPerPage(nil)
+            return Todo.query(on: req.db).paginate(for: req)
+        }
+
         // application-wide limitation
         app.fluent.pagination.setMaxPerPage(2)
         app.get("foo-app") { req -> EventLoopFuture<Page<Todo>> in
             Todo.query(on: app.db).paginate(for: req)
         }
 
-        try app.test(.GET, "foo-request?page=1&per=3") { res in
-            XCTAssertEqual(res.status, .ok)
-        }.test(.GET, "foo-request?page=1&per=4") { res in
-            XCTAssertEqual(res.status, .internalServerError)
-        }.test(.GET, "foo-app?page=1&per=2") { res in
-            XCTAssertEqual(res.status, .ok)
-        }.test(.GET, "foo-app?page=1&per=3") { res in
-            XCTAssertEqual(res.status, .internalServerError)
+        try app.test(.GET, "foo-request?page=1&per=3") { response in
+            XCTAssertEqual(response.status, .ok)
+        }
+        .test(.GET, "foo-request?page=1&per=4") { response in
+            XCTAssertEqual(response.status, .internalServerError)
+        }
+        .test(.GET, "foo-request-no-limit?page=1&per=5") { response in
+            XCTAssertEqual(response.status, .ok)
+        }
+        .test(.GET, "foo-app?page=1&per=2") { response in
+            XCTAssertEqual(response.status, .ok)
+        }
+        .test(.GET, "foo-app?page=1&per=3") { response in
+            XCTAssertEqual(response.status, .internalServerError)
         }
     }
 }
