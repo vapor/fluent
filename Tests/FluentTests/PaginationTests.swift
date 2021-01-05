@@ -82,12 +82,12 @@ final class PaginationTests: XCTestCase {
 
         // request limitation
         app.get("foo-request") { req -> EventLoopFuture<Page<Todo>> in
-            req.fluent.paginationLimits.setMaxPerPage(3)
+            req.fluent.pagination.setMaxPerPage(3)
             return Todo.query(on: req.db).paginate(for: req)
         }
 
         // application-wide limitation
-        app.fluent.paginationLimits.setMaxPerPage(2)
+        app.fluent.pagination.setMaxPerPage(2)
         app.get("foo-app") { req -> EventLoopFuture<Page<Todo>> in
             Todo.query(on: app.db).paginate(for: req)
         }

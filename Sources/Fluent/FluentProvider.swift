@@ -14,7 +14,7 @@ extension Request {
                 logger: self.logger,
                 on: self.eventLoop,
                 history: self.fluent.history.historyEnabled ? self.fluent.history.history : nil,
-                maxPerPage: self.fluent.paginationLimits.maxPerPage
+                maxPerPage: self.fluent.pagination.maxPerPage
             )!
     }
 
@@ -35,7 +35,7 @@ extension Application {
                 logger: self.logger,
                 on: self.eventLoopGroup.next(),
                 history: self.fluent.history.historyEnabled ? self.fluent.history.history : nil,
-                maxPerPage: self.fluent.paginationLimits.maxPerPage
+                maxPerPage: self.fluent.pagination.maxPerPage
             )!
     }
 
@@ -142,11 +142,11 @@ extension Application {
             let fluent: Fluent
         }
 
-        public var paginationLimits: PaginationLimits {
+        public var pagination: Pagination {
             .init(fluent: self)
         }
 
-        public struct PaginationLimits {
+        public struct Pagination {
             let fluent: Fluent
         }
     }
