@@ -99,18 +99,28 @@ final class PaginationTests: XCTestCase {
 
         try app.test(.GET, "foo-request?page=1&per=3") { response in
             XCTAssertEqual(response.status, .ok)
+            let todos = try response.content.decode(Page<Todo>.self)
+            XCTAssertEqual(todos.items.count, 3)
         }
         .test(.GET, "foo-request?page=1&per=4") { response in
-            XCTAssertEqual(response.status, .internalServerError)
+            XCTAssertEqual(response.status, .ok)
+            let todos = try response.content.decode(Page<Todo>.self)
+            XCTAssertEqual(todos.items.count, 3)
         }
         .test(.GET, "foo-request-no-limit?page=1&per=5") { response in
             XCTAssertEqual(response.status, .ok)
+            let todos = try response.content.decode(Page<Todo>.self)
+            XCTAssertEqual(todos.items.count, 5)
         }
         .test(.GET, "foo-app?page=1&per=2") { response in
             XCTAssertEqual(response.status, .ok)
+            let todos = try response.content.decode(Page<Todo>.self)
+            XCTAssertEqual(todos.items.count, 2)
         }
         .test(.GET, "foo-app?page=1&per=3") { response in
-            XCTAssertEqual(response.status, .internalServerError)
+            XCTAssertEqual(response.status, .ok)
+            let todos = try response.content.decode(Page<Todo>.self)
+            XCTAssertEqual(todos.items.count, 2)
         }
     }
 }
