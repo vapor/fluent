@@ -22,16 +22,12 @@ extension Request.Fluent {
 extension Request.Fluent.Pagination {
     /// The maximum amount of elements per page. The default is `nil`.
     public var maxPerPage: Int? {
-        storage[PaginationKey.self]?.maxPerPage
-    }
-
-    /// Set or disable page size limits
-    /// - Parameters:
-    ///   - newValue: The maximum amount of elements per page.
-    ///   If set, `per` in `PageRequest` is compared to this value and an error is thrown if the requested page size exceeds the limit.
-    ///   Pass `nil` to disable checks.
-    public func setMaxPerPage(_ newValue: Int?) {
-        storage[PaginationKey.self] = .init(maxPerPage: newValue)
+        get {
+            storage[PaginationKey.self]?.maxPerPage
+        }
+        nonmutating set {
+            storage[PaginationKey.self] = .init(maxPerPage: newValue)
+        }
     }
 
     var storage: Storage {
@@ -47,16 +43,12 @@ extension Request.Fluent.Pagination {
 extension Application.Fluent.Pagination {
     /// The maximum amount of elements per page. The default is `nil`.
     public var maxPerPage: Int? {
-        storage[PaginationKey.self]?.maxPerPage
-    }
-
-    /// Set or disable page size limits
-    /// - Parameters:
-    ///   - newValue: The maximum amount of elements per page.
-    ///   If set, `per` in `PageRequest` is compared to this value and an error is thrown if the requested page size exceeds the limit.
-    ///   Pass `nil` to disable checks.
-    public func setMaxPerPage(_ newValue: Int?) {
-        storage[PaginationKey.self] = .init(maxPerPage: newValue)
+        get {
+            storage[PaginationKey.self]?.maxPerPage
+        }
+        nonmutating set {
+            storage[PaginationKey.self] = .init(maxPerPage: newValue)
+        }
     }
 
     var storage: Storage {
