@@ -69,58 +69,71 @@ final class PaginationTests: XCTestCase {
         let app = Application(.testing)
         defer { app.shutdown() }
 
-        let test = ArrayTestDatabase()
-        app.databases.use(test.configuration, as: .test)
-
-        test.append([
+        let rows = [
             TestOutput(["id": 1, "title": "a"]),
             TestOutput(["id": 2, "title": "b"]),
             TestOutput(["id": 3, "title": "c"]),
             TestOutput(["id": 4, "title": "d"]),
             TestOutput(["id": 5, "title": "e"]),
-        ])
+        ]
 
-        // request limitation
-        app.get("foo-request") { req -> EventLoopFuture<Page<Todo>> in
-            req.fluent.pagination.maxPerPage = 3
+        let test = CallbackTestDatabase { query in
+            XCTAssertEqual(query.schema, "todos")
+            let result: [TestOutput]
+            if let limit = query.limits.first?.value, let offset = query.offsets.first?.value {
+                result = [TestOutput](rows[min(offset, rows.count - 1)..<min(offset + limit, rows.count)])
+            } else {
+                result = rows
+            }
+            switch query.action {
+            case .aggregate(_):
+                return [TestOutput([.aggregate: rows.count])]
+            default:
+                return result
+            }
+        }
+
+        app.databases.use(test.configuration, as: .test)
+        app.fluent.pagination.maxPerPage = 4
+
+        app.get("todos-request-limit") { req -> EventLoopFuture<Page<Todo>> in
+            req.fluent.pagination.maxPerPage = 2
             return Todo.query(on: req.db).paginate(for: req)
         }
 
-        app.get("foo-request-no-limit") { req -> EventLoopFuture<Page<Todo>> in
+        app.get("todos-request-no-limit") { req -> EventLoopFuture<Page<Todo>> in
+            req.fluent.pagination.maxPerPage = .noLimit
+            return Todo.query(on: req.db).paginate(for: req)
+        }
+
+        app.get("todos-request-app-limit") { req -> EventLoopFuture<Page<Todo>> in
             req.fluent.pagination.maxPerPage = nil
             return Todo.query(on: req.db).paginate(for: req)
         }
 
-        // application-wide limitation
-        app.fluent.pagination.maxPerPage = 2
-        app.get("foo-app") { req -> EventLoopFuture<Page<Todo>> in
-            Todo.query(on: app.db).paginate(for: req)
+        app.get("todos-app-limit") { req -> EventLoopFuture<Page<Todo>> in
+            Todo.query(on: req.db).paginate(for: req)
         }
 
-        try app.test(.GET, "foo-request?page=1&per=3") { response in
+        try app.test(.GET, "todos-request-limit?page=1&per=5") { response in
             XCTAssertEqual(response.status, .ok)
             let todos = try response.content.decode(Page<Todo>.self)
-            XCTAssertEqual(todos.items.count, 3)
+            XCTAssertEqual(todos.items.count, 2, "Should be capped by request-level limit.")
         }
-        .test(.GET, "foo-request?page=1&per=4") { response in
+        .test(.GET, "todos-request-no-limit?page=1&per=5") { response in
             XCTAssertEqual(response.status, .ok)
             let todos = try response.content.decode(Page<Todo>.self)
-            XCTAssertEqual(todos.items.count, 3)
+            XCTAssertEqual(todos.items.count, 5, "Request-level override should suspend app-level limit.")
         }
-        .test(.GET, "foo-request-no-limit?page=1&per=5") { response in
+        .test(.GET, "todos-request-app-limit?page=1&per=5") { response in
             XCTAssertEqual(response.status, .ok)
             let todos = try response.content.decode(Page<Todo>.self)
-            XCTAssertEqual(todos.items.count, 5)
+            XCTAssertEqual(todos.items.count, 4, "Should be capped by app-level limit.")
         }
-        .test(.GET, "foo-app?page=1&per=2") { response in
+        .test(.GET, "todos-app-limit?page=1&per=5") { response in
             XCTAssertEqual(response.status, .ok)
             let todos = try response.content.decode(Page<Todo>.self)
-            XCTAssertEqual(todos.items.count, 2)
-        }
-        .test(.GET, "foo-app?page=1&per=3") { response in
-            XCTAssertEqual(response.status, .ok)
-            let todos = try response.content.decode(Page<Todo>.self)
-            XCTAssertEqual(todos.items.count, 2)
+            XCTAssertEqual(todos.items.count, 4, "Should be capped by app-level limit.")
         }
     }
 }
