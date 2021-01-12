@@ -1,17 +1,21 @@
 import Foundation
 
-public struct PageLimit: Codable, ExpressibleByIntegerLiteral {
+public struct PageLimit {
     public let value: Int?
     
-    public init(integerLiteral value: IntegerLiteralType) {
-        self.value = value
-    }
-
-    private init(value: Int?) {
-        self.value = value
-    }
-
     public static var noLimit: PageLimit {
         .init(value: nil)
+    }
+}
+
+extension PageLimit {
+    public init(_ value: Int) {
+        self.value = value
+    }
+}
+
+extension PageLimit: ExpressibleByIntegerLiteral {
+    public init(integerLiteral value: IntegerLiteralType) {
+        self.value = value
     }
 }

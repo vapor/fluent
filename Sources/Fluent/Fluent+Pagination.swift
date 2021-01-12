@@ -1,12 +1,20 @@
 import FluentKit
 import Vapor
 
-struct PaginationKey: StorageKey {
-    typealias Value = Pagination
+struct RequestPaginationKey: StorageKey {
+    typealias Value = RequestPagination
 }
 
-struct Pagination {
+struct RequestPagination {
     let maxPerPage: PageLimit?
+}
+
+struct AppPaginationKey: StorageKey {
+    typealias Value = AppPagination
+}
+
+struct AppPagination {
+    let maxPerPage: Int?
 }
 
 extension Request.Fluent {
@@ -23,10 +31,10 @@ extension Request.Fluent.Pagination {
     /// The maximum amount of elements per page. The default is `nil`.
     public var maxPerPage: PageLimit? {
         get {
-            storage[PaginationKey.self]?.maxPerPage
+            storage[RequestPaginationKey.self]?.maxPerPage
         }
         nonmutating set {
-            storage[PaginationKey.self] = .init(maxPerPage: newValue)
+            storage[RequestPaginationKey.self] = .init(maxPerPage: newValue)
         }
     }
 
@@ -42,12 +50,12 @@ extension Request.Fluent.Pagination {
 
 extension Application.Fluent.Pagination {
     /// The maximum amount of elements per page. The default is `nil`.
-    public var maxPerPage: PageLimit? {
+    public var maxPerPage: Int? {
         get {
-            storage[PaginationKey.self]?.maxPerPage
+            storage[AppPaginationKey.self]?.maxPerPage
         }
         nonmutating set {
-            storage[PaginationKey.self] = .init(maxPerPage: newValue)
+            storage[AppPaginationKey.self] = .init(maxPerPage: newValue)
         }
     }
 
