@@ -6,7 +6,7 @@ struct RequestPaginationKey: StorageKey {
 }
 
 struct RequestPagination {
-    let maxPerPage: PageLimit?
+    let pageSizeLimit: PageLimit?
 }
 
 struct AppPaginationKey: StorageKey {
@@ -14,7 +14,7 @@ struct AppPaginationKey: StorageKey {
 }
 
 struct AppPagination {
-    let maxPerPage: Int?
+    let pageSizeLimit: Int?
 }
 
 extension Request.Fluent {
@@ -29,12 +29,12 @@ extension Request.Fluent {
 
 extension Request.Fluent.Pagination {
     /// The maximum amount of elements per page. The default is `nil`.
-    public var maxPerPage: PageLimit? {
+    public var pageSizeLimit: PageLimit? {
         get {
-            storage[RequestPaginationKey.self]?.maxPerPage
+            storage[RequestPaginationKey.self]?.pageSizeLimit
         }
         nonmutating set {
-            storage[RequestPaginationKey.self] = .init(maxPerPage: newValue)
+            storage[RequestPaginationKey.self] = .init(pageSizeLimit: newValue)
         }
     }
 
@@ -50,12 +50,12 @@ extension Request.Fluent.Pagination {
 
 extension Application.Fluent.Pagination {
     /// The maximum amount of elements per page. The default is `nil`.
-    public var maxPerPage: Int? {
+    public var pageSizeLimit: Int? {
         get {
-            storage[AppPaginationKey.self]?.maxPerPage
+            storage[AppPaginationKey.self]?.pageSizeLimit
         }
         nonmutating set {
-            storage[AppPaginationKey.self] = .init(maxPerPage: newValue)
+            storage[AppPaginationKey.self] = .init(pageSizeLimit: newValue)
         }
     }
 

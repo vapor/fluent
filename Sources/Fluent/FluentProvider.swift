@@ -14,7 +14,7 @@ extension Request {
                 logger: self.logger,
                 on: self.eventLoop,
                 history: self.fluent.history.historyEnabled ? self.fluent.history.history : nil,
-                maxPerPage: self.fluent.pagination.maxPerPage != nil ? self.fluent.pagination.maxPerPage?.value : self.application.fluent.pagination.maxPerPage
+                pageSizeLimit: self.fluent.pagination.pageSizeLimit != nil ? self.fluent.pagination.pageSizeLimit?.value : self.application.fluent.pagination.pageSizeLimit
             )!
     }
 
@@ -35,7 +35,7 @@ extension Application {
                 logger: self.logger,
                 on: self.eventLoopGroup.next(),
                 history: self.fluent.history.historyEnabled ? self.fluent.history.history : nil,
-                maxPerPage: self.fluent.pagination.maxPerPage
+                pageSizeLimit: self.fluent.pagination.pageSizeLimit
             )!
     }
 

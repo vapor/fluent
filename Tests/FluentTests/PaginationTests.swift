@@ -94,20 +94,20 @@ final class PaginationTests: XCTestCase {
         }
 
         app.databases.use(test.configuration, as: .test)
-        app.fluent.pagination.maxPerPage = 4
+        app.fluent.pagination.pageSizeLimit = 4
 
         app.get("todos-request-limit") { req -> EventLoopFuture<Page<Todo>> in
-            req.fluent.pagination.maxPerPage = 2
+            req.fluent.pagination.pageSizeLimit = 2
             return Todo.query(on: req.db).paginate(for: req)
         }
 
         app.get("todos-request-no-limit") { req -> EventLoopFuture<Page<Todo>> in
-            req.fluent.pagination.maxPerPage = .noLimit
+            req.fluent.pagination.pageSizeLimit = .noLimit
             return Todo.query(on: req.db).paginate(for: req)
         }
 
         app.get("todos-request-app-limit") { req -> EventLoopFuture<Page<Todo>> in
-            req.fluent.pagination.maxPerPage = nil
+            req.fluent.pagination.pageSizeLimit = nil
             return Todo.query(on: req.db).paginate(for: req)
         }
 
