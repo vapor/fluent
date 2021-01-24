@@ -72,7 +72,7 @@ private struct FluentCache: Cache {
 }
 
 public final class CacheEntry: Model {
-    public static let schema: String = "_cache"
+    public static let schema: String = "_fluent_cache"
     
     struct Create: Migration {
         func prepare(on database: Database) -> EventLoopFuture<Void> {
