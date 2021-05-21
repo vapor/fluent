@@ -1,46 +1,33 @@
 name: test
-on:
-  workflow_dispatch:
-  pull_request:
-  push:
-    branches:
-      - master
+on: { pull_request: {} }
+
 jobs:
-  linux:
+  getcidata:
     runs-on: ubuntu-latest
+    outputs:
+      environments: ${{ steps.output.outputs.environments }}
+    steps:
+      - id: output
+        run: |
+          envblob="$(curl -fsSL https://raw.githubusercontent.com/vapor/ci/main/pr-environments.json | jq -cMj '.')"
+          echo "::set-output name=environments::${envblob}"
+
+  test-fluent:
+    needs: getcidata
     strategy:
       fail-fast: false
       matrix:
-        image:
-          - swift:5.2-xenial
-          - swift:5.2-bionic
-          - swiftlang/swift:nightly-5.2-xenial
-          - swiftlang/swift:nightly-5.2-bionic
-          - swiftlang/swift:nightly-5.3-xenial
-          - swiftlang/swift:nightly-5.3-bionic
-          - swiftlang/swift:nightly-master-xenial
-          - swiftlang/swift:nightly-master-bionic
-          - swiftlang/swift:nightly-master-focal
-          - swiftlang/swift:nightly-master-centos8
-          - swiftlang/swift:nightly-master-amazonlinux2
-    container: ${{ matrix.image }}
-    env:
-      LOG_LEVEL: info
-    steps:  
-      - name: Checkout Fluent
-        uses: actions/checkout@v2
-      - name: Run base tests with Thread Sanitizer
-        run: swift test --enable-test-discovery --sanitize=thread
-  macOS:
-    env:
-      LOG_LEVEL: info
-    runs-on: macos-latest
-    steps:
-      - name: Select latest available Xcode
+        env: ${{ fromJSON(needs.getcidata.outputs.environments) }}
+    runs-on: ${{ matrix.env.os }}
+    container: ${{ matrix.env.image }}
+    steps: 
+      - name: Select toolchain
         uses: maxim-lobanov/setup-xcode@v1.2.1
         with:
-          xcode-version: latest
-      - name: Checkout Fluent
+          xcode-version: ${{ matrix.env.toolchain }}
+        if: ${{ matrix.env.toolchain != '' }}
+      - name: Check out Vapor
         uses: actions/checkout@v2
-      - name: Run base Fluent tests with Thread Sanitizer
+      - name: Run tests with Thread Sanitizer
+        timeout-minutes: 30
         run: swift test --enable-test-discovery --sanitize=thread
