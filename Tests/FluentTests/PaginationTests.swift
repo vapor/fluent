@@ -64,6 +64,78 @@ final class PaginationTests: XCTestCase {
             XCTAssertEqual(todos.items.count, 1)
         }
     }
+
+    func testPaginationLimits() throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+
+        let rows = [
+            TestOutput(["id": 1, "title": "a"]),
+            TestOutput(["id": 2, "title": "b"]),
+            TestOutput(["id": 3, "title": "c"]),
+            TestOutput(["id": 4, "title": "d"]),
+            TestOutput(["id": 5, "title": "e"]),
+        ]
+
+        let test = CallbackTestDatabase { query in
+            XCTAssertEqual(query.schema, "todos")
+            let result: [TestOutput]
+            if let limit = query.limits.first?.value, let offset = query.offsets.first?.value {
+                result = [TestOutput](rows[min(offset, rows.count - 1)..<min(offset + limit, rows.count)])
+            } else {
+                result = rows
+            }
+            switch query.action {
+            case .aggregate(_):
+                return [TestOutput([.aggregate: rows.count])]
+            default:
+                return result
+            }
+        }
+
+        app.databases.use(test.configuration, as: .test)
+        app.fluent.pagination.pageSizeLimit = 4
+
+        app.get("todos-request-limit") { req -> EventLoopFuture<Page<Todo>> in
+            req.fluent.pagination.pageSizeLimit = 2
+            return Todo.query(on: req.db).paginate(for: req)
+        }
+
+        app.get("todos-request-no-limit") { req -> EventLoopFuture<Page<Todo>> in
+            req.fluent.pagination.pageSizeLimit = .noLimit
+            return Todo.query(on: req.db).paginate(for: req)
+        }
+
+        app.get("todos-request-app-limit") { req -> EventLoopFuture<Page<Todo>> in
+            req.fluent.pagination.pageSizeLimit = nil
+            return Todo.query(on: req.db).paginate(for: req)
+        }
+
+        app.get("todos-app-limit") { req -> EventLoopFuture<Page<Todo>> in
+            Todo.query(on: req.db).paginate(for: req)
+        }
+
+        try app.test(.GET, "todos-request-limit?page=1&per=5") { response in
+            XCTAssertEqual(response.status, .ok)
+            let todos = try response.content.decode(Page<Todo>.self)
+            XCTAssertEqual(todos.items.count, 2, "Should be capped by request-level limit.")
+        }
+        .test(.GET, "todos-request-no-limit?page=1&per=5") { response in
+            XCTAssertEqual(response.status, .ok)
+            let todos = try response.content.decode(Page<Todo>.self)
+            XCTAssertEqual(todos.items.count, 5, "Request-level override should suspend app-level limit.")
+        }
+        .test(.GET, "todos-request-app-limit?page=1&per=5") { response in
+            XCTAssertEqual(response.status, .ok)
+            let todos = try response.content.decode(Page<Todo>.self)
+            XCTAssertEqual(todos.items.count, 4, "Should be capped by app-level limit.")
+        }
+        .test(.GET, "todos-app-limit?page=1&per=5") { response in
+            XCTAssertEqual(response.status, .ok)
+            let todos = try response.content.decode(Page<Todo>.self)
+            XCTAssertEqual(todos.items.count, 4, "Should be capped by app-level limit.")
+        }
+    }
 }
 
 private extension DatabaseQuery.Limit {
