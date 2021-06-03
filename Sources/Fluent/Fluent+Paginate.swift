@@ -13,4 +13,4 @@ extension QueryBuilder {
     }
 }
 
-extension Page: Content { }
+extension Page: Content, RequestDecodable, ResponseEncodable where T: Codable { }
