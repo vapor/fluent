@@ -1,8 +1,18 @@
-//
-//  File.swift
-//  File
-//
-//  Created by Tim Condon on 08/10/2021.
-//
+#if compiler(>=5.5) && canImport(_Concurrency)
+import NIOCore
+import Vapor
 
-import Foundation
+@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+extension QueryBuilder {
+    public func paginate(
+        for request: Request
+    ) async throws -> Page<Model> {
+        let page = try request.query.decode(PageRequest.self)
+        return try await self.paginate(page)
+    }
+}
+
+@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+extension Page: AsyncRequestDecodable, AsyncResponseEncodable where T: Codable { }
+
+#endif
