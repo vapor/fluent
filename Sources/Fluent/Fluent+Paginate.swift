@@ -13,8 +13,4 @@ extension QueryBuilder {
     }
 }
 
-#if compiler(>=5.5) && canImport(_Concurrency)
 extension Page: Content, ResponseEncodable, RequestDecodable, AsyncResponseEncodable, AsyncRequestDecodable where T: Codable { }
-#else
-extension Page: Content, ResponseEncodable, RequestDecodable where T: Codable { }
-#endif
