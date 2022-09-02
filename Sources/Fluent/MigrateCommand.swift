@@ -5,6 +5,9 @@ public final class MigrateCommand: Command {
         @Flag(name: "revert")
         var revert: Bool
 
+        @Flag(name: "yes", short: "y", help: "Bypass interactive confirmation prompts")
+        var autoConfirmation: Bool
+
         public init() { }
     }
 
@@ -39,7 +42,7 @@ public final class MigrateCommand: Command {
             context.console.print(" on ", newLine: false)
             context.console.print(dbid?.string ?? "default")
         }
-        if context.console.confirm("Would you like to continue?".consoleText(.warning)) {
+        if signature.autoConfirmation || context.console.confirm("Would you like to continue?".consoleText(.warning)) {
             try context.application.migrator.revertLastBatch().wait()
             context.console.print("Migration successful")
         } else {
@@ -60,7 +63,7 @@ public final class MigrateCommand: Command {
             context.console.print(" on ", newLine: false)
             context.console.print(dbid?.string ?? "default")
         }
-        if context.console.confirm("Would you like to continue?".consoleText(.warning)) {
+        if signature.autoConfirmation || context.console.confirm("Would you like to continue?".consoleText(.warning)) {
             try context.application.migrator.prepareBatch().wait()
             context.console.print("Migration successful")
         } else {
