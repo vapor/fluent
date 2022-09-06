@@ -2,7 +2,7 @@
 import NIOCore
 import Vapor
 
-@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension Model where Self: SessionAuthenticatable, Self.SessionID == Self.IDValue {
     public static func asyncSessionAuthenticator(
         _ databaseID: DatabaseID? = nil
@@ -11,7 +11,7 @@ extension Model where Self: SessionAuthenticatable, Self.SessionID == Self.IDVal
     }
 }
 
-@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 private struct AsyncDatabaseSessionAuthenticator<User>: AsyncSessionAuthenticator
     where User: SessionAuthenticatable, User: Model, User.SessionID == User.IDValue
 {
