@@ -52,7 +52,8 @@ extension Application {
             databases: self.databases,
             migrations: self.migrations,
             logger: self.logger,
-            on: self.eventLoopGroup.next()
+            on: self.eventLoopGroup.any(),
+            migrationLogLevel: self.fluent.migrationLogLevel
         )
     }
 
@@ -76,13 +77,15 @@ extension Application {
         final class Storage {
             let databases: Databases
             let migrations: Migrations
+            var migrationLogLevel: Logger.Level
 
-            init(threadPool: NIOThreadPool, on eventLoopGroup: EventLoopGroup) {
+            init(threadPool: NIOThreadPool, on eventLoopGroup: EventLoopGroup, migrationLogLevel: Logger.Level) {
                 self.databases = Databases(
                     threadPool: threadPool,
                     on: eventLoopGroup
                 )
                 self.migrations = .init()
+                self.migrationLogLevel = migrationLogLevel
             }
         }
 
@@ -128,10 +131,16 @@ extension Application {
         func initialize() {
             self.application.storage[Key.self] = .init(
                 threadPool: self.application.threadPool,
-                on: self.application.eventLoopGroup
+                on: self.application.eventLoopGroup,
+                migrationLogLevel: .info
             )
             self.application.lifecycle.use(Lifecycle())
             self.application.commands.use(MigrateCommand(), as: "migrate")
+        }
+        
+        public var migrationLogLevel: Logger.Level {
+            get { self.storage.migrationLogLevel }
+            nonmutating set { self.storage.migrationLogLevel = newValue }
         }
 
         public var history: History {
