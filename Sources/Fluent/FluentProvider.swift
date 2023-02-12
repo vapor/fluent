@@ -52,7 +52,7 @@ extension Application {
             databases: self.databases,
             migrations: self.migrations,
             logger: self.logger,
-            on: self.eventLoopGroup.next(),
+            on: self.eventLoopGroup.any(),
             migrationLogLevel: self.fluent.migrationLogLevel
         )
     }
