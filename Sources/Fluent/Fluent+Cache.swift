@@ -1,4 +1,5 @@
 import Vapor
+import FluentKit
 
 extension Application.Caches {
     public var fluent: Cache {

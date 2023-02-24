@@ -1,6 +1,7 @@
 import Fluent
 import Vapor
 import XCTVapor
+import FluentKit
 
 final class OperatorTests: XCTestCase {
     func testCustomOperators() throws {

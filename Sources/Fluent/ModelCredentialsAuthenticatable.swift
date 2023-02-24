@@ -1,4 +1,5 @@
 import Vapor
+import FluentKit
 
 public protocol ModelCredentialsAuthenticatable: Model, Authenticatable {
     static var usernameKey: KeyPath<Self, Field<String>> { get }

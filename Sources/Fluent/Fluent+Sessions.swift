@@ -1,4 +1,5 @@
 import Vapor
+import FluentKit
 
 extension Application.Fluent {
     public var sessions: Sessions {

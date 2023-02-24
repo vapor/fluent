@@ -2,6 +2,7 @@ import XCTFluent
 import XCTVapor
 import Fluent
 import Vapor
+import FluentKit
 
 final class SessionTests: XCTestCase {
     func testSessionMigrationName() {

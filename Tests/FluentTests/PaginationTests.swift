@@ -2,6 +2,7 @@ import Fluent
 import Vapor
 import XCTVapor
 import XCTFluent
+import FluentKit
 
 final class PaginationTests: XCTestCase {
     func testPagination() throws {
