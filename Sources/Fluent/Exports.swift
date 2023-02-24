@@ -2,10 +2,10 @@
 
 @_exported import FluentKit
 
-#endif
-
 infix operator ~~
 infix operator =~
 infix operator !~
 infix operator !=~
 infix operator !~=
+
+#endif
