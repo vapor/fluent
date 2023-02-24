@@ -1,4 +1,5 @@
 import Vapor
+import FluentKit
 
 public protocol ModelTokenAuthenticatable: Model, Authenticatable {
     associatedtype User: Model & Authenticatable

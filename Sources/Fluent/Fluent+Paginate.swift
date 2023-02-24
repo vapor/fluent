@@ -1,4 +1,5 @@
 import Vapor
+import FluentKit
 
 extension QueryBuilder {
     public func paginate(

@@ -2,6 +2,7 @@ import Fluent
 import Vapor
 import XCTFluent
 import XCTVapor
+import FluentKit
 
 final class QueryHistoryTests: XCTestCase {
     func testQueryHistoryDisabled() throws {
