@@ -1,18 +1,14 @@
 name: deploy-api-docs
 on:
-   push:
-     branches:
-       - main
+  push:
+    branches:
+      - main
 
 jobs:
-  deploy:
-    name: api.vapor.codes
-    runs-on: ubuntu-latest
-    steps:
-    - name: Deploy api-docs
-      uses: appleboy/ssh-action@master
-      with:
-        host: vapor.codes
-        username: vapor
-        key: ${{ secrets.VAPOR_CODES_SSH_KEY }}
-        script: ./github-actions/deploy-api-docs.sh
+  build-and-deploy:
+     uses: vapor/api-docs/.github/workflows/build-and-deploy-docs-workflow.yml@main
+     secrets: inherit
+     with:
+       package_name: fluent
+       modules: Fluent
+       pathsToInvalidate: /fluent
