@@ -1,9 +1,7 @@
-#if compiler(>=5.5) && canImport(_Concurrency)
 import NIOCore
 import Vapor
 import FluentKit
 
-@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
 extension ModelCredentialsAuthenticatable {
     public static func asyncCredentialsAuthenticator(
         _ database: DatabaseID? = nil
@@ -12,7 +10,6 @@ extension ModelCredentialsAuthenticatable {
     }
 }
 
-@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
 private struct AsyncModelCredentialsAuthenticator<User>: AsyncCredentialsAuthenticator
     where User: ModelCredentialsAuthenticatable
 {
@@ -29,6 +26,3 @@ private struct AsyncModelCredentialsAuthenticator<User>: AsyncCredentialsAuthent
         }
     }
 }
-
-#endif
-
