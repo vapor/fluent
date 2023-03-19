@@ -1,3 +1,6 @@
+
+import ConsoleKit
+import FluentKit
 import Vapor
 
 public final class MigrateCommand: Command {
