@@ -1,9 +1,7 @@
-#if compiler(>=5.5) && canImport(_Concurrency)
 import NIOCore
 import Vapor
 import FluentKit
 
-@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
 extension Model where Self: SessionAuthenticatable, Self.SessionID == Self.IDValue {
     public static func asyncSessionAuthenticator(
         _ databaseID: DatabaseID? = nil
@@ -12,7 +10,6 @@ extension Model where Self: SessionAuthenticatable, Self.SessionID == Self.IDVal
     }
 }
 
-@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
 private struct AsyncDatabaseSessionAuthenticator<User>: AsyncSessionAuthenticator
     where User: SessionAuthenticatable, User: Model, User.SessionID == User.IDValue
 {
@@ -24,6 +21,3 @@ private struct AsyncDatabaseSessionAuthenticator<User>: AsyncSessionAuthenticato
         }
     }
 }
-
-#endif
-
