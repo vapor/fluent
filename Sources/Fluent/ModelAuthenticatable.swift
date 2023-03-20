@@ -1,4 +1,5 @@
 import Vapor
+import NIOCore
 import FluentKit
 
 public protocol ModelAuthenticatable: Model, Authenticatable {

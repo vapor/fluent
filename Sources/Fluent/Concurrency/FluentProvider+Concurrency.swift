@@ -1,8 +1,7 @@
-#if compiler(>=5.5) && canImport(_Concurrency)
-import NIOCore
-import Vapor
 
-@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+import Vapor
+import FluentKit
+
 extension Application {
     /// Automatically runs forward migrations without confirmation.
     /// This can be triggered by passing `--auto-migrate` flag.
@@ -20,5 +19,3 @@ extension Application {
         }.get()
     }
 }
-
-#endif
