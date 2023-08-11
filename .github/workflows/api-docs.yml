@@ -11,4 +11,4 @@ jobs:
      with:
        package_name: fluent
        modules: Fluent
-       pathsToInvalidate: /fluent
+       pathsToInvalidate: /fluent/*
