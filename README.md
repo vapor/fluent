@@ -2,7 +2,7 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/1130717/259915558-d72ded24-bc79-4b1b-8f8b-398bf0640f9a.png">
   <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/1130717/259915594-3fb46670-44a7-4677-a7b2-30f9bcf873af.png">
-  <img src="https://user-images.githubusercontent.com/1130717/259915594-3fb46670-44a7-4677-a7b2-30f9bcf873af.png" height="64" alt="Fluent">
+  <img src="https://user-images.githubusercontent.com/1130717/259915594-3fb46670-44a7-4677-a7b2-30f9bcf873af.png" height="96" alt="Fluent">
 </picture>
 <br>
 <br>
