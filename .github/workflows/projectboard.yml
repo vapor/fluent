@@ -7,5 +7,5 @@ on:
 jobs:
   update_project_boards:
     name: Update project boards
-    uses: vapor/ci/.github/workflows/update-project-boards-for-issue.yml@reusable-workflows
+    uses: vapor/ci/.github/workflows/update-project-boards-for-issue.yml@main
     secrets: inherit
