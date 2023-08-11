@@ -1,8 +1,8 @@
 <p align="center">
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/1130717/259709891-64d4c78b-1cd1-4446-8746-d3a009992811.png">
-  <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/1130717/259710040-d79ee9eb-b5d9-4a82-a894-3eb5ef366c1f.png">
-  <img src="https://user-images.githubusercontent.com/1130717/259710040-d79ee9eb-b5d9-4a82-a894-3eb5ef366c1f.png" height="96" alt="PostgresNIO">
+  <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/1130717/259915558-d72ded24-bc79-4b1b-8f8b-398bf0640f9a.png">
+  <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/1130717/259915594-3fb46670-44a7-4677-a7b2-30f9bcf873af.png">
+  <img src="https://user-images.githubusercontent.com/1130717/259915594-3fb46670-44a7-4677-a7b2-30f9bcf873af.png" height="64" alt="Fluent">
 </picture>
 <br>
 <br>
