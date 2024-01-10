@@ -139,7 +139,7 @@ extension Application {
                 migrationLogLevel: .info
             )
             self.application.lifecycle.use(Lifecycle())
-            self.application.commands.use(MigrateCommand(), as: "migrate")
+            self.application.asyncCommands.use(MigrateCommand(), as: "migrate")
         }
         
         public var migrationLogLevel: Logger.Level {
