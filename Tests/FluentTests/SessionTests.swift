@@ -91,14 +91,14 @@ extension DatabaseID {
 }
 
 struct StaticDatabase: DatabaseConfiguration, DatabaseDriver {
-    let database: Database
-    var middleware: [AnyModelMiddleware] = []
+    let database: any Database
+    var middleware: [any AnyModelMiddleware] = []
     
-    func makeDriver(for databases: Databases) -> DatabaseDriver {
+    func makeDriver(for databases: Databases) -> any DatabaseDriver {
         self
     }
 
-    func makeDatabase(with context: DatabaseContext) -> Database {
+    func makeDatabase(with context: DatabaseContext) -> any Database {
         self.database
     }
 

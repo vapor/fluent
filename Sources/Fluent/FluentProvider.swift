@@ -6,11 +6,11 @@ import Vapor
 import FluentKit
 
 extension Request {
-    public var db: Database {
+    public var db: any Database {
         self.db(nil)
     }
 
-    public func db(_ id: DatabaseID?) -> Database {
+    public func db(_ id: DatabaseID?) -> any Database {
         self.application
             .databases
             .database(
@@ -28,16 +28,16 @@ extension Request {
 }
 
 extension Application {
-    public var db: Database {
+    public var db: any Database {
         self.db(nil)
     }
 
-    public func db(_ id: DatabaseID?) -> Database {
+    public func db(_ id: DatabaseID?) -> any Database {
         self.databases
             .database(
                 id,
                 logger: self.logger,
-                on: self.eventLoopGroup.next(),
+                on: self.eventLoopGroup.any(),
                 history: self.fluent.history.historyEnabled ? self.fluent.history.history : nil,
                 pageSizeLimit: self.fluent.pagination.pageSizeLimit
             )!
@@ -78,12 +78,12 @@ extension Application {
     }
 
     public struct Fluent {
-        final class Storage {
+        final class Storage: @unchecked Sendable {
             let databases: Databases
             let migrations: Migrations
             var migrationLogLevel: Logger.Level
 
-            init(threadPool: NIOThreadPool, on eventLoopGroup: EventLoopGroup, migrationLogLevel: Logger.Level) {
+            init(threadPool: NIOThreadPool, on eventLoopGroup: any EventLoopGroup, migrationLogLevel: Logger.Level) {
                 self.databases = Databases(
                     threadPool: threadPool,
                     on: eventLoopGroup
@@ -106,7 +106,7 @@ extension Application {
                     @Flag(name: "auto-revert", help: "If true, Fluent will automatically revert your database on boot")
                     var autoRevert: Bool
 
-                    init() { }
+                    init() {}
                 }
 
                 let signature = try Signature(from: &application.environment.commandInput)

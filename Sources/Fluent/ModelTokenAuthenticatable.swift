@@ -1,6 +1,6 @@
 import Vapor
 import NIOCore
-import FluentKit
+@preconcurrency import FluentKit
 
 public protocol ModelTokenAuthenticatable: Model, Authenticatable {
     associatedtype User: Model & Authenticatable
@@ -12,7 +12,7 @@ public protocol ModelTokenAuthenticatable: Model, Authenticatable {
 extension ModelTokenAuthenticatable {
     public static func authenticator(
         database: DatabaseID? = nil
-    ) -> Authenticator {
+    ) -> any Authenticator {
         ModelTokenAuthenticator<Self>(database: database)
     }
 

@@ -1,11 +1,11 @@
 import NIOCore
 import Vapor
-import FluentKit
+@preconcurrency import FluentKit
 
 extension Model where Self: SessionAuthenticatable, Self.SessionID == Self.IDValue {
     public static func asyncSessionAuthenticator(
         _ databaseID: DatabaseID? = nil
-    ) -> AsyncAuthenticator {
+    ) -> any AsyncAuthenticator {
         AsyncDatabaseSessionAuthenticator<Self>(databaseID: databaseID)
     }
 }

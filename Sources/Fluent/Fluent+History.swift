@@ -1,5 +1,5 @@
 import Vapor
-import FluentKit
+@preconcurrency import FluentKit
 
 struct RequestQueryHistory: StorageKey {
     typealias Value = QueryHistory
