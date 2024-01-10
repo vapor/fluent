@@ -1,0 +1,22 @@
+<svg version="1.1" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" id="technology">
+  <defs>
+  <style>
+    @media(prefers-color-scheme:dark){:root{--color-logo-shape:#000;--color-logo-base:#fff;}}
+    body[data-color-scheme="dark"]{--color-logo-shape:#000;--color-logo-base:#fff;}
+    #d{fill:var(--color-logo-base,#000)}#h{fill:var(--color-logo-shape,#fff)}
+  </style>
+  <path id="d" d="M6,47l58-47,58,47-58,45z" />
+  <path id="s" d="M6,47v12l58,45v-12z" />
+  <path id="h" d="M83.16,37.9l-13.45,2.82,3.6-10.63c.68-2-.82-4.06-3.35-4.6-2.53-.55-5.13.64-5.8,2.64l-3.6,10.62-9.84-7.8c-1.85-1.48-4.85-1.48-6.7,0-1.86,1.46-1.86,3.83,0,5.3l9.85,7.8-13.45,2.82c-2.53.53-4.04,2.6-3.36,4.6s3.28,3.2,5.8,2.66l13.45-2.82-3.6,10.63c-.68,2,.82,4.06,3.35,4.6,1.7.37,3.42-.1,4.6-.96.6-.42.97-1.05,1.22-1.68l3.6-10.62,9.84,7.8c1.85,1.48,4.85,1.48,6.7,0,1.86-1.46,1.86-3.83,0-5.3l-9.85-7.8,13.45-2.82c.84-.18,1.56-.52,2.13-.97,1.15-.9,1.68-2.28,1.23-3.62-.68-2-3.28-3.2-5.8-2.66z" />
+  </defs>
+  <use href="#s" fill="#38c0ff" y="24"/>
+  <use href="#s" fill="#6bd0ff" y="12"/>
+  <use href="#s" fill="#9ee0ff"/>
+  <g transform="matrix(-1 0 0 1 128 0)">
+    <use href="#s" fill="#e438ff" y="24"/>
+    <use href="#s" fill="#eb6bff" y="12"/>
+    <use href="#s" fill="#f29eff"/>
+  </g>
+  <use href="#d"/>
+  <use href="#h"/>
+</svg>

@@ -1,4 +1,4 @@
-// swift-tools-version:5.6
+// swift-tools-version:5.7
 import PackageDescription
 
 let package = Package(
@@ -13,8 +13,8 @@ let package = Package(
         .library(name: "Fluent", targets: ["Fluent"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/vapor/fluent-kit.git", from: "1.38.0"),
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.50.0"),
+        .package(url: "https://github.com/vapor/fluent-kit.git", from: "1.45.0"),
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.91.1"),
     ],
     targets: [
         .target(name: "Fluent", dependencies: [
