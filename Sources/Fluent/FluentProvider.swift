@@ -1,9 +1,10 @@
 import ConsoleKit
 import NIOCore
 import NIOPosix
+import NIOConcurrencyHelpers
 import Logging
 import Vapor
-import FluentKit
+@preconcurrency import FluentKit
 
 extension Request {
     public var db: any Database {
@@ -78,10 +79,10 @@ extension Application {
     }
 
     public struct Fluent {
-        final class Storage: @unchecked Sendable {
+        final class Storage: Sendable {
             let databases: Databases
             let migrations: Migrations
-            var migrationLogLevel: Logger.Level
+            let migrationLogLevel: NIOLockedValueBox<Logger.Level>
 
             init(threadPool: NIOThreadPool, on eventLoopGroup: any EventLoopGroup, migrationLogLevel: Logger.Level) {
                 self.databases = Databases(
@@ -89,7 +90,7 @@ extension Application {
                     on: eventLoopGroup
                 )
                 self.migrations = .init()
-                self.migrationLogLevel = migrationLogLevel
+                self.migrationLogLevel = .init(migrationLogLevel)
             }
         }
 
@@ -143,8 +144,8 @@ extension Application {
         }
         
         public var migrationLogLevel: Logger.Level {
-            get { self.storage.migrationLogLevel }
-            nonmutating set { self.storage.migrationLogLevel = newValue }
+            get { self.storage.migrationLogLevel.withLockedValue { $0 } }
+            nonmutating set { self.storage.migrationLogLevel.withLockedValue { $0 = newValue } }
         }
 
         public var history: History {
