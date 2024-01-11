@@ -8,7 +8,7 @@ final class CacheTests: XCTestCase {
         XCTAssertEqual(CacheEntry.migration.name, "Fluent.CacheEntry.Create")
     }
     
-    func testCacheGet() throws {
+    func testCacheGet() async throws {
         let app = Application(.testing)
         defer { app.shutdown() }
 
@@ -23,7 +23,7 @@ final class CacheTests: XCTestCase {
         // simulate cache miss
         test.append([])
         do {
-            let foo = try app.cache.get("foo", as: String.self).wait()
+            let foo = try await app.cache.get("foo", as: String.self)
             XCTAssertNil(foo)
         }
         
@@ -33,12 +33,12 @@ final class CacheTests: XCTestCase {
             "value": "\"bar\""
         ])])
         do {
-            let foo = try app.cache.get("foo", as: String.self).wait()
+            let foo = try await app.cache.get("foo", as: String.self)
             XCTAssertEqual(foo, "bar")
         }
     }
 
-    func testCacheSet() throws {
+    func testCacheSet() async throws {
         let app = Application(.testing)
         defer { app.shutdown() }
 
@@ -64,6 +64,6 @@ final class CacheTests: XCTestCase {
         // Configure cache.
         app.caches.use(.fluent)
         
-        try app.cache.set("foo", to: "bar").wait()
+        try await app.cache.set("foo", to: "bar")
     }
 }

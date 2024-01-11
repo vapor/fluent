@@ -1,6 +1,6 @@
 import Foundation
 
-public struct PageLimit {
+public struct PageLimit: Sendable {
     public let value: Int?
     
     public static var noLimit: PageLimit {

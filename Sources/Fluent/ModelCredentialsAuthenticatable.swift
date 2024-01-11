@@ -1,6 +1,6 @@
 import Vapor
 import NIOCore
-import FluentKit
+@preconcurrency import FluentKit
 
 public protocol ModelCredentialsAuthenticatable: Model, Authenticatable {
     static var usernameKey: KeyPath<Self, Field<String>> { get }
@@ -11,7 +11,7 @@ public protocol ModelCredentialsAuthenticatable: Model, Authenticatable {
 extension ModelCredentialsAuthenticatable {
     public static func credentialsAuthenticator(
         database: DatabaseID? = nil
-    ) -> Authenticator {
+    ) -> any Authenticator {
         ModelCredentialsAuthenticator<Self>(database: database)
     }
 
@@ -24,7 +24,7 @@ extension ModelCredentialsAuthenticatable {
     }
 }
 
-public struct ModelCredentials: Content {
+public struct ModelCredentials: Content, Sendable {
     public let username: String
     public let password: String
 

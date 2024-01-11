@@ -1,7 +1,7 @@
 import Foundation
 import NIOCore
 import Vapor
-import FluentKit
+@preconcurrency import FluentKit
 
 extension Application.Fluent {
     public var sessions: Sessions {
@@ -29,13 +29,13 @@ extension ModelSessionAuthenticatable {
 extension Model where Self: SessionAuthenticatable, Self.SessionID == Self.IDValue {
     public static func sessionAuthenticator(
         _ databaseID: DatabaseID? = nil
-    ) -> Authenticator {
+    ) -> any Authenticator {
         DatabaseSessionAuthenticator<Self>(databaseID: databaseID)
     }
 }
 
 extension Application.Fluent.Sessions {
-    public func driver(_ databaseID: DatabaseID? = nil) -> SessionDriver {
+    public func driver(_ databaseID: DatabaseID? = nil) -> any SessionDriver {
         DatabaseSessions(databaseID: databaseID)
     }
 }
@@ -114,7 +114,7 @@ public final class SessionRecord: Model {
     public static let schema = "_fluent_sessions"
 
     struct Create: Migration {
-        func prepare(on database: Database) -> EventLoopFuture<Void> {
+        func prepare(on database: any Database) -> EventLoopFuture<Void> {
             database.schema("_fluent_sessions")
                 .id()
                 .field("key", .string, .required)
@@ -123,12 +123,12 @@ public final class SessionRecord: Model {
                 .create()
         }
 
-        func revert(on database: Database) -> EventLoopFuture<Void> {
+        func revert(on database: any Database) -> EventLoopFuture<Void> {
             database.schema("_fluent_sessions").delete()
         }
     }
 
-    public static var migration: Migration {
+    public static var migration: any Migration {
         Create()
     }
     

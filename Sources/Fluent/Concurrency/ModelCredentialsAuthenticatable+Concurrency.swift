@@ -1,11 +1,11 @@
 import NIOCore
 import Vapor
-import FluentKit
+@preconcurrency import FluentKit
 
 extension ModelCredentialsAuthenticatable {
     public static func asyncCredentialsAuthenticator(
         _ database: DatabaseID? = nil
-    ) -> AsyncAuthenticator {
+    ) -> any AsyncAuthenticator {
         AsyncModelCredentialsAuthenticator<Self>(database: database)
     }
 }

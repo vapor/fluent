@@ -5,7 +5,7 @@ struct RequestPaginationKey: StorageKey {
     typealias Value = RequestPagination
 }
 
-struct RequestPagination {
+struct RequestPagination: Sendable {
     let pageSizeLimit: PageLimit?
 }
 

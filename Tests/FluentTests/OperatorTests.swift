@@ -49,7 +49,7 @@ private struct DummyDatabase: Database {
         fatalError()
     }
 
-    func execute(query: DatabaseQuery, onOutput: @escaping (DatabaseOutput) -> ()) -> EventLoopFuture<Void> {
+    func execute(query: DatabaseQuery, onOutput: @escaping (any DatabaseOutput) -> ()) -> EventLoopFuture<Void> {
         fatalError()
     }
 
@@ -61,11 +61,11 @@ private struct DummyDatabase: Database {
         fatalError()
     }
     
-    func withConnection<T>(_ closure: @escaping (Database) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
+    func withConnection<T>(_ closure: @escaping (any Database) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
         fatalError()
     }
     
-    func transaction<T>(_ closure: @escaping (Database) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
+    func transaction<T>(_ closure: @escaping (any Database) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
         fatalError()
     }
 }

@@ -1,16 +1,17 @@
 import ConsoleKit
 import NIOCore
 import NIOPosix
+import NIOConcurrencyHelpers
 import Logging
 import Vapor
-import FluentKit
+@preconcurrency import FluentKit
 
 extension Request {
-    public var db: Database {
+    public var db: any Database {
         self.db(nil)
     }
 
-    public func db(_ id: DatabaseID?) -> Database {
+    public func db(_ id: DatabaseID?) -> any Database {
         self.application
             .databases
             .database(
@@ -28,16 +29,16 @@ extension Request {
 }
 
 extension Application {
-    public var db: Database {
+    public var db: any Database {
         self.db(nil)
     }
 
-    public func db(_ id: DatabaseID?) -> Database {
+    public func db(_ id: DatabaseID?) -> any Database {
         self.databases
             .database(
                 id,
                 logger: self.logger,
-                on: self.eventLoopGroup.next(),
+                on: self.eventLoopGroup.any(),
                 history: self.fluent.history.historyEnabled ? self.fluent.history.history : nil,
                 pageSizeLimit: self.fluent.pagination.pageSizeLimit
             )!
@@ -78,18 +79,18 @@ extension Application {
     }
 
     public struct Fluent {
-        final class Storage {
+        final class Storage: Sendable {
             let databases: Databases
             let migrations: Migrations
-            var migrationLogLevel: Logger.Level
+            let migrationLogLevel: NIOLockedValueBox<Logger.Level>
 
-            init(threadPool: NIOThreadPool, on eventLoopGroup: EventLoopGroup, migrationLogLevel: Logger.Level) {
+            init(threadPool: NIOThreadPool, on eventLoopGroup: any EventLoopGroup, migrationLogLevel: Logger.Level) {
                 self.databases = Databases(
                     threadPool: threadPool,
                     on: eventLoopGroup
                 )
                 self.migrations = .init()
-                self.migrationLogLevel = migrationLogLevel
+                self.migrationLogLevel = .init(migrationLogLevel)
             }
         }
 
@@ -106,7 +107,7 @@ extension Application {
                     @Flag(name: "auto-revert", help: "If true, Fluent will automatically revert your database on boot")
                     var autoRevert: Bool
 
-                    init() { }
+                    init() {}
                 }
 
                 let signature = try Signature(from: &application.environment.commandInput)
@@ -139,12 +140,12 @@ extension Application {
                 migrationLogLevel: .info
             )
             self.application.lifecycle.use(Lifecycle())
-            self.application.commands.use(MigrateCommand(), as: "migrate")
+            self.application.asyncCommands.use(MigrateCommand(), as: "migrate")
         }
         
         public var migrationLogLevel: Logger.Level {
-            get { self.storage.migrationLogLevel }
-            nonmutating set { self.storage.migrationLogLevel = newValue }
+            get { self.storage.migrationLogLevel.withLockedValue { $0 } }
+            nonmutating set { self.storage.migrationLogLevel.withLockedValue { $0 = newValue } }
         }
 
         public var history: History {

@@ -1,14 +1,14 @@
 import NIOCore
 import Foundation
 import Vapor
-import FluentKit
+@preconcurrency import FluentKit
 
 extension Application.Caches {
-    public var fluent: Cache {
+    public var fluent: any Cache {
         self.fluent(nil)
     }
 
-    public func fluent(_ db: DatabaseID?) -> Cache {
+    public func fluent(_ db: DatabaseID?) -> any Cache {
         FluentCache(id: db, database: self.application.db(db))
     }
 }
@@ -27,9 +27,9 @@ extension Application.Caches.Provider {
 
 private struct FluentCache: Cache {
     let id: DatabaseID?
-    let database: Database
+    let database: any Database
     
-    init(id: DatabaseID?, database: Database) {
+    init(id: DatabaseID?, database: any Database) {
         self.id = id
         self.database = database
     }
@@ -78,7 +78,7 @@ public final class CacheEntry: Model {
     public static let schema: String = "_fluent_cache"
     
     struct Create: Migration {
-        func prepare(on database: Database) -> EventLoopFuture<Void> {
+        func prepare(on database: any Database) -> EventLoopFuture<Void> {
             database.schema("_fluent_cache")
                 .id()
                 .field("key", .string, .required)
@@ -87,12 +87,12 @@ public final class CacheEntry: Model {
                 .create()
         }
         
-        func revert(on database: Database) -> EventLoopFuture<Void> {
+        func revert(on database: any Database) -> EventLoopFuture<Void> {
             database.schema("_fluent_cache").delete()
         }
     }
 
-    public static var migration: Migration {
+    public static var migration: any Migration {
         Create()
     }
     

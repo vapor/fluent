@@ -74,7 +74,7 @@ extension ByteBuffer {
 }
 
 private extension Request {
-    var posts: PostRepository {
+    var posts: any PostRepository {
         self.application.posts.makePosts!(self)
     }
 }
@@ -93,9 +93,9 @@ private extension Application {
     }
 }
 
-private struct PostRepositoryFactory {
-    var makePosts: ((Request) -> PostRepository)?
-    mutating func use(_ makePosts: @escaping (Request) -> PostRepository) {
+private struct PostRepositoryFactory: @unchecked Sendable { // not actually Sendable but the compiler doesn't need to know that
+    var makePosts: ((Request) -> any PostRepository)?
+    mutating func use(_ makePosts: @escaping (Request) -> any PostRepository) {
         self.makePosts = makePosts
     }
 }
@@ -123,7 +123,7 @@ private final class Post: Model, Content, Equatable {
 
 private struct TestPostRepository: PostRepository {
     let posts: [Post]
-    let eventLoop: EventLoop
+    let eventLoop: any EventLoop
 
     func all() -> EventLoopFuture<[Post]> {
         self.eventLoop.makeSucceededFuture(self.posts)
@@ -131,7 +131,7 @@ private struct TestPostRepository: PostRepository {
 }
 
 private struct DatabasePostRepository: PostRepository {
-    let database: Database
+    let database: any Database
     func all() -> EventLoopFuture<[Post]> {
         database.query(Post.self).all()
     }
