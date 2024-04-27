@@ -13,8 +13,8 @@ let package = Package(
         .library(name: "Fluent", targets: ["Fluent"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/vapor/fluent-kit.git", from: "1.45.0"),
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.91.1"),
+        .package(url: "https://github.com/vapor/fluent-kit.git", from: "1.48.0"),
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.94.1"),
     ],
     targets: [
         .target(
@@ -23,10 +23,7 @@ let package = Package(
                 .product(name: "FluentKit", package: "fluent-kit"),
                 .product(name: "Vapor", package: "vapor"),
             ],
-            swiftSettings: [
-                .enableUpcomingFeature("ExistentialAny"),
-                .enableExperimentalFeature("StrictConcurrency=complete"),
-            ]
+            swiftSettings: swiftSettings
         ),
         .testTarget(
             name: "FluentTests",
@@ -35,10 +32,19 @@ let package = Package(
                 .product(name: "XCTFluent", package: "fluent-kit"),
                 .product(name: "XCTVapor", package: "vapor"),
             ],
-            swiftSettings: [
-                .enableUpcomingFeature("ExistentialAny"),
-                .enableExperimentalFeature("StrictConcurrency=complete"),
-            ]
+            swiftSettings: swiftSettings
         ),
     ]
 )
+
+var swiftSettings: [SwiftSetting] { [
+    .enableUpcomingFeature("ExistentialAny"),
+    .enableUpcomingFeature("ConciseMagicFile"),
+    .enableUpcomingFeature("ForwardTrailingClosures"),
+    .enableUpcomingFeature("ImportObjcForwardDeclarations"),
+    .enableUpcomingFeature("DisableOutwardActorInference"),
+    .enableUpcomingFeature("IsolatedDefaultValues"),
+    .enableUpcomingFeature("GlobalConcurrency"),
+    .enableUpcomingFeature("StrictConcurrency"),
+    .enableExperimentalFeature("StrictConcurrency=complete"),
+] }
