@@ -30,7 +30,7 @@ final class OperatorTests: XCTestCase {
             .filter(\.$name !~ ["Earth", "Mars"])
     }
 }
-private final class Planet: Model {
+private final class Planet: Model, @unchecked Sendable {
     static let schema = "planets"
 
     @ID(custom: .id)
@@ -49,7 +49,7 @@ private struct DummyDatabase: Database {
         fatalError()
     }
 
-    func execute(query: DatabaseQuery, onOutput: @escaping (any DatabaseOutput) -> ()) -> EventLoopFuture<Void> {
+    func execute(query: DatabaseQuery, onOutput: @escaping @Sendable (any DatabaseOutput) -> ()) -> EventLoopFuture<Void> {
         fatalError()
     }
 
@@ -61,11 +61,11 @@ private struct DummyDatabase: Database {
         fatalError()
     }
     
-    func withConnection<T>(_ closure: @escaping (any Database) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
+    func withConnection<T>(_ closure: @escaping @Sendable (any Database) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
         fatalError()
     }
     
-    func transaction<T>(_ closure: @escaping (any Database) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
+    func transaction<T>(_ closure: @escaping @Sendable (any Database) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
         fatalError()
     }
 }

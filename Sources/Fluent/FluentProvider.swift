@@ -4,7 +4,7 @@ import NIOPosix
 import NIOConcurrencyHelpers
 import Logging
 import Vapor
-@preconcurrency import FluentKit
+import FluentKit
 
 extension Request {
     public var db: any Database {

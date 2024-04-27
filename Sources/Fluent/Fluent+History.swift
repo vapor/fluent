@@ -1,5 +1,5 @@
 import Vapor
-@preconcurrency import FluentKit
+import FluentKit
 
 struct RequestQueryHistory: StorageKey {
     typealias Value = QueryHistory
@@ -42,12 +42,12 @@ extension Application.Fluent.History {
     }
 
     var history: QueryHistory? {
-        return storage[RequestQueryHistory.self]
+        storage[RequestQueryHistory.self]
     }
 
     /// The queries stored in this lifecycle history
     public var queries: [DatabaseQuery] {
-        return history?.queries ?? []
+        history?.queries ?? []
     }
 
     /// Start recording the query history
@@ -82,12 +82,12 @@ extension Request.Fluent.History {
     }
 
     var history: QueryHistory? {
-        return storage[RequestQueryHistory.self]
+        storage[RequestQueryHistory.self]
     }
 
     /// The queries stored in this lifecycle history
     public var queries: [DatabaseQuery] {
-        return history?.queries ?? []
+        history?.queries ?? []
     }
 
     /// Start recording the query history

@@ -121,7 +121,7 @@ final class QueryHistoryTests: XCTestCase {
     }
 }
 
-private final class Post: Model, Content, Equatable {
+private final class Post: Model, Content, Equatable, @unchecked Sendable {
     static func == (lhs: Post, rhs: Post) -> Bool {
         lhs.id == rhs.id && lhs.content == rhs.content
     }

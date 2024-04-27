@@ -1,7 +1,7 @@
 import NIOCore
 import Foundation
 import Vapor
-@preconcurrency import FluentKit
+import FluentKit
 
 extension Application.Caches {
     public var fluent: any Cache {
@@ -49,10 +49,7 @@ private struct FluentCache: Cache {
             }
     }
     
-    func set<T>(_ key: String, to value: T?) -> EventLoopFuture<Void>
-        where T: Encodable
-    
-    {
+    func set(_ key: String, to value: (some Encodable)?) -> EventLoopFuture<Void> {
         if let value = value {
             do {
                 let data = try JSONEncoder().encode(value)
@@ -74,7 +71,7 @@ private struct FluentCache: Cache {
     }
 }
 
-public final class CacheEntry: Model {
+public final class CacheEntry: Model, @unchecked Sendable {
     public static let schema: String = "_fluent_cache"
     
     struct Create: Migration {

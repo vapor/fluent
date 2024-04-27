@@ -1,7 +1,7 @@
 import Foundation
 import NIOCore
 import Vapor
-@preconcurrency import FluentKit
+import FluentKit
 
 extension Application.Fluent {
     public var sessions: Sessions {
@@ -42,7 +42,7 @@ extension Application.Fluent.Sessions {
 
 extension Application.Sessions.Provider {
     public static var fluent: Self {
-        return .fluent(nil)
+        .fluent(nil)
     }
 
     public static func fluent(_ databaseID: DatabaseID?) -> Self {
@@ -110,7 +110,7 @@ private struct DatabaseSessionAuthenticator<User>: SessionAuthenticator
     }
 }
 
-public final class SessionRecord: Model {
+public final class SessionRecord: Model, @unchecked Sendable {
     public static let schema = "_fluent_sessions"
 
     struct Create: Migration {

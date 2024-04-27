@@ -3,31 +3,34 @@ import Vapor
 import XCTVapor
 import XCTFluent
 import FluentKit
+import NIOConcurrencyHelpers
 
 final class PaginationTests: XCTestCase {
     func testPagination() throws {
         let app = Application(.testing)
         defer { app.shutdown() }
 
-        var rows: [TestOutput] = []
+        let rows: NIOLockedValueBox<[TestOutput]> = .init([])
         for i in 1...1_000 {
-            rows.append(TestOutput([
+            rows.withLockedValue { $0.append(TestOutput([
                 "id": i,
                 "title": "Todo #\(i)"
-            ]))
+            ])) }
         }
         let test = CallbackTestDatabase { query in
             XCTAssertEqual(query.schema, "todos")
-            let result: [TestOutput]
-            if let limit = query.limits.first?.value, let offset = query.offsets.first?.value {
-                result = [TestOutput](rows[min(offset, rows.count - 1)..<min(offset + limit, rows.count)])
-            } else {
-                result = rows
+            var result: [TestOutput] = []
+            rows.withLockedValue {
+                if let limit = query.limits.first?.value, let offset = query.offsets.first?.value {
+                    result = [TestOutput]($0[min(offset, $0.count - 1)..<min(offset + limit, $0.count)])
+                } else {
+                    result = $0
+                }
             }
 
             switch query.action {
             case .aggregate(_):
-                return [TestOutput([.aggregate: rows.count])]
+                return [TestOutput([.aggregate: rows.withLockedValue { $0.count }])]
             default:
                 return result
             }
@@ -161,7 +164,7 @@ private extension DatabaseQuery.Offset {
     }
 }
 
-private final class Todo: Model, Content {
+private final class Todo: Model, Content, @unchecked Sendable {
     static let schema = "todos"
 
     @ID(custom: .id)
