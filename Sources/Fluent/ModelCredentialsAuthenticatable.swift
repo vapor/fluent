@@ -1,6 +1,6 @@
 import Vapor
 import NIOCore
-@preconcurrency import FluentKit
+import FluentKit
 
 public protocol ModelCredentialsAuthenticatable: Model, Authenticatable {
     static var usernameKey: KeyPath<Self, Field<String>> { get }

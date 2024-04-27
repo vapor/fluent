@@ -123,7 +123,7 @@ final class CredentialTests: XCTestCase {
     }
 }
 
-final class CredentialsUser: Model {
+final class CredentialsUser: Model, @unchecked Sendable {
     static let schema = "users"
 
     @ID(key: .id)

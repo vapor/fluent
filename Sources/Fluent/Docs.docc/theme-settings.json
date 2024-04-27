@@ -1,6 +1,6 @@
 {
   "theme": {
-    "aside": { "border-radius": "6px", "border-style": "double", "border-width": "3px" },
+    "aside": { "border-radius": "16px", "border-style": "double", "border-width": "3px" },
     "border-radius": "0",
     "button": { "border-radius": "16px", "border-width": "1px", "border-style": "solid" },
     "code":   { "border-radius": "16px", "border-width": "1px", "border-style": "solid" },

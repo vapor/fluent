@@ -1,6 +1,6 @@
 import NIOCore
 import Vapor
-@preconcurrency import FluentKit
+import FluentKit
 
 extension ModelCredentialsAuthenticatable {
     public static func asyncCredentialsAuthenticator(

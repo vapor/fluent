@@ -1,6 +1,6 @@
 import Vapor
 import NIOCore
-@preconcurrency import FluentKit
+import FluentKit
 
 public protocol ModelTokenAuthenticatable: Model, Authenticatable {
     associatedtype User: Model & Authenticatable
