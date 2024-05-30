@@ -30,6 +30,7 @@ final class OperatorTests: XCTestCase {
             .filter(\.$name !~ ["Earth", "Mars"])
     }
 }
+
 private final class Planet: Model, @unchecked Sendable {
     static let schema = "planets"
 

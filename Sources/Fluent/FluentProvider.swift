@@ -12,15 +12,20 @@ extension Request {
     }
 
     public func db(_ id: DatabaseID?) -> any Database {
-        self.application
-            .databases
-            .database(
-                id,
-                logger: self.logger,
-                on: self.eventLoop,
-                history: self.fluent.history.historyEnabled ? self.fluent.history.history : nil,
-                pageSizeLimit: self.fluent.pagination.pageSizeLimit != nil ? self.fluent.pagination.pageSizeLimit?.value : self.application.fluent.pagination.pageSizeLimit
-            )!
+        self.db(id, logger: self.logger)
+    }
+    
+    public func db(_ id: DatabaseID?, logger: Logger) -> any Database {
+        self.application.databases.database(
+            id,
+            logger: logger,
+            on: self.eventLoop,
+            history: self.fluent.history.historyEnabled ? self.fluent.history.history : nil,
+            // Use map() (not flatMap()) so if pageSizeLimit is non-nil but the value is nil
+            // the request's "no limit" setting overrides the app's setting.
+            pageSizeLimit: self.fluent.pagination.pageSizeLimit.map(\.value) ??
+                           self.application.fluent.pagination.pageSizeLimit
+        )!
     }
 
     public var fluent: Fluent {
@@ -34,14 +39,17 @@ extension Application {
     }
 
     public func db(_ id: DatabaseID?) -> any Database {
-        self.databases
-            .database(
-                id,
-                logger: self.logger,
-                on: self.eventLoopGroup.any(),
-                history: self.fluent.history.historyEnabled ? self.fluent.history.history : nil,
-                pageSizeLimit: self.fluent.pagination.pageSizeLimit
-            )!
+        self.db(id, logger: self.logger)
+    }
+    
+    public func db(_ id: DatabaseID?, logger: Logger) -> any Database {
+        self.databases.database(
+            id,
+            logger: logger,
+            on: self.eventLoopGroup.any(),
+            history: self.fluent.history.historyEnabled ? self.fluent.history.history : nil,
+            pageSizeLimit: self.fluent.pagination.pageSizeLimit
+        )!
     }
 
     public var databases: Databases {
@@ -53,7 +61,7 @@ extension Application {
     }
 
     public var migrator: Migrator {
-        Migrator(
+        .init(
             databases: self.databases,
             migrations: self.migrations,
             logger: self.logger,
@@ -85,10 +93,7 @@ extension Application {
             let migrationLogLevel: NIOLockedValueBox<Logger.Level>
 
             init(threadPool: NIOThreadPool, on eventLoopGroup: any EventLoopGroup, migrationLogLevel: Logger.Level) {
-                self.databases = Databases(
-                    threadPool: threadPool,
-                    on: eventLoopGroup
-                )
+                self.databases = Databases(threadPool: threadPool, on: eventLoopGroup)
                 self.migrations = .init()
                 self.migrationLogLevel = .init(migrationLogLevel)
             }
@@ -99,23 +104,33 @@ extension Application {
         }
 
         struct Lifecycle: LifecycleHandler {
+            struct Signature: CommandSignature {
+                @Flag(name: "auto-migrate", help: "If true, Fluent will automatically migrate your database on boot")
+                var autoMigrate: Bool
+
+                @Flag(name: "auto-revert", help: "If true, Fluent will automatically revert your database on boot")
+                var autoRevert: Bool
+            }
+
             func willBoot(_ application: Application) throws {
-                struct Signature: CommandSignature {
-                    @Flag(name: "auto-migrate", help: "If true, Fluent will automatically migrate your database on boot")
-                    var autoMigrate: Bool
-
-                    @Flag(name: "auto-revert", help: "If true, Fluent will automatically revert your database on boot")
-                    var autoRevert: Bool
-
-                    init() {}
-                }
-
                 let signature = try Signature(from: &application.environment.commandInput)
+                
                 if signature.autoRevert {
                     try application.autoRevert().wait()
                 }
                 if signature.autoMigrate {
                     try application.autoMigrate().wait()
+                }
+            }
+            
+            func willBootAsync(_ application: Application) async throws {
+                let signature = try Signature(from: &application.environment.commandInput)
+                
+                if signature.autoRevert {
+                    try await application.autoRevert()
+                }
+                if signature.autoMigrate {
+                    try await application.autoMigrate()
                 }
             }
 
@@ -148,21 +163,11 @@ extension Application {
             nonmutating set { self.storage.migrationLogLevel.withLockedValue { $0 = newValue } }
         }
 
-        public var history: History {
-            .init(fluent: self)
-        }
+        public struct History { let fluent: Fluent }
+        public var history: History { .init(fluent: self) }
 
-        public struct History {
-            let fluent: Fluent
-        }
-
-        public var pagination: Pagination {
-            .init(fluent: self)
-        }
-
-        public struct Pagination {
-            let fluent: Fluent
-        }
+        public struct Pagination { let fluent: Fluent }
+        public var pagination: Pagination { .init(fluent: self) }
     }
 
     public var fluent: Fluent {

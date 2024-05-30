@@ -5,32 +5,40 @@ import Vapor
 import FluentKit
 
 final class SessionTests: XCTestCase {
+    var app: Application!
+    
+    override func setUp() async throws {
+        self.app = try await Application.make(.testing)
+    }
+    
+    override func tearDown() async throws {
+        try await self.app.asyncShutdown()
+        self.app = nil
+    }
+    
     func testSessionMigrationName() {
         XCTAssertEqual(SessionRecord.migration.name, "Fluent.SessionRecord.Create")
     }
     
-    func testSessions() throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-
+    func testSessions() async throws {
         // Setup test db.
         let test = ArrayTestDatabase()
-        app.databases.use(test.configuration, as: .test)
-        app.migrations.add(SessionRecord.migration)
+        self.app.databases.use(test.configuration, as: .test)
+        self.app.migrations.add(SessionRecord.migration)
 
         // Configure sessions.
-        app.sessions.use(.fluent)
-        app.middleware.use(app.sessions.middleware)
+        self.app.sessions.use(.fluent)
+        self.app.middleware.use(self.app.sessions.middleware)
 
         // Setup routes.
-        app.get("set", ":value") { req -> HTTPStatus in
+        self.app.get("set", ":value") { req -> HTTPStatus in
             req.session.data["name"] = req.parameters.get("value")
             return .ok
         }
-        app.get("get") { req -> String in
+        self.app.get("get") { req -> String in
             req.session.data["name"] ?? "n/a"
         }
-        app.get("del") { req -> HTTPStatus in
+        self.app.get("del") { req -> HTTPStatus in
             req.session.destroy()
             return .ok
         }
@@ -39,7 +47,7 @@ final class SessionTests: XCTestCase {
         test.append([TestOutput()])
         // Store session id.
         var sessionID: String?
-        try app.test(.GET, "/set/vapor") { res in
+        try await self.app.test(.GET, "/set/vapor") { res async in
             sessionID = res.headers.setCookie?["vapor-session"]?.string
             XCTAssertEqual(res.status, .ok)
         }
@@ -54,11 +62,11 @@ final class SessionTests: XCTestCase {
         ])
         // Add empty query output for session update.
         test.append([])
-        try app.test(.GET, "/get", beforeRequest: { req in
+        try await self.app.test(.GET, "/get", beforeRequest: { req async in
             var cookies = HTTPCookies()
             cookies["vapor-session"] = .init(string: sessionID!)
             req.headers.cookie = cookies
-        }) { res in
+        }) { res async in
             XCTAssertEqual(res.status, .ok)
             XCTAssertEqual(res.body.string, "vapor")
         }

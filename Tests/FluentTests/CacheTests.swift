@@ -4,26 +4,34 @@ import Fluent
 import Vapor
 
 final class CacheTests: XCTestCase {
+    var app: Application!
+    
+    override func setUp() async throws {
+        self.app = try await Application.make(.testing)
+    }
+    
+    override func tearDown() async throws {
+        try await self.app.asyncShutdown()
+        self.app = nil
+    }
+    
     func testCacheMigrationName() {
         XCTAssertEqual(CacheEntry.migration.name, "Fluent.CacheEntry.Create")
     }
     
     func testCacheGet() async throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-
         // Setup test db.
         let test = ArrayTestDatabase()
-        app.databases.use(test.configuration, as: .test)
-        app.migrations.add(CacheEntry.migration)
+        self.app.databases.use(test.configuration, as: .test)
+        self.app.migrations.add(CacheEntry.migration)
 
         // Configure cache.
-        app.caches.use(.fluent)
+        self.app.caches.use(.fluent)
         
         // simulate cache miss
         test.append([])
         do {
-            let foo = try await app.cache.get("foo", as: String.self)
+            let foo = try await self.app.cache.get("foo", as: String.self)
             XCTAssertNil(foo)
         }
         
@@ -33,15 +41,12 @@ final class CacheTests: XCTestCase {
             "value": "\"bar\""
         ])])
         do {
-            let foo = try await app.cache.get("foo", as: String.self)
+            let foo = try await self.app.cache.get("foo", as: String.self)
             XCTAssertEqual(foo, "bar")
         }
     }
 
     func testCacheSet() async throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-
         // Setup test db.
         let test = CallbackTestDatabase { query in
             switch query.input[0] {
@@ -51,19 +56,16 @@ final class CacheTests: XCTestCase {
                     XCTAssertEqual(value, "\"bar\"")
                 default: XCTFail("unexpected value")
                 }
-                
             default: XCTFail("unexpected input")
             }
-            return [
-                TestOutput(["id": UUID()])
-            ]
+            return [TestOutput(["id": UUID()])]
         }
-        app.databases.use(test.configuration, as: .test)
-        app.migrations.add(CacheEntry.migration)
+        self.app.databases.use(test.configuration, as: .test)
+        self.app.migrations.add(CacheEntry.migration)
 
         // Configure cache.
-        app.caches.use(.fluent)
+        self.app.caches.use(.fluent)
         
-        try await app.cache.set("foo", to: "bar")
+        try await self.app.cache.set("foo", to: "bar")
     }
 }
