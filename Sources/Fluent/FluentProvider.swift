@@ -61,7 +61,7 @@ extension Application {
     }
 
     public var migrator: Migrator {
-        Migrator(
+        .init(
             databases: self.databases,
             migrations: self.migrations,
             logger: self.logger,
@@ -93,10 +93,7 @@ extension Application {
             let migrationLogLevel: NIOLockedValueBox<Logger.Level>
 
             init(threadPool: NIOThreadPool, on eventLoopGroup: any EventLoopGroup, migrationLogLevel: Logger.Level) {
-                self.databases = Databases(
-                    threadPool: threadPool,
-                    on: eventLoopGroup
-                )
+                self.databases = Databases(threadPool: threadPool, on: eventLoopGroup)
                 self.migrations = .init()
                 self.migrationLogLevel = .init(migrationLogLevel)
             }
@@ -166,21 +163,11 @@ extension Application {
             nonmutating set { self.storage.migrationLogLevel.withLockedValue { $0 = newValue } }
         }
 
-        public var history: History {
-            .init(fluent: self)
-        }
+        public struct History { let fluent: Fluent }
+        public var history: History { .init(fluent: self) }
 
-        public struct History {
-            let fluent: Fluent
-        }
-
-        public var pagination: Pagination {
-            .init(fluent: self)
-        }
-
-        public struct Pagination {
-            let fluent: Fluent
-        }
+        public struct Pagination { let fluent: Fluent }
+        public var pagination: Pagination { .init(fluent: self) }
     }
 
     public var fluent: Fluent {
