@@ -5,38 +5,35 @@ import Vapor
 import FluentKit
 
 final class CredentialTests: XCTestCase {
-
-    func testCredentialsAuthentication() throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-
-        // Setup test db.
+    var app: Application!
+    
+    override func setUp() async throws {
+        self.app = try await Application.make(.testing)
+    }
+    
+    override func tearDown() async throws {
+        try await self.app.asyncShutdown()
+        self.app = nil
+    }
+    
+    func testCredentialsAuthentication() async throws {
         let testDB = ArrayTestDatabase()
-        app.databases.use(testDB.configuration, as: .test)
-
-        // Configure sessions.
-        app.middleware.use(app.sessions.middleware)
-
-        // Setup routes.
-        let sessionRoutes = app.grouped(CredentialsUser.sessionAuthenticator())
-
-        let credentialRoutes = sessionRoutes.grouped(CredentialsUser.credentialsAuthenticator())
-        credentialRoutes.post("login") { req -> Response in
+        self.app.databases.use(testDB.configuration, as: .test)
+        self.app.middleware.use(self.app.sessions.middleware)
+        let sessionRoutes = self.app.grouped(CredentialsUser.sessionAuthenticator())
+        sessionRoutes.grouped(CredentialsUser.credentialsAuthenticator()).post("login") { req in
             guard req.auth.has(CredentialsUser.self) else {
                 throw Abort(.unauthorized)
             }
             return req.redirect(to: "/protected")
         }
-
-        let protectedRoutes = sessionRoutes.grouped(CredentialsUser.redirectMiddleware(path: "/login"))
-        protectedRoutes.get("protected") { req -> HTTPStatus in
+        sessionRoutes.grouped(CredentialsUser.redirectMiddleware(path: "/login")).get("protected") { req in
             _ = try req.auth.require(CredentialsUser.self)
-            return .ok
+            return HTTPStatus.ok
         }
 
         // Create user
-        let password = "password-\(Int.random())"
-        let passwordHash = try Bcrypt.hash(password)
+        let password = "password-\(Int.random())", passwordHash = try Bcrypt.hash(password)
         let testUser = CredentialsUser(id: UUID(), username: "user-\(Int.random())", password: passwordHash)
         testDB.append([TestOutput(testUser)])
         testDB.append([TestOutput(testUser)])
@@ -45,7 +42,7 @@ final class CredentialTests: XCTestCase {
 
         // Test login
         let loginData = ModelCredentials(username: testUser.username, password: password)
-        try app.test(.POST, "/login", beforeRequest: { req in
+        try await self.app.test(.POST, "/login", beforeRequest: { req in
             try req.content.encode(loginData, as: .urlEncodedForm)
         }) { res in
             XCTAssertEqual(res.status, .seeOther)
@@ -53,49 +50,35 @@ final class CredentialTests: XCTestCase {
             let sessionID = try XCTUnwrap(res.headers.setCookie?["vapor-session"]?.string)
 
             // Test accessing protected route
-            try app.test(.GET, "/protected", beforeRequest: { req in
+            try await self.app.test(.GET, "/protected", beforeRequest: { req in
                 var cookies = HTTPCookies()
                 cookies["vapor-session"] = .init(string: sessionID)
                 req.headers.cookie = cookies
-            }) { res in
+            }) { res async in
                 XCTAssertEqual(res.status, .ok)
             }
         }
     }
     
     func testAsyncCredentialsAuthentication() async throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-
-        
-        // Setup test db.
         let testDB = ArrayTestDatabase()
-        
-        app.databases.use(testDB.configuration, as: .test)
+        self.app.databases.use(testDB.configuration, as: .test)
+        self.app.middleware.use(self.app.sessions.middleware)
+        let sessionRoutes = self.app.grouped(CredentialsUser.sessionAuthenticator())
 
-        // Configure sessions.
-        app.middleware.use(app.sessions.middleware)
-
-        // Setup routes.
-        let sessionRoutes = app.grouped(CredentialsUser.sessionAuthenticator())
-
-        let credentialRoutes = sessionRoutes.grouped(CredentialsUser.asyncCredentialsAuthenticator())
-        credentialRoutes.post("login") { req -> Response in
+        sessionRoutes.grouped(CredentialsUser.asyncCredentialsAuthenticator()).post("login") { req async throws in
             guard req.auth.has(CredentialsUser.self) else {
                 throw Abort(.unauthorized)
             }
             return req.redirect(to: "/protected")
         }
-
-        let protectedRoutes = sessionRoutes.grouped(CredentialsUser.redirectMiddleware(path: "/login"))
-        protectedRoutes.get("protected") { req -> HTTPStatus in
+        sessionRoutes.grouped(CredentialsUser.redirectMiddleware(path: "/login")).get("protected") { req async throws in
             _ = try req.auth.require(CredentialsUser.self)
-            return .ok
+            return HTTPStatus.ok
         }
 
         // Create user
-        let password = "password-\(Int.random())"
-        let passwordHash = try Bcrypt.hash(password)
+        let password = "password-\(Int.random())", passwordHash = try Bcrypt.hash(password)
         let testUser = CredentialsUser(id: UUID(), username: "user-\(Int.random())", password: passwordHash)
         testDB.append([TestOutput(testUser)])
         testDB.append([TestOutput(testUser)])
@@ -104,19 +87,17 @@ final class CredentialTests: XCTestCase {
 
         // Test login
         let loginData = ModelCredentials(username: testUser.username, password: password)
-        try app.test(.POST, "/login", beforeRequest: { req in
-            try req.content.encode(loginData, as: .urlEncodedForm)
-        }) { res in
-            XCTAssertEqual(res.status, .seeOther)
-            XCTAssertEqual(res.headers[.location].first, "/protected")
-            let sessionID = try XCTUnwrap(res.headers.setCookie?["vapor-session"]?.string)
+        try await self.app.test(.POST, "/login", beforeRequest: { try $0.content.encode(loginData, as: .urlEncodedForm) }) {
+            XCTAssertEqual($0.status, .seeOther)
+            XCTAssertEqual($0.headers[.location].first, "/protected")
+            let sessionID = try XCTUnwrap($0.headers.setCookie?["vapor-session"]?.string)
 
             // Test accessing protected route
-            try app.test(.GET, "/protected", beforeRequest: { req in
+            try await app.test(.GET, "/protected", beforeRequest: { req in
                 var cookies = HTTPCookies()
                 cookies["vapor-session"] = .init(string: sessionID)
                 req.headers.cookie = cookies
-            }) { res in
+            }) { res async in
                 XCTAssertEqual(res.status, .ok)
             }
         }

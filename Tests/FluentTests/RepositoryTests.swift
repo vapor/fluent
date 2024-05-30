@@ -3,51 +3,57 @@ import Vapor
 import XCTFluent
 import XCTVapor
 import FluentKit
+import NIOConcurrencyHelpers
 
 final class RepositoryTests: XCTestCase {
-    func testRepositoryPatternStatic() throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-
-        var posts: [Post] = [
+    var app: Application!
+    
+    override func setUp() async throws {
+        self.app = try await Application.make(.testing)
+    }
+    
+    override func tearDown() async throws {
+        try await self.app.asyncShutdown()
+        self.app = nil
+    }
+    
+    func testRepositoryPatternStatic() async throws {
+        let posts: NIOLockedValueBox<[Post]> = .init([
             .init(content: "a"),
             .init(content: "b")
-        ]
+        ])
 
-        app.posts.use {
-            TestPostRepository(posts: posts, eventLoop: $0.eventLoop)
+        self.app.posts.use {
+            TestPostRepository(posts: posts.withLockedValue { $0 }, eventLoop: $0.eventLoop)
         }
 
-        app.get("foo") { req -> EventLoopFuture<[Post]> in
-            req.posts.all()
+        self.app.get("foo") { req -> [Post] in
+            try await req.posts.all()
         }
 
-        try app.testable().test(.GET, "foo") { res in
+        try await self.app.testable().test(.GET, "foo") { res async in
             XCTAssertEqual(res.status, .ok)
-            XCTAssertEqualJSON(res.body.string, posts)
+            XCTAssertEqualJSON(res.body.string, posts.withLockedValue { $0 })
         }
 
-        posts.append(.init(content: "c"))
+        posts.withLockedValue { $0.append(.init(content: "c")) }
 
-        try app.testable().test(.GET, "foo") { res in
+        try await self.app.testable().test(.GET, "foo") { res async in
             XCTAssertEqual(res.status, .ok)
-            XCTAssertEqualJSON(res.body.string, posts)
+            XCTAssertEqualJSON(res.body.string, posts.withLockedValue { $0 })
         }
     }
     
-    func testRepositoryPatternDatabase() throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-
+    func testRepositoryPatternDatabase() async throws {
         let test = ArrayTestDatabase()
-        app.databases.use(test.configuration, as: .test)
+        self.app.databases.use(test.configuration, as: .test)
         
-        app.posts.use { req in
+        self.app.posts.use { req in
             DatabasePostRepository(database: req.db(.test))
         }
         
-        app.get("foo") { req -> EventLoopFuture<[Post]> in
-            req.posts.all()
+        self.app.get("foo") { req -> [Post] in
+            try await req.posts.all()
         }
         
         let posts: [Post] = [
@@ -60,7 +66,7 @@ final class RepositoryTests: XCTestCase {
             TestOutput(["id": 2, "content": "b"]),
         ])
         
-        try app.testable().test(.GET, "foo") { res in
+        try await self.app.testable().test(.GET, "foo") { res async in
             XCTAssertEqual(res.status, .ok)
             XCTAssertEqualJSON(res.body.string, posts)
         }
@@ -69,7 +75,7 @@ final class RepositoryTests: XCTestCase {
 
 extension ByteBuffer {
     var string: String {
-        .init(decoding: self.readableBytesView, as: UTF8.self)
+        self.getString(at: self.readerIndex, length: self.readableBytes)!
     }
 }
 
@@ -83,19 +89,17 @@ private extension Application {
     private struct PostRepositoryKey: StorageKey {
         typealias Value = PostRepositoryFactory
     }
+
     var posts: PostRepositoryFactory {
-        get {
-            self.storage[PostRepositoryKey.self] ?? .init()
-        }
-        set {
-            self.storage[PostRepositoryKey.self] = newValue
-        }
+        get { self.storage[PostRepositoryKey.self] ?? .init() }
+        set { self.storage[PostRepositoryKey.self] = newValue }
     }
 }
 
 private struct PostRepositoryFactory: @unchecked Sendable { // not actually Sendable but the compiler doesn't need to know that
-    var makePosts: ((Request) -> any PostRepository)?
-    mutating func use(_ makePosts: @escaping (Request) -> any PostRepository) {
+    var makePosts: (@Sendable (Request) -> any PostRepository)?
+    
+    mutating func use(_ makePosts: @escaping @Sendable (Request) -> any PostRepository) {
         self.makePosts = makePosts
     }
 }
@@ -125,18 +129,18 @@ private struct TestPostRepository: PostRepository {
     let posts: [Post]
     let eventLoop: any EventLoop
 
-    func all() -> EventLoopFuture<[Post]> {
-        self.eventLoop.makeSucceededFuture(self.posts)
-    }
+    func all() -> EventLoopFuture<[Post]> { self.eventLoop.makeSucceededFuture(self.posts) }
+    func all() async throws -> [Post] { self.posts }
 }
 
 private struct DatabasePostRepository: PostRepository {
     let database: any Database
-    func all() -> EventLoopFuture<[Post]> {
-        database.query(Post.self).all()
-    }
+    
+    func all() -> EventLoopFuture<[Post]> { self.database.query(Post.self).all() }
+    func all() async throws -> [Post] { try await self.database.query(Post.self).all() }
 }
 
 private protocol PostRepository {
     func all() -> EventLoopFuture<[Post]>
+    func all() async throws -> [Post]
 }
