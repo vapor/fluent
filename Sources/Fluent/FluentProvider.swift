@@ -107,23 +107,33 @@ extension Application {
         }
 
         struct Lifecycle: LifecycleHandler {
+            struct Signature: CommandSignature {
+                @Flag(name: "auto-migrate", help: "If true, Fluent will automatically migrate your database on boot")
+                var autoMigrate: Bool
+
+                @Flag(name: "auto-revert", help: "If true, Fluent will automatically revert your database on boot")
+                var autoRevert: Bool
+            }
+
             func willBoot(_ application: Application) throws {
-                struct Signature: CommandSignature {
-                    @Flag(name: "auto-migrate", help: "If true, Fluent will automatically migrate your database on boot")
-                    var autoMigrate: Bool
-
-                    @Flag(name: "auto-revert", help: "If true, Fluent will automatically revert your database on boot")
-                    var autoRevert: Bool
-
-                    init() {}
-                }
-
                 let signature = try Signature(from: &application.environment.commandInput)
+                
                 if signature.autoRevert {
                     try application.autoRevert().wait()
                 }
                 if signature.autoMigrate {
                     try application.autoMigrate().wait()
+                }
+            }
+            
+            func willBootAsync(_ application: Application) async throws {
+                let signature = try Signature(from: &application.environment.commandInput)
+                
+                if signature.autoRevert {
+                    try await application.autoRevert()
+                }
+                if signature.autoMigrate {
+                    try await application.autoMigrate()
                 }
             }
 
