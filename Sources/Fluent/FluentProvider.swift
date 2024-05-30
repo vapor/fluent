@@ -12,15 +12,20 @@ extension Request {
     }
 
     public func db(_ id: DatabaseID?) -> any Database {
-        self.application
-            .databases
-            .database(
-                id,
-                logger: self.logger,
-                on: self.eventLoop,
-                history: self.fluent.history.historyEnabled ? self.fluent.history.history : nil,
-                pageSizeLimit: self.fluent.pagination.pageSizeLimit != nil ? self.fluent.pagination.pageSizeLimit?.value : self.application.fluent.pagination.pageSizeLimit
-            )!
+        self.db(id, logger: self.logger)
+    }
+    
+    public func db(_ id: DatabaseID?, logger: Logger) -> any Database {
+        self.application.databases.database(
+            id,
+            logger: logger,
+            on: self.eventLoop,
+            history: self.fluent.history.historyEnabled ? self.fluent.history.history : nil,
+            // Use map() (not flatMap()) so if pageSizeLimit is non-nil but the value is nil
+            // the request's "no limit" setting overrides the app's setting.
+            pageSizeLimit: self.fluent.pagination.pageSizeLimit.map(\.value) ??
+                           self.application.fluent.pagination.pageSizeLimit
+        )!
     }
 
     public var fluent: Fluent {
@@ -34,14 +39,17 @@ extension Application {
     }
 
     public func db(_ id: DatabaseID?) -> any Database {
-        self.databases
-            .database(
-                id,
-                logger: self.logger,
-                on: self.eventLoopGroup.any(),
-                history: self.fluent.history.historyEnabled ? self.fluent.history.history : nil,
-                pageSizeLimit: self.fluent.pagination.pageSizeLimit
-            )!
+        self.db(id, logger: self.logger)
+    }
+    
+    public func db(_ id: DatabaseID?, logger: Logger) -> any Database {
+        self.databases.database(
+            id,
+            logger: logger,
+            on: self.eventLoopGroup.any(),
+            history: self.fluent.history.historyEnabled ? self.fluent.history.history : nil,
+            pageSizeLimit: self.fluent.pagination.pageSizeLimit
+        )!
     }
 
     public var databases: Databases {
