@@ -71,6 +71,47 @@ final class SessionTests: XCTestCase {
             XCTAssertEqual(res.body.string, "vapor")
         }
     }
+
+    func testSessionCustomSchema() async throws {
+        // Setup test.
+        SessionRecord.schema = "_custom_fluent_sessions"
+        let test = ArrayTestDatabase()
+        self.app.databases.use(test.configuration, as: .test)
+        self.app.migrations.add(SessionRecord.migration)
+        self.app.sessions.use(.fluent)
+        self.app.middleware.use(self.app.sessions.middleware)
+        self.app.get("set", ":value") { req -> HTTPStatus in
+            req.session.data["name"] = req.parameters.get("value")
+            return .ok
+        }
+        self.app.get("get") { req in req.session.data["name"] ?? "n/a" }
+        self.app.get("del") { req -> HTTPStatus in
+            req.session.destroy()
+            return .ok
+        }
+
+        // Add single query output with empty row.
+        test.append([TestOutput()])
+        var sessionID: String?
+        try await self.app.test(.GET, "/set/vapor") { res async in
+            sessionID = res.headers.setCookie?["vapor-session"]?.string
+            XCTAssertEqual(res.status, .ok)
+        }
+        // Add single query output with session data for session read.
+        test.append([TestOutput([
+            "id": UUID(), "key": SessionID(string: sessionID!),
+            "data": SessionData(initialData: ["name": "vapor"])
+        ])])
+        test.append([])
+        try await self.app.test(.GET, "/get", beforeRequest: { req async in
+            var cookies = HTTPCookies()
+            cookies["vapor-session"] = .init(string: sessionID!)
+            req.headers.cookie = cookies
+        }) { res async in
+            XCTAssertEqual(res.status, .ok)
+            XCTAssertEqual(res.body.string, "vapor")
+        }
+    }
 }
 
 final class User: Model, @unchecked Sendable {
@@ -95,22 +136,5 @@ extension User: ModelSessionAuthenticatable { }
 extension DatabaseID {
     static var test: Self {
         .init(string: "test")
-    }
-}
-
-struct StaticDatabase: DatabaseConfiguration, DatabaseDriver {
-    let database: any Database
-    var middleware: [any AnyModelMiddleware] = []
-    
-    func makeDriver(for databases: Databases) -> any DatabaseDriver {
-        self
-    }
-
-    func makeDatabase(with context: DatabaseContext) -> any Database {
-        self.database
-    }
-
-    func shutdown() {
-        // Do nothing.
     }
 }

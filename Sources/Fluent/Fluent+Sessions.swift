@@ -111,11 +111,15 @@ private struct DatabaseSessionAuthenticator<User>: SessionAuthenticator
 }
 
 public final class SessionRecord: Model, @unchecked Sendable {
-    public static let schema = "_fluent_sessions"
+    #if swift(>=5.10)
+    nonisolated(unsafe) public static var schema = "_fluent_sessions"
+    #else
+    public static var schema = "_fluent_sessions"
+    #endif
 
     struct Create: Migration {
         func prepare(on database: any Database) -> EventLoopFuture<Void> {
-            database.schema("_fluent_sessions")
+            database.schema(SessionRecord.schema)
                 .id()
                 .field("key", .string, .required)
                 .field("data", .json, .required)
@@ -124,7 +128,7 @@ public final class SessionRecord: Model, @unchecked Sendable {
         }
 
         func revert(on database: any Database) -> EventLoopFuture<Void> {
-            database.schema("_fluent_sessions").delete()
+            database.schema(SessionRecord.schema).delete()
         }
     }
 
