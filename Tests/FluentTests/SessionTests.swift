@@ -113,4 +113,8 @@ struct StaticDatabase: DatabaseConfiguration, DatabaseDriver {
     func shutdown() {
         // Do nothing.
     }
+    
+    func shutdownAsync() async {
+        // Do nothing
+    }
 }

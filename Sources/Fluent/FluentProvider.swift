@@ -137,6 +137,10 @@ extension Application {
             func shutdown(_ application: Application) {
                 application.databases.shutdown()
             }
+            
+            func shutdownAsync(_ application: Application) async {
+                await application.databases.shutdownAsync()
+            }
         }
 
         let application: Application
