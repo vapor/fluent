@@ -7,14 +7,14 @@ extension Application.Fluent {
     public var sessions: Sessions {
         .init(fluent: self)
     }
-
+    
     public struct Sessions {
         let fluent: Application.Fluent
     }
 }
 
 public protocol ModelSessionAuthenticatable: Model, SessionAuthenticatable
-    where Self.SessionID == Self.IDValue
+where Self.SessionID == Self.IDValue
 { }
 
 extension ModelSessionAuthenticatable {
@@ -44,7 +44,7 @@ extension Application.Sessions.Provider {
     public static var fluent: Self {
         .fluent(nil)
     }
-
+    
     public static func fluent(_ databaseID: DatabaseID?) -> Self {
         .init {
             $0.sessions.use { $0.fluent.sessions.driver(databaseID) }
@@ -59,8 +59,8 @@ private struct DatabaseSessions: SessionDriver {
         self.databaseID = databaseID
     }
     
-    func createSession(_ data: SessionData, for request: Request) -> EventLoopFuture<SessionID> {
-        let id = self.generateID()
+    func createSession(_ sessionID: SessionID? = nil,_ data: SessionData, for request: Request) -> EventLoopFuture<SessionID> {
+        let id = sessionID ?? self.generateID()
         return SessionRecord(key: id, data: data)
             .create(on: request.db(self.databaseID))
             .map { id }
@@ -97,10 +97,10 @@ private struct DatabaseSessions: SessionDriver {
 }
 
 private struct DatabaseSessionAuthenticator<User>: SessionAuthenticator
-    where User: SessionAuthenticatable, User: Model, User.SessionID == User.IDValue
+where User: SessionAuthenticatable, User: Model, User.SessionID == User.IDValue
 {
     let databaseID: DatabaseID?
-
+    
     func authenticate(sessionID: User.SessionID, for request: Request) -> EventLoopFuture<Void> {
         User.find(sessionID, on: request.db(self.databaseID)).map {
             if let user = $0 {
@@ -112,7 +112,7 @@ private struct DatabaseSessionAuthenticator<User>: SessionAuthenticator
 
 public final class SessionRecord: Model, @unchecked Sendable {
     public static let schema = "_fluent_sessions"
-
+    
     struct Create: Migration {
         func prepare(on database: any Database) -> EventLoopFuture<Void> {
             database.schema("_fluent_sessions")
@@ -122,12 +122,12 @@ public final class SessionRecord: Model, @unchecked Sendable {
                 .unique(on: "key")
                 .create()
         }
-
+        
         func revert(on database: any Database) -> EventLoopFuture<Void> {
             database.schema("_fluent_sessions").delete()
         }
     }
-
+    
     public static var migration: any Migration {
         Create()
     }
