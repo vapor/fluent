@@ -62,14 +62,14 @@ private struct DatabaseSessions: SessionDriver {
     func createSession(_ data: SessionData, for request: Request) -> EventLoopFuture<SessionID> {
         let id = self.generateID()
         return SessionRecord(key: id, data: data)
-            .create(on: request.db(self.databaseID))
+            .create(on: request.db(self.databaseID), annotationContext: nil)
             .map { id }
     }
     
     func readSession(_ sessionID: SessionID, for request: Request) -> EventLoopFuture<SessionData?> {
         SessionRecord.query(on: request.db(self.databaseID))
             .filter(\.$key == sessionID)
-            .first()
+            .first(annotationContext: nil)
             .map { $0?.data }
     }
     
@@ -77,14 +77,14 @@ private struct DatabaseSessions: SessionDriver {
         SessionRecord.query(on: request.db(self.databaseID))
             .filter(\.$key == sessionID)
             .set(\.$data, to: data)
-            .update()
+            .update(annotationContext: nil)
             .map { sessionID }
     }
     
     func deleteSession(_ sessionID: SessionID, for request: Request) -> EventLoopFuture<Void> {
         SessionRecord.query(on: request.db(self.databaseID))
             .filter(\.$key == sessionID)
-            .delete()
+            .delete(annotationContext: nil)
     }
     
     private func generateID() -> SessionID {
@@ -102,7 +102,7 @@ private struct DatabaseSessionAuthenticator<User>: SessionAuthenticator
     let databaseID: DatabaseID?
 
     func authenticate(sessionID: User.SessionID, for request: Request) -> EventLoopFuture<Void> {
-        User.find(sessionID, on: request.db(self.databaseID)).map {
+        User.find(sessionID, on: request.db(self.databaseID), annotationContext: nil).map {
             if let user = $0 {
                 request.auth.login(user)
             }

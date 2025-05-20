@@ -39,7 +39,7 @@ private struct FluentCache: Cache {
     {
         CacheEntry.query(on: self.database)
             .filter(\.$key == key)
-            .first()
+            .first(annotationContext: nil)
             .flatMapThrowing { entry -> T? in
                 if let entry = entry {
                     return try JSONDecoder().decode(T.self, from: Data(entry.value.utf8))
@@ -57,12 +57,12 @@ private struct FluentCache: Cache {
                     key: key,
                     value: String(decoding: data, as: UTF8.self)
                 )
-                return entry.create(on: self.database)
+                return entry.create(on: self.database, annotationContext: nil)
             } catch {
                 return self.database.eventLoop.makeFailedFuture(error)
             }
         } else {
-            return CacheEntry.query(on: self.database).filter(\.$key == key).delete()
+            return CacheEntry.query(on: self.database).filter(\.$key == key).delete(annotationContext: nil)
         }
     }
     

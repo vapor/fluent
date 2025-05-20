@@ -1,6 +1,7 @@
 import Vapor
 import NIOCore
 import FluentKit
+import SQLKit
 
 public protocol ModelTokenAuthenticatable: Model, Authenticatable {
     associatedtype User: Model & Authenticatable
@@ -38,17 +39,17 @@ private struct ModelTokenAuthenticator<Token>: BearerAuthenticator
         let db = request.db(self.database)
         return Token.query(on: db)
             .filter(\._$value == bearer.token)
-            .first()
+            .first(annotationContext: nil)
             .flatMap
         { token -> EventLoopFuture<Void> in
             guard let token = token else {
                 return request.eventLoop.makeSucceededFuture(())
             }
             guard token.isValid else {
-                return token.delete(on: db)
+                return token.delete(on: db, annotationContext: nil)
             }
             request.auth.login(token)
-            return token._$user.get(on: db).map {
+            return token._$user.get(on: db, annotationContext: nil).map {
                 request.auth.login($0)
             }
         }

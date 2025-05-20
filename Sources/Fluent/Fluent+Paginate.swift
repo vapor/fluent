@@ -1,14 +1,16 @@
 import Vapor
 import NIOCore
 import FluentKit
+import SQLKit
 
 extension QueryBuilder {
     public func paginate(
-        for request: Request
+        for request: Request,
+        annotationContext: SQLAnnotationContext
     ) -> EventLoopFuture<Page<Model>> {
         do {
             let page = try request.query.decode(PageRequest.self)
-            return self.paginate(page)
+            return self.paginate(page, annotationContext: annotationContext)
         } catch {
             return request.eventLoop.makeFailedFuture(error)
         }

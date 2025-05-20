@@ -42,7 +42,7 @@ private struct ModelCredentialsAuthenticator<User>: CredentialsAuthenticator
     public let database: DatabaseID?
 
     func authenticate(credentials: ModelCredentials, for request: Request) -> EventLoopFuture<Void> {
-        User.query(on: request.db(self.database)).filter(\._$username == credentials.username).first().flatMapThrowing { foundUser in
+        User.query(on: request.db(self.database)).filter(\._$username == credentials.username).first(annotationContext: nil).flatMapThrowing { foundUser in
             guard let user = foundUser else {
                 return
             }

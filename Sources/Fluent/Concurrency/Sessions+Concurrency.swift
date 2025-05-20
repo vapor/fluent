@@ -16,7 +16,7 @@ private struct AsyncDatabaseSessionAuthenticator<User>: AsyncSessionAuthenticato
     let databaseID: DatabaseID?
 
     func authenticate(sessionID: User.SessionID, for request: Request) async throws {
-        if let user = try await User.find(sessionID, on: request.db(self.databaseID)) {
+        if let user = try await User.find(sessionID, on: request.db(self.databaseID), annotationContext: nil) {
             request.auth.login(user)
         }
     }

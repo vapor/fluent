@@ -35,7 +35,7 @@ private struct ModelAuthenticator<User>: BasicAuthenticator
     ) -> EventLoopFuture<Void> {
         User.query(on: request.db(self.database))
             .filter(\._$username == basic.username)
-            .first()
+            .first(annotationContext: nil)
             .flatMapThrowing
         {
             guard let user = $0 else {
