@@ -1,4 +1,4 @@
-import ConsoleKit
+public import ConsoleKit
 import FluentKit
 import Vapor
 

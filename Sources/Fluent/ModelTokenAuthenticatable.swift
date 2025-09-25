@@ -1,6 +1,5 @@
-import Vapor
-import NIOCore
-import FluentKit
+public import FluentKit
+public import Vapor
 
 public protocol ModelTokenAuthenticatable: Model, Authenticatable {
     associatedtype User: Model & Authenticatable
@@ -39,19 +38,17 @@ private struct ModelTokenAuthenticator<Token>: BearerAuthenticator
         return Token.query(on: db)
             .filter(\._$value == bearer.token)
             .first()
-            .flatMap
-        { token -> EventLoopFuture<Void> in
-            guard let token = token else {
-                return request.eventLoop.makeSucceededFuture(())
+            .flatMap { token -> EventLoopFuture<Void> in
+                guard let token = token else {
+                    return request.eventLoop.makeSucceededFuture(())
+                }
+                guard token.isValid else {
+                    return token.delete(on: db)
+                }
+                request.auth.login(token)
+                return token._$user.get(on: db).map {
+                    request.auth.login($0)
+                }
             }
-            guard token.isValid else {
-                return token.delete(on: db)
-            }
-            request.auth.login(token)
-            return token._$user.get(on: db).map {
-                request.auth.login($0)
-            }
-        }
     }
 }
-

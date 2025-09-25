@@ -1,7 +1,6 @@
+public import FluentKit
 import Foundation
-import NIOCore
-import Vapor
-import FluentKit
+public import Vapor
 
 extension Application.Fluent {
     public var sessions: Sessions {
@@ -15,7 +14,7 @@ extension Application.Fluent {
 
 public protocol ModelSessionAuthenticatable: Model, SessionAuthenticatable
     where Self.SessionID == Self.IDValue
-{ }
+{}
 
 extension ModelSessionAuthenticatable {
     public var sessionID: SessionID {
@@ -54,25 +53,25 @@ extension Application.Sessions.Provider {
 
 private struct DatabaseSessions: SessionDriver {
     let databaseID: DatabaseID?
-    
+
     init(databaseID: DatabaseID? = nil) {
         self.databaseID = databaseID
     }
-    
+
     func createSession(_ data: SessionData, for request: Request) -> EventLoopFuture<SessionID> {
         let id = self.generateID()
         return SessionRecord(key: id, data: data)
             .create(on: request.db(self.databaseID))
             .map { id }
     }
-    
+
     func readSession(_ sessionID: SessionID, for request: Request) -> EventLoopFuture<SessionData?> {
         SessionRecord.query(on: request.db(self.databaseID))
             .filter(\.$key == sessionID)
             .first()
             .map { $0?.data }
     }
-    
+
     func updateSession(_ sessionID: SessionID, to data: SessionData, for request: Request) -> EventLoopFuture<SessionID> {
         SessionRecord.query(on: request.db(self.databaseID))
             .filter(\.$key == sessionID)
@@ -80,13 +79,13 @@ private struct DatabaseSessions: SessionDriver {
             .update()
             .map { sessionID }
     }
-    
+
     func deleteSession(_ sessionID: SessionID, for request: Request) -> EventLoopFuture<Void> {
         SessionRecord.query(on: request.db(self.databaseID))
             .filter(\.$key == sessionID)
             .delete()
     }
-    
+
     private func generateID() -> SessionID {
         var bytes = Data()
         for _ in 0..<32 {
@@ -97,8 +96,7 @@ private struct DatabaseSessions: SessionDriver {
 }
 
 private struct DatabaseSessionAuthenticator<User>: SessionAuthenticator
-    where User: SessionAuthenticatable, User: Model, User.SessionID == User.IDValue
-{
+where User: SessionAuthenticatable, User: Model, User.SessionID == User.IDValue {
     let databaseID: DatabaseID?
 
     func authenticate(sessionID: User.SessionID, for request: Request) -> EventLoopFuture<Void> {
@@ -131,18 +129,18 @@ public final class SessionRecord: Model, @unchecked Sendable {
     public static var migration: any Migration {
         Create()
     }
-    
+
     @ID(key: .id)
     public var id: UUID?
-    
+
     @Field(key: "key")
     public var key: SessionID
-    
+
     @Field(key: "data")
     public var data: SessionData
-    
-    public init() { }
-    
+
+    public init() {}
+
     public init(id: UUID? = nil, key: SessionID, data: SessionData) {
         self.id = id
         self.key = key

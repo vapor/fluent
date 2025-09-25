@@ -1,5 +1,5 @@
-import Vapor
-import FluentKit
+public import FluentKit
+public import Vapor
 
 struct RequestQueryHistory: StorageKey {
     typealias Value = QueryHistory

@@ -1,118 +1,120 @@
 import Fluent
+import Testing
 import Vapor
+import VaporTesting
 import XCTFluent
-import XCTVapor
-import FluentKit
 
-final class QueryHistoryTests: XCTestCase {
-    var app: Application!
-    
-    override func setUp() async throws {
-        self.app = try await Application.make(.testing)
-    }
-    
-    override func tearDown() async throws {
-        try await self.app.asyncShutdown()
-        self.app = nil
-    }
-    
-    func testQueryHistoryDisabled() async throws {
-        let test = ArrayTestDatabase()
-        self.app.databases.use(test.configuration, as: .test)
+@Suite
+struct QueryHistoryTests {
+    @Test
+    func queryHistoryDisabled() async throws {
+        try await withApp { app in
+            let test = ArrayTestDatabase()
+            app.databases.use(test.configuration, as: .test)
 
-        test.append([
-            TestOutput(["id": 1, "content": "a"]),
-            TestOutput(["id": 2, "content": "b"]),
-        ])
+            test.append([
+                TestOutput(["id": 1, "content": "a"]),
+                TestOutput(["id": 2, "content": "b"]),
+            ])
 
-        self.app.get("foo") { req -> [Post] in
-            let posts = try await Post.query(on: req.db).all()
-            XCTAssertEqual(req.fluent.history.queries.count, 0)
-            return posts
-        }
+            app.get("foo") { req -> [Post] in
+                let posts = try await Post.query(on: req.db).all()
+                #expect(req.fluent.history.queries.count == 0)
+                return posts
+            }
 
-        try await self.app.testable().test(.GET, "foo") { res async in
-            XCTAssertEqual(res.status, .ok)
+            try await app.test(.GET, "foo") { res async in
+                #expect(res.status == .ok)
+            }
         }
     }
 
-    func testQueryHistoryEnabled() async throws {
-        let test = ArrayTestDatabase()
-        self.app.databases.use(test.configuration, as: .test)
+    @Test
+    func queryHistoryEnabled() async throws {
+        try await withApp { app in
+            let test = ArrayTestDatabase()
+            app.databases.use(test.configuration, as: .test)
 
-        test.append([
-            TestOutput(["id": 1, "content": "a"]),
-            TestOutput(["id": 2, "content": "b"]),
-        ])
+            test.append([
+                TestOutput(["id": 1, "content": "a"]),
+                TestOutput(["id": 2, "content": "b"]),
+            ])
 
-        self.app.get("foo") { req -> [Post] in
-            req.fluent.history.start()
-            let posts = try await Post.query(on: req.db).all()
-            XCTAssertEqual(req.fluent.history.queries.count, 1)
-            return posts
-        }
+            app.get("foo") { req -> [Post] in
+                req.fluent.history.start()
+                let posts = try await Post.query(on: req.db).all()
+                #expect(req.fluent.history.queries.count == 1)
+                return posts
+            }
 
-        try await self.app.testable().test(.GET, "foo") { res async in
-            XCTAssertEqual(res.status, .ok)
-        }
-    }
-
-    func testQueryHistoryEnableAndDisable() async throws {
-        let test = ArrayTestDatabase()
-        self.app.databases.use(test.configuration, as: .test)
-
-        test.append([
-            TestOutput(["id": 1, "content": "a"]),
-            TestOutput(["id": 2, "content": "b"]),
-        ])
-        test.append([
-            TestOutput(["id": 1, "content": "a"]),
-            TestOutput(["id": 2, "content": "b"]),
-        ])
-
-        self.app.get("foo") { req -> [Post] in
-            req.fluent.history.start()
-            _ = try await Post.query(on: req.db).all()
-            XCTAssertEqual(req.fluent.history.queries.count, 1)
-            req.fluent.history.stop()
-
-            let posts = try await Post.query(on: req.db).all()
-            XCTAssertEqual(req.fluent.history.queries.count, 1)
-            return posts
-        }
-
-        try await self.app.testable().test(.GET, "foo") { res async in
-            XCTAssertEqual(res.status, .ok)
+            try await app.test(.GET, "foo") { res async in
+                #expect(res.status == .ok)
+            }
         }
     }
 
-    func testQueryHistoryForApp() async throws {
-        self.app.fluent.history.start()
-        let test = ArrayTestDatabase()
-        self.app.databases.use(test.configuration, as: .test)
+    @Test
+    func queryHistoryEnableAndDisable() async throws {
+        try await withApp { app in
+            let test = ArrayTestDatabase()
+            app.databases.use(test.configuration, as: .test)
 
-        test.append([
-            TestOutput(["id": 1, "content": "a"]),
-            TestOutput(["id": 2, "content": "b"]),
-        ])
+            test.append([
+                TestOutput(["id": 1, "content": "a"]),
+                TestOutput(["id": 2, "content": "b"]),
+            ])
+            test.append([
+                TestOutput(["id": 1, "content": "a"]),
+                TestOutput(["id": 2, "content": "b"]),
+            ])
 
-        _ = try await Post.query(on: self.app.db).all()
+            app.get("foo") { req -> [Post] in
+                req.fluent.history.start()
+                _ = try await Post.query(on: req.db).all()
+                #expect(req.fluent.history.queries.count == 1)
+                req.fluent.history.stop()
 
-        test.append([
-            TestOutput(["id": 1, "content": "a"]),
-            TestOutput(["id": 2, "content": "b"]),
-        ])
+                let posts = try await Post.query(on: req.db).all()
+                #expect(req.fluent.history.queries.count == 1)
+                return posts
+            }
 
-        _ = try await Post.query(on: self.app.db).all()
+            try await app.test(.GET, "foo") { res async in
+                #expect(res.status == .ok)
+            }
+        }
+    }
 
-        test.append([
-            TestOutput(["id": 1, "content": "a"]),
-            TestOutput(["id": 2, "content": "b"]),
-        ])
+    @Test
+    func queryHistoryForApp() async throws {
+        try await withApp { app in
+            app.fluent.history.start()
+            let test = ArrayTestDatabase()
+            app.databases.use(test.configuration, as: .test)
 
-        self.app.fluent.history.stop()
-        _ = try await Post.query(on: self.app.db).all()
-        XCTAssertEqual(self.app.fluent.history.queries.count, 2)
+            test.append([
+                TestOutput(["id": 1, "content": "a"]),
+                TestOutput(["id": 2, "content": "b"]),
+            ])
+
+            _ = try await Post.query(on: app.db).all()
+
+            test.append([
+                TestOutput(["id": 1, "content": "a"]),
+                TestOutput(["id": 2, "content": "b"]),
+            ])
+
+            _ = try await Post.query(on: app.db).all()
+
+            test.append([
+                TestOutput(["id": 1, "content": "a"]),
+                TestOutput(["id": 2, "content": "b"]),
+            ])
+
+            app.fluent.history.stop()
+            _ = try await Post.query(on: app.db).all()
+            #expect(app.fluent.history.queries.count == 2)
+        }
     }
 }
 
@@ -129,7 +131,7 @@ private final class Post: Model, Content, Equatable, @unchecked Sendable {
     @Field(key: "content")
     var content: String
 
-    init() { }
+    init() {}
 
     init(id: Int? = nil, content: String) {
         self.id = id

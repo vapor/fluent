@@ -1,10 +1,13 @@
 import Fluent
+import Testing
 import Vapor
-import XCTVapor
-import FluentKit
+import VaporTesting
 
-final class OperatorTests: XCTestCase {
-    func testCustomOperators() throws {
+@Suite
+struct OperatorTests {
+    @Test
+    func customOperators() throws {
+        // TODO: What does this test...?
         let db = DummyDatabase()
 
         // name contains string anywhere, prefix, suffix
@@ -50,7 +53,7 @@ private struct DummyDatabase: Database {
         fatalError()
     }
 
-    func execute(query: DatabaseQuery, onOutput: @escaping @Sendable (any DatabaseOutput) -> ()) -> EventLoopFuture<Void> {
+    func execute(query: DatabaseQuery, onOutput: @escaping @Sendable (any DatabaseOutput) -> Void) -> EventLoopFuture<Void> {
         fatalError()
     }
 
@@ -61,11 +64,11 @@ private struct DummyDatabase: Database {
     func execute(enum: DatabaseEnum) -> EventLoopFuture<Void> {
         fatalError()
     }
-    
+
     func withConnection<T>(_ closure: @escaping @Sendable (any Database) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
         fatalError()
     }
-    
+
     func transaction<T>(_ closure: @escaping @Sendable (any Database) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
         fatalError()
     }

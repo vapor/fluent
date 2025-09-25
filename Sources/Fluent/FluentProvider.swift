@@ -1,10 +1,7 @@
 import ConsoleKit
-import NIOCore
-import NIOPosix
+public import FluentKit
 import NIOConcurrencyHelpers
-import Logging
-import Vapor
-import FluentKit
+public import Vapor
 
 extension Request {
     public var db: any Database {
@@ -14,7 +11,7 @@ extension Request {
     public func db(_ id: DatabaseID?) -> any Database {
         self.db(id, logger: self.logger)
     }
-    
+
     public func db(_ id: DatabaseID?, logger: Logger) -> any Database {
         self.application.databases.database(
             id,
@@ -23,8 +20,7 @@ extension Request {
             history: self.fluent.history.historyEnabled ? self.fluent.history.history : nil,
             // Use map() (not flatMap()) so if pageSizeLimit is non-nil but the value is nil
             // the request's "no limit" setting overrides the app's setting.
-            pageSizeLimit: self.fluent.pagination.pageSizeLimit.map(\.value) ??
-                           self.application.fluent.pagination.pageSizeLimit
+            pageSizeLimit: self.fluent.pagination.pageSizeLimit.map(\.value) ?? self.application.fluent.pagination.pageSizeLimit
         )!
     }
 
@@ -41,7 +37,7 @@ extension Application {
     public func db(_ id: DatabaseID?) -> any Database {
         self.db(id, logger: self.logger)
     }
-    
+
     public func db(_ id: DatabaseID?, logger: Logger) -> any Database {
         self.databases.database(
             id,
@@ -114,7 +110,7 @@ extension Application {
 
             func willBoot(_ application: Application) throws {
                 let signature = try Signature(from: &application.environment.commandInput)
-                
+
                 if signature.autoRevert {
                     try application.autoRevert().wait()
                 }
@@ -122,10 +118,10 @@ extension Application {
                     try application.autoMigrate().wait()
                 }
             }
-            
+
             func willBootAsync(_ application: Application) async throws {
                 let signature = try Signature(from: &application.environment.commandInput)
-                
+
                 if signature.autoRevert {
                     try await application.autoRevert()
                 }
@@ -137,7 +133,7 @@ extension Application {
             func shutdown(_ application: Application) {
                 application.databases.shutdown()
             }
-            
+
             func shutdownAsync(_ application: Application) async {
                 await application.databases.shutdownAsync()
             }
@@ -161,7 +157,7 @@ extension Application {
             self.application.lifecycle.use(Lifecycle())
             self.application.asyncCommands.use(MigrateCommand(), as: "migrate")
         }
-        
+
         public var migrationLogLevel: Logger.Level {
             get { self.storage.migrationLogLevel.withLockedValue { $0 } }
             nonmutating set { self.storage.migrationLogLevel.withLockedValue { $0 = newValue } }

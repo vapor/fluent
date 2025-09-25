@@ -1,6 +1,5 @@
-import NIOCore
-import Vapor
-import FluentKit
+public import FluentKit
+public import Vapor
 
 extension Model where Self: SessionAuthenticatable, Self.SessionID == Self.IDValue {
     public static func asyncSessionAuthenticator(
@@ -11,8 +10,7 @@ extension Model where Self: SessionAuthenticatable, Self.SessionID == Self.IDVal
 }
 
 private struct AsyncDatabaseSessionAuthenticator<User>: AsyncSessionAuthenticator
-    where User: SessionAuthenticatable, User: Model, User.SessionID == User.IDValue
-{
+where User: SessionAuthenticatable, User: Model, User.SessionID == User.IDValue {
     let databaseID: DatabaseID?
 
     func authenticate(sessionID: User.SessionID, for request: Request) async throws {

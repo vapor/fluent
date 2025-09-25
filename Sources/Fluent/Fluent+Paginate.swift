@@ -1,6 +1,5 @@
-import Vapor
-import NIOCore
-import FluentKit
+public import FluentKit
+public import Vapor
 
 extension QueryBuilder {
     public func paginate(
@@ -15,4 +14,4 @@ extension QueryBuilder {
     }
 }
 
-extension Page: Content, ResponseEncodable, RequestDecodable, AsyncResponseEncodable, AsyncRequestDecodable where T: Codable { }
+extension Page: @retroactive Content, ResponseEncodable, RequestDecodable, AsyncResponseEncodable, AsyncRequestDecodable where T: Codable {}

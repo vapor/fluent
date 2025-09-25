@@ -1,6 +1,5 @@
-import Vapor
-import NIOCore
-import FluentKit
+public import FluentKit
+public import Vapor
 
 public protocol ModelCredentialsAuthenticatable: Model, Authenticatable {
     static var usernameKey: KeyPath<Self, Field<String>> { get }
@@ -35,8 +34,7 @@ public struct ModelCredentials: Content, Sendable {
 }
 
 private struct ModelCredentialsAuthenticator<User>: CredentialsAuthenticator
-    where User: ModelCredentialsAuthenticatable
-{
+where User: ModelCredentialsAuthenticatable {
     typealias Credentials = ModelCredentials
 
     public let database: DatabaseID?
@@ -53,4 +51,3 @@ private struct ModelCredentialsAuthenticator<User>: CredentialsAuthenticator
         }
     }
 }
-
