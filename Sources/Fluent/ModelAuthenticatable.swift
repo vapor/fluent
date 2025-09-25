@@ -1,10 +1,9 @@
-import Vapor
-import NIOCore
 import FluentKit
+public import Vapor
 
 public protocol ModelAuthenticatable: Model, Authenticatable {
-    static var usernameKey: KeyPath<Self, Field<String>> { get }
-    static var passwordHashKey: KeyPath<Self, Field<String>> { get }
+    static var usernameKey: KeyPath<Self, FieldProperty<Self, String>> { get }
+    static var passwordHashKey: KeyPath<Self, FieldProperty<Self, String>> { get }
     func verify(password: String) throws -> Bool
 }
 
@@ -15,11 +14,11 @@ extension ModelAuthenticatable {
         ModelAuthenticator<Self>(database: database)
     }
 
-    var _$username: Field<String> {
+    var _$username: FieldProperty<Self, String> {
         self[keyPath: Self.usernameKey]
     }
 
-    var _$passwordHash: Field<String> {
+    var _$passwordHash: FieldProperty<Self, String> {
         self[keyPath: Self.passwordHashKey]
     }
 }
@@ -36,15 +35,14 @@ private struct ModelAuthenticator<User>: BasicAuthenticator
         User.query(on: request.db(self.database))
             .filter(\._$username == basic.username)
             .first()
-            .flatMapThrowing
-        {
-            guard let user = $0 else {
-                return
+            .flatMapThrowing {
+                guard let user = $0 else {
+                    return
+                }
+                guard try user.verify(password: basic.password) else {
+                    return
+                }
+                request.auth.login(user)
             }
-            guard try user.verify(password: basic.password) else {
-                return
-            }
-            request.auth.login(user)
-        }
     }
 }

@@ -1,9 +1,7 @@
-import Foundation
-
 public struct PageLimit: Sendable {
     public let value: Int?
-    
-    public static var noLimit: PageLimit {
+
+    public static var noLimit: Self {
         .init(value: nil)
     }
 }

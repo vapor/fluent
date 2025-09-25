@@ -1,5 +1,5 @@
-import Vapor
 import FluentKit
+public import Vapor
 
 extension Application {
     /// Automatically runs forward migrations without confirmation.

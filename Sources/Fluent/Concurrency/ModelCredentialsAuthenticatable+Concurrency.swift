@@ -1,6 +1,5 @@
-import NIOCore
-import Vapor
 import FluentKit
+public import Vapor
 
 extension ModelCredentialsAuthenticatable {
     public static func asyncCredentialsAuthenticator(
@@ -11,8 +10,7 @@ extension ModelCredentialsAuthenticatable {
 }
 
 private struct AsyncModelCredentialsAuthenticator<User>: AsyncCredentialsAuthenticator
-    where User: ModelCredentialsAuthenticatable
-{
+where User: ModelCredentialsAuthenticatable {
     typealias Credentials = ModelCredentials
 
     public let database: DatabaseID?

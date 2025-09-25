@@ -1,5 +1,5 @@
 import FluentKit
-import Vapor
+public import Vapor
 
 struct RequestPaginationKey: StorageKey {
     typealias Value = RequestPagination
