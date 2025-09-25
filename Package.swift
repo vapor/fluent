@@ -30,7 +30,7 @@ let package = Package(
             dependencies: [
                 .target(name: "Fluent"),
                 .product(name: "XCTFluent", package: "fluent-kit"),
-                .product(name: "XCTVapor", package: "vapor"),
+                .product(name: "VaporTesting", package: "vapor"),
             ],
             swiftSettings: swiftSettings
         ),

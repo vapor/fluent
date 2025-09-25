@@ -1,71 +1,68 @@
-import XCTFluent
-import XCTVapor
 import Fluent
+import Testing
 import Vapor
+import VaporTesting
+import XCTFluent
 
-final class CacheTests: XCTestCase {
-    var app: Application!
-    
-    override func setUp() async throws {
-        self.app = try await Application.make(.testing)
-    }
-    
-    override func tearDown() async throws {
-        try await self.app.asyncShutdown()
-        self.app = nil
-    }
-    
-    func testCacheMigrationName() {
-        XCTAssertEqual(CacheEntry.migration.name, "Fluent.CacheEntry.Create")
-    }
-    
-    func testCacheGet() async throws {
-        // Setup test db.
-        let test = ArrayTestDatabase()
-        self.app.databases.use(test.configuration, as: .test)
-        self.app.migrations.add(CacheEntry.migration)
-
-        // Configure cache.
-        self.app.caches.use(.fluent)
-        
-        // simulate cache miss
-        test.append([])
-        do {
-            let foo = try await self.app.cache.get("foo", as: String.self)
-            XCTAssertNil(foo)
-        }
-        
-        // simulate cache hit
-        test.append([TestOutput([
-            "key": "foo",
-            "value": "\"bar\""
-        ])])
-        do {
-            let foo = try await self.app.cache.get("foo", as: String.self)
-            XCTAssertEqual(foo, "bar")
-        }
+@Suite
+struct CacheTests {
+    @Test
+    func cacheMigrationName() {
+        #expect(CacheEntry.migration.name == "Fluent.CacheEntry.Create")
     }
 
-    func testCacheSet() async throws {
-        // Setup test db.
-        let test = CallbackTestDatabase { query in
-            switch query.input[0] {
-            case .dictionary(let dict):
-                switch dict["value"] {
-                case .bind(let value as String):
-                    XCTAssertEqual(value, "\"bar\"")
-                default: XCTFail("unexpected value")
-                }
-            default: XCTFail("unexpected input")
+    @Test
+    func cacheGet() async throws {
+        try await withApp { app in
+            // Setup test db.
+            let test = ArrayTestDatabase()
+            app.databases.use(test.configuration, as: .test)
+            app.migrations.add(CacheEntry.migration)
+
+            // Configure cache.
+            app.caches.use(.fluent)
+
+            // simulate cache miss
+            test.append([])
+            do {
+                let foo = try await app.cache.get("foo", as: String.self)
+                #expect(foo == nil)
             }
-            return [TestOutput(["id": UUID()])]
-        }
-        self.app.databases.use(test.configuration, as: .test)
-        self.app.migrations.add(CacheEntry.migration)
 
-        // Configure cache.
-        self.app.caches.use(.fluent)
-        
-        try await self.app.cache.set("foo", to: "bar")
+            // simulate cache hit
+            test.append([TestOutput(["key": "foo", "value": #""bar""#])])
+            do {
+                let foo = try await app.cache.get("foo", as: String.self)
+                #expect(foo == "bar")
+            }
+        }
+    }
+
+    @Test
+    func cacheSet() async throws {
+        try await withApp { app in
+            // Setup test db.
+            let test = CallbackTestDatabase { query in
+                switch query.input[0] {
+                case .dictionary(let dict):
+                    switch dict["value"] {
+                    case .bind(let value as String):
+                        #expect(value == #""bar""#)
+                    default:
+                        Issue.record("unexpected value")
+                    }
+                default:
+                    Issue.record("unexpected input")
+                }
+                return [TestOutput(["id": UUID()])]
+            }
+            app.databases.use(test.configuration, as: .test)
+            app.migrations.add(CacheEntry.migration)
+
+            // Configure cache.
+            app.caches.use(.fluent)
+
+            try await app.cache.set("foo", to: "bar")
+        }
     }
 }
