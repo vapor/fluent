@@ -1,4 +1,4 @@
-import FluentKit
+public import FluentKit
 public import Vapor
 
 public protocol ModelTokenAuthenticatable: Model, Authenticatable {

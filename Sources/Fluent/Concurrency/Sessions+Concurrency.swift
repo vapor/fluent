@@ -1,4 +1,4 @@
-import FluentKit
+public import FluentKit
 public import Vapor
 
 extension Model where Self: SessionAuthenticatable, Self.SessionID == Self.IDValue {

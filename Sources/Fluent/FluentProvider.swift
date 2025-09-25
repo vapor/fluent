@@ -1,5 +1,5 @@
 import ConsoleKit
-import FluentKit
+public import FluentKit
 import NIOConcurrencyHelpers
 public import Vapor
 
