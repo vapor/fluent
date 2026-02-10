@@ -50,7 +50,7 @@ private struct DummyDatabase: Database {
     }
 
     var context: DatabaseContext {
-        fatalError()
+        .init(configuration: DummyDatabaseConfiguration(), logger: Logger(label: "fluent"), eventLoop: MultiThreadedEventLoopGroup.singleton.any())
     }
 
     func execute(query: DatabaseQuery, onOutput: @escaping @Sendable (any DatabaseOutput) -> Void) -> EventLoopFuture<Void> {
@@ -72,4 +72,20 @@ private struct DummyDatabase: Database {
     func transaction<T>(_ closure: @escaping @Sendable (any Database) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
         fatalError()
     }
+}
+
+private struct DummyDatabaseConfiguration: DatabaseConfiguration {
+    var middleware: [any FluentKit.AnyModelMiddleware] = []
+
+    func makeDriver(for databases: FluentKit.Databases) -> any FluentKit.DatabaseDriver {
+        DummyDatabaseDriver()
+    }
+}
+
+private struct DummyDatabaseDriver: DatabaseDriver {
+    func makeDatabase(with context: FluentKit.DatabaseContext) -> any FluentKit.Database {
+        DummyDatabase()
+    }
+    
+    func shutdown() {}
 }
