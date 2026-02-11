@@ -2,6 +2,7 @@ import Fluent
 import Testing
 import Vapor
 import VaporTesting
+import XCTFluent
 
 @Suite
 struct OperatorTests {
@@ -42,50 +43,4 @@ private final class Planet: Model, @unchecked Sendable {
 
     @Field(key: "name")
     var name: String
-}
-
-private struct DummyDatabase: Database {
-    var inTransaction: Bool {
-        false
-    }
-
-    var context: DatabaseContext {
-        .init(configuration: DummyDatabaseConfiguration(), logger: Logger(label: "fluent"), eventLoop: MultiThreadedEventLoopGroup.singleton.any())
-    }
-
-    func execute(query: DatabaseQuery, onOutput: @escaping @Sendable (any DatabaseOutput) -> Void) -> EventLoopFuture<Void> {
-        fatalError()
-    }
-
-    func execute(schema: DatabaseSchema) -> EventLoopFuture<Void> {
-        fatalError()
-    }
-
-    func execute(enum: DatabaseEnum) -> EventLoopFuture<Void> {
-        fatalError()
-    }
-
-    func withConnection<T>(_ closure: @escaping @Sendable (any Database) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
-        fatalError()
-    }
-
-    func transaction<T>(_ closure: @escaping @Sendable (any Database) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
-        fatalError()
-    }
-}
-
-private struct DummyDatabaseConfiguration: DatabaseConfiguration {
-    var middleware: [any FluentKit.AnyModelMiddleware] = []
-
-    func makeDriver(for databases: FluentKit.Databases) -> any FluentKit.DatabaseDriver {
-        DummyDatabaseDriver()
-    }
-}
-
-private struct DummyDatabaseDriver: DatabaseDriver {
-    func makeDatabase(with context: FluentKit.DatabaseContext) -> any FluentKit.Database {
-        DummyDatabase()
-    }
-    
-    func shutdown() {}
 }
